@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="BbsAdmin">
+	<resultMap id="BbsAdminAll" class="egovframework.admin.bbs.service.BbsAdmin">
+		<result property="bbsCd" column="BBS_CD"/>
+		<result property="bbsNm" column="BBS_NM"/>
+		<result property="langCd" column="LANG_CD"/>
+		<result property="bbsTypeCd" column="BBS_TYPE_CD"/>
+		<result property="langNm" column="LANG_NM"/>
+		<result property="typeNm" column="TYPE_NM"/>
+		<result property="useYn" column="USE_YN"/>
+	</resultMap>
+	<resultMap id="BbsAdminList" class="egovframework.admin.bbs.service.BbsAdmin" >
+		<result property="bbsCd" column="BBS_CD"/>
+		<result property="bbsNm" column="BBS_NM"/>
+		<result property="langCd" column="LANG_CD"/>
+		<result property="bbsTypeCd" column="BBS_TYPE_CD"/>
+		<result property="listCd" column="LIST_CD"/>
+		<result property="loginWtYn" column="LOGIN_WT_YN"/>
+		<result property="noticeYn" column="NOTICE_YN"/>
+		<result property="secretYn" column="SECRET_YN"/>
+		<result property="htmlYn" column="HTML_YN"/>
+		<result property="ansYn" column="ANS_YN"/>
+		<result property="atfileYn" column="ATFILE_YN"/>
+		<result property="sizeLimit" column="SIZE_LIMIT"/>
+		<result property="extLimit" column="EXT_LIMIT"/> 	  
+		<result property="linkYn" column="LINK_YN"/>
+		<result property="infYn" column="INF_YN"/>
+		<result property="listCnt" column="LIST_CNT"/>
+		<result property="hlCnt" column="HL_CNT"/>
+		<result property="emailRegYn" column="EMAIL_REG_YN"/>
+		<result property="emailNeedYn" column="EMAIL_NEED_YN"/>
+		<result property="telYn" column="TEL_YN"/>
+		<result property="telNeedYn" column="TEL_NEED_YN"/>
+		<result property="bbsExp" column="BBS_EXP"/>
+		<result property="ansTag" column="ANS_TAG"/>
+		<result property="useYn" column="USE_YN"/>
+		<result property="tblYn" column="TBL_YN"/>
+		<result property="list1Cd" column="LIST1_CD"/>
+		<result property="list2Cd" column="LIST2_CD"/>
+		<result property="list3Cd" column="LIST3_CD"/>
+		<result property="list4Cd" column="LIST4_CD"/>
+	</resultMap>
+	<select id="BbsAdminDao.selectbbsAdminAll" parameterClass="egovframework.admin.bbs.service.BbsAdmin" resultMap="BbsAdminAll">
+		SELECT  A.BBS_CD
+		       ,A.BBS_NM
+		       ,A.LANG_CD
+		       ,A.BBS_TYPE_CD
+		       ,B.LANG_NM
+		       ,C.TYPE_NM
+		       ,A.USE_YN
+		   FROM TB_BBS_ADMIN A,
+		        ( SELECT DITC_NM LANG_NM,
+		                  DITC_CD
+		             FROM TB_COMM_CODE
+		            WHERE 1=1
+		              AND GRP_CD = 'D1011') B,
+		        ( SELECT DITC_NM TYPE_NM,
+		                  DITC_CD
+		             FROM TB_COMM_CODE
+		            WHERE 1=1
+		              AND GRP_CD = 'C1010') C
+		  WHERE 1=1
+		    AND A.LANG_CD=B.DITC_CD
+		    AND A.BBS_TYPE_CD=C.DITC_CD
+	 	<isNotEmpty property="bbsNm">
+	 		<isEqual property="searchWd" compareValue="1">
+	 		AND ( A.BBS_NM LIKE '%' || #bbsNm#  || '%' 
+	 			 OR  A.BBS_NM LIKE '%' || UPPER(#bbsNm#)  || '%'
+	 			 OR  A.BBS_NM LIKE '%' || LOWER(#bbsNm#)  || '%'
+	 		 )
+	 		</isEqual>
+	 	</isNotEmpty>
+	 	<isNotEmpty property="langCd">
+	 		AND A.LANG_CD = #langCd#
+	 	</isNotEmpty>
+	 	<isNotEmpty property="bbsTypeCd">
+	 		AND A.BBS_TYPE_CD = #bbsTypeCd#
+	 	</isNotEmpty>
+	 	<isEqual property="useYn" compareValue="Y">
+	 		AND A.USE_YN = 'Y'
+	 	</isEqual>
+	 	<isEqual property="useYn" compareValue="N">
+	 		AND A.USE_YN = 'N'
+	 	</isEqual>
+	 	 ORDER BY A.REG_DTTM DESC
+	</select>
+	<select id="BbsAdminDao.selectCodeDup" parameterClass="egovframework.admin.bbs.service.BbsAdmin" resultClass="java.lang.Integer">
+		SELECT COUNT(BBS_CD)
+		  FROM TB_BBS_ADMIN
+		 WHERE 	 BBS_CD LIKE #bbsCd# 
+	 			 OR  BBS_CD LIKE UPPER(#bbsCd#)
+	 			 OR  BBS_CD LIKE LOWER(#bbsCd#)
+
+	</select>
+	<insert id="BbsAdminDao.insertBbsAdmin" parameterClass="egovframework.admin.bbs.service.BbsAdmin" >
+
+		INSERT INTO TB_BBS_ADMIN
+		(LANG_CD, BBS_TYPE_CD, BBS_CD, LIST_CD, BBS_NM,
+		 LOGIN_WT_YN, NOTICE_YN, SECRET_YN, HTML_YN, ANS_YN, 
+		 ATFILE_YN, EXT_LIMIT, LINK_YN, INF_YN, TBL_YN,
+		 EMAIL_REG_YN, EMAIL_NEED_YN, TEL_YN, TEL_NEED_YN, 
+		 ANS_TAG, USE_YN
+		<isNotNull property="sizeLimit">
+			,SIZE_LIMIT
+		</isNotNull>
+		<isNotNull property="hlCnt">
+			,HL_CNT
+		</isNotNull>
+		<isNotNull property="listCnt">
+			,LIST_CNT
+		</isNotNull>
+		<isNotNull property="bbsExp">
+			,BBS_EXP
+		</isNotNull>	
+		, LIST1_CD
+		, LIST2_CD
+		, LIST3_CD
+		, LIST4_CD	
+		)
+		VALUES (
+		 #langCd:VARCHAR#
+		,#bbsTypeCd:VARCHAR#
+		,#bbsCd:VARCHAR#
+		,#listCd:NUMERIC#
+		,#bbsNm:VARCHAR#
+		,DECODE(NVL(#loginWtYn:CHAR#,'Y'),'Y','Y','N')
+		,DECODE(NVL(#noticeYn:CHAR#,'N'),'N','N','Y')
+		,DECODE(NVL(#secretYn:CHAR#,'N'),'N','N','Y')
+		,DECODE(NVL(#htmlYn:CHAR#,'Y'),'Y','Y','N')
+		,DECODE(NVL(#ansYn:CHAR#,'Y'),'Y','Y','N')
+		,DECODE(NVL(#atfileYn:CHAR#,'N'),'N','N','Y')
+		,#extLimit:VARCHAR#
+		,DECODE(NVL(#linkYn:CHAR#,'N'),'N','N','Y')
+		,DECODE(NVL(#infYn:CHAR#,'N'),'N','N','Y')
+		,DECODE(NVL(#tblYn:CHAR#,'N'),'N','N','Y')
+		,DECODE(NVL(#emailRegYn:CHAR#,'N'),'N','N','Y')
+		,DECODE(NVL(#emailNeedYn:CHAR#,'N'),'N','N','Y')
+		,DECODE(NVL(#telYn:CHAR#,'N'),'N','N','Y')
+		,DECODE(NVL(#telNeedYn:CHAR#,'N'),'N','N','Y')
+		,#ansTag:CHAR#
+		,#useYn:CHAR#
+		<isNotNull property="sizeLimit">
+			,#sizeLimit#
+		</isNotNull>
+		<isNotNull property="hlCnt">
+			,#hlCnt#
+		</isNotNull>
+		<isNotNull property="listCnt">
+			,#listCnt#
+		</isNotNull>
+		<isNotNull property="bbsExp">
+			,#bbsExp#
+		</isNotNull>		
+		, #list1Cd:VARCHAR#
+		, #list2Cd:VARCHAR#
+		, #list3Cd:VARCHAR#
+		, #list4Cd:VARCHAR#
+		)
+	</insert>
+	<select id="BbsAdminDao.selectBbsAdminList" parameterClass="egovframework.admin.bbs.service.BbsAdmin" resultMap="BbsAdminList">
+		SELECT LANG_CD,BBS_TYPE_CD,BBS_CD,LIST_CD,BBS_NM
+			  ,LOGIN_WT_YN,NOTICE_YN,SECRET_YN,HTML_YN
+			  ,ANS_YN,ATFILE_YN,SIZE_LIMIT,EXT_LIMIT
+			  ,LINK_YN,INF_YN,LIST_CNT,HL_CNT,EMAIL_REG_YN
+			  ,EMAIL_NEED_YN,TEL_YN,TEL_NEED_YN,BBS_EXP
+			  ,ANS_TAG,USE_YN,TBL_YN
+			  ,LIST1_CD, LIST2_CD, LIST3_CD, LIST4_CD
+		  FROM TB_BBS_ADMIN
+		 WHERE BBS_CD= #bbsCd#
+	</select>
+	<update id="BbsAdminDao.updateBbsAdmin" parameterClass="egovframework.admin.bbs.service.BbsAdmin">
+		UPDATE TB_BBS_ADMIN SET
+		BBS_NM 		= #bbsNm:VARCHAR#
+		,LOGIN_WT_YN 	= DECODE(NVL(#loginWtYn:CHAR#,'N'),'Y','Y','N')
+		,NOTICE_YN 		= DECODE(NVL(#noticeYn:CHAR#,'N'),'N','N','Y')
+		,SECRET_YN 		= DECODE(NVL(#secretYn:CHAR#,'N'),'N','N','Y')
+		,HTML_YN 		= DECODE(NVL(#htmlYn:CHAR#,'N'),'Y','Y','N')
+		,ANS_YN 		= DECODE(NVL(#ansYn:CHAR#,'N'),'Y','Y','N')
+		,ATFILE_YN 		= DECODE(NVL(#atfileYn:CHAR#,'N'),'N','N','Y')
+		,EXT_LIMIT 		= #extLimit:VARCHAR#
+		,LINK_YN 		= DECODE(NVL(#linkYn:CHAR#,'N'),'N','N','Y')
+		,INF_YN 		= DECODE(NVL(#infYn:CHAR#,'N'),'N','N','Y')
+		,TBL_YN 		= DECODE(NVL(#tblYn:CHAR#,'N'),'N','N','Y')
+		,EMAIL_REG_YN 	= DECODE(NVL(#emailRegYn:CHAR#,'N'),'N','N','Y')
+		,EMAIL_NEED_YN 	= DECODE(NVL(#emailNeedYn:CHAR#,'N'),'N','N','Y')
+		,TEL_YN 		= DECODE(NVL(#telYn:CHAR#,'N'),'N','N','Y')
+		,TEL_NEED_YN 	= DECODE(NVL(#telNeedYn:CHAR#,'N'),'N','N','Y')
+		,ANS_TAG 		= #ansTag:CHAR#
+		,USE_YN 		= #useYn:CHAR#
+		<isNotNull property="sizeLimit">
+			,SIZE_LIMIT = #sizeLimit#
+		</isNotNull>
+		<isNotNull property="hlCnt">
+			,HL_CNT 	= #hlCnt#
+		</isNotNull>
+		<isNotNull property="listCnt">
+			,LIST_CNT 	= #listCnt#
+		</isNotNull>
+		<isNotNull property="bbsExp">
+			,BBS_EXP 	= #bbsExp#
+		</isNotNull>		
+		WHERE
+			BBS_CD = #bbsCd#
+	</update>
+	<update id="BbsAdminDao.deleteBbsAdmin" parameterClass="egovframework.admin.bbs.service.BbsAdmin">
+		DELETE FROM TB_BBS_ADMIN
+		WHERE BBS_CD = #bbsCd#
+	</update>
+	<update id="BbsAdminDao.deleteBbsList" parameterClass="egovframework.admin.bbs.service.BbsAdmin">
+		DELETE FROM TB_BBS_LIST
+		WHERE BBS_CD = #bbsCd#
+	</update>
+	<update id="BbsAdminDao.deleteBbsFile" parameterClass="egovframework.admin.bbs.service.BbsAdmin">
+		DELETE FROM TB_BBS_FILE
+		WHERE BBS_CD = #bbsCd#	
+	</update>
+	<update id="BbsAdminDao.deleteBbsLink" parameterClass="egovframework.admin.bbs.service.BbsAdmin">
+		DELETE FROM TB_BBS_LINK
+		WHERE BBS_CD = #bbsCd#	
+	</update>
+	<update id="BbsAdminDao.deleteBbsInf" parameterClass="egovframework.admin.bbs.service.BbsAdmin">
+		DELETE FROM TB_BBS_INF
+		WHERE BBS_CD = #bbsCd#	
+	</update>
+</sqlMap>
+

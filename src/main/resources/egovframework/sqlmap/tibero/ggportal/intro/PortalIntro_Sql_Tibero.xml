@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="PortalIntroDao">
+
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+
+	<!-- 공공데이터 개방 통계 -->
+	<select id="PortalIntroDao.selectStatistics" resultClass="record">
+		<![CDATA[
+		SELECT
+			 (
+				SELECT	COUNT(DISTINCT A.INF_ID) 
+				FROM 	TB_OPEN_INF_SRV A JOIN TB_OPEN_INF B  ON A.INF_ID = B.INF_ID	
+				           JOIN TB_OPEN_CATE    C  ON C.CATE_ID       = B.CATE_ID AND C.USE_YN ='Y'
+				           JOIN TB_OPEN_CATE    D ON D.CATE_ID       = C.TOP_CATE_ID AND D.USE_YN ='Y'
+				WHERE A.SRV_YN = 'Y'	AND A.SRV_CD IN ('S', 'C', 'M', 'F', 'A', 'L')
+						AND B.INF_STATE = 'Y'	AND B.OPEN_DTTM <  TRUNC(SYSDATE + 1)	           
+				) "dsCnt"
+			, (SELECT	COUNT(A.INF_ID) 
+				FROM 	TB_OPEN_INF_SRV A JOIN TB_OPEN_INF B  ON A.INF_ID = B.INF_ID	
+				           JOIN TB_OPEN_CATE    C  ON C.CATE_ID       = B.CATE_ID AND C.USE_YN ='Y'
+				           JOIN TB_OPEN_CATE    D ON D.CATE_ID       = C.TOP_CATE_ID AND D.USE_YN ='Y'
+				WHERE A.SRV_YN = 'Y'	AND A.SRV_CD IN ('S', 'C', 'M', 'F', 'A', 'L')
+						AND B.INF_STATE = 'Y'	AND B.OPEN_DTTM <  TRUNC(SYSDATE + 1)	   
+			 ) "srvCnt"
+			, (
+				SELECT COUNT(*)
+				FROM (
+						SELECT	DISTINCT T.ORG_CD 
+						FROM 	TB_OPEN_INF_SRV A JOIN TB_OPEN_INF B  ON A.INF_ID = B.INF_ID	
+						           JOIN TB_OPEN_CATE    C  ON C.CATE_ID       = B.CATE_ID AND C.USE_YN ='Y'
+						           JOIN TB_OPEN_CATE    D ON D.CATE_ID       = C.TOP_CATE_ID AND D.USE_YN ='Y'
+						           JOIN  TB_COMM_ORG O ON B.ORG_CD    = O.ORG_CD AND O.USE_YN ='Y'
+						           JOIN  TB_COMM_ORG T ON O.TOP_ORG_CD    = T.ORG_CD AND T.USE_YN ='Y'
+						WHERE A.SRV_YN = 'Y'	AND A.SRV_CD IN ('S', 'C', 'M', 'F', 'A', 'L')
+								AND B.INF_STATE = 'Y'	AND B.OPEN_DTTM <  TRUNC(SYSDATE + 1)	   
+						UNION 
+						SELECT	DISTINCT T.ORG_CD 
+						FROM 	TB_STTS_TBL A 
+						           JOIN TB_STTS_CATE    C  ON C.CATE_ID       = A.CATE_ID AND C.USE_YN ='Y'
+						           JOIN TB_STTS_CATE    D ON D.CATE_ID       = C.TOP_CATE_ID AND D.USE_YN ='Y'
+						           JOIN  TB_COMM_ORG O ON A.ORG_CD    = O.ORG_CD AND O.USE_YN ='Y'
+						           JOIN  TB_COMM_ORG T ON O.TOP_ORG_CD    = T.ORG_CD AND T.USE_YN ='Y'
+						WHERE A.KOR_YN = 'Y'	AND A.USE_YN = 'Y'
+								AND A.OPEN_STATE = 'Y'	AND A.OPEN_DTTM < TRUNC(SYSDATE + 1)	   
+					)	
+			) "orgCnt"
+			, (
+				SELECT	COUNT(DISTINCT A.STATBL_ID) 
+				FROM 	TB_STTS_TBL A 
+				           JOIN TB_STTS_CATE    C  ON C.CATE_ID       = A.CATE_ID AND C.USE_YN ='Y'
+				           JOIN TB_STTS_CATE    D ON D.CATE_ID       = C.TOP_CATE_ID AND D.USE_YN ='Y'
+				WHERE A.KOR_YN = 'Y'	AND A.USE_YN = 'Y'
+						AND A.OPEN_STATE = 'Y'	AND A.OPEN_DTTM < TRUNC(SYSDATE + 1)	        
+			) "statTblCnt"
+		FROM
+			DUAL
+		]]>
+	</select>
+	
+	<!-- 공공데이터 개방 통계 차트 -->
+	<select id="PortalIntroDao.selectStatisticsByCate" resultClass="record">
+		SELECT
+			A.TOP_CATE_ID "cateId"
+			, A.CATE_NM "cateNm"
+			, COUNT(B.INF_ID) "cnt"
+			, MAX(SAVE_FILE_NM) "cateSaveFileNm"
+		FROM
+			TB_OPEN_CATE A	
+			, (
+				SELECT DISTINCT
+					B.INF_ID
+					, B.CATE_ID
+					, C.TOP_CATE_ID
+				FROM TB_OPEN_INF_SRV A,
+				    TB_OPEN_INF B,
+				    TB_OPEN_CATE C,
+				    TB_OPEN_DS E
+				WHERE 
+					A.INF_ID = B.INF_ID
+					AND A.SRV_YN = 'Y'
+				  	AND INF_STATE = 'Y'
+				  	AND B.OPEN_DTTM <![CDATA[ <= ]]> SYSDATE
+				  	AND B.CATE_ID = C.CATE_ID
+				  	AND A.SRV_CD IN('S', 'C', 'M', 'F', 'A', 'L', 'V')
+				  	AND C.USE_YN = 'Y'
+				  	AND B.DS_ID = E.DS_ID (+)
+		            AND CASE A.SRV_CD
+		                WHEN 'F'
+		                THEN 'Y'
+		                WHEN 'L'
+		                THEN 'Y'
+		                ELSE E.USE_YN
+		                END             = 'Y'
+		                <!-- 
+				UNION
+				SELECT DISTINCT 
+					C.INF_ID
+					, C.CATE_ID
+					, D.TOP_CATE_ID
+				FROM TB_OPEN_INF_MEDIA A
+	           	JOIN TB_OPEN_INF_SRV   B
+	             	ON B.INF_ID          = A.INF_ID
+	            	AND B.INF_SEQ         = A.INF_SEQ
+	           	JOIN TB_OPEN_INF       C
+	             	ON C.INF_ID          = B.INF_ID
+	           	JOIN TB_OPEN_CATE      D
+	             	ON D.CATE_ID         = C.CATE_ID
+	           	JOIN TB_OPEN_CATE      E
+	             	ON E.CATE_ID         = D.TOP_CATE_ID
+	             	 -->
+			) B
+		WHERE
+			A.CATE_ID = A.TOP_CATE_ID
+			AND A.TOP_CATE_ID = B.TOP_CATE_ID (+)
+			AND A.USE_YN = 'Y'
+		GROUP BY
+			A.TOP_CATE_ID
+			, A.CATE_NM
+			, A.V_ORDER
+		ORDER BY
+			A.V_ORDER	
+	</select>
+
+	<!-- 서비스 유형별 통계 데이터 (코드 테이블에 값이 없어서.. ) -->
+	<select id="PortalIntroDao.selectStatisticsByService" resultClass="record">
+		SELECT
+			A.SRV_CD "srvCd"
+			, NVL(B.CNT, 0) "cnt"
+			, CASE WHEN A.SRV_CD = 'S' THEN 0
+						WHEN A.SRV_CD = 'C' THEN 1
+						WHEN A.SRV_CD = 'M' THEN 2
+						WHEN A.SRV_CD = 'F' THEN 3
+						WHEN A.SRV_CD = 'A' THEN 4
+						WHEN A.SRV_CD = 'L' THEN 5
+						ELSE 6 END ORDER_SEQ
+		FROM
+			(
+				SELECT
+					DECODE(LV, '1', S, '2', C, '3', M, '4', F, '5', A, '6', L) SRV_CD
+				FROM (	
+					SELECT
+						'S' S, 'C' C, 'M' M, 'F' F, 'A' A, 'L' L
+					FROM
+						DUAL				
+					)
+					, (SELECT LEVEL LV FROM DUAL CONNECT BY LEVEL <![CDATA[ <= ]]> 6)
+			) A,
+			(		
+				SELECT
+					A.SRV_CD
+					, COUNT(*) CNT
+				FROM
+					TB_OPEN_INF_SRV A
+					, TB_OPEN_INF B
+				WHERE
+					A.INF_ID = B.INF_ID
+					AND A.SRV_YN = 'Y'		
+					AND B.INF_STATE = 'Y'
+					AND B.OPEN_DTTM <![CDATA[ <= ]]> SYSDATE
+				GROUP BY
+					A.SRV_CD	
+			) B
+		WHERE
+			A.SRV_CD = B.SRV_CD	 (+)
+		UNION ALL
+		SELECT 
+			'T',
+			COUNT(*),
+			7
+		FROM 
+			TV_STTS_TBL A
+		WHERE 
+			USE_YN = 'Y'
+			AND A.OPEN_STATE = 'Y'
+			AND (A.KOR_YN = 'Y')
+			AND A.OPEN_DTTM <![CDATA[ < ]]> TRUNC(SYSDATE + 1)
+		ORDER BY
+			ORDER_SEQ	
+	</select>
+</sqlMap>

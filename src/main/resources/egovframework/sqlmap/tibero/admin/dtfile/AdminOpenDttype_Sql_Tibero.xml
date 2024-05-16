@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- @(#)AdminOpenDttype_Sql_Tibero.xml 1.0 2015/06/01                       -->
+<!--                                                                         -->
+<!-- COPYRIGHT (C) 2013 WISEITECH CO., LTD. ALL RIGHTS RESERVED.             -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- 데이터 유형을 관리하는 SQL 파일이다.                                    -->
+<!--                                                                         -->
+<!-- @author 김은삼                                                          -->
+<!-- @version 1.0 2015/06/01                                                 -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<sqlMap namespace="OpenDttype">
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Type Alias                                                          -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 데이터 유형을 검색한다.                                             -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="OpenDttypeDao.searchOpenDttype" parameterClass="params" resultClass="record">
+        SELECT A.VERIFY_ID   	AS "verifyId",
+               A.VERIFY_NM   	AS "verifyNm",
+               A.COLTY_CD     	AS "coltyCd",
+               A.COL_SIZE     	AS "colSize",
+               A.VERIFY_CD     	AS "verifyCd",
+               A.VERIFY_PATN    AS "verifyPatn",
+               A.V_ORDER     	AS "vOrder",
+               A.USE_YN			AS "useYn"
+          FROM TB_OPEN_DSCOLFY A
+         WHERE A.USE_YN       = 'Y'
+         <isNotEmpty property="searchVal">
+			AND A.$searchGubun$ LIKE '%' || #searchVal# || '%'
+		</isNotEmpty>
+		<isNotEmpty property="useYn">
+			AND A.USE_YN = #useYn#
+		</isNotEmpty>
+         ORDER BY
+               A.V_ORDER ASC
+    </select>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 데이터 유형 옵션을 검색한다.                                        -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="OpenDttypeDao.searchOpenDttypeOpt" parameterClass="params" resultClass="record">
+        SELECT A.VERIFY_ID   AS "code",
+               A.VERIFY_NM   AS "name"
+          FROM TB_OPEN_DSCOLFY A
+         WHERE A.USE_YN       = 'Y'
+         ORDER BY
+               A.V_ORDER ASC
+    </select>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 데이터 유형을 등록한다.                                             -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <insert id="OpenDttypeDao.insertOpenDttype" parameterClass="params">
+    <selectKey keyProperty="verifyId" resultClass="string">
+        SELECT SQ_OPEN_VERIFY_ID.NEXTVAL
+          FROM DUAL
+    </selectKey>
+        INSERT INTO TB_OPEN_DSCOLFY
+               (
+                   VERIFY_ID,
+                   VERIFY_NM,
+                   COLTY_CD,
+                   COL_SIZE,
+                   VERIFY_CD,
+                   VERIFY_PATN,
+                   V_ORDER,
+                   USE_YN,
+                   REG_ID,
+                   REG_DTTM
+               )
+        VALUES (
+                   #verifyId#,
+                   #verifyNm#,
+                   #coltyCd#,
+                   #colSize#,
+                   #verifyCd#,
+                   #verifyPatn#,
+                   #vOrder#,
+                   #useYn#,
+                   #regId#,
+                   SYSDATE
+               )
+    </insert>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 데이터 유형을 수정한다.                                             -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <update id="OpenDttypeDao.updateOpenDttype" parameterClass="params">
+        UPDATE TB_OPEN_DSCOLFY A
+           SET A.VERIFY_NM   = #verifyNm#,
+               A.COLTY_CD    = #coltyCd#,
+               A.COL_SIZE    = #colSize#,
+               A.VERIFY_CD   = #verifyCd#,
+               A.VERIFY_PATN = #verifyPatn#,
+               A.V_ORDER     = #vOrder#,
+               A.USE_YN		 = #useYn#,
+               A.UPD_ID      = #updId#,
+               A.UPD_DTTM    = SYSDATE
+         WHERE A.VERIFY_ID   = #verifyId#
+    </update>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 데이터 컬럼을 삭제한다.                                             -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <delete id="OpenDttypeDao.deleteOpenDttype" parameterClass="params">
+        UPDATE TB_OPEN_DSCOLFY A
+           SET A.USE_YN       = 'N',
+               A.UPD_ID       = #updId#,
+               A.UPD_DTTM     = SYSDATE
+         WHERE A.VERIFY_ID    = #verifyId#
+    </delete>
+    
+</sqlMap>

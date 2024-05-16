@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="AdminInstMgmt">
+	<typeAlias  alias="params" type="egovframework.common.base.model.Params"/>
+	<typeAlias  alias="record" type="egovframework.common.base.model.Record"/>
+
+	<select id="AdminInstMgmtDao.selectInstMgmtListTree" parameterClass="params" resultClass="record" >
+		SELECT   INST_CD AS "instCd"
+				, INST_NM  AS "instNm"
+				, INST_RDT AS "instRdt"
+				, INST_BANK_NM AS "instBankNm"
+				, INST_ACC_NM AS "instAccNm"
+				, INST_ACC_NO AS "instAccNo"
+				, INST_ORD AS "instOrd"
+				, INST_PNO AS "instPno"
+				, INSCF_NM AS "inscfNm"
+				, INST_CHRG_DEPT_NM AS "instChrgDeptNm"
+				, INST_CHRG_CENT_CGP_1_NM AS "instChrgCentCgp1Nm"
+				, INST_CHRG_CENT_CGP_2_NM AS "instChrgCentCgp2Nm"
+				, INST_CHRG_CENT_CGP_3_NM AS "instChrgCentCgp3Nm"
+				, INST_FAX_NO AS "instFaxNo"
+				, INST_OFSL_FL_NM AS "instOfslFlNm"
+				, INST_OFSL_FL_PH_NM AS "instOfslFlPhNm"
+		  FROM   TV_OPNZ_INSTCD 
+	</select>
+	
+	<select id="AdminInstMgmtDao.instMgmtRetr" parameterClass="params" resultClass="record" >
+		SELECT    INST_CD AS "instCd"
+				, INST_NM  AS "instNm"
+				, INST_RDT AS "instRdt"
+				, INST_BANK_NM AS "instBankNm"
+				, INST_ACC_NM AS "instAccNm"
+				, INST_ACC_NO AS "instAccNo"
+				, INST_ORD AS "instOrd"
+				, INST_PNO AS "instPno"
+				, INSCF_NM AS "inscfNm"
+				, INST_CHRG_DEPT_NM AS "instChrgDeptNm"
+				, INST_CHRG_CENT_CGP_1_NM AS "instChrgCentCgp1Nm"
+				, INST_CHRG_CENT_CGP_2_NM AS "instChrgCentCgp2Nm"
+				, INST_CHRG_CENT_CGP_3_NM AS "instChrgCentCgp3Nm"
+				, INST_FAX_NO AS "instFaxNo"
+				, INST_OFSL_FL_NM AS "instOfslFlNm"
+				, INST_OFSL_FL_PH_NM AS "instOfslFlPhNm"
+ 		 FROM   TB_OPNZ_INSTCD
+		WHERE   INST_CD =#instCd:VARCHAR#
+	</select>
+
+	<update id="AdminInstMgmtDao.insertInstMgmt" parameterClass="params">
+		MERGE INTO TB_OPNZ_INSTCD A
+		USING (
+				SELECT
+					#instCd:VARCHAR# 				AS INST_CD
+					, #instNm:VARCHAR#   			AS INST_NM
+					, #instBankNm:VARCHAR#  		AS INST_BANK_NM
+					, #instAccNm:VARCHAR# 			AS INST_ACC_NM 
+					, #instAccNo:VARCHAR# 			AS INST_ACC_NO 
+					, #instPno:VARCHAR# 			AS INST_PNO 
+					, #instOfslFlNm:VARCHAR# 		AS INST_OFSL_FL_NM 
+					, #instOfslFlPhNm:VARCHAR# 		AS INST_OFSL_FL_PH_NM 
+					, #inscfNm:VARCHAR# 			AS INSCF_NM 
+					, #instChrgDeptNm:VARCHAR# 		AS INST_CHRG_DEPT_NM 
+					, #instChrgCentCgp1Nm:VARCHAR#  AS INST_CHRG_CENT_CGP_1_NM 
+					, #instChrgCentCgp2Nm:VARCHAR#  AS INST_CHRG_CENT_CGP_2_NM 
+					, #instChrgCentCgp3Nm:VARCHAR#  AS INST_CHRG_CENT_CGP_3_NM 
+					, #instFaxNo:VARCHAR# 			AS INST_FAX_NO
+				FROM DUAL 
+		) B
+		ON (
+			A.INST_CD = B.INST_CD
+		)
+		WHEN MATCHED THEN
+			UPDATE SET
+				A.INST_NM = B.INST_NM
+				, A.INST_BANK_NM = B.INST_BANK_NM
+				, A.INST_ACC_NM = B.INST_ACC_NM
+				, A.INST_ACC_NO = B.INST_ACC_NO
+				, A.INST_PNO = B.INST_PNO
+				<isNotEmpty property="instOfslFlNm">
+				, A.INST_OFSL_FL_NM = B.INST_OFSL_FL_NM
+				</isNotEmpty>
+				<isNotEmpty property="instOfslFlPhNm">
+				, A.INST_OFSL_FL_PH_NM = B.INST_OFSL_FL_PH_NM
+				</isNotEmpty>
+				, A.INSCF_NM = B.INSCF_NM
+				, A.INST_CHRG_DEPT_NM = B.INST_CHRG_DEPT_NM
+				, A.INST_CHRG_CENT_CGP_1_NM = B.INST_CHRG_CENT_CGP_1_NM
+				, A.INST_CHRG_CENT_CGP_2_NM = B.INST_CHRG_CENT_CGP_2_NM
+				, A.INST_CHRG_CENT_CGP_3_NM = B.INST_CHRG_CENT_CGP_3_NM
+				, A.INST_FAX_NO = B.INST_FAX_NO
+		WHEN NOT MATCHED THEN
+			INSERT (
+				A.INST_CD
+				, A.INST_NM
+				, A.INST_RDT
+				, A.INST_BANK_NM
+				, A.INST_ACC_NM
+				, A.INST_ACC_NO
+				, A.INST_ORD
+				, A.INST_PNO
+				, A.INST_OFSL_FL_NM
+				, A.INST_OFSL_FL_PH_NM
+				, A.INSCF_NM
+				, A.INST_CHRG_DEPT_NM
+				, A.INST_CHRG_CENT_CGP_1_NM
+				, A.INST_CHRG_CENT_CGP_2_NM
+				, A.INST_CHRG_CENT_CGP_3_NM
+				, A.INST_FAX_NO
+			) VALUES (
+				B.INST_CD
+				, B.INST_NM
+				, TO_CHAR(SYSDATE, 'YYYYMMDD')
+				, B.INST_BANK_NM
+				, B.INST_ACC_NM
+				, B.INST_ACC_NO
+				, (SELECT COUNT(INST_ORD)+1 FROM TB_OPNZ_INSTCD)
+				, B.INST_PNO
+				, B.INST_OFSL_FL_NM
+				, B.INST_OFSL_FL_PH_NM
+				, B.INSCF_NM
+				, B.INST_CHRG_DEPT_NM
+				, B.INST_CHRG_CENT_CGP_1_NM
+				, B.INST_CHRG_CENT_CGP_2_NM
+				, B.INST_CHRG_CENT_CGP_3_NM
+				, B.INST_FAX_NO
+			)
+	</update>
+</sqlMap>

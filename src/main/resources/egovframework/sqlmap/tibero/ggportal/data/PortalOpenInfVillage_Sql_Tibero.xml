@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<!-- 우리 지역 데이터 찾기 SQL -->
+<!-- @author 장홍식                                              -->
+
+<sqlMap namespace="PortalOpenInfVillageDao">
+
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+
+	<select id="PortalOpenInfVillageDao.selectListCityData" resultClass="record">
+		<![CDATA[
+		SELECT 
+			ORG_CD AS "orgCd"
+			, TYPE_CD AS "typeOrgCd"
+			, ORG_NM AS "orgNm"
+		FROM 
+			TB_COMM_ORG 
+		WHERE 
+			ORG_CD = TOP_ORG_CD
+			AND PAR_ORG_CD IS NULL
+			AND USE_YN = 'Y'
+			AND ORG_CD <> '6410000'
+			AND 'B' <> SUBSTR(ORG_CD, 1, 1)
+		ORDER BY ORG_NM, V_ORDER
+		]]>
+	</select>
+
+	<!-- SIGUN_CD 컬럼 유무 확인 -->
+	<select id="PortalOpenInfVillageDao.selectSigunCdYn" resultClass="record" parameterClass="params">
+		SELECT
+			COUNT(SRC_COL_ID) "cnt"
+		FROM
+			TB_OPEN_DSCOL
+		WHERE
+			DS_ID = #dsId:VARCHAR#
+			AND SRC_COL_ID = 'SIGUN_CD'
+			AND USE_YN = 'Y'
+	</select>
+</sqlMap>

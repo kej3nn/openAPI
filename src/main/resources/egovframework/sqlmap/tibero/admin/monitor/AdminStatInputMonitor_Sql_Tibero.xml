@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- @(#)AdminStatInputMonitor_Sql_Tibero.xml 1.0 2019/10/15                     -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- 통계데이터 입력현황을 관리하는 SQL 파일이다.	                                     -->
+<!--                                                                         -->
+<!-- @author JSSON                                                    	-->
+<!-- @version 1.0 2019/10/05                                                -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<sqlMap namespace="statInputMonitor">
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Type Alias                                                          -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+    
+    <!-- 메인리스트 쿼리 -->
+    <sql id="statInputMonitorDao.main">
+    SELECT T.STATBL_ID AS "statblId"
+         , MAX(T.STATBL_NM) AS "statblNm"
+     	 , W.WRT_ORG_CD AS "wrtOrgCd"
+     	 , MAX(W.WRT_ORG_NM) AS "wrtOrgNm"
+		 , COUNT(*) AS  "cnt"
+    	 , SUM(CASE WHEN W.WRTSTATE_CD = 'AC' THEN 1 ELSE 0 END) AS "acCnt"  
+    	 , SUM(CASE WHEN W.WRTSTATE_CD IN ('AW') THEN 1 ELSE 0 END) AS "awCnt"
+    	 <![CDATA[
+    	 , SUM(CASE WHEN W.WRTSTATE_CD NOT IN ('AC', 'AW') AND W.WRT_END_YMD < TO_CHAR(SYSDATE, 'YYYYMMDD') THEN 1 ELSE 0 END) AS "nawCnt"  
+    	 , SUM(CASE WHEN W.WRTSTATE_CD NOT IN ('AC', 'AW') AND W.WRT_END_YMD >= TO_CHAR(SYSDATE, 'YYYYMMDD') THEN 1 ELSE 0 END) AS "pnawCnt"
+    	 ]]>
+	  FROM TB_STTS_TBL T 
+	 INNER JOIN TB_STTS_WRTLIST W 
+	    ON T.STATBL_ID = W.STATBL_ID
+	     
+	</sql>
+		    	
+    <sql id="statInputMonitorDao.main.where">
+    	WHERE 1=1
+    	  AND T.DSCN_ID = '2000' 
+ 	      AND W.WRTSTATE_CD  NOT IN( 'WL' ) 
+    	
+			<isNotEmpty property="searchVal" prepend="AND">
+				<isEqual property="searchGubun" compareValue="STATBL_ID" >
+					T.STATBL_ID LIKE '%' || #searchVal# || '%'
+				</isEqual>
+				<isEqual property="searchGubun" compareValue="STATBL_NM" >
+					T.STATBL_NM LIKE '%' || #searchVal# || '%'
+				</isEqual>
+		   	</isNotEmpty>
+   		<isNotEmpty property="beginOpenDttm" prepend="AND">
+		   TO_DATE(W.WRT_END_YMD, 'YYYY-MM-DD') BETWEEN TO_DATE(#beginOpenDttm#, 'YYYY-MM-DD') AND TO_DATE(#endOpenDttm#, 'YYYY-MM-DD')	   	 
+	   	</isNotEmpty>
+   		<isNotEmpty property="orgCd" prepend="AND">
+		  W.WRT_ORG_CD LIKE #orgCd#	   	 
+	   	</isNotEmpty>
+   		<isNotEmpty property="nawYn" prepend="AND">
+   		<![CDATA[
+   		 (W.WRTSTATE_CD NOT IN ('AC', 'AW') AND W.WRT_END_YMD < TO_CHAR(SYSDATE, 'YYYYMMDD'))
+	   	]]>
+	   	</isNotEmpty>
+	   	
+	   	
+	   	 GROUP BY T.STATBL_ID, W.WRT_ORG_CD
+    </sql>
+  
+  	<!-- 메인 리스트 조회 -->
+  	<select id="statInputMonitorDao.selectStatInputMonitorList" parameterClass="params" resultClass="record">
+  		/* sql id : statInputMonitorDao.selectStatInputMonitorList */
+  		<isEqual property="paging" compareValue="0">
+		SELECT AA.* 
+		FROM   (SELECT ROWNUM AS ROW_NUM, AA.*
+				FROM   (  
+		</isEqual>
+			<include refid="statInputMonitorDao.main"></include>
+			<include refid="statInputMonitorDao.main.where"></include>
+			ORDER BY
+			    T.STATBL_ID DESC
+		<isEqual property="paging" compareValue="0">
+		<![CDATA[
+				) AA
+			WHERE ROWNUM <= #end:NUMERIC#
+			) AA
+		WHERE AA.ROW_NUM >= #start:NUMERIC#
+		]]>
+		</isEqual>
+  	</select>
+  	<select id="statInputMonitorDao.selectStatInputMonitorListCount" parameterClass="params" resultClass="int">
+  		/* sql id : statInputMonitorDao.selectStatInputMonitorListCount */
+		SELECT COUNT(*) 
+		  FROM (SELECT COUNT(*) 
+		          FROM TB_STTS_TBL T 
+	 		 	INNER JOIN TB_STTS_WRTLIST W 
+	   			  ON T.STATBL_ID = W.STATBL_ID
+		<include refid="statInputMonitorDao.main.where"></include>
+		) AA
+  	</select>
+  	
+  	<sql id="statInputMonitorDao.main.whereChart">
+  		WHERE T.DSCN_ID = '2000'  
+  		 AND W.WRTSTATE_CD  NOT IN( 'WL' )
+  		 <isNotEmpty property="beginOpenDttm" prepend="AND">
+		   TO_DATE(W.WRT_END_YMD, 'YYYY-MM-DD') BETWEEN TO_DATE(#beginOpenDttm#, 'YYYY-MM-DD') AND TO_DATE(#endOpenDttm#, 'YYYY-MM-DD')	   	 
+	   	</isNotEmpty>
+  	</sql>
+  	
+  	<select id="statInputMonitorDao.selectStatInputMonitorChart" parameterClass="params" resultClass="record">
+  		/* sql id : statInputMonitorDao.selectStatInputMonitorChart */
+		SELECT (TOT_CNT) AS TOT_CNT
+			 , AC_CNT, AW_CNT
+			 , NAW_CNT 
+    		 , pNAW_CNT
+			 , (CASE WHEN (TOT_CNT - pNAW_CNT) = 0 THEN 0 ELSE ROUND((AC_CNT + AW_CNT)*100 / (TOT_CNT - pNAW_CNT),2) END) AW_RATE  
+		  FROM
+		     (
+			  SELECT COUNT(*) AS TOT_CNT 
+			      , SUM(CASE WHEN W.WRTSTATE_CD = 'AC' THEN 1 ELSE 0 END) AS AC_CNT 
+			      , SUM(CASE WHEN W.WRTSTATE_CD IN ('AW') THEN 1 ELSE 0 END) AS AW_CNT
+			       <![CDATA[
+			      , SUM(CASE WHEN W.WRTSTATE_CD NOT IN ('AC', 'AW') AND W.WRT_END_YMD < TO_CHAR(SYSDATE, 'YYYYMMDD') THEN 1 ELSE 0 END) AS NAW_CNT  
+			      , SUM(CASE WHEN W.WRTSTATE_CD NOT IN ('AC', 'AW') AND W.WRT_END_YMD >= TO_CHAR(SYSDATE, 'YYYYMMDD') THEN 1 ELSE 0 END) AS PNAW_CNT 
+			  ]]>
+			  FROM TB_STTS_TBL T INNER JOIN TB_STTS_WRTLIST W ON T.STATBL_ID = W.STATBL_ID
+			  
+  		       <include refid="statInputMonitorDao.main.whereChart"></include>
+			)
+		
+	
+  	</select>
+  	
+  	<sql id="statInputMonitorDao.statblmain">
+    SELECT T.STATBL_ID AS "statblId"
+         , MAX(T.STATBL_NM) AS "statblNm"
+     	 , MAX(W.WRT_ORG_CD) AS "wrtOrgCd"
+     	 , MAX(W.WRT_ORG_NM) AS "wrtOrgNm"
+		 , COUNT(*) AS  "cnt"
+    	 , SUM(CASE WHEN W.WRTSTATE_CD = 'AC' THEN 1 ELSE 0 END) AS "acCnt"  
+    	 , SUM(CASE WHEN W.WRTSTATE_CD IN ('AW') THEN 1 ELSE 0 END) AS "awCnt"
+    	 <![CDATA[
+    	 , SUM(CASE WHEN W.WRTSTATE_CD NOT IN ('AC', 'AW') AND W.WRT_END_YMD < TO_CHAR(SYSDATE, 'YYYYMMDD') THEN 1 ELSE 0 END) AS "nawCnt"  
+    	 , SUM(CASE WHEN W.WRTSTATE_CD NOT IN ('AC', 'AW') AND W.WRT_END_YMD >= TO_CHAR(SYSDATE, 'YYYYMMDD') THEN 1 ELSE 0 END) AS "pnawCnt"
+    	 ]]>
+	  FROM TB_STTS_TBL T 
+	 INNER JOIN TB_STTS_WRTLIST W 
+	    ON T.STATBL_ID = W.STATBL_ID
+
+	     
+	</sql>
+	
+	<sql id="statInputMonitorDao.wrtOrgmain">
+    SELECT MAX(T.STATBL_ID) AS "statblId"
+         , MAX(T.STATBL_NM) AS "statblNm"
+     	 , W.WRT_ORG_CD AS "wrtOrgCd"
+     	 , MAX(W.WRT_ORG_NM) AS "wrtOrgNm"
+		 , COUNT(*) AS  "cnt"
+    	 , SUM(CASE WHEN W.WRTSTATE_CD = 'AC' THEN 1 ELSE 0 END) AS "acCnt"  
+    	 , SUM(CASE WHEN W.WRTSTATE_CD IN ('AW') THEN 1 ELSE 0 END) AS "awCnt"
+    	 <![CDATA[
+    	 , SUM(CASE WHEN W.WRTSTATE_CD NOT IN ('AC', 'AW') AND W.WRT_END_YMD < TO_CHAR(SYSDATE, 'YYYYMMDD') THEN 1 ELSE 0 END) AS "nawCnt"  
+    	 , SUM(CASE WHEN W.WRTSTATE_CD NOT IN ('AC', 'AW') AND W.WRT_END_YMD >= TO_CHAR(SYSDATE, 'YYYYMMDD') THEN 1 ELSE 0 END) AS "pnawCnt"
+    	 ]]>
+	  FROM TB_STTS_TBL T 
+	 INNER JOIN TB_STTS_WRTLIST W 
+	    ON T.STATBL_ID = W.STATBL_ID
+	     
+	</sql>
+	
+	    <sql id="statInputMonitorDao.main.statblwhere">
+    	WHERE 1=1
+    	  AND T.DSCN_ID = '2000' 
+ 	      AND W.WRTSTATE_CD  NOT IN( 'WL' ) 
+    	
+			<isNotEmpty property="searchVal" prepend="AND">
+				<isEqual property="searchGubun" compareValue="STATBL_ID" >
+					T.STATBL_ID LIKE '%' || #searchVal# || '%'
+				</isEqual>
+				<isEqual property="searchGubun" compareValue="STATBL_NM" >
+					T.STATBL_NM LIKE '%' || #searchVal# || '%'
+				</isEqual>
+		   	</isNotEmpty>
+   		<isNotEmpty property="beginOpenDttm" prepend="AND">
+		   TO_DATE(W.WRT_END_YMD, 'YYYY-MM-DD') BETWEEN TO_DATE(#beginOpenDttm#, 'YYYY-MM-DD') AND TO_DATE(#endOpenDttm#, 'YYYY-MM-DD')	   	 
+	   	</isNotEmpty>
+   		<isNotEmpty property="orgCd" prepend="AND">
+		  W.WRT_ORG_CD LIKE #orgCd#	   	 
+	   	</isNotEmpty>
+   		<isNotEmpty property="nawYn" prepend="AND">
+   		<![CDATA[
+   		 (W.WRTSTATE_CD NOT IN ('AC', 'AW') AND W.WRT_END_YMD < TO_CHAR(SYSDATE, 'YYYYMMDD'))
+	   	]]>
+	   	</isNotEmpty>
+	   		  GROUP BY T.STATBL_ID
+    </sql>
+    
+    	    <sql id="statInputMonitorDao.main.wrtOrgwhere">
+    	WHERE 1=1
+    	  AND T.DSCN_ID = '2000' 
+ 	      AND W.WRTSTATE_CD  NOT IN( 'WL' ) 
+    	
+			<isNotEmpty property="searchVal" prepend="AND">
+				<isEqual property="searchGubun" compareValue="STATBL_ID" >
+					T.STATBL_ID LIKE '%' || #searchVal# || '%'
+				</isEqual>
+				<isEqual property="searchGubun" compareValue="STATBL_NM" >
+					T.STATBL_NM LIKE '%' || #searchVal# || '%'
+				</isEqual>
+		   	</isNotEmpty>
+   		<isNotEmpty property="beginOpenDttm" prepend="AND">
+		   TO_DATE(W.WRT_END_YMD, 'YYYY-MM-DD') BETWEEN TO_DATE(#beginOpenDttm#, 'YYYY-MM-DD') AND TO_DATE(#endOpenDttm#, 'YYYY-MM-DD')	   	 
+	   	</isNotEmpty>
+   		<isNotEmpty property="orgCd" prepend="AND">
+		  W.WRT_ORG_CD LIKE #orgCd#	   	 
+	   	</isNotEmpty>
+   		<isNotEmpty property="nawYn" prepend="AND">
+   		<![CDATA[
+   		 (W.WRTSTATE_CD NOT IN ('AC', 'AW') AND W.WRT_END_YMD < TO_CHAR(SYSDATE, 'YYYYMMDD'))
+	   	]]>
+	   	</isNotEmpty>
+	   		  GROUP BY W.WRT_ORG_CD
+    </sql>
+    
+  	
+  	 <select id="statInputMonitorDao.selectOpenInputMonitorstatblList" parameterClass="params" resultClass="java.util.LinkedHashMap" remapResults="true">
+  		<include refid="statInputMonitorDao.statblmain"></include>
+  		<include refid="statInputMonitorDao.main.statblwhere"></include>
+
+	</select>
+	
+	<select id="statInputMonitorDao.selectOpenInputMonitorwrtOrgList" parameterClass="params" resultClass="java.util.LinkedHashMap" remapResults="true">
+  		<include refid="statInputMonitorDao.wrtOrgmain"></include>
+  		<include refid="statInputMonitorDao.main.wrtOrgwhere"></include>
+	</select>
+  	
+</sqlMap>

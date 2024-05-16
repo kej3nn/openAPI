@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- @(#)PortalDataCode_Sql_Tibero.xml 1.0 2015/06/15                        -->
+<!--                                                                         -->
+<!-- COPYRIGHT (C) 2013 WISEITECH CO., LTD. ALL RIGHTS RESERVED.             -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- 데이터 코드를 관리하는 SQL 파일이다.                                    -->
+<!--                                                                         -->
+<!-- @author 김은삼                                                          -->
+<!-- @version 1.0 2015/06/15                                                 -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<sqlMap namespace="PortalDataCodeDao">
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Type Alias                                                          -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 데이터 코드를 검색한다.    2023-12-10 TV_DATA_CODE => TB_DATA_CODE 뷰에서 테이블로 변경         -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+      
+    <select id="PortalDataCodeDao.searchDataCode" parameterClass="params" resultClass="record">
+         SELECT A.DITC_CD   AS "code",
+                A.DITC_NM   AS "name"
+           FROM TV_DATA_CODE A
+          WHERE A.GRP_CD     = #grpCd:VARCHAR#
+            <isNotEmpty property="apiYn">
+            AND A.API_YN     = #apiYn:CHAR#
+            </isNotEmpty>
+          ORDER BY
+                A.V_ORDER ASC,
+                A.DITC_CD ASC
+    </select>
+    
+    <select id="PortalDataCodeDao.searchDataCodeTB" parameterClass="params" resultClass="record">
+         SELECT A.DITC_CD   AS "code",
+                A.DITC_NM   AS "name"
+           FROM TB_DATA_CODE A
+          WHERE A.GRP_CD     = #grpCd:VARCHAR#
+            <isNotEmpty property="apiYn">
+            AND A.API_YN     = #apiYn:CHAR#
+            </isNotEmpty>
+          ORDER BY
+                A.V_ORDER ASC,
+                A.DITC_CD ASC
+    </select>
+
+</sqlMap>

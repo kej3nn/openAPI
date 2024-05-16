@@ -1,0 +1,186 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!-- saved from url=(0040)https://open.assembly.go.kr:442/main.do# -->
+<html lang="ko"><head><meta http-equiv="Content-Type" content="text/html; charset=EUC-KR">
+<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7">
+<title>정보공개.행정심판시스템</title>
+
+<link rel="stylesheet" type="text/css" href="https://open.assembly.go.kr:442/common/css/common.css">
+<link rel="stylesheet" type="text/css" href="https://open.assembly.go.kr:442/common/css/main.css">
+
+<script type="text/javascript">
+function preloadImages() { //v3.0
+  var d=document; if(d.images){ if(!d.p) d.p=new Array();
+    var i,j=d.p.length,a=preloadImages.arguments; for(i=0; i<a.length; i++)
+    if (a[i].indexOf("#")!=0){ d.p[j]=new Image; d.p[j++].src=a[i];}}
+}
+
+function swapRestore() { //v3.0
+  var i,x,a=document.sr; for(i=0;a&&i<a.length&&(x=a[i])&&x.oSrc;i++) x.src=x.oSrc;
+}
+
+function findObj(n, d) { //v4.01
+  var p,i,x;  if(!d) d=document; if((p=n.indexOf("?"))>0&&parent.frames.length) {
+    d=parent.frames[n.substring(p+1)].document; n=n.substring(0,p);}
+  if(!(x=d[n])&&d.all) x=d.all[n]; for (i=0;!x&&i<d.forms.length;i++) x=d.forms[i][n];
+  for(i=0;!x&&d.layers&&i<d.layers.length;i++) x=findObj(n,d.layers[i].document);
+  if(!x && d.getElementById) x=d.getElementById(n); return x;
+}
+
+function swap() { //v3.0
+  var i,j=0,x,a=swap.arguments; document.sr=new Array; for(i=0;i<(a.length-2);i+=3)
+   if ((x=findObj(a[i]))!=null){document.sr[j++]=x; if(!x.oSrc) x.oSrc=x.src; x.src=a[i+2];}
+}
+
+function getCookie(sName){
+  var aCookie = document.cookie.split("; ");
+  for (var i=0; i < aCookie.length; i++)  {
+    var aCrumb = aCookie[i].split("=");
+    if (sName == aCrumb[0])
+      return unescape(aCrumb[1]);
+  }
+  return null;
+} 
+
+function LPAD(a){
+	 
+		a = a+"";
+		if(a.length < 2){
+			a = "0"+a;
+		}	
+		return a;
+}
+function setFocus()
+{		
+	//var theDay = new Date(2014,07,23,22,0,0); //2014년 8월 23일 22시까지
+	var theDay = new Date(2020,01,08,12,0,0); 
+	var toDay  = new Date();
+	
+	var chk1 =theDay.getFullYear() + LPAD(theDay.getMonth()+1)  +  LPAD(theDay.getDate()) +  LPAD(theDay.getHours()) +  LPAD(theDay.getMinutes()) + LPAD(theDay.getSeconds());
+	var chk2 =toDay.getFullYear()  + LPAD(toDay.getMonth()+1) +  LPAD(toDay.getDate())  +  LPAD(toDay.getHours())  +  LPAD(toDay.getMinutes())  + LPAD(toDay.getSeconds());	
+ 	
+	//alert(chk1);
+	//alert(chk2);
+	
+	if(chk1 > chk2){
+		if(getCookie("opn_pop")!="done") 
+		{
+		//	// 팝업윈도우의 경로와 크기를 설정 하세요		
+			window.open('http://open.assembly.go.kr/jsp/common/notic_pop.html','opn_pop','scrollbars=no,status=no,width=500,height=290,top=100,left=400');
+		}		
+	}
+	
+ /* 
+  theDay = new Date(2016,02,26,22,0,0); 
+	
+	chk1 =theDay.getFullYear() + LPAD(theDay.getMonth())  +  LPAD(theDay.getDate()) +  LPAD(theDay.getHours()) +  LPAD(theDay.getMinutes()) + LPAD(theDay.getSeconds());
+	
+	if(chk1 > chk2){
+		if(getCookie("opn_pop_admin2")!="done") 
+		{
+		//	// 팝업윈도우의 경로와 크기를 설정 하세요		
+			window.open('http://open.assembly.go.kr/jsp/common/notic_pop.html','opn_pop_admin','scrollbars=no,status=no,width=500,height=320,top=100,left=600');
+		}		
+	} 	
+*/
+}
+
+</script>
+<link type="text/css" rel="stylesheet" href="chrome-extension://eobejphpabbjeehffmbiecckpkggpbai/style.css"><script type="text/javascript" charset="utf-8" src="chrome-extension://eobejphpabbjeehffmbiecckpkggpbai/js/content-script/page_context.js"></script></head>
+
+ <body onload="setFocus();" naver_screen_capture_injected="true">
+
+<!-- 헤더 시작 -->
+<div id="container">
+<div id="contentzone">
+
+<div id="toplogo" title="정보공개.행정심판시스템"><h1><p class="blind">정보공개.행정심판시스템</p></h1></div>
+<div id="box_top"></div>
+<div id="box_body">
+	<ul>
+		<li>
+			<a href="https://open.assembly.go.kr:442/opn/guideOpnInfoGroundsLaws.do" onclick="javascript:location.href='/opn/guideOpnInfoGroundsLaws.do';">
+			<h2><img src="https://open.assembly.go.kr:442/common/image/main/menu01.gif" alt="정보공개안내" title="정보공개안내" id="m01" onmouseover="swap('m01','','https://open.assembly.go.kr:442/common/image/main/menu01_over.gif',1)" onmouseout="swapRestore()"></h2>
+			</a>
+		</li>
+
+		<li class="blank01"><img src="https://open.assembly.go.kr:442/common/image/main/blank01.gif" alt=""> </li>
+
+		<li>
+			<a href="https://open.assembly.go.kr:442/admjud/guideAdmjud.do" onclick="javascript:location.href='/admjud/guideAdmjud.do';">
+			<h2><img src="https://open.assembly.go.kr:442/common/image/main/menu05.gif" alt="정보공개안내" title="행정심판안내" id="m05" onmouseover="swap('m05','','https://open.assembly.go.kr:442/common/image/main/menu05_over.gif',1)" onmouseout="swapRestore()"></h2>
+			</a>
+		</li>
+
+		<li class="blank02"><img src="https://open.assembly.go.kr:442/common/image/main/blank02.gif" alt=""></li>
+		<li class="menu02">
+			<a href="https://open.assembly.go.kr:442/opn/searchOpnApl.do" onclick="javascript:location.href='/opn/searchOpnApl.do';">
+			<h2><img src="https://open.assembly.go.kr:442/common/image/main/menu02.gif" alt="정보공개안내" title="정보공개청구" id="m02" onmouseover="swap('m02','','https://open.assembly.go.kr:442/common/image/main/menu02_over.gif',1)" onmouseout="swapRestore()"></h2>
+			</a>
+		</li>
+
+		<li class="menu06">
+			<a href="https://open.assembly.go.kr:442/admjud/searchAdmjud.do" onclick="javascript:location.href='/admjud/searchAdmjud.do';">
+			<h2><img src="https://open.assembly.go.kr:442/common/image/main/menu06.gif" alt="행정심판청구" title="행정심판청구" id="m06" onmouseover="swap('m06','','https://open.assembly.go.kr:442/common/image/main/menu06_over.gif',1)" onmouseout="swapRestore()"></h2>
+			</a>
+		</li>
+
+		<li class="menu03">
+			<a href="https://open.assembly.go.kr:442/opnlst/searchOpnlst.do" onclick="javascript:location.href='/opnlst/searchOpnlst.do';">
+			<h2><img src="https://open.assembly.go.kr:442/common/image/main/menu03.gif" alt="공개목록검색" title="공개목록검색" id="m03" onmouseover="swap('m03','','https://open.assembly.go.kr:442/common/image/main/menu03_over.gif',1)" onmouseout="swapRestore()"></h2>
+			</a>
+		</li>
+		<li class="menu04">
+			<a href="https://open.assembly.go.kr:442/opn/searchOpnObjtn.do" onclick="javascript:location.href='/opn/searchOpnObjtn.do';">
+			<h2><img src="https://open.assembly.go.kr:442/common/image/main/menu04.gif" alt="이의신청" title="이의신청" id="m04" onmouseover="swap('m04','','https://open.assembly.go.kr:442/common/image/main/menu04_over.gif',1)" onmouseout="swapRestore()"></h2>
+		</a>
+		</li>
+		<li class="blank03"><img src="https://open.assembly.go.kr:442/common/image/main/blank03.gif" alt=""></li>
+	</ul>
+
+</div>
+<!--메뉴들:END-->
+
+<div id="box_bottom"></div>
+<!-- 헤더 드디어 끝-->
+<div id="banner">   
+	<ul>
+		<li>
+			<a href="http://www.assembly.go.kr/" target="_blank">
+				<img src="https://open.assembly.go.kr:442/common/image/main/banner01.gif" alt="대한민국국회 홈페이지로 가기" title="대한민국국회 홈페이지로 가기">
+			</a>
+		</li>
+		<li>
+			<a href="http://nas.na.go.kr/" target="_blank">
+				<img src="https://open.assembly.go.kr:442/common/image/main/banner02.gif" alt="국회사무처 홈페이지로 가기" title="국회사무처 홈페이지로 가기">
+			</a>
+		</li>
+		<li>
+			<a href="http://www.nanet.go.kr/main.jsp" target="_blank">
+				<img src="https://open.assembly.go.kr:442/common/image/main/banner05.gif" alt="국회도서관 홈페이지로 가기" title="국회도서관 홈페이지로 가기">
+			</a>
+		</li>
+		<li>
+			<a href="http://www.nabo.go.kr/" target="_blank">
+				<img src="https://open.assembly.go.kr:442/common/image/main/banner04.gif" alt="국회예산정책처 홈페이지로 가기" title="국회예산정책처 홈페이지로 가기">
+			</a>
+		</li>
+		<li>
+			<a href="http://www.nars.go.kr/" target="_blank">
+				<img src="https://open.assembly.go.kr:442/common/image/main/banner03.gif" alt="국회입법조사처 홈페이지로 가기" title="국회입법조사처 홈페이지로 가기">
+			</a>
+		</li>
+	</ul>
+</div>
+
+<div id="copyright">
+	<address>
+	<p>	대한민국국회 정보공개·행정심판시스템 홈페이지의 모든정보의 권한은 국회에 있습니다.</p>
+	<p>서울시 영등포구 의사당대로1 (여의도동) 07233</p>
+	</address>
+</div>
+
+</div>
+</div>
+
+
+</body><audio src="" id="naver_dic_audio_controller" controls="controls" style="display: none;"></audio></html>

@@ -1,0 +1,789 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- @(#)AdminInfSetMgmt_Sql_Tibero.xml 1.0 2019/07/29                     -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- 정보셋을 관리하는 SQL 파일이다.	                                     -->
+<!--                                                                         -->
+<!-- @author JHKIM                                                         	-->
+<!-- @version 1.0 2019/07/29                                                -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<sqlMap namespace="InfSetMgmt">
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Type Alias                                                          -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+    
+    <!-- 메인리스트 쿼리 -->
+    <sql id="infSetMgmtDao.main">
+		SELECT
+		    A.INFS_ID		AS "infsId",
+		    A.SEQ			AS "seq",
+		    A.INFS_NM		AS "infsNm",
+		    A.CATE_NM		AS "cateNm",
+		    A.ORG_NM		AS "orgNm",
+		    A.DOC_CNT		AS "docCnt",
+		    A.INF_CNT		AS "infCnt",
+		    A.STATBL_CNT	AS "statblCnt",
+		    A.OPEN_STATE	AS "openState",
+		    A.OPEN_DTTM		AS "openDttm"
+		FROM
+		    TV_INFO_SET A
+	</sql>
+		    	
+    <sql id="infSetMgmtDao.main.where">
+			WHERE 1=1
+		      AND A.USE_YN = 'Y' 
+			<isNotEmpty property="openState" prepend="AND">
+				A.OPEN_STATE = #openState:VARCHAR#	   	 
+	   		</isNotEmpty>
+			<isNotEmpty property="searchVal" prepend="AND">
+				<isEqual property="searchGubun" compareValue="INFS_NM" >
+					A.INFS_NM LIKE '%' || #searchVal# || '%'
+				</isEqual>
+				<isEqual property="searchGubun" compareValue="INFS_ID" >
+					A.INFS_ID LIKE '%' || #searchVal# || '%'
+				</isEqual>
+		   	</isNotEmpty>
+		   	<isNotEmpty property="iterCateId" prepend="AND">
+		   	  A.CATE_ID IN
+		   	<iterate property="iterCateId" open="(" close=")" conjunction=", ">
+           		#iterCateId[]:VARCHAR#
+           	</iterate>
+           	</isNotEmpty>
+           	<isNotEmpty property="openType" prepend="AND">
+           		<isEqual property="openType" compareValue="D">
+           			A.DOC_CNT > 0 
+           		</isEqual>
+           		<isEqual property="openType" compareValue="O">
+           			A.INF_CNT > 0 
+           		</isEqual>
+           		<isEqual property="openType" compareValue="S">
+           			A.STATBL_CNT > 0 
+           		</isEqual>
+           	</isNotEmpty>
+   		<isNotEmpty property="orgCd" prepend="AND">
+				A.ORG_CD = #orgCd:VARCHAR#	   	 
+	   	</isNotEmpty>
+		<isNotEmpty property="beginOpenDttm" prepend="AND">
+		   A.OPEN_DTTM <![CDATA[ >= ]]> TO_DATE(#beginOpenDttm:VARCHAR#, 'YYYY-MM-DD') + 0	   	 
+	   	</isNotEmpty>
+	   	<isNotEmpty property="endOpenDttm" prepend="AND">
+		   A.OPEN_DTTM <![CDATA[ < ]]> TO_DATE(#endOpenDttm:VARCHAR#, 'YYYY-MM-DD') + 1
+	   	</isNotEmpty>	   	
+	   	<isNotEmpty property="fvtDataOrder">
+	   		<isEqual property="fvtDataOrder" compareValue="Y">
+			AND   A.FVT_DATA_ORDER IN (SELECT DITC_CD FROM TB_COMM_CODE WHERE GRP_CD = 'C1018' AND USE_YN = 'Y' AND DITC_CD != 0)
+			</isEqual>   	 
+	   	</isNotEmpty>
+    </sql>
+  
+  	<!-- 메인 리스트 조회 -->
+  	<select id="infSetMgmtDao.selectMainList" parameterClass="params" resultClass="record">
+  		/* sql id : infSetMgmtDao.selectMainList */
+  		<isEqual property="paging" compareValue="0">
+		SELECT AA.* 
+		FROM   (SELECT ROWNUM AS ROW_NUM, AA.*
+				FROM   (  
+		</isEqual>
+			<include refid="infSetMgmtDao.main"></include>
+			<include refid="infSetMgmtDao.main.where"></include>
+			ORDER BY
+			    A.V_ORDER
+		<isEqual property="paging" compareValue="0">
+		<![CDATA[
+				) AA
+			WHERE ROWNUM <= #end:NUMERIC#
+			) AA
+		WHERE AA.ROW_NUM >= #start:NUMERIC#
+		]]>
+		</isEqual>
+  	</select>
+  	<select id="infSetMgmtDao.selectMainListCount" parameterClass="params" resultClass="int">
+  		/* sql id : infSetMgmtDao.selectMainListCount */
+		SELECT COUNT(*)
+		FROM   TV_INFO_SET A
+		<include refid="infSetMgmtDao.main.where"></include>
+  	</select>
+  	
+  	<!-- 정보셋 관리 탭 내의 상세정보 조회 -->
+  	<select id="infSetMgmtDao.selectDtl" parameterClass="params" resultClass="record">
+  		/* sql id : infSetMgmtDao.selectDtl */
+		SELECT
+		    A.INFS_ID			AS "infsId",
+		    A.SEQ				AS "seq",
+		    A.INFS_NM			AS "infsNm",
+		    A.CATE_ID			AS "cateId",
+		    A.FVT_DATA_ORDER	AS "fvtDataOrder",
+		    A.INFS_SMRY_EXP		AS "infsSmryExp",
+		    A.SCHW_TAG_CONT		AS "schwTagCont",
+		    A.USE_YN			AS "useYn",
+		    A.OPEN_STATE		AS "openState",
+		    A.DOC_CNT			AS "docCnt",
+		    A.INF_CNT			AS "infCnt",
+		    A.STATBL_CNT		AS "statblCnt",
+		    TO_CHAR(A.OPEN_DTTM, 'YYYY-MM-DD')				AS "openDttm",
+		    DECODE(NVL(A.FVT_DATA_ORDER, 0), 0, 'N', 'Y')	AS "fvtDataOrderYn"
+		FROM
+		    TV_INFO_SET A
+		WHERE
+		    A.INFS_ID = #infsId:VARCHAR#  		
+  	</select>
+  	
+  	<!-- 정보셋 신규 SEQ -->
+  	<select id="infSetMgmtDao.getSqInfoInfsSeq" resultClass="int">
+  		SELECT SQ_INFO_INFS_SEQ.NEXTVAL FROM DUAL
+  	</select>
+  	
+  	<!-- 정보셋 신규 ID -->
+  	<select id="infSetMgmtDao.getInfsId" resultClass="string" parameterClass="params">
+  		SELECT FN_CREATE_INFS_ID(#seq:NUMERIC#) FROM DUAL
+  	</select>
+  		
+  	<!-- 정보셋 마스터정보 등록 -->
+  	<insert id="infSetMgmtDao.insertInfoSetMst" parameterClass="params">
+  		/* sql id : infSetMgmtDao.insertInfoSetMst */
+		INSERT INTO TB_INFO_SET(
+			INFS_ID          ,
+		    SEQ              ,
+		    INFS_NM          ,
+		    TAG_INFS_NM      ,
+		    CATE_ID          ,
+		    SCHW_TAG_CONT    ,
+		    INFS_SMRY_EXP    ,
+		    ORG_CD           ,
+		    USR_CD           ,
+		    OPEN_DTTM        ,
+		    FVT_DATA_ORDER   ,
+		    USE_YN           ,
+		    REG_ID           ,
+		    REG_DTTM         ,
+		    UPD_ID           ,
+		    UPD_DTTM         
+		)
+		VALUES(
+			#infsId:VARCHAR#,
+			#seq:NUMERIC#,
+			#infsNm:VARCHAR#,
+			UPPER(REPLACE(#infsNm:VARCHAR#, ' ', '')),
+			'dummyCate',
+			#schwTagCont:VARCHAR#,
+			#infsSmryExp:VARCHAR#,
+			'dummyOrgcd',
+			0,
+			'',	
+			#fvtDataOrder:NUMERIC#,
+		    #useYn:VARCHAR#,
+		    #regId:VARCHAR#,
+		    SYSDATE,
+		    #updId:VARCHAR#,
+		    SYSDATE         		
+		)		
+	</insert>	
+	<update id="infSetMgmtDao.updateInfoSetMstRpst" parameterClass="params">
+		/* sql id : infSetMgmtDao.updateInfoSetMstRpst */
+		UPDATE TB_INFO_SET
+		SET 
+			CATE_ID = (SELECT CATE_ID FROM TB_INFO_SET_CATE WHERE INFS_ID = #infsId:VARCHAR# AND RPST_YN = 'Y' AND USE_YN = 'Y'),
+			ORG_CD =  (SELECT ORG_CD  FROM TB_INFO_SET_USR  WHERE INFS_ID = #infsId:VARCHAR# AND RPST_YN = 'Y' AND USE_YN = 'Y'),
+			USR_CD =  (SELECT USR_CD  FROM TB_INFO_SET_USR  WHERE INFS_ID = #infsId:VARCHAR# AND RPST_YN = 'Y' AND USE_YN = 'Y')
+		WHERE INFS_ID = #infsId:VARCHAR# 
+	</update>
+	
+	<!-- 정보셋 마스터 정보 수정 -->
+	<update id="infSetMgmtDao.updateInfoSetMst" parameterClass="params">
+		/* sql id : infSetMgmtDao.updateInfoSetMst */
+		UPDATE TB_INFO_SET
+		SET 
+			INFS_NM 		=  #infsNm:VARCHAR#,
+			TAG_INFS_NM     =  UPPER(REPLACE(#infsNm:VARCHAR#, ' ', '')),
+			INFS_SMRY_EXP 	=  #infsSmryExp:VARCHAR#,
+			SCHW_TAG_CONT	=  #schwTagCont:VARCHAR#,
+			OPEN_DTTM 		=  DECODE(OPEN_STATE, 'Y', TO_DATE(#openDttm:VARCHAR#, 'YYYY-MM-DD'), 'N', ''),
+			FVT_DATA_ORDER	= #fvtDataOrder:VARCHAR#
+		WHERE INFS_ID = #infsId:VARCHAR# 
+	</update>
+	
+	<!-- 정보셋 백업(STATUS=D 일경우 데이터 삭제) -->
+	<procedure id="infSetMgmtDao.execSpBcupInfoSet" parameterClass="params" resultClass="record" >
+	    <![CDATA[
+	      { CALL SP_BCUP_INFO_SET(#infsId:VARCHAR#, #Status:VARCHAR#, #updId:VARCHAR#)}
+	      ]]>
+	</procedure>
+	
+	<!-- 정보셋 분류체계 팝업 리스트 조회 -->
+	<select id="infSetMgmtDao.selectInfSetCatePop" parameterClass="params" resultClass="record">
+		/* sql id : infSetMgmtDao.selectInfSetCatePop */
+		SELECT
+			A.CATE_ID					AS "cateId"
+			, A.CATE_NM					AS "cateNm"
+			, A.CATE_FULLNM 			AS "cateFullnm"
+			, A.CATE_LVL				AS "Level"
+			, A.USE_YN					AS "useYn"
+			, NVL2(B.CATE_ID, '1', '0') AS "chk"
+		FROM
+			TB_INFO_CATE A
+		LEFT JOIN TB_INFO_SET_CATE B 
+			ON B.INFS_ID = #infsId:VARCHAR#
+		    AND A.CATE_ID = B.CATE_ID 			
+		WHERE 
+			A.CATE_ID IN 
+			(
+			SELECT CATE_ID FROM TB_INFO_CATE B
+		<isNotEmpty property="searchVal">
+			<isEqual property="searchGubun" compareValue="CATE_NM" >
+				START WITH B.CATE_NM LIKE '%' || #searchVal# || '%'	
+			</isEqual>
+			<isEqual property="searchGubun" compareValue="ENG_CATE_NM" >
+				START WITH B.ENG_CATE_NM LIKE '%' || #searchVal# || '%'	
+			</isEqual>
+	   	</isNotEmpty> 
+			CONNECT BY 
+				CATE_ID = PRIOR PAR_CATE_ID 
+				AND B.USE_YN = 'Y'
+			)
+		START WITH PAR_CATE_ID = 'T'
+		CONNECT BY 
+			PRIOR A.CATE_ID = PAR_CATE_ID 
+			AND A.USE_YN = 'Y'
+		ORDER SIBLINGS BY A.V_ORDER	
+	</select>	
+	
+	<!-- 정보셋 관리 관련 분류 조회 -->
+	<select id="infSetMgmtDao.selectInfoSetCate" parameterClass="params" resultClass="record">
+		/* sql id : infSetMgmtDao.selectInfoSetCate */
+		SELECT
+		    A.INFS_ID		AS "infsId",
+		    A.CATE_ID		AS "cateId",
+		    A.RPST_YN		AS "rpstYn",
+		    A.USE_YN		AS "useYn",
+		    B.CATE_NM		AS "cateNm",
+		    B.CATE_FULLNM	AS "cateFullNm"
+		FROM
+		    TB_INFO_SET_CATE A
+		    	INNER JOIN TB_INFO_CATE B ON A.CATE_ID = B.CATE_ID
+		    	AND B.USE_YN = 'Y'
+		WHERE
+		    INFS_ID = #infsId:VARCHAR#
+		ORDER BY A.V_ORDER
+	</select>
+	
+	<!-- 정보셋 관리 관련 분류 머지 -->
+	<update id="infSetMgmtDao.mergeInfoSetCate" parameterClass="record">
+		/* sql id : infSetMgmtDao.mergeInfoSetCate */
+		MERGE INTO TB_INFO_SET_CATE A
+		USING (
+			SELECT 
+				#infsId:VARCHAR#	AS INFS_ID
+				, #cateId:VARCHAR#	AS CATE_ID
+				, #rpstYn:VARCHAR#	AS RPST_YN
+				, #useYn:CHAR#		AS USE_YN
+				, #regId:VARCHAR#	AS REG_ID
+				, #updId:VARCHAR#	AS UPD_ID
+			FROM DUAL
+		) B
+		ON (
+			A.INFS_ID 	  = B.INFS_ID
+			AND A.CATE_ID = B.CATE_ID
+		)
+		WHEN MATCHED THEN 
+		UPDATE SET
+			A.RPST_YN 		= B.RPST_YN
+			, A.USE_YN 		= B.USE_YN
+			, A.UPD_ID 		= B.UPD_ID
+			, A.UPD_DTTM 	= SYSDATE
+		WHEN NOT MATCHED THEN
+		INSERT (
+			A.INFS_ID
+			, A.CATE_ID
+			, A.RPST_YN
+			, A.USE_YN
+			, A.REG_ID
+			, A.REG_DTTM
+			, A.UPD_ID
+			, A.UPD_DTTM
+		)
+		VALUES (
+			B.INFS_ID
+			, B.CATE_ID
+			, B.RPST_YN
+			, B.USE_YN
+			, B.REG_ID
+			, SYSDATE
+			, B.UPD_ID
+			, SYSDATE
+		)	
+	</update>
+	
+	<!-- 정보셋 관리 관련 분류 삭제 -->
+	<delete id="infSetMgmtDao.deleteInfoSetCate" parameterClass="record">
+		/* sql id : infSetMgmtDao.deleteInfoSetCate */
+		DELETE FROM TB_INFO_SET_CATE
+		WHERE  INFS_ID = #infsId:VARCHAR#
+		AND    CATE_ID = #cateId:VARCHAR#
+	</delete>
+	
+	<!-- 정보셋 관리 관련 유저 조회 -->
+	<select id="infSetMgmtDao.selectInfoSetUsr" parameterClass="params" resultClass="record">
+		/* sql id : infSetMgmtDao.selectInfoSetUsr */
+		SELECT
+			SEQCE_NO		AS "seqceNo" 
+			, A.INFS_ID 	AS "infsId"
+			, A.USR_CD		AS "usrCd"
+			, A.ORG_CD		AS "orgCd"
+			, A.RPST_YN		AS "rpstYn"
+			, A.PRSS_ACC_CD	AS "prssAccCd"
+			, A.SRC_VIEW_YN	AS "srcViewYn"
+			, A.USE_YN		AS "useYn"
+			, (SELECT USR_NM FROM TB_COMM_USR WHERE USR_CD = A.USR_CD) AS "usrNm"
+			, (SELECT ORG_NM FROM TB_COMM_ORG WHERE ORG_CD = A.ORG_CD) AS "orgNm"
+		FROM
+			TB_INFO_SET_USR A
+		WHERE
+			A.INFS_ID = #infsId:VARCHAR#
+	</select>
+	
+	<!-- 정보셋 관련유저 삭제 -->
+	<delete id="infSetMgmtDao.deleteInfoSetUsr" parameterClass="record">
+		/* sql id : infSetMgmtDao.deleteInfoSetUsr */
+		DELETE FROM TB_INFO_SET_USR
+		WHERE  INFS_ID 	= #infsId:VARCHAR#
+		AND    SEQCE_NO = #seqceNo:VARCHAR#
+	</delete>
+	
+	<!-- 정보셋 관련유저 등록, 수정 -->
+	<update id="infSetMgmtDao.mergeInfoSetUsr" parameterClass="record">
+		/* sql id : infSetMgmtDao.mergeInfoSetUsr */
+		MERGE INTO TB_INFO_SET_USR A
+		USING (
+			SELECT 
+				#infsId:VARCHAR# 		AS INFS_ID
+				, #usrCd:NUMERIC#		AS USR_CD
+				, #orgCd:VARCHAR#		AS ORG_CD
+				, #rpstYn:CHAR#			AS RPST_YN
+				, #prssAccCd:VARCHAR#	AS PRSS_ACC_CD
+				, #srcViewYn:CHAR#		AS SRC_VIEW_YN
+				, #useYn:CHAR#			AS USE_YN
+				, #regId:VARCHAR#		AS REG_ID
+				, #updId:VARCHAR#		AS UPD_ID
+			, SYSDATE
+			FROM DUAL
+		) B
+		ON (
+			A.INFS_ID 	 = B.INFS_ID
+			AND A.USR_CD = B.USR_CD
+			AND A.ORG_CD = B.ORG_CD
+		)
+		WHEN MATCHED THEN 
+		UPDATE SET
+			A.RPST_YN 		= B.RPST_YN
+			, A.PRSS_ACC_CD = B.PRSS_ACC_CD
+			, A.SRC_VIEW_YN = B.SRC_VIEW_YN
+			, A.USE_YN 		= B.USE_YN
+			, A.UPD_ID 		= B.UPD_ID
+			, A.UPD_DTTM 	= SYSDATE
+		WHEN NOT MATCHED THEN
+		INSERT (
+			A.SEQCE_NO
+			, A.INFS_ID
+			, A.USR_CD
+			, A.ORG_CD
+			, A.RPST_YN
+			, A.PRSS_ACC_CD
+			, A.SRC_VIEW_YN
+			, A.USE_YN
+			, A.REG_ID
+			, A.REG_DTTM
+			, A.UPD_ID
+			, A.UPD_DTTM
+		)
+		VALUES (
+			SQ_INFO_SET_USR_SEQ.NEXTVAL
+			, B.INFS_ID
+			, B.USR_CD
+			, B.ORG_CD
+			, B.RPST_YN
+			, B.PRSS_ACC_CD
+			, B.SRC_VIEW_YN
+			, B.USE_YN
+			, B.REG_ID
+			, SYSDATE
+			, B.UPD_ID
+			, SYSDATE
+		)	
+	</update>
+	
+	
+	<!-- 문서 목록 리스트 조회(팝업) -->
+	<select id="infSetMgmtDao.selectDocListPop" parameterClass="params" resultClass="record">
+		/* sql id : infSetMgmtDao.selectDocListPop */
+		SELECT
+		    DOC_ID			AS "docId",
+		    DOC_NM			AS "docNm",	
+		    CATE_ID			AS "cateId",
+		    CATE_NM			AS "cateNm",
+		    CATE_FULLNM		AS "cateFullnm",
+		    ORG_CD			AS "orgCd",
+		    ORG_NM			AS "orgNm",
+		    CCL_NM			AS "cclNm",
+		    OPEN_DTTM		AS "openDttm",
+		    OPEN_STATE		AS "openState"
+		FROM
+		    TV_DOC_INF A
+		WHERE   NOT EXISTS (SELECT 1 FROM TB_INFO_SET_REL B
+							WHERE  A.DOC_ID = B.OBJ_ID
+							AND    B.INFS_ID = #infsId:VARCHAR# )    
+		<isNotEmpty property="searchVal">
+	   		<isEqual property="searchGubun" compareValue="DOC_NM">
+				AND   A.DOC_NM LIKE '%' || REPLACE(UPPER(#searchVal#), ' ', '') || '%'	   	 
+	   		</isEqual>
+	   		<isEqual property="searchGubun" compareValue="DOC_ID">
+				AND   A.DOC_ID LIKE '%' || #searchVal# || '%'
+	   		</isEqual>
+	   	</isNotEmpty>	
+	</select>
+	
+	<!-- 공공데이터 목록 리스트 조회(팝업) -->
+	<select id="infSetMgmtDao.selectOpenListPop" parameterClass="params" resultClass="record">
+		/* sql id : infSetMgmtDao.selectOpenListPop */
+		SELECT
+		    INF_ID			AS "infId",
+		    SEQ				AS "seq",
+		    INF_NM			AS "infNm",
+		    CATE_ID			AS "cateId",
+		    CATE_NM			AS "cateNm",
+		    CATE_FULLNM		AS "cateFullNm",
+		    ORG_CD			AS "orgCd",
+		    ORG_NM			AS "orgNm",
+		    ORG_FULLNM		AS "orgFullnm",
+		    CCL_NM			AS "cclNm",
+		    OPEN_DTTM		AS "openDttm",
+		    INF_STATE		AS "infState"
+		FROM
+		    TV_MNG_INF A
+		WHERE
+			NOT EXISTS (SELECT 1 FROM TB_INFO_SET_REL B
+						WHERE  A.INF_ID = B.OBJ_ID
+						AND    B.INFS_ID = #infsId:VARCHAR# )    
+		<isNotEmpty property="searchVal">
+	   		<isEqual property="searchGubun" compareValue="INF_NM">
+				AND   A.INF_NM LIKE '%' || REPLACE(UPPER(#searchVal#), ' ', '') || '%'	   	 
+	   		</isEqual>
+	   		<isEqual property="searchGubun" compareValue="INF_ID">
+				AND   A.INF_ID LIKE '%' || #searchVal# || '%'
+	   		</isEqual>
+	   	</isNotEmpty>						
+	</select>
+	
+	<!-- 통계 목록 리스트 조회(팝업) -->
+	<select id="infSetMgmtDao.selectStatListPop" parameterClass="params" resultClass="record">
+		/* sql id : infSetMgmtDao.selectStatListPop */
+		SELECT
+		    STATBL_ID		AS "statblId",
+		    STATBL_NM		AS "statblNm",	
+		    CATE_ID			AS "cateId",
+		    CATE_NM			AS "cateNm",
+		    CATE_FULLNM		AS "cateFullnm",
+		    ORG_CD			AS "orgCd",
+		    ORG_NM			AS "orgNm",
+		    CCL_NM			AS "cclNm",
+		    OPEN_DTTM		AS "openDttm",
+		    OPEN_STATE		AS "openState"
+		FROM
+		    TV_STTS_TBL A
+		WHERE
+		    USE_YN = 'Y'
+			AND NOT EXISTS (SELECT 1 FROM TB_INFO_SET_REL B
+							WHERE  A.STATBL_ID = B.OBJ_ID
+							AND    B.INFS_ID = #infsId:VARCHAR# )    
+		<isNotEmpty property="searchVal">
+	   		<isEqual property="searchGubun" compareValue="STATBL_NM">
+				AND   A.STATBL_NM LIKE '%' || REPLACE(UPPER(#searchVal#), ' ', '') || '%'	   	 
+	   		</isEqual>
+	   		<isEqual property="searchGubun" compareValue="STATBL_ID">
+				AND   A.STATBL_ID LIKE '%' || #searchVal# || '%'
+	   		</isEqual>
+	   	</isNotEmpty>			    
+	</select>
+	
+	<!-- 정보셋 관리 관련 데이터 등록, 수정 -->
+	<update id="infSetMgmtDao.mergeInfoSetRel" parameterClass="record">
+		/* sql id : infSetMgmtDao.mergeInfoSetRel */
+		MERGE INTO TB_INFO_SET_REL A
+		USING (
+			SELECT 
+				#infsId:VARCHAR# 		AS INFS_ID
+				, #infsTag:VARCHAR#		AS INFS_TAG
+				, #objId:VARCHAR#		AS OBJ_ID
+				, #vOrder:NUMERIC#		AS V_ORDER
+				, #useYn:CHAR#			AS USE_YN
+				, #regId:VARCHAR#		AS REG_ID
+				, #updId:VARCHAR#		AS UPD_ID
+			, SYSDATE
+			FROM DUAL
+		) B
+		ON (
+			A.INFS_ID 	 	= B.INFS_ID
+			AND A.INFS_TAG	= B.INFS_TAG
+			AND A.OBJ_ID 	= B.OBJ_ID
+		)
+		WHEN MATCHED THEN 
+		UPDATE SET
+			A.USE_YN 		= B.USE_YN
+			, A.V_ORDER 	= B.V_ORDER
+			, A.UPD_ID 		= B.UPD_ID
+			, A.UPD_DTTM 	= SYSDATE
+		WHEN NOT MATCHED THEN
+		INSERT (
+			A.INFS_ID
+			, A.INFS_TAG
+			, A.OBJ_ID
+			, A.V_ORDER
+			, A.USE_YN
+			, A.REG_ID
+			, A.REG_DTTM
+			, A.UPD_ID
+			, A.UPD_DTTM
+		)
+		VALUES (
+			B.INFS_ID
+			, B.INFS_TAG
+			, B.OBJ_ID
+			, B.V_ORDER
+			, B.USE_YN
+			, B.REG_ID
+			, SYSDATE
+			, B.UPD_ID
+			, SYSDATE
+		)	
+	</update>
+	
+	<!-- 정보셋 관리 관련 데이터 삭제 -->
+	<delete id="infSetMgmtDao.deleteInfoSetRel" parameterClass="record">
+		/* sql id : infSetMgmtDao.deleteInfoSetRel */
+		DELETE FROM TB_INFO_SET_REL
+		WHERE  INFS_ID 	= #infsId:VARCHAR#
+		AND    INFS_TAG = #infsTag:VARCHAR#
+		AND    OBJ_ID 	= #objId:VARCHAR#
+	</delete>
+	
+	
+	<!-- 정보셋 관리 관련 문서데이터 조회 -->
+	<select id="infSetMgmtDao.selectInfoSetRelDoc" parameterClass="params" resultClass="record">
+		/* sql id : infSetMgmtDao.selectInfoSetRelDoc */
+		SELECT
+			A.INFS_ID			AS "infsId",
+			B.DOC_ID			AS "docId",
+		    B.DOC_NM			AS "docNm",	
+		    B.CATE_NM			AS "cateNm",
+		    B.ORG_NM			AS "orgNm",
+		    B.CCL_NM			AS "cclNm",
+		    B.OPEN_STATE		AS "openState",
+		    B.OPEN_DTTM			AS "openDttm",
+		    A.USE_YN			AS "useYn",
+		    A.V_ORDER			AS "vOrder"
+		FROM
+		    TB_INFO_SET_REL A
+		    INNER JOIN TV_DOC_INF B ON A.OBJ_ID = B.DOC_ID
+		WHERE A.INFS_ID = #infsId:VARCHAR#
+		ORDER BY A.V_ORDER
+	</select>
+	
+	<!-- 정보셋 관리 관련 공공데이터 조회 -->
+	<select id="infSetMgmtDao.selectInfoSetRelOpen" parameterClass="params" resultClass="record">
+		/* sql id : infSetMgmtDao.selectInfoSetRelOpen */
+		SELECT
+			A.INFS_ID			AS "infsId",
+			B.INF_ID			AS "infId",
+		    B.INF_NM			AS "infNm",	
+		    B.CATE_NM			AS "cateNm",
+		    B.ORG_NM			AS "orgNm",
+		    B.CCL_NM			AS "cclNm",
+		    B.INF_STATE			AS "infState",
+		    B.OPEN_DTTM			AS "openDttm",
+		    A.USE_YN			AS "useYn",
+		    A.V_ORDER			AS "vOrder"
+		FROM
+		    TB_INFO_SET_REL A
+		    INNER JOIN TV_MNG_INF B ON A.OBJ_ID = B.INF_ID
+		WHERE
+			A.INFS_ID = #infsId:VARCHAR#
+		ORDER BY A.V_ORDER
+	</select>
+	
+	<!-- 정보셋 관리 관련 통계데이터 조회 -->
+	<select id="infSetMgmtDao.selectInfoSetRelStat" parameterClass="params" resultClass="record">
+		/* sql id : infSetMgmtDao.selectInfoSetRelStat */
+		SELECT
+			A.INFS_ID			AS "infsId",
+			B.STATBL_ID			AS "statblId",
+		    B.STATBL_NM			AS "statblNm",	
+		    B.CATE_NM			AS "cateNm",
+		    B.ORG_NM			AS "orgNm",
+		    B.CCL_NM			AS "cclNm",
+		    B.OPEN_STATE		AS "openState",
+		    B.OPEN_DTTM			AS "openDttm",
+		    A.USE_YN			AS "useYn",
+		    A.V_ORDER			AS "vOrder"
+		FROM
+		    TB_INFO_SET_REL A
+		    INNER JOIN TV_STTS_TBL B ON A.OBJ_ID = B.STATBL_ID
+		WHERE
+			B.USE_YN = 'Y'
+			AND A.INFS_ID = #infsId:VARCHAR#
+		ORDER BY A.V_ORDER
+	</select>
+	
+	<!-- 정보셋 관리 관련 데이터 저장시 마스터 테이블에 문서, 공공, 통계 갯수 수정 -->
+	<update id="infSetMgmtDao.updateInfoSetMstRelCnt" parameterClass="params">
+		/* sql id : infSetMgmtDao.updateInfoSetMstRelCnt */
+		UPDATE TB_INFO_SET
+		SET 
+			(DOC_CNT, INF_CNT, STATBL_CNT) = (
+											SELECT
+											    NVL(MAX(DECODE(INFS_TAG, 'D', CNT)), 0) AS DOC_CNT,
+											    NVL(MAX(DECODE(INFS_TAG, 'O', CNT)), 0) AS INF_CNT,
+											    NVL(MAX(DECODE(INFS_TAG, 'S', CNT)), 0) AS STATBL_CNT
+											FROM
+											    (
+											        SELECT
+											            INFS_TAG,
+											            COUNT(*) AS CNT
+											        FROM
+											            TB_INFO_SET_REL
+											        WHERE
+											            INFS_ID = #infsId:VARCHAR# 
+											            AND USE_YN = 'Y'
+											        GROUP BY
+											            INFS_TAG
+											    )
+			)
+		WHERE INFS_ID = #infsId:VARCHAR# 
+	</update>
+	
+	<!-- 정보셋 관리 공개/공개취소 처리 -->
+	<update id="infSetMgmtDao.updateInfSetOpenState" parameterClass="params">
+		/* sql id : infSetMgmtDao.updateInfSetOpenState */
+		UPDATE TB_INFO_SET
+		SET    OPEN_STATE = #openState:VARCHAR#
+			<isEqual property="openState" compareValue="Y">
+			 , OPEN_DTTM = SYSDATE
+			</isEqual>
+			<isNotEqual property="openState" compareValue="Y">
+			, OPEN_DTTM = ''
+			</isNotEqual>
+		WHERE  INFS_ID = #infsId:VARCHAR#
+	</update>
+	
+	<!-- 정보셋 관리 태그 일괄 삭제(해당 ID) -->
+	<delete id="infSetMgmtDao.deleteInfSetTag" parameterClass="params">
+		/* sql id : infSetMgmtDao.deleteInfSetTag */
+		DELETE FROM TB_INFO_SET_TAG
+		WHERE  INFS_ID = #infsId:VARCHAR#
+	</delete>
+	
+	<!-- 정보셋 관리 태그 등록 -->
+	<insert id="infSetMgmtDao.insertInfSetTag" parameterClass="record">
+		/* sql id : infSetMgmtDao.insertInfSetTag */
+		INSERT INTO TB_INFO_SET_TAG(
+			INFS_ID
+			, SYS_TAG
+			, TAG_NM
+			, USE_YN
+			, REG_DTTM
+		)
+		VALUES(
+			#infsId:VARCHAR#
+			, 'K'
+			, #tagNm:VARCHAR#
+			, 'Y'
+			, SYSDATE
+		)
+	</insert>
+	
+	<!-- 정보셋 관리 설명 조회 -->
+	<select id="infSetMgmtDao.selectInfSetExp" parameterClass="params" resultClass="record">
+		/* sql id : infSetMgmtDao.selectInfSetExp */
+		SELECT
+			INFS_ID				AS "infsId"
+			, SEQCE_NO			AS "seqceNo"
+			, INFS_EXP_TIT		AS "infsExpTit"	
+			, INFS_DTL_CONT		AS "infsDtlCont"
+			, V_ORDER			AS "vOrder"
+			, USE_YN			AS "expUseYn"
+			, REG_DTTM			AS "regDttm"
+		FROM
+			TB_INFO_SET_EXP
+		WHERE
+			INFS_ID = #infsId:VARCHAR#
+		<isNotEmpty property="seqceNo">
+			AND SEQCE_NO = #seqceNo:NUMERIC#	
+		</isNotEmpty>
+		ORDER BY V_ORDER
+	</select>
+	
+	<!-- 정보셋 관리 설명 데이터 등록-->
+	<insert id="infSetMgmtDao.insertInfSetExp" parameterClass="params">
+		/* sql id : infSetMgmtDao.insertInfSetExp */
+		INSERT INTO TB_INFO_SET_EXP A (
+			A.INFS_ID
+			, A.SEQCE_NO
+			, A.INFS_EXP_TIT
+			, A.INFS_DTL_CONT
+			, A.V_ORDER
+			, A.USE_YN
+			, A.REG_ID
+			, A.REG_DTTM
+			, A.UPD_ID
+			, A.UPD_DTTM
+		)
+		VALUES(
+			#infsId:VARCHAR#
+			, (SELECT NVL(MAX(SEQCE_NO), 0)+1 FROM TB_INFO_SET_EXP WHERE INFS_ID = #infsId:VARCHAR#)
+			, #infsExpTit:VARCHAR#
+			, #infsDtlCont:CLOB#
+			, (SELECT NVL(MAX(V_ORDER), 0)+1 FROM TB_INFO_SET_EXP WHERE INFS_ID = #infsId:VARCHAR#)
+			, #expUseYn:CHAR#
+			, #regId:VARCHAR#
+			, SYSDATE
+			, #updId:VARCHAR#
+			, SYSDATE
+		)
+	</insert>
+	
+	<!-- 정보셋 관리 설명 데이터 수정 -->
+	<update id="infSetMgmtDao.updateInfSetExp" parameterClass="params">
+		/* sql id : infSetMgmtDao.updateInfSetExp */
+		UPDATE TB_INFO_SET_EXP A
+		SET    A.INFS_EXP_TIT 	= #infsExpTit:VARCHAR#
+			 , A.INFS_DTL_CONT 	= #infsDtlCont:CLOB#
+			 , A.USE_YN 		= #expUseYn:CHAR#
+			 , A.UPD_ID 		= #updId:VARCHAR#
+			 , A.UPD_DTTM 		= SYSDATE
+		WHERE  INFS_ID 	= #infsId:VARCHAR#
+		AND    SEQCE_NO = #seqceNo:NUMERIC#
+	</update>
+	
+	<!-- 정보셋 관리 설명 데이터 삭제 -->
+	<delete id="infSetMgmtDao.deleteInfSetExp" parameterClass="params">
+		/* sql id : infSetMgmtDao.deleteInfSetExp */
+		DELETE FROM TB_INFO_SET_EXP
+		WHERE  INFS_ID  = #infsId:VARCHAR#
+		AND    SEQCE_NO = #seqceNo:NUMERIC#
+	</delete>
+	
+	<!-- 정보셋 관리 설명 시트 순서 저장  -->
+	<update id="infSetMgmtDao.saveInfSetExpOrder" parameterClass="params">
+		/* sql id : infSetMgmtDao.saveInfSetExpOrder */
+		UPDATE TB_INFO_SET_EXP
+		SET    V_ORDER 	= #vOrder:NUMERIC#
+		WHERE  INFS_ID  = #infsId:VARCHAR#
+		AND    SEQCE_NO = #seqceNo:NUMERIC#
+	</update>
+	
+</sqlMap>

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="portalDocInf" >
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+
+	<!-- 문서관리 메타정보 조회 -->
+	<select id="portalDocInfDao.selectDocInfMeta" parameterClass="params" resultClass="record">
+		/* sql id : portalDocInfDao.selectDocInfMeta */
+		SELECT 
+			  'D' AS OPENTY_TAG, '규정(지침)' AS OPENTY_TAG_NM,
+			   O.DOC_ID AS "docId",
+		       O.SEQ AS "seq",
+		       O.DOC_NM AS "docNm",      
+		       O.TOP_CATE_ID AS "topCateId",
+		       C.CATE_NM AS "topCateNm",
+		       C.SAVE_FILE_NM AS "cateSaveFileNm",
+		       (SELECT NVL(AVG(APPR_VAL), 0) FROM TB_DOC_INF_APPR  WHERE DOC_ID = O.DOC_ID  ) AS "apprVal",
+		       O.SRC_YN AS "srcYn", O.SRC_URL AS "srcUrl",  O.SRC_EXP AS "srcExp",
+		       O.DT_NM AS "dtNm",
+		       O.CCL_CD AS "cclCd",  
+		       O.CCL_NM AS "cclNm",  
+		       FN_GET_COMM_VALUE_CD('D1008', O.CCL_CD) AS "cclFileNm",  
+		       O.CATE_FULLNM AS "cateFullnm",
+		       O.TOP_ORG_NM AS "orgNm",
+		       O.SCHW_TAG_CONT AS "schwTagCont",
+		       O.DOC_EXP AS "docExp",
+		       O.LOAD_CD AS "loadCd",
+		       O.LOAD_NM AS "loadNm",
+		       TO_CHAR(O.LOAD_DTTM, 'YYYY-MM-DD') AS "loadDttm",
+		       TO_CHAR(O.OPEN_DTTM, 'YYYY-MM-DD') AS "openDttm",
+		       'F' AS "srvCd",
+		       DATA_DTTM_CONT	AS "dataDttmCont"
+		  FROM TV_DOC_INF O
+		   INNER JOIN TB_DOC_CATE C  ON O.TOP_CATE_ID = C.CATE_ID  AND C.USE_YN = 'Y'
+		 WHERE O.DOC_ID = #docId:VARCHAR#
+		       AND O.OPEN_STATE = 'Y'
+		       AND O.OPEN_DTTM <![CDATA[<]]>TRUNC(SYSDATE +1)
+	</select>
+	
+	<!-- 평가점수 등록 -->
+	<insert id="portalDocInfDao.insertDocInfAppr" parameterClass="params">
+		/* sql id : portalDocInfDao.insertDocInfAppr */
+        INSERT INTO TB_DOC_INF_APPR
+                (   SEQCE_NO, 
+                    DOC_ID,
+                    APPR_VAL,
+                    USER_CD,
+					USER_IP,
+                    REG_DTTM
+                )
+         VALUES (   SQ_LOG_SEQ.NEXTVAL,
+                    #docId:VARCHAR#,
+                    #apprVal:NUMERIC#,
+                    #userCd:NUMERIC#,
+			   		#userIp:VARCHAR#,
+                    SYSDATE
+                )
+    </insert>
+    
+    <!-- 평가점수 조회 -->
+    <select id="portalDocInfDao.selectDocInfAppr" parameterClass="params" resultClass="record">
+    	/* sql id : portalDocInfDao.selectDocInfAppr */
+         SELECT AVG(A.APPR_VAL) AS "apprVal"
+           FROM TB_DOC_INF_APPR A
+          WHERE A.DOC_ID         = #docId:VARCHAR#
+    </select>
+    
+    <!-- 문서관리 조회 기록 로그생성 -->
+    <insert id="portalDocInfDao.insertLogDocInf" parameterClass="params">
+    	/* sql id : portalDocInfDao.insertLogDocInf */
+		INSERT INTO TB_LOG_DOC_INF (
+			SEQCE_NO,
+			DOC_ID,
+			SYS_TAG,
+			USER_CD,
+			USER_IP,
+			REG_DTTM
+		)
+		SELECT SQ_LOG_DOC_SEQ.NEXTVAL,
+			    #docId:VARCHAR#,
+			    'K',
+			   	#userCd:NUMERIC#,
+			   	#userIp:VARCHAR#,
+			   	SYSDATE
+	 	FROM    TB_DOC_INF
+	 	WHERE  DOC_ID = #docId:VARCHAR#
+	</insert>
+	
+</sqlMap>

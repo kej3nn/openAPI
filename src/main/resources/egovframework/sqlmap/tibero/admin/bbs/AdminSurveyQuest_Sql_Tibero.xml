@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="SurveyQuest">
+	<typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+	<resultMap class="egovframework.admin.bbs.service.SurveyQuest" id="SurveyQuestList">
+		<result property="surveyId" column="SURVEY_ID"/>
+		<result property="questSeq" column="QUEST_SEQ"/>
+		<result property="grpExp" column="GRP_EXP"/>
+		<result property="questNo" column="QUEST_NO"/>
+		<result property="questNm" column="QUEST_NM"/>
+<!-- 		<result property="itemCd" column="ITEM_CD"/> -->
+		<result property="examCd" column="EXAM_CD"/>
+		<result property="maxDupCnt" column="MAX_DUP_CNT"/>
+		<result property="useYn" column="USE_YN"/>
+		<result property="regId" column="REG_ID"/>
+		<result property="regDttm" column="REG_DTTM"/>
+		<result property="updId" column="UPD_ID"/>
+		<result property="UpdDttm" column="UPD_DTTM"/>
+		
+	</resultMap>
+	
+	<resultMap class="egovframework.admin.bbs.service.SurveyQuest" id="SurveyQuestPop">
+		<result property="surveyId" column="SURVEY_ID"/>
+		<result property="questSeq" column="QUEST_SEQ"/>
+		<result property="grpExp" column="GRP_EXP"/>
+		<result property="questNo" column="QUEST_NO"/>
+		<result property="questNm" column="QUEST_NM"/>
+<!-- 		<result property="itemCd" column="ITEM_CD"/> -->
+		<result property="examCd" column="EXAM_CD"/>
+		<result property="maxDupCnt" column="MAX_DUP_CNT"/>
+	</resultMap>
+	
+	<select id="SurveyQuestDAO.selectSurveyQuestSeq" parameterClass="egovframework.admin.bbs.service.SurveyQuest" resultClass="java.lang.Integer">
+		SELECT QUEST_SEQ
+		  FROM TB_SURVEY_QUEST 
+		 WHERE SURVEY_ID = #surveyId# 
+		   AND QUEST_NO = #questNo#
+<!-- 		   AND ITEM_CD = #itemCd# -->
+		   AND EXAM_CD = #examCd#
+		   AND MAX_DUP_CNT = #maxDupCnt#
+	</select>
+	
+	<update id="SurveyQuestDAO.insertSurveyQuest" parameterClass="egovframework.admin.bbs.service.SurveyQuest" >
+	   
+		MERGE INTO TB_SURVEY_QUEST A
+		USING DUAL
+		ON (A.SURVEY_ID = #surveyId# AND A.QUEST_SEQ = #questSeq#)
+		WHEN MATCHED THEN
+			UPDATE   
+			   SET  	
+				 	  QUEST_NO = #questNo#
+				 	, QUEST_NM = #questNm#
+<!-- 				 	, ITEM_CD  = #itemCd# -->
+				 	, EXAM_CD  = #examCd#
+				 	, GRP_EXP  = #grpExp#
+				 	, MAX_DUP_CNT = #maxDupCnt#
+				 	, UPD_DTTM = SYSDATE
+				 	<isEqual property="useYn" compareValue="N" >
+				 	, USE_YN = 'N'
+				 	</isEqual>
+				 	<isEqual property="useYn" compareValue="Y" >
+				 	, USE_YN = 'Y'
+				 	</isEqual>
+			 WHERE   SURVEY_ID = #surveyId#
+			   AND   QUEST_SEQ = #questSeq#
+		WHEN NOT MATCHED THEN
+			INSERT 
+				(  SURVEY_ID
+				 , QUEST_SEQ
+				 , QUEST_NO
+				 , QUEST_NM
+<!-- 				 , ITEM_CD -->
+				 , EXAM_CD
+				 , GRP_EXP
+				 , MAX_DUP_CNT
+				 <isEqual property="useYn" compareValue="N" >
+				 	, USE_YN 
+				 </isEqual>
+				) 
+			VALUES
+				(
+					  #surveyId#
+					, (SELECT NVL(MAX(QUEST_SEQ)+1,1) FROM TB_SURVEY_QUEST WHERE SURVEY_ID = #surveyId#)
+					, #questNo#
+					, #questNm#
+					, #examCd#
+					, #grpExp#
+					, #maxDupCnt#
+					<isEqual property="useYn" compareValue="N">
+				   	   , 'N'
+				   	</isEqual>
+					
+				)	   
+	
+	</update>
+	
+	<update id="SurveyQuestDAO.deleteSurveyQuest" parameterClass="egovframework.admin.bbs.service.SurveyQuest">
+		DELETE FROM TB_SURVEY_QUEST
+		WHERE SURVEY_ID = #surveyId#
+		  AND QUEST_SEQ = #questSeq#
+	</update>
+	
+	<update id="SurveyQuestDAO.deleteSurveyExam" parameterClass="egovframework.admin.bbs.service.SurveyQuest">
+		DELETE FROM TB_SURVEY_EXAM
+		WHERE SURVEY_ID = #surveyId#
+		  AND QUEST_SEQ = #questSeq#
+	</update>
+	
+	<select id="SurveyQuestDAO.selectSurveyQuestAll" parameterClass="egovframework.admin.bbs.service.SurveyQuest" resultMap="SurveyQuestList">
+		SELECT A.SURVEY_ID
+	     		,A.QUEST_SEQ
+	     		,A.GRP_EXP
+	     		,A.QUEST_NO
+	     		,A.QUEST_NM
+<!-- 	     		,A.ITEM_CD -->
+				,A.EXAM_CD <!-- 컬럼명 변경됨 -->
+	     		,A.MAX_DUP_CNT
+	     		,A.USE_YN
+	     		,A.REG_ID
+	     		,A.REG_DTTM
+	     		,A.UPD_ID
+	     		,A.UPD_DTTM
+	       FROM TB_SURVEY_QUEST A
+	      WHERE 1=1
+	        AND A.SURVEY_ID = #surveyId#
+	      ORDER BY CASE WHEN TO_NUMBER(INSTR(QUEST_NO, '-')) > 0
+			            THEN TO_NUMBER(SUBSTR(QUEST_NO, 1, INSTR(QUEST_NO, '-')-1) 
+			            || '.' 
+			            || SUBSTR(QUEST_NO, INSTR(QUEST_NO, '-')+1, LENGTH(QUEST_NO)) )
+			            ELSE TO_NUMBER(SUBSTR(QUEST_NO, 1, LENGTH(QUEST_NO)))
+				   END
+	</select>
+	
+	<select id="SurveyQuestDAO.selectSurveyQuestPop" parameterClass="egovframework.admin.bbs.service.SurveyQuest" resultMap="SurveyQuestPop">
+		SELECT 	  SURVEY_ID
+				, QUEST_SEQ
+				, GRP_EXP
+				, QUEST_NO
+				, QUEST_NM
+<!-- 				, ITEM_CD -->
+				, EXAM_CD
+				, MAX_DUP_CNT
+		  FROM TB_SURVEY_QUEST
+		 WHERE SURVEY_ID = #surveyId#
+<!-- 		 ORDER BY QUEST_NO , QUEST_SEQ ASC -->
+	  ORDER BY CASE WHEN TO_NUMBER(INSTR(QUEST_NO, '-')) > 0
+			        THEN TO_NUMBER(SUBSTR(QUEST_NO, 1, INSTR(QUEST_NO, '-')-1) 
+			        || '.' 
+			        || SUBSTR(QUEST_NO, INSTR(QUEST_NO, '-')+1, LENGTH(QUEST_NO)) )
+			        ELSE TO_NUMBER(SUBSTR(QUEST_NO, 1, LENGTH(QUEST_NO)))
+			   END
+	</select>
+	
+	
+	
+	
+	
+	
+	
+</sqlMap>
+
+

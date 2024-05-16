@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- @(#)AdminNaCmps_Sql_Tibero.xml 1.0 2019/07/29                       -->
+<!--                                                                         -->
+<!-- COPYRIGHT (C) 2013 WISEITECH CO., LTD. ALL RIGHTS RESERVED.             -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- 관리자 정보카달로그 관리 SQL 파일이다.	                                  -->
+<!--                                                                         -->
+<!-- @author                                                        	-->
+<!-- @version 1.0 2019/07/29                                                -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<sqlMap namespace="OpenApiMng">
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Type Alias                                                          -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+     <!-- 메인리스트 쿼리 -->
+    <sql id="OpenApiMngDao.main">
+		 SELECT API_SEQ			AS "apiSeq"
+			  , ORG_CD			AS "orgCd"
+			  , (SELECT ORG_NM FROM TB_COMM_ORG B WHERE B.ORG_CD = A.ORG_CD)   AS "orgNm"
+			  , API_TAG_CD		AS "apiTagCd"
+			  , (SELECT DITC_NM FROM TB_COMM_CODE WHERE GRP_CD = 'A8016' AND DITC_CD = API_TAG_CD) AS "apiTagNm"
+			  , API_NM			AS "apiNm"
+			  , API_URL			AS "apiUrl"
+			  , API_SMRY_EXP	AS "apiSmryExp"
+			  , V_ORDER			AS "vOrder"
+			  , USE_YN			AS "useYn"
+			  , REG_ID			AS "regId"
+			  , REG_DTTM		AS "regDttm"
+			  , UPD_ID			AS "updId"
+			  , UPD_DTTM		AS "updDttm"
+		  FROM TB_NA_API_LIST A
+    </sql>
+   	
+   	
+    <sql id="OpenApiMngDao.main.where">
+		WHERE 1=1
+		<isNotEmpty property="accCd">
+			<isNotEqual property="accCd" compareValue="SYS">
+					<isEmpty property="SysInpGbn">
+						AND	A.USR_CD = #inpUsrCd:NUMERIC#
+					</isEmpty>
+					<isNotEmpty property="SysInpGbn">
+						<isEqual property="SysInpGbn" compareValue="ORG">
+							AND A.ORG_CD = #inpOrgCd:VARCHAR# 
+						</isEqual>
+						<isEqual property="SysInpGbn" compareValue="USR">
+							AND	A.USR_CD = #inpUsrCd:NUMERIC#	
+						</isEqual>
+					</isNotEmpty>	
+			</isNotEqual>
+		</isNotEmpty>
+		<isNotEmpty property="useYn" prepend="AND">
+	    	A.USE_YN = #useYn#
+	    </isNotEmpty>
+		<isNotEmpty property="searchVal">			 
+				AND A.API_NM LIKE '%'||#searchVal#||'%'
+		</isNotEmpty>
+        <isNotEmpty property="orgCd" prepend="AND">
+	   	  A.ORG_CD = #orgCd:VARCHAR#
+        </isNotEmpty>
+    </sql>
+  	
+  	<!-- 기관정보 리스트조회 -->
+  	<!-- 
+  	<select id="OpenApiMngDao.selectOrgList" parameterClass="params" resultClass="record">
+  		/* sql id : openApiMngDao.selectOrgList */
+  		SELECT A.ORG_CD		AS "orgCd"
+  				,A.ORG_NM	AS "orgNm"
+  		FROM TB_COMM_ORG A
+  		WHERE 1=1
+  		<isNotEmpty property="accCd">
+			<isNotEqual property="accCd" compareValue="SYS">
+					<isEmpty property="SysInpGbn">
+						AND	A.USR_CD = #inpUsrCd:NUMERIC#
+					</isEmpty>
+					<isNotEmpty property="SysInpGbn">
+						<isEqual property="SysInpGbn" compareValue="ORG">
+							AND A.ORG_CD = #inpOrgCd:VARCHAR# 
+						</isEqual>
+						<isEqual property="SysInpGbn" compareValue="USR">
+							AND	A.USR_CD = #inpUsrCd:NUMERIC#	
+						</isEqual>
+					</isNotEmpty>	
+			</isNotEqual>
+		</isNotEmpty>
+  		AND A.USE_YN = 'Y'
+  		AND A.ORG_CD NOT LIKE '%test%'
+  		ORDER BY A.V_ORDER
+  	</select>
+  	 -->
+  	 
+  	 <!-- 기관정보 리스트조회 -->
+  	<select id="OpenApiMngDao.selectOrgList" parameterClass="params" resultClass="record">
+  		/* sql id : openApiMngDao.selectOrgList */
+  		SELECT A.ORG_CD		AS "orgCd"
+  				,A.ORG_NM	AS "orgNm"
+  		FROM TV_COMM_ORG A
+  		WHERE 1=1
+  		<isNotEmpty property="accCd">
+			<isNotEqual property="accCd" compareValue="SYS">
+					<isNotEmpty property="SysInpGbn">
+						<isEqual property="SysInpGbn" compareValue="ORG">
+							AND A.ORG_CD = #inpOrgCd:VARCHAR# 
+						</isEqual>
+					</isNotEmpty>	
+			</isNotEqual>
+		</isNotEmpty>
+  		ORDER BY V_ORDER
+  	</select>
+ 	<!-- 메인 리스트 조회 -->
+  	<select id="OpenApiMngDao.selectOpenApiMngList" parameterClass="params" resultClass="record">
+  		/* sql id : OpenApiMngDao.selectOpenApiMngList */
+  		<isEqual property="paging" compareValue="0">
+		SELECT AA.* 
+		FROM   (SELECT ROWNUM AS ROW_NUM, AA.*
+				FROM   (  
+		</isEqual>
+			<include refid="OpenApiMngDao.main"></include>
+			<include refid="OpenApiMngDao.main.where"></include>
+			ORDER BY
+			    A.V_ORDER
+		<isEqual property="paging" compareValue="0">
+		<![CDATA[
+				) AA
+			WHERE ROWNUM <= #end:NUMERIC#
+			) AA
+		WHERE AA.ROW_NUM >= #start:NUMERIC#
+		]]>
+		</isEqual> 
+  	</select>
+  	<select id="OpenApiMngDao.selectOpenApiMngListCount" parameterClass="params" resultClass="int">
+  		/* sql id : OpenApiMngDao.selectOpenApiMngListCount */
+		SELECT COUNT(*)
+		FROM   TB_NA_API_LIST A
+		<include refid="OpenApiMngDao.main.where"></include>
+  	</select>
+  	
+	<!-- 제공 OPENAPI 등록/수정 -->
+	<update id="OpenApiMngDao.mergeOpenApiMng" parameterClass="params">
+		/* sql id : OpenApiMngDao.mergeOpenApiMng */
+		MERGE INTO TB_NA_API_LIST A
+		USING (
+				SELECT
+					  #apiSeq:INTEGER#   			    AS API_SEQ
+					, #orgCd:VARCHAR#   			AS ORG_CD
+					, #apiTagCd:VARCHAR#   			AS API_TAG_CD
+					, #apiNm:VARCHAR# 	  			AS API_NM
+					, #apiUrl:VARCHAR#   			AS API_URL
+					, #apiSmryExp:VARCHAR#	   		AS API_SMRY_EXP
+					<isNotEmpty property="vOrder">
+					, #vOrder:VARCHAR#				AS V_ORDER
+					</isNotEmpty>
+					<isNotEmpty property="useYn">
+					, #useYn:CHAR#   				AS USE_YN
+					</isNotEmpty>
+					, #regId:VARCHAR#               AS REG_ID    
+					, #regDttm:VARCHAR#             AS REG_DTTM
+					, #updId:VARCHAR#           	AS UPD_ID 
+					, #updDttm:VARCHAR#             AS updDttm
+				FROM DUAL
+		) B
+		ON (
+			A.API_SEQ		= B.API_SEQ
+		)
+		WHEN MATCHED THEN
+		UPDATE SET
+			 A.ORG_CD			= B.ORG_CD
+			, A.API_TAG_CD		= B.API_TAG_CD
+			, A.API_NM			= B.API_NM
+			, A.API_URL			= B.API_URL
+			, A.API_SMRY_EXP    = B.API_SMRY_EXP
+			<isNotEmpty property="vOrder">
+			, A.V_ORDER      	= B.V_ORDER
+			</isNotEmpty>
+			<isNotEmpty property="useYn">
+			, A.USE_YN     	 	= B.USE_YN
+			</isNotEmpty>
+			, A.UPD_ID			= B.REG_ID
+			, A.UPD_DTTM		= sysdate
+		WHEN NOT MATCHED THEN
+		INSERT (
+			A.API_SEQ
+			, A.ORG_CD
+			, A.API_TAG_CD        
+			, A.API_NM         
+			, A.API_URL  
+			, A.API_SMRY_EXP   
+			<isNotEmpty property="vOrder">   
+			, A.V_ORDER  
+			</isNotEmpty>
+			<isNotEmpty property="useYn">
+			, A.USE_YN
+			</isNotEmpty>
+			, A.REG_ID 
+			, A.REG_DTTM
+		)
+		VALUES (
+			  (SELECT NVL(MAX(API_SEQ)+ 1,0) FROM TB_NA_API_LIST)    
+			, B.ORG_CD    
+			, B.API_TAG_CD        
+			, B.API_NM         
+			, B.API_URL  
+			, B.API_SMRY_EXP  
+			<isNotEmpty property="vOrder">        
+			, B.V_ORDER  
+			</isNotEmpty>
+			<isNotEmpty property="useYn">  
+			, B.USE_YN
+			</isNotEmpty>
+			, B.REG_ID 
+			, sysdate
+		)
+	</update>
+	
+	<!-- 제공 OPENAPI 상세 조회 -->
+	<select id="OpenApiMngDao.selectOpenApiMngDtl" parameterClass="params" resultClass="record">
+		/* sql id : OpenApiMngDao.selectOpenApiMngDtl */
+		SELECT API_SEQ			AS "apiSeq"
+			  , ORG_CD			AS "orgCd"
+			  , (SELECT ORG_NM FROM TB_COMM_ORG B WHERE B.ORG_CD = A.ORG_CD)   AS "orgNm"
+			  , API_TAG_CD		AS "apiTagCd"
+			  , (SELECT DITC_NM FROM TB_COMM_CODE WHERE GRP_CD = 'A8016' AND DITC_CD = API_TAG_CD) AS "apiTagNm"
+			  , API_NM			AS "apiNm"
+			  , API_URL			AS "apiUrl"
+			  , API_SMRY_EXP	AS "apiSmryExp"
+			  , V_ORDER			AS "vOrder"
+			  , USE_YN			AS "useYn"
+			  , REG_ID			AS "regId"
+			  , REG_DTTM		AS "regDttm"
+			  , UPD_ID			AS "updId"
+			  , UPD_DTTM		AS "updDttm"
+		  FROM TB_NA_API_LIST A
+		  WHERE A.API_SEQ = #apiSeq:INTEGER#
+	</select>
+	
+	<!-- 제공OPENAPI 삭제 -->
+	<delete id="OpenApiMngDao.deleteOpenApiMng" parameterClass="params">
+		/* sql id : OpenApiMngDao.deleteOpenApiMng */
+		DELETE FROM TB_NA_API_LIST
+		 WHERE API_SEQ = #apiSeq:INTEGER#
+	</delete>
+	
+	
+</sqlMap>

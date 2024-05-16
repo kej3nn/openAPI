@@ -1,0 +1,432 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="OpenInfAcol" >
+  <typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+  
+	<resultMap id="OpenInfCol" class="egovframework.admin.service.service.OpenInfAcol" >
+		<result column="STATUS"        property="status"                />
+		<result column="INF_ID"        property="infId"                />
+		<result column="INF_SEQ"       property="infSeq"               />
+		<result column="COL_SEQ"       property="colSeq"               />
+		<result column="COL_ID"        property="colId"               />
+		<result column="COL_NM"        property="colNm"            />
+		<result column="VIEW_CD"       property="viewCd"               />
+		<result column="FILT_CODE"     property="filtCode"       />
+		<result column="SORT_TAG"      property="sortTag"             />
+		<result column="VIEW_YN"       property="viewYn"               />
+		<result column="USE_YN"        property="useYn"                />               
+		<result column="V_ORDER"        property="vOrder"                />
+		<result column="AOPT_SET"        property="aoptSet"                />
+	</resultMap>
+
+	<resultMap id="sampleUriMap" class="egovframework.admin.service.service.OpenInfAcol">
+		<result property="infId" 		column="INF_ID"/>
+		<result property="infSeq" 		column="INF_SEQ"/>
+		<result property="uriSeq" 		column="URI_SEQ"/>
+		<result property="uriNm" 		column="URI_NM"/>
+		<result property="uriNmEng" 	column="ENG_URI_NM"/>
+		<result property="uriParam" 	column="URI_PARAM"/>
+		<result property="uriVOrder" 	column="V_ORDER"/>
+		<result property="uriUseYn"	 	column="USE_YN"/>
+		<result property="uri" 			column="URI"/>
+		<result property="uriFull"		column="URI_FULL"/>
+	</resultMap>	
+	
+	<resultMap id="previewPrintValMap" class="egovframework.admin.service.service.OpenInfAcol">
+		<result property="infId" 		column="INF_ID"/>
+		<result property="infNm" 		column="INF_NM"/>
+		<result property="dsId" 		column="DS_ID"/>
+		<result property="colId" 		column="COL_ID"/>
+		<result property="colNm" 		column="COL_NM"/>
+		<result property="colNmEng" 	column="ENG_COL_NM"/>
+		<result property="colExp"	 	column="COL_EXP"/>
+		<result property="colExpEng" 	column="ENG_COL_EXP"/>
+	</resultMap>	
+
+	<resultMap id="previewResultMsgMap" class="egovframework.admin.service.service.OpenInfAcol">
+		<result property="msgTag" 		column="MSG_TAG"/>
+		<result property="msgCd" 		column="MSG_CD"/>
+		<result property="msgExp" 		column="MSG_EXP"/>
+		<result property="msgExpEng"	column="ENG_MSG_EXP"/>
+		<result property="msgDesc" 		column="MSG_DESC"/>
+	</resultMap>	
+			 
+	<resultMap id="previewReqVarMap" class="egovframework.admin.service.service.OpenInfAcol">
+		<result property="colId" 		column="COL_ID"/>
+		<result property="reqType" 		column="REQ_TYPE"/>
+		<result property="colNm" 		column="COL_NM"/>
+		<result property="colNmEng"		column="ENG_COL_NM"/>
+		<result property="colExp" 		column="COL_EXP"/>
+		<result property="colExpEng" 	column="ENG_COL_EXP"/>
+	</resultMap>
+		
+	<resultMap id="previewApiTestMap" class="egovframework.admin.service.service.OpenInfAcol">
+		<result property="colId" 		column="COL_ID"/>
+		<result property="reqType" 		column="REQ_TYPE"/>
+		<result property="reqTypeEng"	column="ENG_REQ_TYPE"/>
+		<result property="reqNeed" 		column="REQ_NEED"/>
+		<result property="reqNeedEng"	column="ENG_REQ_NEED"/>
+		<result property="reqNeedYn"	column="REQ_NEED_YN"/>
+		<result property="colNm" 		column="COL_NM"/>
+		<result property="colNmEng"		column="ENG_COL_NM"/>
+		<result property="colExp" 		column="COL_EXP"/>
+		<result property="colExpEng" 	column="ENG_COL_EXP"/>
+		<result property="useFiltCode" 	column="USE_FILT_CODE"/>
+		<result property="filtCode" 	column="FILT_CODE"/>
+	</resultMap>	
+
+	<resultMap id="OpenInfColOptPop" class="egovframework.admin.service.service.OpenInfAcol" >
+		<result column="INF_NM"          property="infNm"        />            
+		<result column="INF_ID"        property="infId"                />
+		<result column="INF_SEQ"       property="infSeq"               />
+		<result column="SRV_CD"       property="srvCd"               />
+		<result column="OWNER_CD"        property="ownerCd"      />
+		<result column="DS_ID"           property="dsId"         />
+		<result column="DS_NM"           property="dsNm"         />
+		<result column="COL_ID"        property="colId"               />
+		<result column="COL_NM"        property="colNm"            />
+		<result column="COL_SEQ"       property="colSeq"               />
+		<result column="COND_YN"         property="condYn"       />           
+		<result column="COND_OP"         property="condOp"       />
+		<result column="COND_VAR"        property="condVar"      />
+		<result column="FILT_CODE"       property="filtCode"     />
+		<result column="REQ_YN"       property="reqYn"     />
+		<result column="REQ_OP"       property="reqOp"     />
+		<result column="REQ_NEED"       property="reqNeed"     />
+		<result column="REQ_TYPE"       property="reqType"     />
+	</resultMap>
+	
+	<resultMap id="previewApiTestSelectValMap" class="egovframework.admin.service.service.OpenInfAcol">
+		<result property="ditcCd" 		column="DITC_CD"/>
+		<result property="ditcNm" 		column="DITC_NM"/>
+	</resultMap>
+	
+	<select id="OpenInfAcolDAO.selectOpenInfColList" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultMap="OpenInfCol" >
+		 SELECT   CASE WHEN C.COL_SEQ IS NOT NULL THEN '' ELSE 'I' END AS STATUS
+		        , A.INF_ID
+		        , A.INF_SEQ
+		        , B.COL_SEQ
+		        , CASE C.V_ORDER WHEN 0 THEN B.COL_SEQ ELSE C.V_ORDER END AS V_ORDER
+		        , B.COL_ID
+		        , B.COL_NM
+		        , FILT_CODE
+		        , C.SORT_TAG
+		        , NVL(C.VIEW_CD, 'Text') AS VIEW_CD
+		        , NVL(C.VIEW_YN, 'N') AS VIEW_YN
+		        , NVL(C.USE_YN, 'Y') AS USE_YN
+		        , DECODE(C.REQ_YN, 'Y', '사용중', '') AS AOPT_SET
+		   FROM   TV_MNG_INF_SRV A INNER JOIN TB_OPEN_DSCOL B ON A.DS_ID = B.DS_ID 
+		                           LEFT OUTER JOIN TB_OPEN_INF_ACOL C ON A.INF_ID = C.INF_ID
+		    AND   A.INF_SEQ = C.INF_SEQ
+		    AND   B.COL_SEQ = C.COL_SEQ
+		  WHERE   A.INF_ID= #infId:VARCHAR#
+		    AND   A.SRV_CD = #srvCd:VARCHAR#
+		    AND B.USE_YN ='Y'
+		 ORDER BY B.V_ORDER 
+	</select>
+	
+	<update id="OpenInfAcolDAO.mergeIntoCol" parameterClass="egovframework.admin.service.service.OpenInfAcol" >
+		<![CDATA[
+		MERGE INTO TB_OPEN_INF_ACOL A
+		USING(
+				SELECT #infId:VARCHAR#         	AS INF_ID
+					  ,#infSeq:NUMERIC#	       	AS INF_SEQ
+					  ,#colSeq:NUMERIC#        	AS COL_SEQ
+					  ,#vOrder:NUMERIC#			AS V_ORDER
+					  ,#filtCode:VARCHAR#	    AS FILT_CODE
+					  ,#sortTag:CHAR#		AS SORT_TAG
+					  ,#viewCd:VARCHAR# 	  	AS VIEW_CD
+					  ,#viewYn:CHAR#			AS VIEW_YN
+					  ,#useYn:CHAR#			AS USE_YN
+					  ,#sessionUsrId:VARCHAR#  	AS REG_ID 
+					  ,SYSDATE         	AS REG_DTTM
+					  ,#sessionUsrId:VARCHAR#  	AS UPD_ID
+					  ,SYSDATE         	AS UPD_DTTM  
+				  FROM DUAL
+			)B
+		ON ( A.INF_ID = B.INF_ID AND A.INF_SEQ = B.INF_SEQ AND A.COL_SEQ =B.COL_SEQ)
+		WHEN MATCHED THEN
+		UPDATE SET
+				 A.V_ORDER = B.V_ORDER
+				,A.VIEW_CD = B.VIEW_CD				
+				,A.VIEW_YN = B.VIEW_YN
+				,A.FILT_CODE = B.FILT_CODE
+				,A.SORT_TAG = B.SORT_TAG
+				,A.USE_YN = B.USE_YN
+				,A.UPD_ID = B.UPD_ID
+				,A.UPD_DTTM = B.UPD_DTTM
+		WHEN NOT MATCHED THEN
+		INSERT 
+		(
+			 A.INF_ID
+			,A.INF_SEQ
+			,A.COL_SEQ
+			,A.V_ORDER
+			,A.VIEW_CD
+			,A.SORT_TAG
+			,A.FILT_CODE
+			,A.VIEW_YN
+			,A.USE_YN
+			,A.REG_ID 
+			,A.REG_DTTM
+			,A.UPD_ID
+			,A.UPD_DTTM  
+		)VALUES
+		(
+			 B.INF_ID
+			,B.INF_SEQ
+			,B.COL_SEQ
+			,B.V_ORDER
+			,B.VIEW_CD
+			,B.SORT_TAG
+			,B.FILT_CODE
+			,B.VIEW_YN
+			,B.USE_YN
+			,B.REG_ID 
+			,B.REG_DTTM
+			,B.UPD_ID
+			,B.UPD_DTTM  	
+		)
+		]]>
+	</update>
+	
+	<update id="OpenInfAcolDAO.mergeIntoApi" parameterClass="egovframework.admin.service.service.OpenInfAcol" >
+		<![CDATA[
+		MERGE INTO TB_OPEN_INF_AURI A
+		USING(
+				SELECT #infId:VARCHAR#         					AS INF_ID
+					  ,#infSeq:NUMERIC#	       					AS INF_SEQ
+					  ,#uriSeq:NUMERIC#        					AS URI_SEQ
+					  ,#uriNm:VARCHAR# 							AS URI_NM
+					  ,#uriNm:VARCHAR#							AS ENG_URI_NM
+					  ,CONCAT(#uri:VARCHAR#||'?', #uriParam#)	AS URI
+					  ,#uriUseYn:CHAR#						AS USE_YN
+					  ,#uriVOrder:NUMERIC#						AS V_ORDER
+					  ,#sessionUsrId:VARCHAR#  					AS REG_ID 
+					  ,SYSDATE         					AS REG_DTTM
+					  ,#sessionUsrId:VARCHAR#  					AS UPD_ID
+					  ,SYSDATE         					AS UPD_DTTM  
+				  FROM DUAL
+			)B
+		ON ( A.INF_ID = B.INF_ID AND A.INF_SEQ = B.INF_SEQ AND A.URI_SEQ =B.URI_SEQ)
+		WHEN MATCHED THEN
+		UPDATE SET
+				 A.V_ORDER = B.V_ORDER
+				,A.URI = B.URI  
+				,A.URI_NM = B.URI_NM
+				,A.ENG_URI_NM = B.ENG_URI_NM
+				,A.USE_YN = B.USE_YN
+				,A.UPD_ID = B.UPD_ID
+				,A.UPD_DTTM = B.UPD_DTTM
+		WHEN NOT MATCHED THEN
+		INSERT 
+		(
+			 A.INF_ID
+			,A.INF_SEQ
+			,A.URI_SEQ
+			,A.URI_NM
+			,A.ENG_URI_NM
+			,A.URI
+			,A.V_ORDER
+			,A.USE_YN
+			,A.REG_ID 
+			,A.REG_DTTM
+			,A.UPD_ID
+			,A.UPD_DTTM  
+		)VALUES
+		(
+			 B.INF_ID
+			,B.INF_SEQ
+			,B.URI_SEQ
+			,B.URI_NM
+			,B.ENG_URI_NM
+			,B.URI
+			,B.V_ORDER
+			,B.USE_YN
+			,B.REG_ID 
+			,B.REG_DTTM
+			,B.UPD_ID
+			,B.UPD_DTTM  	
+		)
+		]]>
+	</update>
+	
+	<select id="OpenInfAcolDAO.apiDup" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultClass="java.lang.Integer">
+		SELECT   NVL(COUNT(*), 0) AS CNT
+		  FROM   TB_OPEN_INF_SRV
+		 WHERE   API_RES = #apiRes:VARCHAR#
+		   AND   INF_ID != #infId:VARCHAR#
+	</select>
+	
+	
+	<select id="OpenInfAcolDAO.selectApiUri" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultMap="sampleUriMap">
+		SELECT   A.INF_ID
+		       , A.INF_SEQ
+		       , A.URI_SEQ
+		       , A.URI_NM
+		       , ENG_URI_NM
+		       , SUBSTR(URI, 1, INSTR(URI, '?')-1) URI
+		       , SUBSTR(URI, INSTR(URI, '?')+1, LENGTH(URI)) AS URI_PARAM
+		       , API_EP || '/' || API_RES || '?' || SUBSTR(URI, INSTR(URI, '?')+1, LENGTH(URI)) URI_FULL
+		       , A.USE_YN
+		       , A.URI_SEQ
+		       , A.V_ORDER
+		  FROM   TB_OPEN_INF_AURI A INNER JOIN TB_OPEN_INF_SRV B
+		          				    ON  A.INF_ID = B.INF_ID
+		          				    AND B.SRV_CD = #srvCd#
+		 WHERE   A.INF_ID = #infId:VARCHAR#
+		 <isNotEmpty property="popupUse" >		
+		   AND   A.USE_YN = #popupUse:CHAR#
+		 </isNotEmpty>
+		ORDER BY A.V_ORDER 
+	</select>
+	
+	<select id="OpenInfAcolDAO.selectOpenInfColInfo" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultMap="OpenInfColOptPop" >
+		SELECT   A.INF_ID
+				,A.INF_SEQ
+				,A.INF_NM
+				,A.SRV_CD
+				,A.OWNER_CD
+				,A.DS_ID
+				,A.DS_NM
+				,B.COL_ID
+				,B.COL_NM
+				,B.COL_SEQ
+				,COND_YN
+				,COND_OP
+				,COND_VAR
+				,FILT_CODE
+				,REQ_YN
+				,REQ_OP
+				,REQ_NEED
+				,REQ_TYPE
+		   FROM TV_MNG_INF_SRV A
+			    INNER JOIN TB_OPEN_DSCOL B
+				ON A.DS_ID = B.DS_ID
+				AND B.USE_YN ='Y'
+				LEFT OUTER JOIN TB_OPEN_INF_ACOL C
+				ON A.INF_ID = C.INF_ID
+				AND A.INF_SEQ = C.INF_SEQ
+				AND B.COL_SEQ = C.COL_SEQ
+		  WHERE C.INF_ID=#infId#
+			AND C.INF_SEQ=#infSeq:NUMERIC#
+			AND C.COL_SEQ=#colSeq:NUMERIC# 
+	</select>
+	
+	<update id="OpenInfAcolDAO.updateOpt" parameterClass="egovframework.admin.service.service.OpenInfAcol" >
+		<![CDATA[
+		UPDATE   TB_OPEN_INF_ACOL 
+		   SET   COND_YN = #condYn:CHAR#
+			   , COND_OP = #condOp:VARCHAR#
+			   , COND_VAR =  #condVar:VARCHAR#
+			   , REQ_YN = #reqYn:CHAR#
+		       , REQ_OP = #reqOp:VARCHAR#
+		       , REQ_NEED = #reqNeed:CHAR#
+		       , REQ_TYPE = #reqType:VARCHAR#
+		       , FILT_CODE = #filtCode:VARCHAR#
+			   , UPD_ID = #sessionUsrId:VARCHAR#
+			   , UPD_DTTM = SYSDATE
+		 WHERE   INF_ID=#infId:VARCHAR#
+		   AND   INF_SEQ=#infSeq:NUMERIC#
+		   AND   COL_SEQ=#colSeq:NUMERIC# 
+		]]>
+	</update>
+	
+	
+	<select id="OpenInfAcolDAO.selectPreviewPrintVal" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultMap="previewPrintValMap" >
+		SELECT   A.INF_ID
+		       , A.INF_NM
+		       , C.DS_ID
+		       , C.COL_ID
+		       , C.COL_NM || DECODE(C.UNIT_CD, NULL, '', D.DITC_NM) COL_NM
+		       , C.ENG_COL_NM || DECODE(C.UNIT_CD, NULL, '', D.ENG_DITC_NM) ENG_COL_NM	
+		       , C.COL_EXP
+		       , C.ENG_COL_EXP
+		  FROM   TB_OPEN_INF A INNER JOIN TB_OPEN_DS B
+		   					   ON  A.DS_ID = B.DS_ID
+		   					   AND B.USE_YN ='Y'
+		   					   INNER JOIN TB_OPEN_DSCOL C
+		   					   ON  B.DS_ID = C.DS_ID
+		   					   LEFT OUTER JOIN TB_COMM_CODE D
+		   					   ON  C.UNIT_CD = D.DITC_CD
+		   					   AND D.GRP_CD = 'D1013'
+		   					   INNER JOIN TB_OPEN_INF_ACOL E
+		   					   ON  A.INF_ID = E.INF_ID
+		   					   AND C.COL_SEQ = E.COL_SEQ
+		   					   AND E.VIEW_YN = 'Y'  
+		   					   AND E.USE_YN = 'Y'
+		 WHERE   A.INF_ID = #infId:VARCHAR#
+	</select>
+	
+	<select id="OpenInfAcolDAO.selectPreviewResultMsg" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultMap="previewResultMsgMap" >
+		SELECT   MSG_TAG
+		       , MSG_CD
+		       , MSG_EXP
+		       , ENG_MSG_EXP
+		       , MSG_DESC
+		  FROM   TB_OPEN_INF_AMSG
+		 WHERE   USE_YN = 'Y'
+		ORDER BY V_ORDER  
+	</select>
+	
+	<select id="OpenInfAcolDAO.selectPreviewReqVar" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultMap="previewReqVarMap" >
+		SELECT   C.COL_ID
+		       , D.REQ_TYPE || DECODE(D.REQ_NEED, 'Y', '(필수)', '') REQ_TYPE
+		       , C.COL_NM
+		       , C.ENG_COL_NM
+		       , C.COL_EXP
+		       , C.ENG_COL_EXP
+		  FROM   TB_OPEN_INF A INNER JOIN TB_OPEN_DS B
+		   					   ON  A.DS_ID = B.DS_ID
+		   					   INNER JOIN TB_OPEN_DSCOL C
+		   					   ON  B.DS_ID = C.DS_ID
+		   					  AND C.USE_YN ='Y'
+		   					   INNER JOIN TB_OPEN_INF_ACOL D
+		   					   ON  A.INF_ID = D.INF_ID
+		   					   AND C.COL_SEQ = D.COL_SEQ
+		 WHERE   A.INF_ID = #infId:VARCHAR#
+		   AND   D.REQ_YN = 'Y'
+		   AND   D.USE_YN = 'Y'
+	</select>
+	
+	<select id="OpenInfAcolDAO.selectPreviewApiTest" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultMap="previewApiTestMap" >
+		SELECT   RN, A.*
+		  FROM   (  SELECT   C.COL_ID
+					       , D.REQ_TYPE || DECODE(D.REQ_NEED, 'Y', '(필수)', '') REQ_TYPE
+					       , D.REQ_TYPE || DECODE(D.REQ_NEED, 'Y', '(require)', '') ENG_REQ_TYPE
+					       , DECODE(D.REQ_NEED, 'Y', '(필수)', '(선택)') REQ_NEED
+					       , DECODE(D.REQ_NEED, 'Y', '(require)', '(select)') ENG_REQ_NEED
+					       , NVL(D.REQ_NEED, 'N') AS REQ_NEED_YN
+					       , C.COL_NM
+					       , C.ENG_COL_NM
+					       , C.COL_EXP
+					       , C.ENG_COL_EXP
+					       , DECODE(NVL(D.FILT_CODE, 'N'), 'N', 'N', 'Y') USE_FILT_CODE
+					       , D.FILT_CODE       
+					       , ROWNUM RN
+					  FROM   TB_OPEN_INF A INNER JOIN TB_OPEN_DS B
+					   					   ON  A.DS_ID = B.DS_ID
+					   					   INNER JOIN TB_OPEN_DSCOL C
+					   					   ON  B.DS_ID = C.DS_ID
+					   					  AND C.USE_YN ='Y'
+					   					   INNER JOIN TB_OPEN_INF_ACOL D
+					   					   ON  A.INF_ID = D.INF_ID
+					   					   AND C.COL_SEQ = D.COL_SEQ
+					 WHERE   A.INF_ID = #infId:VARCHAR#
+					   AND   D.REQ_YN = 'Y'
+					   AND   D.USE_YN = 'Y'
+		           ) A
+		WHERE RN like '%'           			  
+	</select>
+	
+	<select id="OpenInfAcolDAO.selectPreviewApiTestSelectVal" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultMap="previewApiTestSelectValMap" >
+		SELECT DITC_CD, DITC_NM
+		  FROM TV_DATA_CODE
+		 WHERE GRP_CD = #ditcCd:VARCHAR#
+		   AND API_YN = 'Y'
+		ORDER BY V_ORDER
+	</select>
+	
+	
+</sqlMap>
+	

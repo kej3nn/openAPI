@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="CommMenuAcc">
+	<typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+	<resultMap id="CommMenuList" class="egovframework.admin.basicinf.service.CommMenuAcc">
+		<result property="menuId"    	column="MENU_ID"     />
+		<result property="menuNm"    	column="MENU_NM"     />
+		<result property="menuUrl"   	column="MENU_URL"    />
+		<result property="menuParam"   	column="MENU_PARAM"    />
+		<result property="Level"	  	column="LEVEL"       />
+		<result property="useYn"	  	column="USE_YN"       />
+		<result property="accCd"	  	column="ACC_CD"       />
+		<result property="menuAcc"	  	column="MENU_ACC"    />
+		<result property="menuSiteCd"	  	column="MENU_SITE_CD"    />
+	</resultMap>
+	
+	
+	<!-- 전체 리스트 조회 -->
+	<select id="CommMenuAccDAO.selectMenuList" parameterClass="egovframework.admin.basicinf.service.CommMenuAcc" resultMap="CommMenuList" >
+		SELECT   A.MENU_NM
+			   , A.MENU_ID
+		       , A.MENU_URL
+		       , A.MENU_PARAM
+		       , LEVEL
+		       , DECODE(A.USE_YN, 'Y', 1, 'N', 0) AS USE_YN
+		       , #menuGrpCd# AS ACC_CD
+		       , NVL(B.MENU_ACC, 0) AS MENU_ACC
+		       , MENU_SITE_CD 
+		  FROM   TB_COMM_MENU A 
+		  		 LEFT JOIN  (SELECT MENU_ID, ACC_CD, MENU_ACC 
+		  		 			   FROM TB_COMM_MENUACC 
+					  		  WHERE ACC_CD = #menuGrpCd:VARCHAR#
+					  		 ) B
+		  		 ON A.MENU_ID = B.MENU_ID
+		 WHERE   1=1 
+		 		 <isNotEmpty property="searchWord" >
+					 <isEqual property="searchWd" compareValue="1">
+					 AND A.MENU_NM LIKE '%'||#searchWord#||'%'
+					 </isEqual>
+					 <isEqual property="searchWd" compareValue="2">
+					 AND A.MENU_URL LIKE '%'||#searchWord#||'%'
+					 </isEqual>
+				 </isNotEmpty>
+				 <isEqual property="useYn" compareValue="Y" >
+					 AND A.USE_YN = 'Y'
+				 </isEqual>	
+				 <isEqual property="useYn" compareValue="N" >
+					 AND A.USE_YN = 'N'
+				 </isEqual> 
+				 	 AND A.MENU_SITE_CD = #menuSiteCd#  		 
+				 START WITH A.PAR_MENU_ID = 0
+				 CONNECT BY PRIOR A.MENU_ID = A.PAR_MENU_ID
+		  		 ORDER SIBLINGS BY A.V_ORDER
+	</select>
+	
+	<select id="CommMenuAccDAO.selectMenuListCnt" parameterClass="egovframework.admin.basicinf.service.CommMenuAcc" resultClass="java.lang.Integer" >
+		SELECT   COUNT(*)
+		  FROM   TB_COMM_MENU A 
+		  		 LEFT JOIN  (SELECT MENU_ID, ACC_CD, MENU_ACC 
+		  		 			   FROM TB_COMM_MENUACC 
+					  		  WHERE ACC_CD = 'SYS'
+					  		 ) B
+		  		 ON A.MENU_ID = B.MENU_ID
+		 WHERE   1=1
+		 		 <isNotEmpty property="searchWord" >
+					 <isEqual property="searchWd" compareValue="1">
+					 AND A.MENU_NM LIKE '%'||#searchWord#||'%'
+					 </isEqual>
+					 <isEqual property="searchWd" compareValue="2">
+					 AND A.MENU_URL LIKE '%'||#searchWord#||'%'
+					 </isEqual>
+				 </isNotEmpty>
+				 <isEqual property="useYn" compareValue="Y" >
+					 AND A.USE_YN = 'Y'
+				 </isEqual>	
+				 <isEqual property="useYn" compareValue="N" >
+					 AND A.USE_YN = 'N'
+				 </isEqual> 		 
+				 START WITH A.PAR_MENU_ID = 0
+				 CONNECT BY PRIOR A.MENU_ID = A.PAR_MENU_ID
+		  		 ORDER SIBLINGS BY A.V_ORDER
+	</select>
+	
+	<update id="CommMenuAccDAO.updateCommMenuAcc" parameterClass="egovframework.admin.basicinf.service.CommMenuAcc" >
+	<![CDATA[		   
+		MERGE INTO TB_COMM_MENUACC
+		USING DUAL
+		ON (MENU_ID = #menuId:NUMERIC# AND ACC_CD = #accCd#)
+		WHEN MATCHED THEN
+			UPDATE   
+			   SET   MENU_ACC = #menuAcc:NUMERIC#
+			   	   , UPD_ID = #sessionUsrId:VARCHAR#
+				   , UPD_DTTM = SYSDATE
+			 WHERE   MENU_ID = #menuId:NUMERIC#
+			   AND   ACC_CD = #accCd:VARCHAR#
+		
+		WHEN NOT MATCHED THEN
+			INSERT  
+				(MENU_ID, ACC_CD, MENU_ACC, REG_ID, REG_DTTM)
+			VALUES
+				(
+					#menuId:NUMERIC#
+				  , #accCd:VARCHAR#
+				  , #menuAcc:NUMERIC#
+				  , #sessionUsrId:VARCHAR#
+				  , SYSDATE
+				)		   
+	]]>
+	</update>
+	
+	
+	
+</sqlMap>

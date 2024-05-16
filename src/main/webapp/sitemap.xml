@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset
+      xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+            http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+            
+	<!-- 국회의원 -->
+	<url>
+	    <loc>https://open.assembly.go.kr/portal/infs/cont/infsContPage.do?cateId=NA10000</loc>
+	</url>
+	<!-- 국회의원 검색 -->
+	<url>
+	    <loc>https://open.assembly.go.kr/portal/assm/search/memberSchPage.do</loc>
+	</url>
+	<!-- 정당 및 교섭단체 현황 -->
+	<url>
+	    <loc>https://open.assembly.go.kr/portal/assm/assmPartyNegotiationPage.do</loc>
+	</url>
+	<!-- 국회의원 현황 정보 -->
+	<url>
+	    <loc>https://open.assembly.go.kr/portal/infs/cont/infsContPage.do?cateId=NA11000</loc>
+	</url>
+	<!-- 역대 국회 정보 -->
+	<url>
+	    <loc>https://open.assembly.go.kr/portal/infs/cont/infsContPage.do?cateId=NA13000</loc>
+	</url>
+	<!-- 의정활동별 공개 -->
+	<url>
+	    <loc>https://open.assembly.go.kr/portal/infs/cont/infsContPage.do?cateId=NA41000</loc>
+	</url>
+	<!-- 의정활동 통합현황 -->
+	<url>
+	    <loc>https://open.assembly.go.kr/portal/bpm/prc/prcMstPage.do</loc>
+	</url>
+	<!-- 본회의 정보 -->
+	<url>
+	    <loc>https://open.assembly.go.kr/portal/infs/cont/infsContPage.do?cateId=NA40000&amp;infsId=INT002128FH10228</loc>
+	</url>
+	<!-- 전원위원회 정보 -->
+	<url>
+		<loc>https://open.assembly.go.kr/portal/infs/cont/infsContPage.do?cateId=NA40000&amp;infsId=IGF0022017N49179</loc>
+	</url>
+	<!-- 위원회 정보 -->
+	<url>
+	    <loc>https://open.assembly.go.kr/portal/infs/cont/infsContPage.do?cateId=NA40000&amp;infsId=IW2002121H113037</loc>
+	</url>
+	<!-- 날짜별 의정활동 -->
+	<url>
+	    <loc>https://open.assembly.go.kr/portal/infs/cont/infsContPage.do?cateId=NA40000&amp;infsId=IDP002153ML33415</loc>
+	</url>
+	<!--  인사청문회 -->
+	<url>
+	    <loc>https://open.assembly.go.kr/portal/infs/cont/infsContPage.do?cateId=NA40000&infsId=I7M002042T098793</loc>
+	</url>
+	<!-- 청원 -->
+	<url>
+	    <loc>https://open.assembly.go.kr/portal/infs/cont/infsContPage.do?cateId=NA40000&amp;infsId=I0B002087YA25174</loc>
+	</url>
+	<!-- 주제별 공개 -->
+	<url>
+	    <loc>https://open.assembly.go.kr/portal/infs/cont/infsContPage.do?cateId=NA21000</loc>
+	</url>
+	<!-- 주제별 공개 개요 -->
+	<url>
+	    <loc>https://open.assembly.go.kr/portal/infs/cont/infsContPage.do?infsId=IWA0021747D35167</loc>
+	</url>
+	<!-- 정책 -->
+	<url>
+	    <loc>https://open.assembly.go.kr/portal/infs/cont/infsContPage.do?cateId=NA21000</loc>
+	</url>
+	<!-- 의회외교 -->
+	<url>
+	    <loc>https://open.assembly.go.kr/portal/infs/cont/infsContPage.do?cateId=NA22000&amp;infsId=IFX002041LY14370</loc>
+	</url>
+	<!-- 재정 -->
+	<url>
+	    <loc>https://open.assembly.go.kr/portal/infs/cont/infsContPage.do?cateId=NA23000</loc>
+	</url>
+	<!-- 행정 -->
+	<url>
+	    <loc>https://open.assembly.go.kr/portal/infs/cont/infsContPage.do?cateId=NA24000</loc>
+	</url>
+	<!-- 국민참여 -->
+	<url>
+	    <loc>https://open.assembly.go.kr/portal/infs/cont/infsContPage.do?cateId=NA25000</loc>
+	</url>
+	<!-- 언론·미디어·국회일정 -->
+	<url>
+	    <loc>https://open.assembly.go.kr/portal/infs/cont/infsContPage.do?cateId=NA26000</loc>
+	</url>
+	<!-- 보고서ㆍ발간물 -->
+	<url>
+	    <loc>https://open.assembly.go.kr/portal/infs/cont/infsContPage.do?cateId=NA51000</loc>
+	</url>
+	<!-- 보고서·발간물 전체 -->
+	<url>
+	    <loc>https://open.assembly.go.kr/portal/nadata/catalog/naDataCommPage.do</loc>
+	</url>
+	<!-- 국회사무처 -->
+	<url>
+	    <loc>https://open.assembly.go.kr/portal/infs/cont/infsContPage.do?cateId=NA50000&amp;infsId=IF5002144Q137969</loc>
+	</url>
+	<!-- 국회도서관 -->
+	<url>
+	    <loc>https://open.assembly.go.kr/portal/infs/cont/infsContPage.do?cateId=NA50000&amp;infsId=I4Z002145VT86650</loc>
+	</url>
+	<!-- 국회예산정책처 -->
+	<url>
+	    <loc>https://open.assembly.go.kr/portal/infs/cont/infsContPage.do?cateId=NA50000&amp;infsId=IH9002148D262584</loc>
+	</url>
+	<!-- 국회입법조사처 -->
+	<url>
+	    <loc>https://open.assembly.go.kr/portal/infs/cont/infsContPage.do?cateId=NA50000&amp;infsId=IW1002147NX25455</loc>
+	</url>
+	<!-- 정보공개청구 안내 -->
+	<url>
+	    <loc>https://open.assembly.go.kr/portal/exposeInfo/guideOpnInfoPage.do</loc>
+	</url>
+	<!-- 청구서 작성 -->
+	<url>
+	    <loc>https://open.assembly.go.kr/portal/expose/writeAccountPage.do</loc>
+	</url>
+	<!-- 청구서 처리현황 -->
+	<url>
+	    <loc>https://open.assembly.go.kr/portal/expose/searchAccountPage.do</loc>
+	</url>
+	<!-- 이의신청서 작성 -->
+	<url>
+	    <loc>https://open.assembly.go.kr/portal/expose/targetObjectionPage.do</loc>
+	</url>
+	<!-- 이의신청서 처리현황 -->
+	<url>
+	    <loc>https://open.assembly.go.kr/portal/expose/searchObjectionPage.do</loc>
+	</url>
+	<!-- 정보서비스 사이트맵 -->
+	<url>
+	    <loc>https://open.assembly.go.kr/infonavi</loc>
+	</url>
+	<!-- 정보서비스 카탈로그 -->
+	<url>
+	    <loc>https://open.assembly.go.kr/portal/nadata/catalog/naDataCatalogPage.do</loc>
+	</url>
+	<!-- 국회의원 통계 -->
+	<url>
+	    <loc>https://open.assembly.go.kr/portal/theme/visual/searchVisualPage.do</loc>
+	</url>
+	<!-- 정당 및 교섭단체 정보 -->
+	<url>
+	    <loc>https://open.assembly.go.kr/portal/theme/visual/partyNegotiationInfoPage.do</loc>
+	</url>
+	<!-- 공지사항 -->
+	<url>
+	    <loc>https://open.assembly.go.kr/portal/bbs/notice/searchBulletinPage.do</loc>
+	</url>
+	<!-- FAQ -->
+	<url>
+	    <loc>https://open.assembly.go.kr/portal/bbs/faq01/searchBulletinPage.do</loc>
+	</url>
+	<!-- Q&amp;A -->
+	<url>
+	    <loc>https://open.assembly.go.kr/portal/bbs/qna01/searchBulletinPage.do</loc>
+	</url>
+	<!-- 활용갤러리 -->
+	<url>
+	    <loc>https://open.assembly.go.kr/portal/bbs/gallery/searchBulletinPage.do</loc>
+	</url>
+	<!-- 서비스 소개 -->
+	<url>
+	    <loc>https://open.assembly.go.kr/portal/intro/serviceIntroPage.do</loc>
+	</url>
+	<!-- 서비스 이용안내 -->
+	<url>
+	    <loc>https://open.assembly.go.kr/portal/intro/useServiceIntroPage.do</loc>
+	</url>
+	<!-- 나의 질문내역 -->
+	<url>
+	    <loc>https://open.assembly.go.kr/portal/myPage/myQnaPage.do</loc>
+	</url>
+	<!-- 나의질문내역 상세 -->
+	<url>
+	    <loc>https://open.assembly.go.kr/portal/myPage/selectMyQnaPage.do</loc>
+	</url>
+	<!-- 검색연혁 및 추천정보 -->
+	<url>
+	    <loc>https://open.assembly.go.kr/portal/myPage/searchHisRcmdPage.do</loc>
+	</url>    
+            
+</urlset>            

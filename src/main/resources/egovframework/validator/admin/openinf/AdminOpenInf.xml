@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE form-validation PUBLIC 
+    "-//Apache Software Foundation//DTD Commons Validator Rules Configuration 1.1//EN" 
+    "http://jakarta.apache.org/commons/dtds/validator_1_1.dtd">
+
+<form-validation>
+    <formset>
+		<form name="adminOpenInf">
+			<field property="infNm" depends="required">
+        		<arg0 key="labal.infNm" />
+			</field>
+			<field property="dtId" depends="required">
+        		<arg0 key="labal.dt" />
+			</field>
+			<field property="cateId" depends="required">
+        		<arg0 key="labal.cateNm" />
+			</field>
+			<field property="openCd" depends="required">
+        		<arg0 key="labal.openCd" />
+			</field>
+			<field property="cclCd" depends="required">
+        		<arg0 key="labal.cclCd" />
+			</field>
+			<field property="loadCd" depends="required">
+        		<arg0 key="labal.loadCd" />
+			</field>
+			<!-- <field property="orgCd" depends="required">
+        		<arg0 key="labal.orgCdNm" />
+			</field> -->
+			<!-- <field property="usrNm" depends="required">
+        		<arg0 key="labal.usrNm" />
+			</field> -->
+			<!-- <field property="openDttm" depends="required">
+        		<arg0 key="labal.openDttm" /> 
+			</field>-->
+			
+		</form>
+    </formset>
+</form-validation>

@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="StatOpen" >
+  <typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+	<resultMap id="StatCateOpen" class="egovframework.admin.stat.service.StatOpen" >
+		<result column="TOP_CATE_NM"        property="cateNmTop"                />
+		<result column="CATE_NM"        property="cateNm"                />
+	    <result column="SRV_CNT"        property="srvCnt"                />
+   	    <result column="S_CNT"        property="sCnt"                />
+	    <result column="C_CNT"        property="cCnt"                />
+	    <result column="M_CNT"        property="mCnt"                />
+	    <result column="F_CNT"        property="fCnt"                />
+	    <result column="L_CNT"        property="lCnt"                />
+	    <result column="A_CNT"        property="aCnt"                />
+	    <result column="V_CNT"        property="vCnt"                />
+    </resultMap>
+    
+    <resultMap id="StatOrgOpen" class="egovframework.admin.stat.service.StatOpen" >
+		<result column="ORG_NM"        property="orgNm"                />
+	    <result column="ORG_CD"        property="orgCd"                />
+	    <result column="SRV_CNT"        property="srvCnt"                />
+   	    <result column="S_CNT"        property="sCnt"                />
+	    <result column="C_CNT"        property="cCnt"                />
+	    <result column="M_CNT"        property="mCnt"                />
+	    <result column="F_CNT"        property="fCnt"                />
+	    <result column="L_CNT"        property="lCnt"                />
+	    <result column="A_CNT"        property="aCnt"                />
+	    <result column="V_CNT"        property="vCnt"                />
+    </resultMap>
+    
+    <!-- <resultMap id="StatDtOpen" class="egovframework.admin.stat.service.StatOpen" >
+		<result column="DT_NM"        property="dtNm"                />
+	    <result column="DT_ID"        property="dtId"                />
+	    <result column="INF_CNT"        property="infCnt"                />
+	    <result column="SRV_CNT"        property="srvCnt"                />
+   	    <result column="S_CNT"        property="sCnt"                />	    
+	    <result column="C_CNT"        property="cCnt"                />
+	    <result column="M_CNT"        property="mCnt"                />
+	    <result column="F_CNT"        property="fCnt"                />
+	    <result column="L_CNT"        property="lCnt"                />
+	    <result column="A_CNT"        property="aCnt"                />
+	    <result column="V_CNT"        property="vCnt"                />
+	    <result column="CT_CNT"        property="ctCnt"                />
+	    <result column="VN_CNT"        property="vnCnt"                />
+    </resultMap> -->
+    
+    <resultMap id="seriesResult" class="egovframework.admin.stat.service.StatOpen" >
+		<result column="COLUMN_NM"        property="columnNm"                />
+		<!-- <result column="ENG_COLUMN_NM"        property="columnNmEng"                /> -->
+    </resultMap> 
+    
+    
+    <!-- 개방 현황 분류,기관,보유데이터별 Chart형 자료에서 시리즈 목록 조회 ==> 대표적으로 TB_STAT_OPEN_CATE에서 뽑음(어차피 다른 테이블도 컬럼명은 같음) -->
+	<select id="StatOpenDao.getOpenSeriesResult" parameterClass="egovframework.admin.stat.service.StatOpen"  resultMap="seriesResult" remapResults="true">
+	<!-- COLUMN_NM만 조회 -->
+		SELECT B.COMMENTS COLUMN_NM
+		FROM DBA_TAB_COLUMNS A, DBA_COL_COMMENTS B
+		WHERE A.OWNER = B.OWNER
+		AND A.TABLE_NAME = B.TABLE_NAME
+		AND A.COLUMN_NAME = B.COLUMN_NAME
+		AND A.TABLE_NAME = 'TB_STAT_OPEN' AND B.TABLE_NAME = 'TB_STAT_OPEN'
+		AND A.COLUMN_NAME LIKE '%CNT'
+		AND A.OWNER = 'GGOPENPTL'
+		AND B.COMMENTS NOT IN('공공데이터수')
+        AND B.COMMENTS IS NOT NULL
+		
+	
+	<!-- ENG_COLUMN_NM만 조회 -->
+	<!-- 	SELECT 
+	A.COLUMN_NAME ENG_COLUMN_NM
+	FROM DBA_TAB_COLUMNS A, DBA_COL_COMMENTS B
+	WHERE A.OWNER = B.OWNER
+	AND A.TABLE_NAME = B.TABLE_NAME
+	AND A.COLUMN_NAME = B.COLUMN_NAME
+	AND A.TABLE_NAME = 'TB_STAT_OPEN_CATE' AND B.TABLE_NAME = 'TB_STAT_OPEN_CATE'
+	AND A.COLUMN_NAME LIKE '%CNT' -->
+		
+	<!-- 컬럼명,컬럼 코멘트 함께 조회 -->
+	<!--SELECT B.COMMENTS COLUMN_NM,
+	A.COLUMN_NAME ENG_COLUMN_NM
+	FROM DBA_TAB_COLUMNS A, DBA_COL_COMMENTS B
+	WHERE A.OWNER = B.OWNER
+	AND A.TABLE_NAME = B.TABLE_NAME
+	AND A.COLUMN_NAME = B.COLUMN_NAME
+	AND A.TABLE_NAME = 'TB_STAT_OPEN_CATE' AND B.TABLE_NAME = 'TB_STAT_OPEN_CATE'
+	AND A.COLUMN_NAME LIKE '%CNT' -->
+	</select>
+    
+    
+    <!-- 분류별 개방 현황에서 Sheet형 데이터 조회 -->
+	<select id="StatOpenDao.getOpenStatCateSheetAll" parameterClass="egovframework.admin.stat.service.StatOpen" resultMap="StatCateOpen">
+	<!-- 	SELECT 
+		YYYYMMDD AS DD
+		,SUM(INF_CNT) INF_CNT
+		,SUM(SRV_CNT) SRV_CNT 
+		,SUM(S_CNT) S_CNT
+		,SUM(T_CNT) T_CNT
+		,SUM(C_CNT) C_CNT
+		,SUM(M_CNT) M_CNT
+		,SUM(F_CNT) F_CNT
+		,SUM(L_CNT) L_CNT
+		,SUM(A_CNT) A_CNT
+		FROM TB_STAT_OPEN_PRGS_D
+		WHERE YYYYMMDD BETWEEN #pubDttmFrom# AND #pubDttmTo#
+		GROUP BY YYYYMMDD -->
+		SELECT 
+			  (SELECT CATE_NM FROM TB_OPEN_CATE WHERE CATE_ID = B.TOP_CATE_ID) TOP_CATE_NM
+			  ,B.CATE_NM
+		  	  ,A.CATE_ID
+			  ,SUM(A.SRV_CNT) SRV_CNT 
+			  ,SUM(A.S_CNT) S_CNT
+		  	  ,SUM(A.C_CNT) C_CNT
+		  	  ,SUM(A.M_CNT) M_CNT
+		  	  ,SUM(A.F_CNT) F_CNT
+		  	  ,SUM(A.L_CNT) L_CNT
+		  	  ,SUM(A.A_CNT) A_CNT
+		  	  ,SUM(A.V_CNT) V_CNT
+		FROM TB_STAT_OPEN A
+			,TB_OPEN_CATE B
+		WHERE A.CATE_ID= B.CATE_ID
+		AND A.YYYYMMDD = #pubDttmTo:VARCHAR#
+		GROUP BY B.CATE_NM,A.CATE_ID,B.TOP_CATE_ID
+		ORDER BY
+			TOP_CATE_NM, B.CATE_NM
+	</select>
+	
+
+	<!-- 분류별 개방 현황 Chart형 자료에서 X축 데이터 조회 -->
+	<select id="StatOpenDao.getCateChartDataX" parameterClass="egovframework.admin.stat.service.StatOpen"  resultClass="java.util.LinkedHashMap" remapResults="true">
+<!-- 	SELECT B.CATE_NM
+		FROM TB_STAT_OPEN A
+			,TB_OPEN_CATE B
+		WHERE A.CATE_ID= B.CATE_ID
+		AND B.CATE_LVL = 1
+		GROUP BY B.CATE_NM,A.CATE_ID
+		 -->
+		SELECT DISTINCT
+			(SELECT CATE_NM FROM TB_OPEN_CATE WHERE CATE_ID = B.TOP_CATE_ID) TOP_CATE_NM
+		FROM TB_STAT_OPEN A
+			,TB_OPEN_CATE B
+		WHERE A.CATE_ID= B.CATE_ID
+		GROUP BY B.CATE_NM,A.CATE_ID,B.TOP_CATE_ID
+		ORDER BY
+			TOP_CATE_NM
+	</select>
+	
+	
+	<!-- 분류별 개방 현황 Chart형 자료에서 Y축 데이터 조회 -->
+	<select id="StatOpenDao.getCateChartDataY" parameterClass="egovframework.admin.stat.service.StatOpen"  resultClass="java.util.LinkedHashMap" remapResults="true">
+		SELECT
+			SUM(C.S_CNT) S_CNT
+			,SUM(C.C_CNT) C_CNT
+			,SUM(C.M_CNT) M_CNT
+			,SUM(C.F_CNT) F_CNT
+			,SUM(C.L_CNT) L_CNT
+			,SUM(C.A_CNT) A_CNT
+			,SUM(C.V_CNT) V_CNT
+		FROM (	
+			SELECT
+				(SELECT CATE_NM FROM TB_OPEN_CATE WHERE CATE_ID = B.TOP_CATE_ID) TOP_CATE_NM
+				,B.TOP_CATE_ID
+				,SUM(A.S_CNT) S_CNT
+				,SUM(A.C_CNT) C_CNT
+				,SUM(A.M_CNT) M_CNT
+				,SUM(A.F_CNT) F_CNT
+				,SUM(A.L_CNT) L_CNT
+				,SUM(A.A_CNT) A_CNT
+				,SUM(A.V_CNT) V_CNT
+			FROM TB_STAT_OPEN A
+				,TB_OPEN_CATE B
+			WHERE A.CATE_ID= B.CATE_ID
+			AND A.YYYYMMDD = #pubDttmTo:VARCHAR#
+			GROUP BY A.CATE_ID,B.TOP_CATE_ID
+			) C	
+		GROUP BY
+			C.TOP_CATE_ID, TOP_CATE_NM
+		ORDER BY
+			TOP_CATE_NM
+	</select>
+	
+	
+	<!-- 기관별 개방 현황에서 Sheet형 데이터 조회 -->
+	<select id="StatOpenDao.getOpenStatOrgSheetAll" parameterClass="egovframework.admin.stat.service.StatOpen" resultMap="StatOrgOpen">
+		SELECT B.ORG_NM
+		  	  ,A.ORG_CD
+			  ,SUM(A.SRV_CNT) SRV_CNT 
+			  ,SUM(A.S_CNT) S_CNT
+			  ,SUM(A.C_CNT) C_CNT
+		  	  ,SUM(A.M_CNT) M_CNT
+		  	  ,SUM(A.F_CNT) F_CNT
+		  	  ,SUM(A.L_CNT) L_CNT
+		  	  ,SUM(A.A_CNT) A_CNT
+		  	  ,SUM(A.V_CNT) V_CNT
+		FROM TB_STAT_OPEN A
+			,TB_COMM_ORG B
+		WHERE A.ORG_CD= B.ORG_CD
+		AND A.YYYYMMDD = #pubDttmTo:VARCHAR#
+		GROUP BY B.ORG_NM,A.ORG_CD
+		ORDER BY B.ORG_NM
+	</select>
+	
+
+	<!-- 기관별 개방 현황 Chart형 자료에서 X축 데이터 조회 -->
+	<select id="StatOpenDao.getOrgChartDataX" parameterClass="egovframework.admin.stat.service.StatOpen"  resultClass="java.util.LinkedHashMap" remapResults="true">
+		SELECT B.ORG_NM
+		FROM TB_STAT_OPEN A
+			,TB_COMM_ORG B
+		WHERE A.ORG_CD= B.ORG_CD
+		<!-- AND B.ORG_LVL = 1 -->
+		GROUP BY B.ORG_NM,A.ORG_CD
+		ORDER BY B.ORG_NM
+	</select>
+	
+	
+	<!-- 기관별 개방 현황 Chart형 자료에서 Y축 데이터 조회 -->
+	<select id="StatOpenDao.getOrgChartDataY" parameterClass="egovframework.admin.stat.service.StatOpen"  resultClass="java.util.LinkedHashMap" remapResults="true">
+	SELECT	  SUM(A.S_CNT) S_CNT
+		  	  ,SUM(A.C_CNT) C_CNT
+		  	  ,SUM(A.M_CNT) M_CNT
+		  	  ,SUM(A.F_CNT) F_CNT
+		  	  ,SUM(A.L_CNT) L_CNT
+		  	  ,SUM(A.A_CNT) A_CNT
+		  	  ,SUM(A.V_CNT) V_CNT
+		FROM TB_STAT_OPEN A
+			,TB_COMM_ORG B
+		WHERE A.ORG_CD= B.ORG_CD
+	AND A.YYYYMMDD = #pubDttmTo#
+		GROUP BY B.ORG_NM,A.ORG_CD
+		ORDER BY B.ORG_NM
+	</select>
+	
+	
+	<!-- 보유데이터별 개방 현황에서 Sheet형 데이터 조회 -->
+<!-- 	<select id="StatOpenDao.getOpenStatDtSheetAll" parameterClass="egovframework.admin.stat.service.StatOpen" resultMap="StatDtOpen"> -->
+<!-- 	SELECT B.INF_NM -->
+<!-- 		  	  ,A.INF_ID -->
+<!--   			  ,SUM(A.INF_CNT) INF_CNT -->
+<!-- 			  ,SUM(A.SRV_CNT) SRV_CNT  -->
+<!-- 			  ,SUM(A.S_CNT) S_CNT -->
+<!-- 		  	  ,SUM(A.C_CNT) C_CNT -->
+<!-- 		  	  ,SUM(A.M_CNT) M_CNT -->
+<!-- 		  	  ,SUM(A.F_CNT) F_CNT -->
+<!-- 		  	  ,SUM(A.L_CNT) L_CNT -->
+<!-- 		  	  ,SUM(A.A_CNT) A_CNT -->
+<!-- 		  	  ,SUM(A.V_CNT) V_CNT -->
+<!-- 		  	  ,SUM(A.CT_CNT) CT_CNT -->
+<!-- 		  	  ,SUM(A.VN_CNT) VN_CNT -->
+<!-- 		FROM TB_STAT_OPEN A -->
+<!-- 			,TB_OPEN_INF B -->
+<!-- 		WHERE A.INF_ID = B.INF_ID -->
+<!-- 		AND A.YYYYMMDD BETWEEN #pubDttmFrom# AND #pubDttmTo# -->
+<!-- 		GROUP BY B.INF_NM,A.INF_ID -->
+<!-- 	</select> -->
+	
+
+	<!-- 보유데이터별 개방 현황 Chart형 자료에서 X축 데이터 조회 -->
+<!-- 	<select id="StatOpenDao.getDtChartDataX" parameterClass="egovframework.admin.stat.service.StatOpen"  resultClass="java.util.LinkedHashMap" remapResults="true"> -->
+<!-- 		SELECT B.INF_NM -->
+<!-- 		FROM TB_STAT_OPEN A -->
+<!-- 			,TB_OPEN_DT B -->
+<!-- 		WHERE A.INF_ID= B.INF_ID -->
+<!-- 		GROUP BY B.INF_NM,A.INF_ID -->
+<!-- 	</select> -->
+	
+	
+	<!-- 보유데이터별 개방 현황 Chart형 자료에서 Y축 데이터 조회 --> 
+<!-- 	<select id="StatOpenDao.getDtChartDataY" parameterClass="egovframework.admin.stat.service.StatOpen"  resultClass="java.util.LinkedHashMap" remapResults="true"> -->
+<!-- 	SELECT	  SUM(A.INF_CNT) INF_CNT -->
+<!-- 			  ,SUM(A.SRV_CNT) SRV_CNT  -->
+<!-- 			  ,SUM(A.S_CNT) S_CNT -->
+<!-- 		  	  ,SUM(A.C_CNT) C_CNT -->
+<!-- 		  	  ,SUM(A.M_CNT) M_CNT -->
+<!-- 		  	  ,SUM(A.F_CNT) F_CNT -->
+<!-- 		  	  ,SUM(A.L_CNT) L_CNT -->
+<!-- 		  	  ,SUM(A.A_CNT) A_CNT -->
+<!-- 		  	  ,SUM(A.V_CNT) V_CNT -->
+<!-- 		  	  ,SUM(A.CT_CNT) CT_CNT -->
+<!-- 		  	  ,SUM(A.VN_CNT) VN_CNT -->
+<!-- 		FROM TB_STAT_OPEN A -->
+<!-- 			,TB_OPEN_DT B -->
+<!-- 		WHERE A.INF_ID= B.INF_ID -->
+<!-- 	AND A.YYYYMMDD BETWEEN #pubDttmFrom# AND #pubDttmTo#		 -->
+<!-- 		GROUP BY B.INF_NM, A.INF_ID -->
+<!-- 	</select> -->
+
+	
+	
+</sqlMap>

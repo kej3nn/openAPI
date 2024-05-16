@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="portalInfsList" >
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+
+	<!-- TV_INFA_LIST 조회 전체컬럼 -->
+	<!-- <sql id="infaList.where">
+		A.OPENTY_TAG		AS "opentyTag",
+		A.OPENTY_TAG_NM		AS "opentyTagNm",
+		A.INFA_ID			AS "infaId",
+		A.INFA_NM			AS "infaNm",
+		A.CATE_ID			AS "cateId",
+		A.CATE_NM			AS "cateNm",
+		A.ORG_CD			AS "orgCd",
+		A.ORG_NM			AS "orgNm",
+		A.INFA_EXP			AS "infaExp",
+		A.OPEN_YMD			AS "openYmd",
+		A.OPEN_SRV			AS "openSrv"	
+	</sql> -->
+	<!-- TV_INFA_LIST 검색조건 -->
+	<sql id="infaList.where">
+		<!-- <dynamic prepend="WHERE "> -->
+			<isNotEmpty property="schInputVal" prepend=" AND ">
+				<isEmpty property="schInputGubun">
+					( TAG_INFA_NM LIKE '%' || UPPER(REPLACE(#schInputVal:VARCHAR#, ' ', '')) || '%'
+					OR SCHW_TAG_CONT LIKE '%' || UPPER(REPLACE(#schInputVal:VARCHAR#, ' ', '')) || '%'
+					OR INFA_EXP LIKE '%' || UPPER(REPLACE(#schInputVal:VARCHAR#, ' ', '')) || '%' )
+				</isEmpty>
+				<isNotEmpty property="schInputGubun">
+					<isEqual property="schInputGubun" compareValue="schTagInfaNm" >
+						TAG_INFA_NM LIKE '%' || UPPER(REPLACE(#schInputVal:VARCHAR#, ' ', '')) || '%'
+					</isEqual>
+					<isEqual property="schInputGubun" compareValue="schSchwTagCont">
+						SCHW_TAG_CONT LIKE '%' || UPPER(REPLACE(#schInputVal:VARCHAR#, ' ', '')) || '%'
+					</isEqual>
+					<isEqual property="schInputGubun" compareValue="schInfaExp">
+						INFA_EXP LIKE '%' || UPPER(REPLACE(#schInputVal:VARCHAR#, ' ', '')) || '%'
+					</isEqual>
+				</isNotEmpty>				
+			</isNotEmpty>
+			<isNotEmpty property="schOrgCd" prepend=" AND ">
+				A.ORG_CD = #schOrgCd:VARCHAR#
+			</isNotEmpty>
+			<isNotEmpty property="schArrCateId" prepend=" AND ">
+				A.INFA_ID IN (SELECT INFA_ID 
+							  FROM   TV_INFA_LIST_CATE 
+							  WHERE   CATE_ID IN (SELECT CATE_ID FROM TB_INFO_CATE C
+							  					  START WITH 
+													<iterate property="schArrCateId" prepend=" CATE_ID IN " open="(" close=")" conjunction=", ">
+														#schArrCateId[]#
+													</iterate>
+												   AND USE_YN = 'Y'
+												   CONNECT BY PRIOR C.CATE_ID = C.PAR_CATE_ID
+												   AND USE_YN = USE_YN
+							  					  ) 
+							  )
+			</isNotEmpty>
+			<isNotEmpty property="schJoinSrvCd" prepend=" AND ">
+				REGEXP_LIKE(A.OPEN_SRV, #schJoinSrvCd:varchar#)
+			</isNotEmpty>
+			<isNotEmpty property="schArrTag" prepend=" AND ">
+				<iterate property="schArrTag" prepend=" A.OPENTY_TAG IN " open="(" close=")" conjunction=", ">
+					#schArrTag[]#
+				</iterate>
+			</isNotEmpty>
+		<!-- </dynamic> -->
+	</sql>
+	
+	<!-- TV_INFA_LIST 검색조건 - Open API -->	
+<!-- 	<sql id="infaList.openapi.where">
+		WHERE A.INFA_ID = B.INFA_ID
+		AND REGEXP_LIKE(A.OPEN_SRV, 'A')
+		AND   A.OPENTY_TAG = 'O'
+		<isNotEmpty property="schInputVal" prepend=" AND ">
+			<isEmpty property="schInputGubun">
+				A.TAG_INFA_NM LIKE '%' || UPPER(REPLACE(#schInputVal:VARCHAR#, ' ', '')) || '%'
+			</isEmpty>
+			<isNotEmpty property="schInputGubun">
+				<isEqual property="schInputGubun" compareValue="schTagInfaNm" >
+					A.TAG_INFA_NM LIKE '%' || UPPER(REPLACE(#schInputVal:VARCHAR#, ' ', '')) || '%'
+				</isEqual>
+				<isEqual property="schInputGubun" compareValue="schSchwTagCont">
+					A.SCHW_TAG_CONT LIKE '%' || UPPER(REPLACE(#schInputVal:VARCHAR#, ' ', '')) || '%'
+				</isEqual>
+				<isEqual property="schInputGubun" compareValue="schInfaExp">
+					A.INFA_EXP LIKE '%' || UPPER(REPLACE(#schInputVal:VARCHAR#, ' ', '')) || '%'
+				</isEqual>
+			</isNotEmpty>		
+		</isNotEmpty>
+		<isNotEmpty property="schOrgCd" prepend=" AND ">
+			A.ORG_CD = #schOrgCd:VARCHAR#
+		</isNotEmpty>
+		<isNotEmpty property="schArrCateId" prepend=" AND ">
+			A.INFA_ID IN (SELECT INFA_ID 
+						  FROM   TV_INFA_LIST_CATE 
+						  WHERE   CATE_ID IN (SELECT CATE_ID FROM TB_INFO_CATE C
+						  					  START WITH 
+												<iterate property="schArrCateId" prepend=" CATE_ID IN " open="(" close=")" conjunction=", ">
+													#schArrCateId[]#
+												</iterate>
+											   AND USE_YN = 'Y'
+											   CONNECT BY PRIOR C.CATE_ID = C.PAR_CATE_ID
+											   AND USE_YN = USE_YN
+						  					  ) 
+						  )
+		</isNotEmpty>
+	</sql> -->
+
+	<!-- 정보공개 목록 조회(페이징) -->
+	<select id="portalInfsListDao.selectInfsListPaging" remapResults="true" parameterClass="params" resultClass="record">
+
+		<isEqual property="paging" compareValue="0">
+		SELECT AA.* 
+		FROM   (SELECT ROWNUM AS ROW_NUM, AA.*
+				FROM   (  
+		</isEqual> 
+
+		SELECT
+			<!-- <include refid="infaList.col"/> -->
+			*
+		FROM TV_INFA_LIST A	,
+        (
+          SELECT INFA_ID
+          FROM (
+                 SELECT INFA_NM
+                      , INFA_ID
+                      , OPEN_YMD
+                      , ROW_NUMBER() OVER(PARTITION BY INFA_NM ORDER BY OPEN_YMD DESC) AS RNO
+                   FROM TV_INFA_LIST
+               )
+          WHERE RNO = 1 
+        ) B
+        WHERE A.INFA_ID = B.INFA_ID	
+		<include refid="infaList.where"/>
+		
+		<!-- 데이터 정렬 -->
+		<isNotEmpty property="schVOrder" prepend=" ORDER BY ">
+			<isEqual property="schVOrder" compareValue="N">
+				A.INFA_NM, A.INFA_ID
+			</isEqual>
+			<isEqual property="schVOrder" compareValue="D">
+				A.OPEN_YMD DESC, A.INFA_ID
+			</isEqual>
+			<isEqual property="schVOrder" compareValue="V">
+				A.VIEW_CNT DESC, A.INFA_ID
+			</isEqual>
+		</isNotEmpty>
+		
+		<isEqual property="paging" compareValue="0">
+		<![CDATA[
+				) AA
+			WHERE ROWNUM <= #end:NUMERIC#
+			) AA
+		WHERE AA.ROW_NUM >= #start:NUMERIC#
+		]]>
+		</isEqual>
+	</select>
+	
+	<!-- 정보공개 목록 조회(카운트) -->
+	<select id="portalInfsListDao.selectInfsListPagingCount" parameterClass="params" resultClass="int">
+		/* sql id : portalInfsListDao.selectInfsListPagingCount */
+		SELECT COUNT(*) AS CNT
+		FROM   TV_INFA_LIST A	,
+        (
+          SELECT INFA_ID
+          FROM (
+                 SELECT INFA_NM
+                      , INFA_ID
+                      , OPEN_YMD
+                      , ROW_NUMBER() OVER(PARTITION BY INFA_NM ORDER BY OPEN_YMD DESC) AS RNO
+                   FROM TV_INFA_LIST
+               )
+          WHERE RNO = 1 
+        ) B
+        WHERE A.INFA_ID = B.INFA_ID
+		<include refid="infaList.where"/> 
+	</select>
+	
+	<!-- 기관을 조회한다.(최상위조직) -->
+	<select id="portalInfsListDao.selectCommOrgTop" parameterClass="params" resultClass="record">
+		/* sql id : portalInfsListDao.selectCommOrgTop */
+		SELECT ORG_CD	AS "orgCd", 
+			   ORG_NM	AS "orgNm", 
+			   V_ORDER 	AS "vOrder"
+		FROM TV_COMM_ORG
+	</select>
+	
+	
+	<!-- 선택된 정보서비스 목록을 조회한다. -->
+	<select id="portalInfsListDao.selectInfsInfoList" remapResults="true" parameterClass="params" resultClass="record">
+		/* sql id : portalInfsListDao.selectInfsInfoList */
+		SELECT INFA_ID			AS "infaId",	 
+		       INFA_NM			AS "infaNm", 
+		       OPENTY_TAG		AS "opentyTag", 
+		       OPENTY_TAG_NM	AS "opentyTagNm", 
+		       CATE_ID			AS "cateId", 
+		       CATE_NM			AS "cateNm", 
+		       OPEN_YMD			AS "openYmd" 
+		  FROM TV_INFA_LIST A 
+		 WHERE REGEXP_LIKE(A.OPEN_SRV, 'S') 
+			<isNotEmpty property="infaIds" prepend=" AND ">
+				A.INFA_ID IN 
+		       	<iterate property="infaIds" open="(" close=")" conjunction=", ">
+	          		#infaIds[]:VARCHAR#
+	          	</iterate>
+			</isNotEmpty>
+			<isEmpty property="infaIds">
+				AND 1=2
+			</isEmpty>
+    </select>
+    
+    <!-- 정보셋 ID에 속한 정보서비스 목록을 조회한다. -->
+	<select id="portalInfsListDao.selectInfsInfoRelList" remapResults="true" parameterClass="params" resultClass="record">
+		/* sql id : portalInfsListDao.selectInfsInfoRelList */
+		SELECT
+		      A.OPENTY_TAG		AS "opentyTag",
+		      A.OPENTY_TAG_NM	AS "opentyTagNm",
+		      A.INFA_ID			AS "infaId",
+		      A.INFA_NM			AS "infaNm",
+		      A.CATE_ID			AS "cateId",
+		      A.CATE_NM			AS "cateNm",
+		      A.OPEN_YMD		AS "openYmd",
+		      A.OPEN_SRV		AS "openSrv",
+		      A.VIEW_CNT		AS "viewCnt",
+		      CASE
+		          WHEN LENGTH(A.CATE_FULLNM) - LENGTH(REPLACE (A.CATE_FULLNM, '>', '')) > 2 THEN SUBSTR(A.CATE_FULLNM, 0, INSTR(A.CATE_FULLNM, '>', 1, 3) - 1)
+		          ELSE CATE_FULLNM
+		      END AS "cateFullnm"
+		  FROM
+		      TV_INFA_LIST A
+		      INNER JOIN TB_INFO_SET_REL B ON A.INFA_ID = B.OBJ_ID
+		      AND B.USE_YN = 'Y'
+		      AND B.INFS_TAG = A.OPENTY_TAG
+		  WHERE A.OPENTY_TAG IN ('O', 'S') 
+       			AND REGEXP_LIKE(A.OPEN_SRV, 'S') 
+		    <isNotEmpty property="infaIds" prepend=" AND ">
+				B.INFS_ID IN 
+		       	<iterate property="infaIds" open="(" close=")" conjunction=", ">
+	          		#infaIds[]:VARCHAR#
+	          	</iterate>
+			</isNotEmpty>
+			<isEmpty property="infaIds">
+				AND 1=2
+			</isEmpty>
+		  ORDER BY B.V_ORDER		
+    </select>    
+    
+</sqlMap>

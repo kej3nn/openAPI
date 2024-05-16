@@ -1,0 +1,94 @@
+package egovframework.portal.assm.web;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import egovframework.common.base.controller.BaseController;
+import egovframework.common.base.model.Params;
+import egovframework.portal.assm.service.AssmNotiService;
+import egovframework.portal.assm.service.AssmMemberService;
+
+/**
+ * 국회의원 알림 컨트롤러 클래스
+ * 
+ * @author	JHKIM
+ * @version 1.0
+ * @since   2019/10/16
+ */
+@Controller("AssmNotiController")
+public class AssmNotiController extends BaseController {
+
+	/**
+	 * 국회의원 알림 서비스
+	 */
+	@Resource(name="AssmNotiService")
+	private AssmNotiService AssmNotiService;
+	
+	/**
+	 * 국회의원 서비스
+	 */
+	@Resource(name="AssmMemberService")
+	private AssmMemberService assmMemberService;
+	
+	/**
+	 * 알림 페이지 이동
+	 */
+	@RequestMapping("/portal/assm/noti/assmNotiPage.do")
+	public String memberNotiPage(HttpServletRequest request, Model model) {
+		// 역대 국회의원 대수 코드 목록을 조회한다. (현재 보유하고 있는 데이터 코드 기준)
+		model.addAttribute("assmHistUnitCodeList", assmMemberService.selectAssmHistUnitCodeList(null));
+				
+		return "/portal/assm/noti/assmNoti";
+	}
+	
+	/**
+	 * 의원실 알림 조회(전체)
+	 */
+	@RequestMapping("/portal/assm/noti/searchAssmNoti.do")
+	public String lawmDegtMotnLgsbPagePaging(HttpServletRequest request, Model model) {
+		Params params = getParams(request, false);
+        
+        Object result = AssmNotiService.searchAssmNoti(params);
+        
+        addObject(model, result);
+        
+        return "jsonView";
+	}
+	
+	/**
+	 * 의원실 채용 조회
+	 */
+	@RequestMapping("/portal/assm/noti/searchAssmNotiRcrt.do")
+	public String searchAssmNotiRcrt(HttpServletRequest request, Model model) {
+		Params params = getParams(request, false);
+        
+		params.set("bbsCdN", AssmMemberController.GUBUN_NAMES.get("NR"));
+		
+        Object result = AssmNotiService.searchAssmNoti(params);
+        
+        addObject(model, result);
+        
+        return "jsonView";
+	}
+	
+	/**
+	 * 기자회견 조회
+	 */
+	@RequestMapping("/portal/assm/noti/searchAssmNotiIntv.do")
+	public String searchAssmNotiIntv(HttpServletRequest request, Model model) {
+		Params params = getParams(request, false);
+        
+		params.set("bbsCdN", AssmMemberController.GUBUN_NAMES.get("NI"));
+		
+        Object result = AssmNotiService.searchAssmNoti(params);
+        
+        addObject(model, result);
+        
+        return "jsonView";
+	}
+	
+}

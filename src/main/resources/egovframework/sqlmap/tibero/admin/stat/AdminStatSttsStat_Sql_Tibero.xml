@@ -1,0 +1,391 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- @(#)AdminStatSttsStat_Sql_Tibero.xml 1.0 2017/08/07                     -->
+<!--                                                                         -->
+<!-- COPYRIGHT (C) 2013 WISEITECH CO., LTD. ALL RIGHTS RESERVED.             -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- 통계메타관리 SQL 파일이다.  	                                    	-->
+<!--                                                                         -->
+<!-- @author 김정호                                                        	-->
+<!-- @version 1.0 2017/08/07                                                 -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<sqlMap namespace="StatSttsStat">
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Type Alias                                                          -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+    
+    <!-- 통계 메타 리스트 조회 -->
+	<select id="StatSttsStatDao.selectStatSttsStat" parameterClass="params" resultClass="record">
+		SELECT 
+			A.STAT_ID		AS "statId"
+			, A.STAT_NM		AS "statNm"
+			, A.STTS_CD		AS "sttsCd"
+			, A.ORG_CD		AS "orgCd"
+			, B.ORG_NM		AS "orgNm"
+			, A.USE_YN		AS "useYn"
+			, A.V_ORDER		AS "vOrder"
+			, FN_GET_COMM_CODE_NM('S1008', A.STTS_CD) 	AS "sttsNm"
+		FROM
+			TB_STTS_STAT A
+			LEFT OUTER JOIN TB_COMM_ORG B
+				ON  A.ORG_CD = B.ORG_CD
+				AND B.USE_YN = 'Y'	
+		WHERE
+			STTS_CD = #sttsCd:VARCHAR#
+		<isNotEmpty property="searchVal">
+			<isEqual property="searchGubun" compareValue="STAT_NM" >
+				AND A.STAT_NM LIKE '%' || #searchVal# || '%'
+			</isEqual>
+			<isEqual property="searchGubun" compareValue="ENG_STAT_NM" >
+				AND A.ENG_STAT_NM LIKE '%' || #searchVal# || '%'
+			</isEqual>
+			<isEqual property="searchGubun" compareValue="STAT_ID" >
+				AND A.STAT_ID LIKE '%' || #searchVal# || '%'
+			</isEqual>
+		</isNotEmpty>	
+		<isNotEmpty property="useYn">
+		AND A.USE_YN = #useYn#
+		</isNotEmpty>	
+		<isNotEmpty property="orgCd">
+		AND A.ORG_CD = #orgCd#
+		</isNotEmpty>
+		ORDER BY A.V_ORDER, A.STAT_NM
+	</select>
+	<select id="StatSttsStatDao.selectStatSttsStatCount" parameterClass="params" resultClass="record">
+		SELECT 
+			COUNT(*)
+		FROM
+			TB_STTS_STAT A
+			INNER JOIN TB_COMM_ORG B
+				ON  A.ORG_CD = B.ORG_CD
+				AND B.USE_YN = 'Y'	
+		WHERE
+			STTS_CD = #sttsCd:VARCHAR#	
+	</select>			
+	
+	<!-- 통계 메타 관리 입력 -->
+	<insert id="StatSttsStatDao.insertStatSttsStat" parameterClass="params">
+		<selectKey keyProperty="vOrder" resultClass="integer">
+			SELECT NVL(MAX(V_ORDER), 1) + 1 FROM TB_STTS_STAT
+		</selectKey>
+		INSERT INTO TB_STTS_STAT
+		(
+			STAT_ID
+			, STAT_NM
+			, ENG_STAT_NM
+			, STTS_CD
+			, USE_YN
+			, V_ORDER
+			, REG_ID
+			, REG_DTTM
+			, UPD_ID
+			, UPD_DTTM
+		)
+		VALUES
+		(
+			FN_CREATE_STAT_ID()
+			, #statNm:VARCHAR#
+			, #engStatNm:VARCHAR#
+			, #sttsCd:VARCHAR#
+			, #useYn:CHAR#
+			, #vOrder:NUMERIC#
+			, #regId:VARCHAR#
+			, SYSDATE
+			, #updId:VARCHAR#
+			, SYSDATE
+		)
+	</insert>
+	
+	<!-- 통계 메타 관리 상세 -->
+	<select id="StatSttsStatDao.selectStatSttsStatDtl" parameterClass="params" resultClass="record">
+		SELECT
+			STAT_ID			AS "statId"
+			, STAT_NM		AS "statNm"
+			, ENG_STAT_NM	AS "engStatNm"
+			, STTS_CD		AS "sttsCd"
+			, USE_YN		AS "useYn"
+		FROM
+			TB_STTS_STAT
+		WHERE
+			STAT_ID = #statId:VARCHAR#	
+	</select>
+	
+	<!-- 통계 설명 메타정보 메타입력 유형코드 조회(실 데이터 확인 후) -->
+	<select id="StatSttsStatDao.selectStatSttsStatExistMetaCd" parameterClass="params" resultClass="record">
+		SELECT 
+			DISTINCT A.META_CD 	AS "metaCd"
+			, B.DITC_NM			AS "metaNm"
+		FROM 
+			TB_STTS_STDDMETA A 
+			INNER JOIN TB_COMM_CODE B
+		    	ON A.META_CD = B.DITC_CD
+			    AND B.GRP_CD = 'S1001'
+			    AND B.USE_YN = 'Y'    
+		WHERE 
+			A.STTS_CD = #sttsCd:VARCHAR#
+		    AND A.USE_YN = 'Y'
+		    AND A.STDDMETA_YN = 'N'
+		ORDER BY A.META_CD	
+	</select>
+	
+	<!-- 통계설명 메타정보 조회 -->
+	<select id="StatSttsStatDao.selectStatSttsStddMeta" parameterClass="params" resultClass="record">
+		SELECT 
+			A.META_ID				AS "metaId"
+			, A.META_NM				AS "metaNm"
+			, A.ENG_META_NM			AS "engMetaNm"
+			, A.STTS_CD				AS "sttsCd"
+			, A.META_CD				AS "metaCd"
+			, A.META_EXP			AS "metaExp"
+			, A.METATY_CD			AS "metatyCd"
+			, A.INPUT_MAX_CD		AS "inputMaxCd"
+			, A.GRP_CD				AS "grpCd"
+			, A.INPUT_NEED_YN		AS "inputNeedYn"
+			, B.META_CONT			AS "metaCont"
+			, B.ENG_META_CONT		AS "engMetaCont"
+			, B.DITC_CD				AS "ditcCd"
+			, B.SRC_FILE_NM			AS "srcFileNm"
+			, B.SAVE_FILE_NM		AS "saveFileNm"
+			, B.VIEW_FILE_NM		AS "viewFileNm"
+			, B.ENG_VIEW_FILE_NM	AS "engViewFileNm"
+			, B.FILE_SIZE			AS "fileSize"
+			, B.FILE_EXT			AS "fileExt"
+			, C.VALUE_CD			AS "inputMaxCdVal"
+		FROM 
+			TB_STTS_STDDMETA A
+			LEFT OUTER JOIN TB_STTS_STAT_META B
+				ON  A.META_ID = B.META_ID
+				AND B.STAT_ID = #statId:VARCHAR#
+			LEFT OUTER JOIN TB_COMM_CODE C
+				ON A.INPUT_MAX_CD = C.DITC_cD
+				AND C.GRP_CD = 'S4002'
+				AND C.USE_YN = 'Y'
+		WHERE 
+			A.STTS_CD 			= #sttsCd:VARCHAR#
+			AND A.USE_YN 		= 'Y'
+			AND A.STDDMETA_YN 	= 'N'
+		ORDER BY A.V_ORDER, A.META_NM	
+	</select>
+	
+	<!-- 통계설명정보 저장 -->
+	<update id="StatSttsStatDao.saveSttsStat" parameterClass="params">
+		UPDATE TB_STTS_STAT
+		SET
+			STAT_NM 		= #statNm:VARCHAR#
+			, ENG_STAT_NM 	= #engStatNm:VARCHAR#
+			, USE_YN 		= #useYn:CHAR#
+		WHERE  STAT_ID 		= #statId:VARCHAR#
+	</update>
+	
+	<!-- 통계설명 메타정보 저장 -->
+	<update id="StatSttsStatDao.saveSttsStatMeta" parameterClass="java.util.LinkedList">
+		MERGE INTO TB_STTS_STAT_META A
+		USING (
+			<dynamic>
+				<iterate conjunction="UNION ALL ">
+				SELECT
+					#[].statId:VARCHAR#					AS STAT_ID
+					, #[].metaId:NUMERIC#				AS META_ID
+					, #[].metaCont:VARCHAR#				AS META_CONT
+					, #[].engMetaCont:VARCHAR#			AS ENG_META_CONT
+					, #[].ditcCd:VARCHAR#				AS DITC_CD
+					, #[].srcFileNm:VARCHAR#			AS SRC_FILE_NM
+					, #[].saveFileNm:VARCHAR#			AS SAVE_FILE_NM
+					, #[].viewFileNm:VARCHAR#			AS VIEW_FILE_NM
+					, #[].engViewFileNm:VARCHAR#		AS ENG_VIEW_FILE_NM
+					, TO_NUMBER(#[].fileSize:VARCHAR#)	AS FILE_SIZE
+					, #[].fileExt:VARCHAR#				AS FILE_EXT
+				FROM DUAL
+				</iterate>
+			</dynamic>
+		) B
+		ON (
+			A.STAT_ID 		= B.STAT_ID
+			AND A.META_ID 	= B.META_ID
+		)
+		WHEN MATCHED THEN
+		UPDATE SET
+			A.META_CONT 			= B.META_CONT
+			, A.ENG_META_CONT 		= B.ENG_META_CONT
+			, A.DITC_CD 			= B.DITC_CD
+			, A.SRC_FILE_NM 		= B.SRC_FILE_NM
+			, A.SAVE_FILE_NM 		= B.SAVE_FILE_NM
+			, A.VIEW_FILE_NM 		= B.VIEW_FILE_NM
+			, A.ENG_VIEW_FILE_NM 	= B.ENG_VIEW_FILE_NM
+			, A.FILE_SIZE 			= B.FILE_SIZE
+			, A.FILE_EXT 			= B.FILE_EXT
+		WHEN NOT MATCHED THEN
+		INSERT (
+			A.STAT_ID
+			, A.META_ID
+			, A.META_CONT
+			, A.ENG_META_CONT
+			, A.DITC_CD
+			, A.SRC_FILE_NM
+			, A.SAVE_FILE_NM	
+			, A.VIEW_FILE_NM
+			, A.ENG_VIEW_FILE_NM
+			, A.FILE_SIZE
+			, A.FILE_EXT
+		)
+		VALUES (
+			B.STAT_ID
+			, B.META_ID
+			, B.META_CONT
+			, B.ENG_META_CONT
+			, B.DITC_CD
+			, B.SRC_FILE_NM
+			, B.SAVE_FILE_NM	
+			, B.VIEW_FILE_NM
+			, B.ENG_VIEW_FILE_NM
+			, B.FILE_SIZE
+			, B.FILE_EXT
+		)
+	</update>
+	
+	<!-- 통계설명 관리담당자 삭제 -->
+	<update id="StatSttsStatDao.delSttsStatUsr" parameterClass="params">
+		UPDATE TB_STTS_STAT_USR
+		SET    USE_YN = 'N'
+		WHERE  STAT_ID = #statId:VARCHAR#
+	</update>
+	
+	<!-- 통계설명 관리담당자 삭제 후 재 입력 -->
+	<update id="StatSttsStatDao.mergeSttsStatUsr" parameterClass="java.util.HashMap">
+		MERGE INTO TB_STTS_STAT_USR A
+		USING (
+			<dynamic>
+			<iterate property="pMap" conjunction="UNION ALL ">
+			SELECT 
+				#pMap[].statId:VARCHAR# 		AS STAT_ID
+				, #pMap[].usrCd:NUMERIC#		AS USR_CD
+				, #pMap[].orgCd:VARCHAR#		AS ORG_CD
+				, #pMap[].rpstYn:CHAR#			AS RPST_YN
+				, #pMap[].prssAccCd:VARCHAR#	AS PRSS_ACC_CD
+				, #pMap[].srcViewYn:CHAR#		AS SRC_VIEW_YN
+				, #pMap[].vOrder:NUMERIC#		AS V_ORDER
+				, #pMap[].useYn:CHAR#			AS USE_YN
+				, #pMap[].regId:VARCHAR#		AS REG_ID
+				, #pMap[].updId:VARCHAR#		AS UPD_ID
+			, SYSDATE
+			FROM DUAL
+			</iterate>
+			</dynamic>			
+		) B
+		ON (
+			A.STAT_ID = B.STAT_ID
+			AND A.USR_CD = B.USR_CD
+			AND A.ORG_CD = B.ORG_CD
+		)
+		WHEN MATCHED THEN 
+		UPDATE SET
+			A.RPST_YN = B.RPST_YN
+			, A.PRSS_ACC_CD = B.PRSS_ACC_CD
+			, A.SRC_VIEW_YN = B.SRC_VIEW_YN
+			, A.USE_YN = B.USE_YN
+			, A.UPD_ID = B.UPD_ID
+			, A.UPD_DTTM = SYSDATE
+		WHEN NOT MATCHED THEN
+		INSERT (
+			A.STAT_ID
+			, A.USR_CD
+			, A.ORG_CD
+			, A.RPST_YN
+			, A.PRSS_ACC_CD
+			, A.SRC_VIEW_YN
+			, A.USE_YN
+			, A.REG_ID
+			, A.REG_DTTM
+			, A.UPD_ID
+			, A.UPD_DTTM
+		)
+		VALUES (
+			B.STAT_ID
+			, B.USR_CD
+			, B.ORG_CD
+			, B.RPST_YN
+			, B.PRSS_ACC_CD
+			, B.SRC_VIEW_YN
+			, B.USE_YN
+			, B.REG_ID
+			, SYSDATE
+			, B.UPD_ID
+			, SYSDATE
+		)	
+	</update>
+	
+	<!-- 통계설명 관리담당자 대표담당자 처리 -->
+	<update id="StatSttsStatDao.updateSttsStatOwner" parameterClass="record">
+		UPDATE TB_STTS_STAT
+		SET
+			USR_CD = #usrCd:NUMERIC#
+			, ORG_CD = (SELECT TOP_ORG_CD FROM TB_COMM_ORG WHERE ORG_CD = #orgCd:VARCHAR#)
+		WHERE
+			STAT_ID = #statId:VARCHAR#
+	</update>	
+	
+	<!-- 통계설명 관리담당자 목록 조회 -->
+	<select id="StatSttsStatDao.selectSttsStatUsrList" parameterClass="params" resultClass="record">
+		SELECT 
+			A.STAT_ID 			AS "statId"
+			, A.USR_CD			AS "usrCd"
+			, A.ORG_CD			AS "orgCd"
+			, A.RPST_YN			AS "rpstYn"
+			, A.PRSS_ACC_CD		AS "prssAccCd"
+			, A.SRC_VIEW_YN		AS "srcViewYn"
+			, A.USE_YN			AS "useYn"
+			, (SELECT USR_NM FROM TB_COMM_USR WHERE USR_CD = A.USR_CD) AS "usrNm"
+			, (SELECT ORG_NM FROM TB_COMM_ORG WHERE ORG_CD = A.ORG_CD) AS "orgNm"
+		FROM
+			TB_STTS_STAT_USR A
+		WHERE
+			A.STAT_ID	 = #statId:VARCHAR#
+		AND	A.USE_YN 	= 'Y'		
+	</select>
+	
+	<!-- 통계설명 정보 삭제 -->
+	<delete id="StatSttsStatDao.deleteSttsStat" parameterClass="params">
+		DELETE FROM TB_STTS_STAT WHERE STAT_ID = #statId:VARCHAR#
+	</delete>
+
+	<!-- 통계설명 메타정보 삭제 -->
+	<delete id="StatSttsStatDao.deleteSttsStatMeta" parameterClass="params">
+		DELETE FROM TB_STTS_STAT_META WHERE STAT_ID = #statId:VARCHAR#
+	</delete>
+	
+	<!-- 통계설명 관리 담당자 삭제 -->
+	<delete id="StatSttsStatDao.deleteSttsStatUsr" parameterClass="params">
+		DELETE FROM TB_STTS_STAT_USR WHERE STAT_ID = #statId:VARCHAR#
+	</delete>	
+	
+	<!-- 통계메타 순서 저장 -->
+	<update id="StatSttsStatDao.updateSttsStatMetaVorder" parameterClass="record">
+		UPDATE TB_STTS_STAT
+		SET    V_ORDER = #vOrder:NUMERIC#
+		WHERE  STAT_ID = #statId:VARCHAR#
+	</update>
+	
+	<!-- 백업 -->
+	<procedure id="StatSttsStatDao.execSpBcupSttsStat" parameterClass="params" resultClass="record" >
+	    <![CDATA[
+	      { CALL SP_BCUP_STTS_STAT(#statId:VARCHAR#, #Status:VARCHAR#, #regId:VARCHAR#)}
+	      ]]>
+	</procedure>
+	
+	<!-- 통계설명 ID를 사용하는 공개된 통계표 갯수 확인 -->
+    <select id="StatSttsStatDao.selectStatSttsOpenStateTblCnt" parameterClass="params" resultClass="record">
+	    SELECT COUNT(*) AS "cnt" 
+	    FROM   TB_STTS_TBL
+		WHERE  STAT_ID = #statId:VARCHAR#
+		AND    USE_YN = 'Y'
+		AND    OPEN_STATE = 'Y'
+	</select>
+	
+</sqlMap>

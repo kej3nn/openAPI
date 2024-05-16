@@ -1,0 +1,674 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- @(#)AdminGaAPI_Sql_Tibero.xml 1.0 2020/11/04                       -->
+<!--                                                                         -->
+<!-- COPYRIGHT (C) 2013 WISEITECH CO., LTD. ALL RIGHTS RESERVED.             -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- 구글 애널리틱스 SQL 파일이다.	                                    			 -->
+<!--                                                                         -->
+<!-- @author 최성빈                                                        								 -->
+<!-- @version 1.0 2020/11/04                                                 -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<sqlMap namespace="AdminGaApi">
+
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Type Alias                                                          -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+   	
+   	<!-- 구글 사이트 분석 현황 - 접속자수 입력 -->
+	<insert id="adminGaApiDao.insertStatAcesGG" parameterClass="params">
+		/* sql id : adminGaApiDao.insertStatAcesGG */
+		INSERT INTO TB_STAT_ACES_GG (
+			GA_CLCT_SEQCE_NO
+		    , YYYYMMDD
+		    , USER_CNT
+		    , SSEN_CNT
+		    , LV_RTO
+		    , SSEN_AVG_TM
+		    , REG_DTTM 
+		)
+		VALUES (
+			SQ_GA_CLCR_SEQ.NEXTVAL
+			, #date:VARCHAR#
+			, #users:NUMERIC#
+			, #sessions:NUMERIC#
+			, #bounceRate:NUMERIC#
+			, #sessionDuration:VARCHAR#
+			, SYSDATE
+		)
+	</insert>
+	
+	<!-- 구글 사이트 분석 현황 - 접속자수 쿼리 -->
+    <sql id="adminGaApiDao.statAcesGG">
+    	SELECT GA_CLCT_SEQCE_NO  AS "gaClctSeqceNo"
+			  , YYYYMMDD          AS "yyyymmdd"
+			  , USER_CNT          AS "userCnt"
+			  , SSEN_CNT          AS "ssenCnt"
+			  , LV_RTO            AS "lvRto"
+			  , SSEN_AVG_TM       AS "ssenAvgTm"
+			  , REG_DTTM          AS "regDttm"
+		  FROM TB_STAT_ACES_GG   
+	</sql>
+	
+	<!-- 구글 사이트 분석 현황 - 접속자수 조회 조건 -->
+	<sql id="adminGaApiDao.statAcesGG.where">
+    	WHERE 1=1
+   		<isNotEmpty property="startYmd" prepend="AND">
+		   TO_DATE(YYYYMMDD, 'YYYY-MM-DD') <![CDATA[ >= ]]> TO_DATE(#startYmd:VARCHAR#, 'YYYY-MM-DD') + 0	   	 
+	   	</isNotEmpty>
+	   	<isNotEmpty property="endYmd" prepend="AND">
+		   TO_DATE(YYYYMMDD, 'YYYY-MM-DD') <![CDATA[ < ]]> TO_DATE(#endYmd:VARCHAR#, 'YYYY-MM-DD') + 1
+	   	</isNotEmpty>
+    </sql>
+	
+	<!-- 구글 사이트 분석 현황 - 접속자수 리스트 조회 -->
+  	<select id="adminGaApiDao.selectStatAcesGGList" parameterClass="params" resultClass="record">
+  		/* sql id : adminGaApiDao.selectStatAcesGGList */
+  		<isEqual property="paging" compareValue="0">
+		SELECT AA.* 
+		FROM   (SELECT ROWNUM AS ROW_NUM, AA.*
+				FROM   (  
+		</isEqual>
+			<include refid="adminGaApiDao.statAcesGG"></include>
+			<include refid="adminGaApiDao.statAcesGG.where"></include>
+			ORDER BY
+			   YYYYMMDD DESC
+		<isEqual property="paging" compareValue="0">
+		<![CDATA[
+				) AA
+			WHERE ROWNUM <= #end:NUMERIC#
+			) AA
+		WHERE AA.ROW_NUM >= #start:NUMERIC#
+		]]>
+		</isEqual>
+  	</select>
+  	
+  	<select id="adminGaApiDao.selectStatAcesGGListCount" parameterClass="params" resultClass="int">
+  		/* sql id : adminGaApiDao.selectStatAcesGGListCount */
+		SELECT COUNT(*) 
+		  FROM TB_STAT_ACES_GG 
+		<include refid="adminGaApiDao.statAcesGG.where"></include>
+  	</select>
+  	
+  	<!--  구글 사이트 분석 현황 - 접속자수(중복체크)-->
+	<select id="adminGaApiDao.statAcesGGCheckDup" parameterClass="params" resultClass="Integer">
+		/* sql id : adminGaApiDao.statAcesGGCheckDup */	
+		  SELECT COUNT(GA_CLCT_SEQCE_NO) 
+		    FROM TB_STAT_ACES_GG 
+           WHERE YYYYMMDD = #yyyymmdd:VARCHAR#
+	</select>	
+	
+	<!--  구글 사이트 분석 현황 - 접속자수 뷰 (시작날짜 조회)-->	
+	<select id="adminGaApiDao.getStatAcesGGMaxStartDate" parameterClass="params" resultClass="String">
+			/* sql id : adminGaApiDao.getStatAcesGGMaxStartDate */
+			SELECT 
+			       CASE WHEN MAX_DATE = YESTERDAY THEN YESTERDAY 
+			            ELSE NEXT_DATE 
+			       END AS "startDate" 
+			  FROM 
+			       (SELECT TO_CHAR(TO_DATE(MAX(YYYYMMDD), 'YYYY-MM-DD'), 'YYYY-MM-DD') AS MAX_DATE ,
+			              TO_CHAR(TO_DATE(MAX(YYYYMMDD), 'YYYY-MM-DD') +1, 'YYYY-MM-DD') AS NEXT_DATE , 
+			              TO_CHAR(SYSDATE-1, 'YYYY-MM-DD') AS YESTERDAY 
+			         FROM TB_STAT_ACES_GG 
+			       )
+	</select>
+
+	<!-- 구글 페이지뷰 입력 -->
+	<insert id="adminGaApiDao.insertStatPageGG" parameterClass="params">
+		/* sql id : adminGaApiDao.insertStatPageGG */
+		INSERT INTO TB_STAT_PAGE_GG (
+			GA_CLCT_SEQCE_NO
+		    , YYYYMMDD
+		    , MENU_FULLNM
+		    , PGVW_CNT
+		    , REG_DTTM 
+		)
+		VALUES (
+			SQ_GA_CLCR_SEQ.NEXTVAL
+			, #date:VARCHAR#
+			, #pageTitle:NUMERIC#
+			, #pageviews:NUMERIC#
+			, SYSDATE
+		)
+	</insert>
+	
+	<!-- 구글 페이지 뷰 쿼리 -->
+    <sql id="adminGaApiDao.statPageGG">
+    	SELECT GA_CLCT_SEQCE_NO  AS "gaClctSeqceNo"
+			  , YYYYMMDD           AS "yyyymmdd"
+			  , MENU_FULLNM        AS "menuFullnm"
+			  , PGVW_CNT           AS "pgvwCnt"
+			  , ROUND((PGVW_CNT/sum(PGVW_CNT) OVER(PARTITION BY YYYYMMDD ORDER BY YYYYMMDD ))*100,2) AS "pgvwRto" 
+			  , REG_DTTM           AS "regDttm"
+		  FROM TB_STAT_PAGE_GG   
+	</sql>
+	
+	<!-- 구글 페이지 뷰 조회 조건 -->
+	<sql id="adminGaApiDao.statPageGG.where">
+    	WHERE 1=1
+   		<isNotEmpty property="startYmd" prepend="AND">
+		   TO_DATE(YYYYMMDD, 'YYYY-MM-DD') <![CDATA[ >= ]]> TO_DATE(#startYmd:VARCHAR#, 'YYYY-MM-DD') + 0	   	 
+	   	</isNotEmpty>
+	   	<isNotEmpty property="endYmd" prepend="AND">
+		   TO_DATE(YYYYMMDD, 'YYYY-MM-DD') <![CDATA[ < ]]> TO_DATE(#endYmd:VARCHAR#, 'YYYY-MM-DD') + 1
+	   	</isNotEmpty>
+    </sql>
+	
+	<!-- 구글 페이지 뷰 리스트 조회 -->
+  	<select id="adminGaApiDao.selectStatPageGGList" parameterClass="params" resultClass="record">
+  		/* sql id : adminGaApiDao.selectStatPageGGList */
+  		<isEqual property="paging" compareValue="0">
+		SELECT AA.* 
+		FROM   (SELECT ROWNUM AS ROW_NUM, AA.*
+				FROM   (  
+		</isEqual>
+			<include refid="adminGaApiDao.statPageGG"></include>
+			<include refid="adminGaApiDao.statPageGG.where"></include>
+			ORDER BY
+			   YYYYMMDD DESC, MENU_FULLNM
+		<isEqual property="paging" compareValue="0">
+		<![CDATA[
+				) AA
+			WHERE ROWNUM <= #end:NUMERIC#
+			) AA
+		WHERE AA.ROW_NUM >= #start:NUMERIC#
+		]]>
+		</isEqual>
+  	</select>
+  	
+  	<select id="adminGaApiDao.selectStatPageGGListCount" parameterClass="params" resultClass="int">
+  		/* sql id : adminGaApiDao.selectStatPageGGListCount */
+		SELECT COUNT(*) 
+		  FROM TB_STAT_PAGE_GG 
+		<include refid="adminGaApiDao.statPageGG.where"></include>
+  	</select>
+  	
+  	<!--  구글 페이지 뷰(중복체크)-->
+	<select id="adminGaApiDao.statPageGGCheckDup" parameterClass="params" resultClass="Integer">
+		/* sql id : adminGaApiDao.statPageGGCheckDup */	
+		  SELECT COUNT(GA_CLCT_SEQCE_NO) 
+		    FROM TB_STAT_PAGE_GG 
+           WHERE YYYYMMDD = #yyyymmdd:VARCHAR#
+	</select>	
+	
+	<!--  구글 사이트 분석 현황 - 페이지 뷰 (시작날짜 조회)-->
+	<select id="adminGaApiDao.getStatPageGGMaxStartDate" parameterClass="params" resultClass="String">
+		/* sql id : adminGaApiDao.getStatPageGGMaxStartDate */
+		SELECT 
+		       CASE WHEN MAX_DATE = YESTERDAY THEN YESTERDAY 
+		            ELSE NEXT_DATE 
+		       END AS "startDate" 
+		  FROM 
+		       (SELECT TO_CHAR(TO_DATE(MAX(YYYYMMDD), 'YYYY-MM-DD'), 'YYYY-MM-DD') AS MAX_DATE ,
+		              TO_CHAR(TO_DATE(MAX(YYYYMMDD), 'YYYY-MM-DD') +1, 'YYYY-MM-DD') AS NEXT_DATE , 
+		              TO_CHAR(SYSDATE-1, 'YYYY-MM-DD') AS YESTERDAY 
+		         FROM TB_STAT_PAGE_GG 
+		       )
+	</select>
+	
+	<!-- 구글 사이트 분석 현황 - 지역현황 입력 -->
+	<insert id="adminGaApiDao.insertStatAreaGG" parameterClass="params">
+		/* sql id : adminGaApiDao.insertStatAreaGG */
+		INSERT INTO TB_STAT_AREA_GG (
+			GA_CLCT_SEQCE_NO
+			, YYYYMMDD
+			, NAT_ID
+			, NAT_NM
+			, USER_CNT
+			, NEW_VSTR_CNT
+			, SSEN_CNT
+		    , REG_DTTM 
+		)
+		VALUES (
+			SQ_GA_CLCR_SEQ.NEXTVAL
+			, #date:VARCHAR#
+			, #countryIsoCode:VARCHAR#
+			, #country:NUMERIC#
+			, #users:NUMERIC#
+			, #newUsers:NUMERIC#
+			, #sessions:NUMERIC#
+			, SYSDATE
+		)
+	</insert>
+	
+	<!-- 구글 사이트 분석 현황 - 지역현황 쿼리 -->
+    <sql id="adminGaApiDao.statAreaGG">
+    	SELECT GA_CLCT_SEQCE_NO      AS "gaClctSeqceNo"
+		       , YYYYMMDD            AS "yyyymmdd"
+		       , NAT_ID              AS "natId"
+		       , NAT_NM              AS "natNm"
+		       , USER_CNT            AS "userCnt"
+		       , ROUND((USER_CNT/SUM(USER_CNT) OVER(PARTITION BY YYYYMMDD ORDER BY YYYYMMDD ))*100,2) AS "userRto"  
+		       , NEW_VSTR_CNT        AS "newVstrCnt"
+		       , ROUND((NEW_VSTR_CNT/SUM(NEW_VSTR_CNT) OVER(PARTITION BY YYYYMMDD ORDER BY YYYYMMDD ))*100,2) AS "newVstrRto" 
+		       , SSEN_CNT            AS "ssenCnt"
+		       , ROUND((SSEN_CNT/SUM(SSEN_CNT) OVER(PARTITION BY YYYYMMDD ORDER BY YYYYMMDD ))*100,2) AS "ssenRto"
+		       , REG_DTTM            AS "regDttm"
+		  FROM TB_STAT_AREA_GG    
+	</sql>
+	
+	<!-- 구글 사이트 분석 현황 - 지역현황 조회 조건 -->
+	<sql id="adminGaApiDao.statAreaGG.where">
+    	WHERE 1=1
+   		<isNotEmpty property="startYmd" prepend="AND">
+		   TO_DATE(YYYYMMDD, 'YYYY-MM-DD') <![CDATA[ >= ]]> TO_DATE(#startYmd:VARCHAR#, 'YYYY-MM-DD') + 0	   	 
+	   	</isNotEmpty>
+	   	<isNotEmpty property="endYmd" prepend="AND">
+		   TO_DATE(YYYYMMDD, 'YYYY-MM-DD') <![CDATA[ < ]]> TO_DATE(#endYmd:VARCHAR#, 'YYYY-MM-DD') + 1
+	   	</isNotEmpty>
+    </sql>
+	
+	<!-- 구글 사이트 분석 현황 - 지역현황 리스트 조회 -->
+  	<select id="adminGaApiDao.selectStatAreaGGList" parameterClass="params" resultClass="record">
+  		/* sql id : adminGaApiDao.selectStatAreaGGList */
+  		<isEqual property="paging" compareValue="0">
+		SELECT AA.* 
+		FROM   (SELECT ROWNUM AS ROW_NUM, AA.*
+				FROM   (  
+		</isEqual>
+			<include refid="adminGaApiDao.statAreaGG"></include>
+			<include refid="adminGaApiDao.statAreaGG.where"></include>
+			ORDER BY
+			   YYYYMMDD DESC, NAT_NM
+		<isEqual property="paging" compareValue="0">
+		<![CDATA[
+				) AA
+			WHERE ROWNUM <= #end:NUMERIC#
+			) AA
+		WHERE AA.ROW_NUM >= #start:NUMERIC#
+		]]>
+		</isEqual>
+  	</select>
+  	
+  	<select id="adminGaApiDao.selectStatAreaGGListCount" parameterClass="params" resultClass="int">
+  		/* sql id : adminGaApiDao.selectStatAreaGGListCount */
+		SELECT COUNT(*) 
+		  FROM TB_STAT_AREA_GG 
+		<include refid="adminGaApiDao.statPageGG.where"></include>
+  	</select>
+  	
+  	<!--  구글 사이트 분석 현황 - 지역현황(중복체크)-->
+	<select id="adminGaApiDao.statAreaGGCheckDup" parameterClass="params" resultClass="Integer">
+		/* sql id : adminGaApiDao.statAreaGGCheckDup */	
+		  SELECT COUNT(GA_CLCT_SEQCE_NO) 
+		    FROM TB_STAT_AREA_GG 
+           WHERE YYYYMMDD = #yyyymmdd:VARCHAR#
+	</select>	
+	
+	<!--  구글 사이트 분석 현황 - 지역현황 (시작날짜 조회)-->
+	<select id="adminGaApiDao.getStatAreaGGMaxStartDate" parameterClass="params" resultClass="String">
+		/* sql id : adminGaApiDao.getStatAreaGGMaxStartDate */
+		SELECT 
+		       CASE WHEN MAX_DATE = YESTERDAY THEN YESTERDAY 
+		            ELSE NEXT_DATE 
+		       END AS "startDate" 
+		  FROM 
+		       (SELECT TO_CHAR(TO_DATE(MAX(YYYYMMDD), 'YYYY-MM-DD'), 'YYYY-MM-DD') AS MAX_DATE ,
+		              TO_CHAR(TO_DATE(MAX(YYYYMMDD), 'YYYY-MM-DD') +1, 'YYYY-MM-DD') AS NEXT_DATE , 
+		              TO_CHAR(SYSDATE-1, 'YYYY-MM-DD') AS YESTERDAY 
+		         FROM TB_STAT_AREA_GG 
+		       )
+	</select>
+	
+	<!-- 구글 사이트 분석 현황 - 접속경로 입력 -->
+	<insert id="adminGaApiDao.insertStatAcrtGG" parameterClass="params">
+		/* sql id : adminGaApiDao.insertStatAcrtGG */
+		INSERT INTO TB_STAT_ACRT_GG (
+			GA_CLCT_SEQCE_NO
+		    , YYYYMMDD
+			, DEVC_CATE_NM
+			, USER_CNT
+			, NEW_VSTR_CNT
+			, SSEN_CNT
+			, REG_DTTM
+		)
+		VALUES (
+			SQ_GA_CLCR_SEQ.NEXTVAL
+			, #date:VARCHAR#
+			, #deviceCategory:VARCHAR#
+			, #users:NUMERIC#
+			, #newUsers:NUMERIC#
+			, #sessions:NUMERIC#
+			, SYSDATE
+		)
+	</insert>
+	
+	<!-- 구글 사이트 분석 현황 - 접속경로 쿼리 -->
+    <sql id="adminGaApiDao.statAcrtGG">
+    	SELECT GA_CLCT_SEQCE_NO    AS "gaClctSeqceNo"
+		        , YYYYMMDD          AS "yyyymmdd"
+		        , DEVC_CATE_NM      AS "devcCateNm"
+		        , USER_CNT          AS "userCnt"
+		        , ROUND((USER_CNT/sum(USER_CNT) OVER(PARTITION BY YYYYMMDD ORDER BY YYYYMMDD ))*100,2) AS "userRto"
+		        , NEW_VSTR_CNT      AS "newVstrCnt"
+		        , ROUND((NEW_VSTR_CNT/sum(NEW_VSTR_CNT) OVER(PARTITION BY YYYYMMDD ORDER BY YYYYMMDD ))*100,2) AS "newVstrRto" 
+		        , SSEN_CNT          AS "ssenCnt"
+		        , ROUND((SSEN_CNT/sum(SSEN_CNT) OVER(PARTITION BY YYYYMMDD ORDER BY YYYYMMDD ))*100,2) AS "ssenRto"
+		        , REG_DTTM          AS "regDttm"
+		  FROM TB_STAT_ACRT_GG   
+	</sql>
+	
+	<!-- 구글 사이트 분석 현황 - 접속경로 조회 조건 -->
+	<sql id="adminGaApiDao.statAcrtGG.where">
+    	WHERE 1=1
+   		<isNotEmpty property="startYmd" prepend="AND">
+		   TO_DATE(YYYYMMDD, 'YYYY-MM-DD') <![CDATA[ >= ]]> TO_DATE(#startYmd:VARCHAR#, 'YYYY-MM-DD') + 0	   	 
+	   	</isNotEmpty>
+	   	<isNotEmpty property="endYmd" prepend="AND">
+		   TO_DATE(YYYYMMDD, 'YYYY-MM-DD') <![CDATA[ < ]]> TO_DATE(#endYmd:VARCHAR#, 'YYYY-MM-DD') + 1
+	   	</isNotEmpty>
+    </sql>
+	
+	<!-- 구글 사이트 분석 현황 - 접속경로 리스트 조회 -->
+  	<select id="adminGaApiDao.selectStatAcrtGGList" parameterClass="params" resultClass="record">
+  		/* sql id : adminGaApiDao.selectStatAcrtGGList */
+  		<isEqual property="paging" compareValue="0">
+		SELECT AA.* 
+		FROM   (SELECT ROWNUM AS ROW_NUM, AA.*
+				FROM   (  
+		</isEqual>
+			<include refid="adminGaApiDao.statAcrtGG"></include>
+			<include refid="adminGaApiDao.statAcrtGG.where"></include>
+			ORDER BY
+			   YYYYMMDD DESC, DEVC_CATE_NM
+		<isEqual property="paging" compareValue="0">
+		<![CDATA[
+				) AA
+			WHERE ROWNUM <= #end:NUMERIC#
+			) AA
+		WHERE AA.ROW_NUM >= #start:NUMERIC#
+		]]>
+		</isEqual>
+  	</select>
+  	
+  	<select id="adminGaApiDao.selectStatAcrtGGListCount" parameterClass="params" resultClass="int">
+  		/* sql id : adminGaApiDao.selectStatAcrtGGListCount */
+		SELECT COUNT(*) 
+		  FROM TB_STAT_ACRT_GG 
+		<include refid="adminGaApiDao.statPageGG.where"></include>
+  	</select>
+  	
+  	<!--  구글 사이트 분석 현황 - 접속경로(중복체크)-->
+	<select id="adminGaApiDao.statAcrtGGCheckDup" parameterClass="params" resultClass="Integer">
+		/* sql id : adminGaApiDao.statAcrtGGCheckDup */	
+		  SELECT COUNT(GA_CLCT_SEQCE_NO) 
+		    FROM TB_STAT_ACRT_GG 
+           WHERE YYYYMMDD = #yyyymmdd:VARCHAR#
+	</select>	
+	
+	<!--  구글 사이트 분석 현황 - 접속경로 (시작날짜 조회)-->
+	<select id="adminGaApiDao.getStatAcrtGGMaxStartDate" parameterClass="params" resultClass="String">
+		/* sql id : adminGaApiDao.getStatAcrtGGMaxStartDate */
+		SELECT 
+		       CASE WHEN MAX_DATE = YESTERDAY THEN YESTERDAY 
+		            ELSE NEXT_DATE 
+		       END AS "startDate" 
+		  FROM 
+		       (SELECT TO_CHAR(TO_DATE(MAX(YYYYMMDD), 'YYYY-MM-DD'), 'YYYY-MM-DD') AS MAX_DATE ,
+		              TO_CHAR(TO_DATE(MAX(YYYYMMDD), 'YYYY-MM-DD') +1, 'YYYY-MM-DD') AS NEXT_DATE , 
+		              TO_CHAR(SYSDATE-1, 'YYYY-MM-DD') AS YESTERDAY 
+		         FROM TB_STAT_ACRT_GG 
+		       )
+	</select>
+	
+	<!-- 구글 사이트 분석 현황 - 인구통계 입력 -->
+	<insert id="adminGaApiDao.insertStatPoplGG" parameterClass="params">
+		/* sql id : adminGaApiDao.insertStatPoplGG */
+		INSERT INTO TB_STAT_POPL_GG (
+			GA_CLCT_SEQCE_NO
+		    , YYYYMMDD
+			, GN_NM
+			, GNRT_NM
+			, USER_CNT
+			, REG_DTTM
+		)
+		VALUES (
+			SQ_GA_CLCR_SEQ.NEXTVAL
+			, #date:VARCHAR#
+			, #userGender:VARCHAR#
+			, #userAgeBracket:VARCHAR#
+			, #users:NUMERIC#
+			, SYSDATE
+		)
+	</insert>
+	
+	<!-- 구글 사이트 분석 현황 - 인구통계 쿼리 -->
+    <sql id="adminGaApiDao.statPoplGG">
+    	SELECT YYYYMMDD     AS "yyyymmdd"
+		      , GNRT_NM    AS "gnrtNm"
+		      , GNRT_RT    AS "gnrtRt"
+		      , MALE_CNT   AS "maleCnt"
+		      , MALE_RT    AS "maleRt"
+		      , FEMAL_CNT  AS "femalCnt"
+		      , FEMAL_RT   AS "femalRt"
+		FROM (
+		  SELECT YYYYMMDD
+		     ,  GNRT_NM
+		     ,  ROUND((
+		        (NVL(SUM(MALE_CNT),0)+NVL(SUM(FEMAL_CNT),0))
+		          /SUM(NVL(SUM(MALE_CNT),0)+NVL(SUM(FEMAL_CNT),0)) OVER (PARTITION BY YYYYMMDD ORDER BY YYYYMMDD)
+		         ) * 100,2) AS GNRT_RT
+		     ,  NVL(SUM(MALE_CNT),0)   AS MALE_CNT
+		     ,  ROUND(CASE WHEN NVL(SUM(MALE_CNT),0) = 0 THEN 0 
+		            ELSE 
+		              (
+		              (NVL(SUM(MALE_CNT),0))
+		                /SUM(NVL(SUM(MALE_CNT),0)) OVER (PARTITION BY YYYYMMDD ORDER BY YYYYMMDD)
+		               ) * 100 
+		           END,2) AS MALE_RT   
+		     ,  NVL(SUM(FEMAL_CNT),0)  AS FEMAL_CNT
+		     ,  ROUND(CASE WHEN NVL(SUM(FEMAL_CNT),0) = 0 THEN 0 
+		            ELSE 
+		              (
+		              (NVL(SUM(FEMAL_CNT),0))
+		                /SUM(NVL(SUM(FEMAL_CNT),0)) OVER (PARTITION BY YYYYMMDD ORDER BY YYYYMMDD)
+		               ) * 100 
+		           END,2) AS FEMAL_RT      
+		  FROM (
+		  SELECT YYYYMMDD    
+		     ,  GNRT_NM      
+		     ,  CASE WHEN GN_NM = 'male' THEN USER_CNT END AS MALE_CNT   
+		     ,  CASE WHEN GN_NM = 'female' THEN USER_CNT END AS FEMAL_CNT
+		     FROM TB_STAT_POPL_GG
+		     ) MST GROUP BY YYYYMMDD,GNRT_NM   
+		          ORDER BY YYYYMMDD,GNRT_NM
+		  )  
+	</sql>
+	
+	<!-- 구글 사이트 분석 현황 - 인구통계 조회 조건 -->
+	<sql id="adminGaApiDao.statPoplGG.where">
+    	WHERE 1=1
+   		<isNotEmpty property="startYmd" prepend="AND">
+		   TO_DATE(YYYYMMDD, 'YYYY-MM-DD') <![CDATA[ >= ]]> TO_DATE(#startYmd:VARCHAR#, 'YYYY-MM-DD') + 0	   	 
+	   	</isNotEmpty>
+	   	<isNotEmpty property="endYmd" prepend="AND">
+		   TO_DATE(YYYYMMDD, 'YYYY-MM-DD') <![CDATA[ < ]]> TO_DATE(#endYmd:VARCHAR#, 'YYYY-MM-DD') + 1
+	   	</isNotEmpty>
+    </sql>
+	
+	<!-- 구글 사이트 분석 현황 - 인구통계 리스트 조회 -->
+  	<select id="adminGaApiDao.selectStatPoplGGList" parameterClass="params" resultClass="record">
+  		/* sql id : adminGaApiDao.selectStatPoplGGList */
+  		<isEqual property="paging" compareValue="0">
+		SELECT AA.* 
+		FROM   (SELECT ROWNUM AS ROW_NUM, AA.*
+				FROM   (  
+		</isEqual>
+			<include refid="adminGaApiDao.statPoplGG"></include>
+			<include refid="adminGaApiDao.statPoplGG.where"></include>
+			ORDER BY
+			   YYYYMMDD DESC, GNRT_NM
+		<isEqual property="paging" compareValue="0">
+		<![CDATA[
+				) AA
+			WHERE ROWNUM <= #end:NUMERIC#
+			) AA
+		WHERE AA.ROW_NUM >= #start:NUMERIC#
+		]]>
+		</isEqual>
+  	</select>
+  	
+  	<select id="adminGaApiDao.selectStatPoplGGListCount" parameterClass="params" resultClass="int">
+  		/* sql id : adminGaApiDao.selectStatPoplGGListCount */
+		SELECT COUNT(*) 
+		  FROM TB_STAT_POPL_GG 
+		<include refid="adminGaApiDao.statPageGG.where"></include>
+  	</select>
+  	
+  	<!--  구글 사이트 분석 현황 - 인구통계(중복체크)-->
+	<select id="adminGaApiDao.statPoplGGCheckDup" parameterClass="params" resultClass="Integer">
+		/* sql id : adminGaApiDao.statPoplGGCheckDup */	
+		  SELECT COUNT(GA_CLCT_SEQCE_NO) 
+		    FROM TB_STAT_POPL_GG 
+           WHERE YYYYMMDD = #yyyymmdd:VARCHAR#
+	</select>	
+	
+	<!--  구글 사이트 분석 현황 - 인구통계 (시작날짜 조회)-->
+	<select id="adminGaApiDao.getStatPoplGGMaxStartDate" parameterClass="params" resultClass="String">
+		/* sql id : adminGaApiDao.getStatPoplGGMaxStartDate */
+		SELECT 
+		       CASE WHEN MAX_DATE = YESTERDAY THEN YESTERDAY 
+		            ELSE NEXT_DATE 
+		       END AS "startDate" 
+		  FROM 
+		       (SELECT TO_CHAR(TO_DATE(MAX(YYYYMMDD), 'YYYY-MM-DD'), 'YYYY-MM-DD') AS MAX_DATE ,
+		              TO_CHAR(TO_DATE(MAX(YYYYMMDD), 'YYYY-MM-DD') +1, 'YYYY-MM-DD') AS NEXT_DATE , 
+		              TO_CHAR(SYSDATE-1, 'YYYY-MM-DD') AS YESTERDAY 
+		         FROM TB_STAT_POPL_GG 
+		       )
+	</select>
+	
+	<!-- 구글 사이트 분석 현황 - 지역현황 상세 입력 -->
+	<insert id="adminGaApiDao.insertStatAreaDGG" parameterClass="params">
+		/* sql id : adminGaApiDao.insertStatAreaDGG */
+		INSERT INTO TB_STAT_AREA_D_GG (
+			GA_CLCT_SEQCE_NO
+			, YYYYMMDD
+			, NAT_ID
+			, NAT_NM
+			, AREA_ID
+			, AREA_NM
+			, USER_CNT
+			, NEW_VSTR_CNT
+			, SSEN_CNT
+			, REG_DTTM
+		)
+		VALUES (
+			SQ_GA_CLCR_SEQ.NEXTVAL
+			, #date:VARCHAR#
+			, #countryIsoCode:VARCHAR#
+			, #country:VARCHAR#
+			, #regionId:VARCHAR#
+			, #region:VARCHAR#
+			, #users:NUMERIC#
+			, #newUsers:NUMERIC#
+			, #sessions:NUMERIC#
+			, SYSDATE
+		)
+	</insert>
+	
+	<!-- 구글 사이트 분석 현황 - 지역현황 상세 쿼리 -->
+    <sql id="adminGaApiDao.statAreaDGG">
+    	SELECT  GA_CLCT_SEQCE_NO      AS "gaClctSeqceNo"
+		        , YYYYMMDD            AS "yyyymmdd"
+		        , NAT_ID              AS "natId"
+		        , NAT_NM              AS "natNm"
+		        , AREA_ID             AS "areaId"
+		        , AREA_NM             AS "areaNm"
+		        , USER_CNT            AS "userCnt"
+		        , USER_RTO            AS "userRto"
+		        , NEW_VSTR_CNT        AS "newVstrCnt"
+		        , NEW_VSTR_RTO        AS "newVstrRto"
+		        , SSEN_CNT            AS "ssenCnt"
+		        , SSEN_RTO            AS "ssenRto"
+				        
+		FROM(		  
+		    SELECT GA_CLCT_SEQCE_NO
+		           , YYYYMMDD
+		           , CASE WHEN AREA_NM = '(not set)' THEN 'Unknown' 
+		                  ELSE AREA_NM END AS AREA_NM 
+		           , NAT_ID
+		           , NAT_NM 
+		           , AREA_ID        
+		           , SUM(USER_CNT) AS USER_CNT
+		           , ROUND(SUM(USER_CNT)/SUM(SUM(USER_CNT)) OVER (PARTITION BY YYYYMMDD ORDER BY YYYYMMDD)*100,2) AS USER_RTO   
+		           , SUM(NEW_VSTR_CNT) AS NEW_VSTR_CNT
+		           , ROUND(SUM(NEW_VSTR_CNT)/SUM(SUM(NEW_VSTR_CNT)) OVER (PARTITION BY YYYYMMDD ORDER BY YYYYMMDD)*100,2) AS NEW_VSTR_RTO   
+		           , SUM(SSEN_CNT) AS SSEN_CNT
+		           , ROUND(SUM(SSEN_CNT)/SUM(SUM(SSEN_CNT)) OVER (PARTITION BY YYYYMMDD ORDER BY YYYYMMDD)*100,2) AS SSEN_RTO
+		       FROM TB_STAT_AREA_D_GG
+		       GROUP BY GA_CLCT_SEQCE_NO, YYYYMMDD,NAT_NM, NAT_ID, NAT_NM, AREA_ID
+		                , CASE WHEN AREA_NM = '(not set)' THEN 'Unknown' ELSE AREA_NM END
+		       ORDER BY CASE WHEN NAT_NM = 'South Korea' THEN 0 ELSE 1 END 
+		    )  
+	</sql>
+	
+	<!-- 구글 사이트 분석 현황 - 지역현황 상세 조회 조건 -->
+	<sql id="adminGaApiDao.statAreaDGG.where">
+    	WHERE 1=1
+   		<isNotEmpty property="startYmd" prepend="AND">
+		   TO_DATE(YYYYMMDD, 'YYYY-MM-DD') <![CDATA[ >= ]]> TO_DATE(#startYmd:VARCHAR#, 'YYYY-MM-DD') + 0	   	 
+	   	</isNotEmpty>
+	   	<isNotEmpty property="endYmd" prepend="AND">
+		   TO_DATE(YYYYMMDD, 'YYYY-MM-DD') <![CDATA[ < ]]> TO_DATE(#endYmd:VARCHAR#, 'YYYY-MM-DD') + 1
+	   	</isNotEmpty>
+    </sql>
+	
+	<!-- 구글 사이트 분석 현황 - 지역현황 상세 리스트 조회 -->
+  	<select id="adminGaApiDao.selectStatAreaDGGList" parameterClass="params" resultClass="record">
+  		/* sql id : adminGaApiDao.selectStatAreaDGGList */
+  		<isEqual property="paging" compareValue="0">
+		SELECT AA.* 
+		FROM   (SELECT ROWNUM AS ROW_NUM, AA.*
+				FROM   (  
+		</isEqual>
+			<include refid="adminGaApiDao.statAreaDGG"></include>
+			<include refid="adminGaApiDao.statAreaDGG.where"></include>
+			ORDER BY
+			   YYYYMMDD DESC
+		<isEqual property="paging" compareValue="0">
+		<![CDATA[
+				) AA
+			WHERE ROWNUM <= #end:NUMERIC#
+			) AA
+		WHERE AA.ROW_NUM >= #start:NUMERIC#
+		]]>
+		</isEqual>
+  	</select>
+  	
+  	<select id="adminGaApiDao.selectStatAreaDGGListCount" parameterClass="params" resultClass="int">
+  		/* sql id : adminGaApiDao.selectStatAreaDGGListCount */
+		SELECT COUNT(*) 
+		  FROM TB_STAT_AREA_D_GG 
+		<include refid="adminGaApiDao.statPageGG.where"></include>
+  	</select>
+  	
+  	<!--  구글 사이트 분석 현황 - 지역현황 상세(중복체크)-->
+	<select id="adminGaApiDao.statAreaDGGCheckDup" parameterClass="params" resultClass="Integer">
+		/* sql id : adminGaApiDao.statAreaDGGCheckDup */	
+		  SELECT COUNT(GA_CLCT_SEQCE_NO) 
+		    FROM TB_STAT_AREA_D_GG 
+           WHERE YYYYMMDD = #yyyymmdd:VARCHAR#
+	</select>	
+	
+	<!--  구글 사이트 분석 현황 - 지역현황 상세 (시작날짜 조회)-->
+	<select id="adminGaApiDao.getStatAreaDGGMaxStartDate" parameterClass="params" resultClass="String">
+		/* sql id : adminGaApiDao.getStatAreaDGGMaxStartDate */
+		SELECT 
+		       CASE WHEN MAX_DATE = YESTERDAY THEN YESTERDAY 
+		            ELSE NEXT_DATE 
+		       END AS "startDate" 
+		  FROM 
+		       (SELECT TO_CHAR(TO_DATE(MAX(YYYYMMDD), 'YYYY-MM-DD'), 'YYYY-MM-DD') AS MAX_DATE ,
+		              TO_CHAR(TO_DATE(MAX(YYYYMMDD), 'YYYY-MM-DD') +1, 'YYYY-MM-DD') AS NEXT_DATE , 
+		              TO_CHAR(SYSDATE-1, 'YYYY-MM-DD') AS YESTERDAY 
+		         FROM TB_STAT_AREA_D_GG 
+		       )
+	</select>
+</sqlMap>

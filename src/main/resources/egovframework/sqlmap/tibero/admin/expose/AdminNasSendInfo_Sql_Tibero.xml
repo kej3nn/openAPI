@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- @(#)AdminNasSendInfo_Sql_Tibero.xml 1.0 2019/07/29                       -->
+<!--                                                                         -->
+<!-- COPYRIGHT (C) 2013 WISEITECH CO., LTD. ALL RIGHTS RESERVED.             -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- 정보공개(관리자) > 메일, SMS 전송을 위한 SQL 파일이다.	                                    	-->
+<!--                                                                         -->
+<!-- @author SoftOn                                                        	-->
+<!-- @version 1.0 2019/08/22                                                 -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<sqlMap namespace="AdminNasSendInfo">
+
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Type Alias                                                          -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+   	
+	<!-- 기관 정보 조회 -->
+	<select id="AdminNasSendInfoDao.getOpnzInstInfo" parameterClass="string" resultClass="record">
+		/* sql id : AdminNasSendInfoDao.getOpnzInstInfo */
+		SELECT INST_BANK_NM AS INST_BK_NM
+				 , INST_ACC_NM
+				 , INST_ACC_NO
+				 , INST_PNO
+				 , INST_NM
+		FROM TV_OPNZ_INSTCD
+		WHERE INST_CD = #inst_cd#
+	</select>
+	   	
+	<!-- 정보공개청구 정보 조회 -->
+	<select id="AdminNasSendInfoDao.getOpnzAplInfo" parameterClass="string" resultClass="record">
+		/* sql id : AdminNasSendInfoDao.getOpnzAplInfo */
+		SELECT pkg_crypto2.decrypt(APL_MBL_PNO) AS APL_MBL_PNO
+				 , pkg_crypto2.decrypt(APL_EMAIL_ADDR) AS APL_EMAIL_ADDR
+				 , OPB_FOM_VAL
+				 , FC_COMCODE(OPB_FOM_VAL, 'A') AS OPB_FOM_NM
+				 , APL_TAK_MTH
+				 , FC_COMCODE(APL_TAK_MTH, 'B') AS APL_TAK_MTH_NM
+				 , DCS_NTC_RCV_MTH_CD
+				 , DCS_NTC_RCV_MTH_SMS
+				 , DCS_NTC_RCV_MTH_MAIL
+				 , DCS_NTC_RCV_MTH_TALK
+				 , APL_PN
+				 , APL_DT
+				 , APL_SJ
+				 , APL_DEAL_INST_CD
+				 , FC_COMCODE(APL_DEAL_INST_CD, '') AS APL_DEAL_INST_NM
+		FROM TB_OPNZ_APL
+		WHERE APL_NO = #apl_no#
+	</select>
+
+	<!-- 정보공개결정 정보 조회 -->
+	<select id="AdminNasSendInfoDao.getOpnzDcsInfo" parameterClass="string" resultClass="record">
+		/* sql id : AdminNasSendInfoDao.getOpnzDcsInfo */
+		SELECT RCP_DT
+		         , RCP_NO
+		         , OPB_YN
+		         , OPB_DTM
+		         , DCS_PROD_ET_DT
+		         , FEE
+		         , ZIP_FAR
+		         , FEE_RDTN_AMT
+		         , FEE_PAID_ACC_NO
+		FROM TB_OPNZ_DCS
+		WHERE APL_NO = #apl_no#
+	</select>
+	
+	<!-- 관리자 정보 조회 > 기관코드로 조회 -->
+	<select id="AdminNasSendInfoDao.getOpnUsrRelInfo" parameterClass="string" resultClass="record">
+		/* sql id : AdminNasSendInfoDao.getOpnUsrRelInfo */
+		SELECT ROWNUM AS ROW_NUM
+				 , USR_ID
+				 , USR_NM
+				 , USR_PNO
+				 , INST_CD
+				 , INST_NM
+				 , USR_MBL_PNO
+				 , USR_EMAIL_ADDR AS USR_EMAIL
+				 <!-- , PKG_CRYPTO2.DECRYPT(USR_EMAIL_PSWD) USR_EMAIL_PSWD -->
+				 , USR_DIV
+				 , JGRD_NM
+				 , USE_DIV
+				 , NOTI_HH_CD
+				 , NOTI_START_HH
+				 , NOTI_END_HH
+		FROM  TV_OPNZ_USR 
+		WHERE USR_DIV = 'OPN' 
+		AND   USE_DIV = '0'
+		AND   INST_CD = #inst_cd#
+		AND   ROWNUM = 1
+	</select>
+	
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 	-->
+    <!-- SMS발송정보를 등록한다.                            																								-->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 	-->
+	<insert id="AdminNasSendInfoDao.insertSMSRow" parameterClass="params">
+		/* sql id : AdminNasSendInfoDao.insertSMSRow */
+		INSERT INTO BIZ_MSG ( 
+			  CMID
+			, MSG_TYPE
+			, STATUS
+			, REQUEST_TIME
+			, SEND_TIME
+			, DEST_PHONE
+			, DEST_NAME
+			, SEND_PHONE
+			, SEND_NAME
+			, SUBJECT
+			, MSG_BODY	
+			)
+		VALUES(
+			  SQ_BIZ_MSG_CMID.NEXTVAL
+			, (CASE WHEN LENGTHB(#msg_body#)  <![CDATA[ > ]]>90 THEN 5 ELSE 0 END) <!--   5: MMS, 0 : 단문메시지  -->
+			, 0
+			, SYSDATE
+			, SYSDATE			
+			, #dest_phone#
+			, #dest_name#
+			, #send_phone#
+			, #send_name#
+			, #subject#
+			, #msg_body#
+			)
+	</insert>
+	
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 	-->
+    <!-- i-Mailer 발송정보를 등록한다.                            						-->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 	-->
+	<insert id="AdminNasSendInfoDao.insertIMailRow" parameterClass="params">
+		/* sql id : AdminNasSendInfoDao.insertIMailRow */
+		INSERT INTO IM_DMAIL_INFO_48 ( 
+			  SEQIDX
+			, SUBJECT
+			, QRY
+			, REJECT_SLIST_IDX
+			, BLOCK_GROUP_IDX
+			, MAILFROM
+			, MAILTO
+			, REPLYTO
+			, ERRORSTO
+			, HTML
+			, ENCODING
+			, CHARSET
+			, SDATE
+			, TDATE
+			, DURATION_SET
+			, CLICK_SET
+			, SITE_SET
+			, ATC_SET
+			, MTYPE
+			, U_IDX
+			, G_IDX
+			, MSGFLAG
+			, CONTENT
+			)
+		VALUES(
+			  IM_SEQ_DMAIL_INFO_48.NEXTVAL
+			, #mailtitle#
+			, #mailqry#
+			, 0
+			, 0
+			, #mailfrom#
+			, #mailto#
+			, #mailfrom#
+			, #mailfrom#
+			, 1
+			, 1
+			, (SELECT VALUE_CD FROM TB_COMM_CODE WHERE GRP_CD = 'A8000' AND DITC_CD = 'OPNZM' AND  USE_YN = 'Y')
+			, TO_CHAR(SYSDATE, 'yyyymmddHH24MISS')
+			, TO_CHAR(SYSDATE+10, 'yyyymmddHH24MISS')
+			, 1
+			, 1
+			, 0
+			, 0
+			, 0
+			, 0
+			, 0
+			, 0
+			, #mailBody#
+			)
+	</insert>	
+	
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 	-->
+    <!-- 카카오알림톡 발송정보를 등록한다.                            																								-->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 	-->
+	<insert id="AdminNasSendInfoDao.insertTalkRow" parameterClass="params">
+		/* sql id : AdminNasSendInfoDao.insertTalkRow */
+		INSERT INTO BIZ_MSG ( 
+			  CMID
+			, MSG_TYPE
+			, STATUS
+			, REQUEST_TIME
+			, SEND_TIME
+			, DEST_PHONE
+			, DEST_NAME
+			, SEND_PHONE
+			, SEND_NAME
+			, SUBJECT
+			, MSG_BODY
+			, NATION_CODE
+			, SENDER_KEY
+			, TEMPLATE_CODE			
+			)
+		VALUES(
+			  SQ_BIZ_MSG_CMID.NEXTVAL
+			, 6
+			, 0
+			, SYSDATE
+			, SYSDATE			
+			, #dest_phone#
+			, #dest_name#
+			, #send_phone#
+			, #send_name#
+			, #subjectKakao#
+			, #msg_body#
+			, '82'
+			, #senderKey#
+			, #templateCode#
+			)
+	</insert>		
+</sqlMap>

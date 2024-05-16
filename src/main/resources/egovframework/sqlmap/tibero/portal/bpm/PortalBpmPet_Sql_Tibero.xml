@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="portalBpmPet" >
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+	
+	<!-- 국회의원 청원, 국민동의 청원 같이 사용 -->
+	<sql id="bpmPet.memb.col">
+		A.BILL_NO          AS "billNo"  
+		, A.BILL_ID          AS "billId"
+		, A.UNIT_CD          AS "unitCd"
+		, A.BILL_NAME        AS "billName"
+		, A.PROPOSER         AS "proposer"
+		, A.APPROVER         AS "approver"
+		, A.PROPOSE_DT       AS "proposeDt"
+		, A.PROC_RESULT_CD   AS "procResultCd"
+		, A.CMIT_CD          AS "cmitCd"
+		, A.CMIT_NM          AS "cmitNm"
+		, A.COMMITTEE_DT     AS "committeeDt"
+		, A.REPORT_DT        AS "reportDt"
+		, A.PASS_GUBUN       AS "passGubun"
+		, A.PROC_DT          AS "procDt"
+		, A.BILL_MEMO        AS "billMemo"
+		, A.LINK_URL         AS "linkUrl"
+	</sql>
+	<sql id="bpmPet.memb.where">
+		WHERE PETIT_GUBUN = #petitGubun:VARCHAR#
+		<isNotEmpty property="unitCd" prepend=" AND ">
+			A.UNIT_CD LIKE '%' || #unitCd:VARCHAR# || '%'
+		</isNotEmpty>	
+		<isNotEmpty property="billName" prepend=" AND ">
+			A.BILL_NAME LIKE '%' || #billName:VARCHAR# || '%'
+		</isNotEmpty>
+		<isNotEmpty property="proposer" prepend=" AND ">
+			A.PROPOSER LIKE '%' || #proposer:VARCHAR# || '%'
+		</isNotEmpty>
+		<isNotEmpty property="approver" prepend=" AND ">
+			A.APPROVER LIKE '%' || #approver:VARCHAR# || '%'
+		</isNotEmpty>
+		<isNotEmpty property="cmitCd" prepend=" AND ">
+			A.CMIT_CD = #cmitCd:VARCHAR#
+		</isNotEmpty>
+		<isNotEmpty property="cmitNm" prepend=" AND ">
+			A.CMIT_NM = '%' || #cmitNm# || '%'
+		</isNotEmpty>	
+		<isNotEmpty property="procResultCd" prepend=" AND ">
+			A.PROC_RESULT_CD LIKE '%' || #procResultCd# || '%'
+		</isNotEmpty>
+	</sql>
+	
+	<select id="bpmPetDao.searchPetAssmMemb" remapResults="true" parameterClass="params" resultClass="record">
+		/* sql id : bpmPetDao.searchPetAssmMemb */
+		<isEqual property="paging" compareValue="0">
+		SELECT AA.* 
+		FROM   (SELECT ROWNUM AS ROW_NUM, AA.*
+				FROM   (
+		</isEqual>
+		
+			SELECT
+			    <include refid="bpmPet.memb.col"/>
+			FROM
+				TV_PTT_BILL A
+			<include refid="bpmPet.memb.where"/>
+			ORDER BY BILL_NO DESC
+		<isEqual property="paging" compareValue="0">
+		<![CDATA[
+				) AA
+			WHERE ROWNUM <= #end:NUMERIC#
+			) AA
+		WHERE AA.ROW_NUM >= #start:NUMERIC#
+		]]>
+		</isEqual>
+	</select>
+	<select id="bpmPetDao.searchPetAssmMembCount" parameterClass="params" resultClass="int">
+		/* sql id : bpmPetDao.searchBpmPetCount */
+		SELECT
+		    COUNT(*)
+		FROM
+		    TV_PTT_BILL A
+		<include refid="bpmPet.memb.where"/>
+	</select>
+
+	
+</sqlMap>

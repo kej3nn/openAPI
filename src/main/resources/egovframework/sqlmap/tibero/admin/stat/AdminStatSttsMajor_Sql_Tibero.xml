@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- @(#)AdminStatSttsMajor_Sql_Tibero.xml 1.0 2017/08/10                     -->
+<!--                                                                         -->
+<!-- COPYRIGHT (C) 2013 WISEITECH CO., LTD. ALL RIGHTS RESERVED.             -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- 주요통계지표관리 SQL 파일이다.	                                  -->
+<!--                                                                         -->
+<!-- @author 김정호                                                        	-->
+<!-- @version 1.0 2017/08/10                                                -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<sqlMap namespace="StatSttsMajor">
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Type Alias                                                          -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+    
+    <!-- 주요 통계지표 관리 메인 리스트 조회 -->
+	<select id="StatSttsMajorDao.selectStatSttsMajorList" parameterClass="params" resultClass="record">    
+		/* sql id : StatSttsMajorDao.selectStatSttsMajorList */
+		SELECT 
+			A.MAJOR_ID			AS "majorId"
+			, A.MAJOR_NM		AS "majorNm"
+			, A.ENG_MAJOR_NM	AS "engMajorNm"
+			, A.MAJOR_STAT_CD	AS "majorStatCd"
+			, A.STATBL_ID		AS "statblId"
+			, B.STATBL_NM		AS "statblNm"
+			, A.DTACYCLE_CD		AS "dtacycleCd"
+			, A.DTADVS_CD		AS "dtadvsCd"
+			, A.ITM_DATANO		AS "itmDatano"
+			, I.VIEW_ITM_NM		AS "itmDataNm"
+			, A.CLS_DATANO		AS "clsDatano"
+			, C.VIEW_ITM_NM		AS "clsDataNm"
+			, A.GRP_DATANO		AS "grpDatano"
+			, G.VIEW_ITM_NM		AS "grpDataNm"
+			, A.VIEW_FILE_NM	AS "viewFileNm"
+			, A.VIEW1_FILE_NM	AS "view1FileNm"
+			, A.VIEW2_FILE_NM	AS "view2FileNm"
+			, A.USE_YN			AS "useYn"
+			, A.V_ORDER			AS "vOrder"
+			, FN_GET_COMM_CODE_NM('S1005', A.MAJOR_STAT_CD) 	AS "majorStatNm"
+			, FN_GET_COMM_CODE_NM('S1103', A.DTACYCLE_CD) 		AS "dtacycldNm"	
+			, FN_GET_COMM_CODE_NM('S1102', A.DTADVS_CD) 		AS "dtadvsNm"	
+		FROM 
+			TB_STTS_MAJOR A
+			INNER JOIN TB_STTS_TBL B
+				ON  A.STATBL_ID = B.STATBL_ID
+			INNER JOIN TB_STTS_TBL_ITM I
+				ON  A.STATBL_ID = I.STATBL_ID
+				AND I.ITM_TAG = 'I'
+				AND A.ITM_DATANO = I.DATANO
+			LEFT OUTER JOIN TB_STTS_TBL_ITM C
+				ON  A.STATBL_ID = C.STATBL_ID
+				AND C.ITM_TAG = 'C'
+				AND A.CLS_DATANO = C.DATANO
+			LEFT OUTER JOIN TB_STTS_TBL_ITM G
+				ON  A.STATBL_ID = G.STATBL_ID
+				AND G.ITM_TAG = 'G'
+				AND A.GRP_DATANO = G.DATANO			
+		WHERE
+			1=1
+		<isNotEmpty property="majorId">
+			AND A.MAJOR_ID = #majorId#
+		</isNotEmpty>	
+		<isNotEmpty property="searchMajorStatCd">	
+			AND A.MAJOR_STAT_CD = #searchMajorStatCd#
+		</isNotEmpty>
+		<isNotEmpty property="useYn">
+			AND A.USE_YN = #useYn#	
+		</isNotEmpty>
+		<isNotEmpty property="searchVal">
+			<isEqual property="searchGubun" compareValue="MAJOR_NM" >
+				AND A.MAJOR_NM LIKE '%' || #searchVal# || '%'
+			</isEqual>
+			<isEqual property="searchGubun" compareValue="ENG_MAJOR_NM" >
+				AND A.ENG_MAJOR_NM LIKE '%' || #searchVal# || '%'
+			</isEqual>
+			<isEqual property="searchGubun" compareValue="MAJOR_ID" >
+				AND A.MAJOR_ID LIKE '%' || #searchVal# || '%'
+			</isEqual>
+		</isNotEmpty>
+		ORDER BY A.V_ORDER
+	</select>    
+	
+    <!-- 주요 통계지표 관리 단건조회 -->
+	<select id="StatSttsMajorDao.selectStatSttsMajorDtl" parameterClass="params" resultClass="record">    
+		/* sql id : StatSttsMajorDao.selectStatSttsMajorDtl */
+		SELECT 
+			A.MAJOR_ID			AS "majorId"
+			, A.MAJOR_NM		AS "majorNm"
+			, A.ENG_MAJOR_NM	AS "engMajorNm"
+			, A.MAJOR_STAT_CD	AS "majorStatCd"
+			, A.STATBL_ID		AS "statblId"
+			, B.STATBL_NM		AS "statblNm"
+			, A.DTACYCLE_CD		AS "dtacycleCd"
+			, A.DTADVS_CD		AS "dtadvsCd"
+			, A.ITM_DATANO		AS "itmDatano"
+			, I.VIEW_ITM_NM		AS "itmDataNm"
+			, A.CLS_DATANO		AS "clsDatano"
+			, C.VIEW_ITM_NM		AS "clsDataNm"
+			, A.GRP_DATANO		AS "grpDatano"
+			, G.VIEW_ITM_NM		AS "grpDataNm"
+			, A.USE_YN			AS "useYn"
+			, A.V_ORDER			AS "vOrder"
+			, FN_GET_COMM_CODE_NM('S1005', A.MAJOR_STAT_CD) 	AS "majorStatNm"
+			, FN_GET_COMM_CODE_NM('S1103', A.DTACYCLE_CD) 		AS "dtacycldNm"	
+			, FN_GET_COMM_CODE_NM('S1102', A.DTADVS_CD) 		AS "dtadvsNm"	
+		FROM 
+			TB_STTS_MAJOR A
+			INNER JOIN TB_STTS_TBL B
+				ON  A.STATBL_ID = B.STATBL_ID
+			INNER JOIN TB_STTS_TBL_ITM I
+				ON  A.STATBL_ID = I.STATBL_ID
+				AND I.ITM_TAG = 'I'
+				AND A.ITM_DATANO = I.DATANO
+			LEFT OUTER JOIN TB_STTS_TBL_ITM C
+				ON  A.STATBL_ID = C.STATBL_ID
+				AND C.ITM_TAG = 'C'
+				AND A.CLS_DATANO = C.DATANO	
+			LEFT OUTER JOIN TB_STTS_TBL_ITM G
+				ON  A.STATBL_ID = G.STATBL_ID
+				AND G.ITM_TAG = 'G'
+				AND A.GRP_DATANO = G.DATANO		
+		WHERE
+			1=1
+			AND A.MAJOR_ID = #majorId:NUMERIC#
+		ORDER BY A.V_ORDER
+	</select>    	
+	
+	<!-- 통계값 항목/분류 콤보 조회 -->
+	<select id="StatSttsMajorDao.selectStatTblItmCombo" parameterClass="params" resultClass="record">   
+		SELECT 
+			DATANO				AS "code"	
+			, VIEW_ITM_FULLNM 	AS "name"
+		FROM   
+			TB_STTS_TBL_ITM
+		WHERE  
+			STATBL_ID = #statblId:VARCHAR#
+			AND USE_YN = 'Y'
+		<isNotEmpty property="itmTag">
+			AND ITM_TAG = #itmTag#
+		</isNotEmpty>	
+	</select>
+	
+	<!-- 통계값 자료구분 콤보 조회 -->
+	<select id="StatSttsMajorDao.selectStatTblOptDtadvsCombo" parameterClass="params" resultClass="record">   
+		SELECT 
+			A.OPT_VAL		AS "code"
+			, B.DITC_NM		AS "name"
+		FROM 
+			TB_STTS_TBL_OPT A
+			INNER JOIN TB_COMM_CODE B
+				ON  A.OPT_VAL = B.DITC_CD
+				AND B.GRP_CD = 'S1102'
+		WHERE 
+			A.STATBL_ID = #statblId:VARCHAR#
+			AND A.OPT_CD = 'DD'
+		ORDER BY B.V_ORDER	
+	</select>
+	
+	<select id="StatSttsMajorDao.selectStatTblPopupList" parameterClass="params" resultClass="record">   
+		/* sql id : StatSttsMajorDao.selectStatTblPopupList */
+		SELECT 
+			A.STATBL_ID			AS "statblId"
+			, A.STATBL_NM		AS "statblNm"
+			, A.ENG_STATBL_NM	AS "engStatblNm"
+		FROM 
+			TV_STTS_TBL A
+		WHERE
+			A.USE_YN = 'Y'
+		AND OPEN_STATE = 'Y'
+		<isNotEmpty property="searchVal">
+			<isEqual property="searchGubun" compareValue="STATBL_NM" >
+				AND A.STATBL_NM LIKE '%' || #searchVal# || '%'
+			</isEqual>
+			<isEqual property="searchGubun" compareValue="ENG_STATBL_NM" >
+				AND A.ENG_STATBL_NM LIKE '%' || #searchVal# || '%'
+			</isEqual>
+	   	</isNotEmpty> 	
+		ORDER BY A.V_ORDER	
+	</select>
+	
+	
+	<!-- 주요통계지표 MajorId 최대값을 조회한다.(입력시 사용) -->
+	<select id="StatSttsMajorDao.selectMaxMajorId" parameterClass="params" resultClass="integer">
+		/* sql id : StatSttsMajorDao.selectMaxMajorId */
+		SELECT NVL(MAX(MAJOR_ID), 800000) + 1 FROM TB_STTS_MAJOR
+	</select>	
+
+	<!-- 주요통계지표 삭제 -->    
+    <delete id="StatSttsMajorDao.deleteStatSttsMajor" parameterClass="params">
+    	/* sql id : StatSttsMajorDao.deleteStatSttsMajor */
+    	DELETE FROM TB_STTS_MAJOR 
+    	WHERE  MAJOR_ID = #majorId:NUMERIC#
+    </delete>
+    
+    <!-- 주요통계지표 순서저장 -->
+    <update id="StatSttsMajorDao.updateStatSttsMajorOrder" parameterClass="record">
+    	/* sql id : StatSttsMajorDao.updateStatSttsMajorOrder */
+    	UPDATE TB_STTS_MAJOR
+    	SET    V_ORDER = #vOrder:NUMERIC#
+    	WHERE  MAJOR_ID = #majorId:NUMERIC#
+    </update>
+    
+    <!-- 주요통계지표 입력/수정 -->
+	<update id="StatSttsMajorDao.mergeStatSttsMajor" parameterClass="params">
+		/* sql id : StatSttsMajorDao.mergeStatSttsMajor */
+		MERGE INTO TB_STTS_MAJOR A
+		USING (
+				SELECT
+					#majorId:NUMERIC# 		AS MAJOR_ID
+					, #majorNm:VARCHAR# 	AS MAJOR_NM
+					, #engMajorId:VARCHAR# 	AS ENG_MAJOR_NM
+					, #majorStatCd:VARCHAR# AS MAJOR_STAT_CD
+					, #statblId:VARCHAR# 	AS STATBL_ID
+					, #dtacycleCd:VARCHAR# 	AS DTACYCLE_CD
+					, #dtadvsCd:VARCHAR# 	AS DTADVS_CD
+					, #itmDatano:NUMERIC# 	AS ITM_DATANO
+					, #clsDatano:NUMERIC# 	AS CLS_DATANO
+					, #grpDatano:NUMERIC# 	AS GRP_DATANO
+					, 'K' 			AS SYS_TAG
+					, #useYn:CHAR# 		AS USE_YN
+					, (SELECT NVL(MAX(V_ORDER), 0) + 1 FROM TB_STTS_MAJOR) AS V_ORDER
+				<isNotEmpty property="viewFileNm">
+					, #viewFileNm# 	AS VIEW_FILE_NM
+				</isNotEmpty>
+				<isNotEmpty property="view1FileNm">
+					, #view1FileNm# AS VIEW1_FILE_NM
+				</isNotEmpty>
+				<isNotEmpty property="view2FileNm">
+					, #view2FileNm# AS VIEW2_FILE_NM
+				</isNotEmpty>
+					, #regId:VARCHAR# 		AS REG_ID
+					, #updId:VARCHAR# 		AS UPD_ID
+				FROM DUAL
+		) B
+		ON (
+			A.MAJOR_ID 		= B.MAJOR_ID
+		)
+		
+		WHEN MATCHED THEN
+		UPDATE SET
+			A.MAJOR_NM 			= B.MAJOR_NM
+    		, A.ENG_MAJOR_NM 	= B.ENG_MAJOR_NM
+    		, A.MAJOR_STAT_CD 	= B.MAJOR_STAT_CD
+    		, A.STATBL_ID 		= B.STATBL_ID
+    		, A.DTACYCLE_CD 	= B.DTACYCLE_CD
+			, A.DTADVS_CD 		= B.DTADVS_CD
+			, A.ITM_DATANO 		= B.ITM_DATANO
+			, A.CLS_DATANO 		= B.CLS_DATANO
+			, A.GRP_DATANO 		= B.GRP_DATANO
+		<isNotEmpty property="viewFileNm">	
+			, A.VIEW_FILE_NM	= B.VIEW_FILE_NM
+		</isNotEmpty>
+		<isNotEmpty property="view1FileNm">
+			, A.VIEW1_FILE_NM	= B.VIEW1_FILE_NM
+		</isNotEmpty>
+		<isNotEmpty property="view2FileNm">
+			, A.VIEW2_FILE_NM	= B.VIEW2_FILE_NM
+		</isNotEmpty>
+			, A.USE_YN 			= B.USE_YN
+			, A.UPD_ID 			= B.UPD_ID
+			, A.UPD_DTTM 		= SYSDATE	
+				
+		WHEN NOT MATCHED THEN
+		INSERT (
+			A.MAJOR_ID
+			, A.MAJOR_NM
+			, A.ENG_MAJOR_NM
+			, A.MAJOR_STAT_CD
+			, A.STATBL_ID
+			, A.DTACYCLE_CD
+			, A.DTADVS_CD
+			, A.ITM_DATANO
+			, A.CLS_DATANO
+			, A.GRP_DATANO
+			, A.SYS_TAG
+			, A.USE_YN
+			, A.V_ORDER
+		<isNotEmpty property="viewFileNm">	
+			, A.VIEW_FILE_NM
+		</isNotEmpty>
+		<isNotEmpty property="view1FileNm">
+			, A.VIEW1_FILE_NM
+		</isNotEmpty>
+		<isNotEmpty property="view2FileNm">
+			, A.VIEW2_FILE_NM
+		</isNotEmpty>
+			, A.REG_ID
+			, A.REG_DTTM
+			, A.UPD_ID
+			, A.UPD_DTTM
+		)
+		VALUES (
+			B.MAJOR_ID
+			, B.MAJOR_NM
+			, B.ENG_MAJOR_NM
+			, B.MAJOR_STAT_CD
+			, B.STATBL_ID
+			, B.DTACYCLE_CD
+			, B.DTADVS_CD
+			, B.ITM_DATANO
+			, B.CLS_DATANO
+			, B.GRP_DATANO
+			, B.SYS_TAG
+			, B.USE_YN
+			, B.V_ORDER
+		<isNotEmpty property="viewFileNm">	
+			, B.VIEW_FILE_NM
+		</isNotEmpty>
+		<isNotEmpty property="view1FileNm">
+			, B.VIEW1_FILE_NM
+		</isNotEmpty>
+		<isNotEmpty property="view2FileNm">
+			, B.VIEW2_FILE_NM
+		</isNotEmpty>
+			, B.REG_ID
+			, SYSDATE
+			, B.UPD_ID
+			, SYSDATE
+		)
+	</update>	    
+	
+</sqlMap>

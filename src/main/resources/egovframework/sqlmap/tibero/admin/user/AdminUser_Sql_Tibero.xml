@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="User">
+	<resultMap id="UserAll" class="egovframework.admin.user.service.UserVo">
+		<result property="userId" column="USER_ID"/>
+		<result property="userNm" column="USER_NM"/>
+		<result property="userEmail" column="USER_EMAIL"/>
+		<result property="emailYn" column="EMAIL_YN"/>
+		<result property="userTel" column="USER_TEL"/>
+		<result property="hpYn" column="HP_YN"/>
+		<result property="userHp" column="USER_HP"/>	
+		<result property="areaCd" column="AREA_CD"/>
+		<result property="memberCd" column="MEMBER_CD"/>
+		<result property="regDttm" column="REG_DTTM"/>
+	</resultMap>
+	
+	<resultMap id="CommUsrListCheck" class="egovframework.admin.basicinf.service.CommUsr">
+		<result property="usrCd"      column="USR_CD"       />
+		<result property="usrNm"      column="USR_NM"       />
+		<result property="orgCd"      column="ORG_CD"       />
+		<result property="orgNm"      column="ORG_NM"       />
+		<result property="accYn"      column="ACC_YN"       />
+		<result property="accCd"      column="ACC_CD"       />
+		<result property="usrId"      column="USR_ID"       />
+		<result property="accokYn"      column="ACCOK_YN"       />
+	</resultMap>
+	
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Type Alias                                                          -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+    
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 관리자화면 접근시 사용자 정보를 확인한다. 							 -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!--    <select id="adminUserDao.selectUserCheck" parameterClass="params" resultClass="int">-->
+<!--         SELECT NVL(COUNT(*), 0)-->
+<!--         FROM   TV_MEMBER-->
+<!--         WHERE  MEMBER_ID	= #userId:VARCHAR#-->
+<!--         AND    DEPT_CODE 	= #deptCode:VARCHAR#-->
+<!--    </select>-->
+	<select id="adminUserDao.selectUserCheck" parameterClass="params" resultClass="int">
+        SELECT NVL(COUNT(*), 0)
+          FROM TB_COMM_USR
+         WHERE USR_ID = #userId:VARCHAR#
+           AND  ORG_CD 	= #deptCode:VARCHAR#
+    </select>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 관리자화면 접근시 관리자 정보를 확인한다. 							 -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="adminUserDao.selectAdmUserCheck" parameterClass="params" resultClass="int">
+         SELECT NVL(COUNT(*), 0)
+         FROM   TB_COMM_USR
+         WHERE  USR_ID 	= #userId:VARCHAR#
+         AND    ORG_CD 	= #deptCode:VARCHAR#
+         AND    USE_YN 	= 'Y'
+         AND    ACC_YN 	= 'Y'         
+    </select>
+    
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 관리자 정보를 조회한다.				 							 -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="adminUserDao.selectAdmUser" parameterClass="params" resultMap="CommUsrListCheck">
+         SELECT 
+         		A.USR_CD
+				, A.USR_NM
+			    , A.ORG_CD 
+			    , B.ORG_NM        
+			    , A.ACC_YN
+			    , A.ACC_CD
+			    , A.USR_ID
+			    , A.ACCOK_YN
+         FROM   TB_COMM_USR A LEFT OUTER JOIN TB_COMM_ORG B
+         			ON A.ORG_CD = B.ORG_CD
+         WHERE  A.USR_ID 	= #userId:VARCHAR#
+         AND    A.ORG_CD 	= #deptCode:VARCHAR#
+         AND    A.USE_YN = 'Y'
+    </select>
+  
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 관리자 정보를 등록한다.								 			-->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <update id="adminUserDao.mergeCommUser" parameterClass="record">
+		/* sql id : adminUserDao.mergeCommUser */
+		MERGE INTO TB_COMM_USR A
+		USING (
+			SELECT
+				#usrCd:NUMERIC#		AS USR_CD
+				, #usrId:VARCHAR#	AS USR_ID
+				, #usrNm:VARCHAR#	AS USR_NM
+				, #orgCd:VARCHAR#	AS ORG_CD
+				, 'DM'				AS ACC_CD
+				, 'Y'				AS ACC_YN
+				, 'Y'				AS ACCOK_YN			
+				, (SELECT USER_SEQ
+				   FROM   TB_USER U 
+				   WHERE  USER_ID = #usrId:VARCHAR#
+				   ) AS USR_SEQ	
+			FROM DUAL
+		) B
+		ON (
+			A.USR_CD = B.USR_CD
+		)
+		WHEN MATCHED THEN
+		UPDATE SET
+			A.ORG_CD = B.ORG_CD
+			, A.USR_ID   = (CASE WHEN A.USR_ID != B.USR_ID THEN B.USR_ID ELSE  A.USR_ID  END)
+			, A.USR_SEQ   = (CASE WHEN A.USR_SEQ != B.USR_SEQ THEN B.USR_SEQ ELSE  A.USR_SEQ  END)
+			, A.ACC_YN 		= (CASE WHEN B.ORG_CD IS NULL THEN 'N' ELSE 'Y' END)
+			, A.ACCOK_YN 	= (CASE WHEN B.ORG_CD IS NULL THEN 'N' ELSE 'Y' END)
+		WHEN NOT MATCHED THEN
+		INSERT (
+			A.USR_CD
+			, A.USR_ID
+			, A.USR_SEQ
+			, A.USR_NM
+			, A.ORG_CD
+			, A.ACC_CD
+			, A.ACC_YN
+			, A.ACCOK_YN
+			, A.REG_DTTM
+		)
+		VALUES (
+			B.USR_CD
+			, B.USR_ID
+			, B.USR_SEQ
+			, B.USR_NM
+			, B.ORG_CD
+			, B.ACC_CD
+			, B.ACC_YN
+			, B.ACCOK_YN
+			, SYSDATE
+		)	
+	</update>
+	
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 관리자 로그인 이력을 등록한다.							 			-->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<insert id="adminUserDao.insertLogCommUsr" parameterClass="params">
+         INSERT INTO TB_LOG_COMM_USR
+                (
+                	SEQCE_NO,
+                    USR_ID,
+                    ACC_CD,
+                    USR_IP,
+                    USR_AGENT,
+                    REG_DTTM
+                )
+         SELECT SQ_LOG_USR_SEQ.NEXTVAL,
+                A.USR_ID,
+                A.ACC_CD,
+                #userIp:VARCHAR#,
+                #userAgent:VARCHAR#,
+                SYSDATE
+           FROM TB_COMM_USR        A
+          WHERE A.USR_ID = #userId:VARCHAR#
+    </insert>
+	
+	
+	
+	
+	<select id="UserListDao.selectUserListAll" parameterClass="egovframework.admin.user.service.UserVo" resultMap="UserAll">
+	SELECT *
+	  FROM(
+		SELECT ROWNUM AS RN, TB.*
+		  FROM
+		  (
+				SELECT 	RPAD(SUBSTR(A.USER_ID, 1, 3), LENGTH(A.USER_ID), '*') AS USER_ID 	
+					  ,	A.USER_NM
+					  ,	(A.USER_EMAIL) USER_EMAIL
+					  ,	A.EMAIL_YN
+					  , RPAD(SUBSTR((A.USER_TEL), 1,  INSTR((A.USER_TEL), '-', 1,2 )) , LENGTH((A.USER_TEL)), '*') AS USER_TEL 
+					  ,	A.HP_YN
+					  , RPAD(SUBSTR((A.USER_HP), 1,  INSTR((A.USER_HP), '-', 1,2 )) , LENGTH((A.USER_HP)), '*') AS USER_HP
+					  ,	A.AREA_CD 
+					  ,	A.MEMBER_CD
+					  ,	A.REG_DTTM
+				FROM TB_USER A
+					
+				WHERE 1=1
+				
+				<isNotEmpty property="searchWord">
+			 		<isEqual property="searchWd" compareValue="0">
+			 		AND ( A.USER_ID LIKE '%' || #searchWord#  || '%' 
+			 			 OR  A.USER_ID LIKE '%' || UPPER(#searchWord#)  || '%'
+			 			 OR  A.USER_ID LIKE '%' || LOWER(#searchWord#)  || '%'
+			 		 )
+			 		</isEqual>
+			 		<isEqual property="searchWd" compareValue="1">
+			 		AND ( A.USER_NM LIKE '%' || #searchWord#  || '%' 
+			 			 OR  A.USER_NM LIKE '%' || UPPER(#searchWord#)  || '%'
+			 			 OR  A.USER_NM LIKE '%' || LOWER(#searchWord#)  || '%'
+			 		 )
+			 		</isEqual>
+			 		<isEqual property="searchWd" compareValue="2">
+			 		AND ( (A.USER_EMAIL) LIKE '%' || #searchWord#   || '%' 
+			 			 OR  (A.USER_EMAIL) LIKE '%' || UPPER(#searchWord#)  || '%'
+			 			 OR  (A.USER_EMAIL) LIKE '%' || LOWER(#searchWord#)  || '%'
+			 		 )
+			 		</isEqual>
+			 		<isEqual property="searchWd" compareValue="3">
+			 		AND ( (A.USER_TEL) LIKE '%' || #searchWord#  || '%' 
+			 			 OR  (A.USER_TEL) LIKE '%' || UPPER(#searchWord#)  || '%'
+			 			 OR  (A.USER_TEL) LIKE '%' || LOWER(#searchWord#)  || '%'
+			 		 )
+			 		</isEqual>
+			 		<isEqual property="searchWd" compareValue="4">
+			 		AND ( (A.USER_HP) LIKE '%' || #searchWord#  || '%' 
+			 			 OR  (A.USER_HP) LIKE '%' || UPPER(#searchWord#)  || '%'
+			 			 OR  (A.USER_HP) LIKE '%' || LOWER(#searchWord#)  || '%'
+			 		 )
+			 		</isEqual>
+			 	</isNotEmpty>
+				<isNotEmpty property="areaCd">
+					AND A.AREA_CD = #areaCd#
+				</isNotEmpty>
+				<isNotEmpty property="memberCd">	 
+					AND A.MEMBER_CD = #memberCd#
+				</isNotEmpty>
+				<isNotEmpty property="pubDttmFrom">	
+						AND A.REG_DTTM BETWEEN  TO_DATE(#pubDttmFrom:VARCHAR#,'YYYY-MM-DD') AND TO_DATE(#pubDttmTo:VARCHAR#,'YYYY-MM-DD') +1
+				</isNotEmpty>
+					ORDER BY USER_CD DESC
+			)TB
+		)
+	<isNotEqual prepend="startPage" compareValue="0">
+		WHERE RN BETWEEN #startPage:NUMERIC# AND #endPage:NUMERIC#
+	</isNotEqual>
+	</select>
+</sqlMap>
+

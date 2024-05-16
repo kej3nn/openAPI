@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="StatOpenPrgs">
+	<typeAlias alias="egovMap"
+		type="egovframework.rte.psl.dataaccess.util.EgovMap" />
+
+	<resultMap id="seriesPrgsResult" class="egovframework.admin.stat.service.StatOpen">
+		<result column="COLUMN_NM" property="columnNm" />
+		<!-- <result column="ENG_COLUMN_NM" property="columnNmEng" /> -->
+	</resultMap>
+
+	<resultMap id="StatOpen" class="egovframework.admin.stat.service.StatOpen">
+		<result column="YYYYMMDD" property="yyyyMmDd" />
+		<result column="SRV_CNT" property="srvCnt" />
+		<result column="S_CNT" property="sCnt" />
+		<result column="C_CNT" property="cCnt" />
+		<result column="M_CNT" property="mCnt" />
+		<result column="F_CNT" property="fCnt" />
+		<result column="L_CNT" property="lCnt" />
+		<result column="A_CNT" property="aCnt" />
+		<result column="V_CNT" property="vCnt" />
+	</resultMap>
+
+
+	<!-- 개방 추이 일,월,년 Chart형 자료에서 시리즈 목록 조회 -->
+	<select id="StatOpenPrgsDao.getOpenPrgsSeriesResult"
+		parameterClass="egovframework.admin.stat.service.StatOpen" resultMap="seriesPrgsResult"
+		remapResults="true">
+		<!-- COLUMN_NM만 조회 -->
+		SELECT B.COMMENTS COLUMN_NM
+		FROM DBA_TAB_COLUMNS A, DBA_COL_COMMENTS B
+		WHERE A.OWNER = B.OWNER
+		AND A.TABLE_NAME = B.TABLE_NAME
+		AND
+		A.COLUMN_NAME = B.COLUMN_NAME
+		AND A.TABLE_NAME = 'TB_STAT_OPEN'
+		AND B.TABLE_NAME = 'TB_STAT_OPEN'
+		AND A.COLUMN_NAME LIKE '%CNT'
+		AND B.COMMENTS NOT IN('공공데이터수')
+        AND B.COMMENTS IS NOT NULL
+
+		<!-- ENG_COLUMN_NM만 조회 -->
+		<!-- SELECT A.COLUMN_NAME ENG_COLUMN_NM FROM DBA_TAB_COLUMNS A, DBA_COL_COMMENTS 
+			B WHERE A.OWNER = B.OWNER AND A.TABLE_NAME = B.TABLE_NAME AND A.COLUMN_NAME 
+			= B.COLUMN_NAME AND A.TABLE_NAME = 'TB_STAT_OPEN_PRGS_D' AND B.TABLE_NAME 
+			= 'TB_STAT_OPEN_PRGS_D' AND A.COLUMN_NAME LIKE '%CNT' -->
+
+		<!-- 컬럼명,컬럼 코멘트 함께 조회 -->
+		<!--SELECT B.COMMENTS COLUMN_NM, A.COLUMN_NAME ENG_COLUMN_NM FROM DBA_TAB_COLUMNS 
+			A, DBA_COL_COMMENTS B WHERE A.OWNER = B.OWNER AND A.TABLE_NAME = B.TABLE_NAME 
+			AND A.COLUMN_NAME = B.COLUMN_NAME AND A.TABLE_NAME = 'TB_STAT_OPEN_PRGS_D' 
+			AND B.TABLE_NAME = 'TB_STAT_OPEN_PRGS_D' AND A.COLUMN_NAME LIKE '%CNT' -->
+	</select>
+
+
+	<!-- 개방 추이 Sheet형 데이터 조회 -->
+	<select id="StatOpenPrgsDao.getOpenStatPrgsSheetAll"
+		parameterClass="egovframework.admin.stat.service.StatOpen" resultMap="StatOpen">
+
+		SELECT
+		<isNotEmpty property="mode">
+			<isEqual property="mode" compareValue="D">
+				SUBSTR(YYYYMMDD,1,4)||'-'||SUBSTR(YYYYMMDD,5,2)||'-'||SUBSTR(YYYYMMDD,7,2)
+				AS YYYYMMDD
+			</isEqual>
+			<isEqual property="mode" compareValue="M">
+				SUBSTR(YYYYMMDD,1,4)||'-'||SUBSTR(YYYYMMDD,5,2) AS YYYYMMDD
+			</isEqual>
+			<isEqual property="mode" compareValue="Y">
+				SUBSTR(YYYYMMDD,1,4) AS
+				YYYYMMDD
+			</isEqual>
+		</isNotEmpty>
+		<isEmpty>
+			SUBSTR(YYYYMMDD,1,4)||'-'||SUBSTR(YYYYMMDD,5,2)||'-'||SUBSTR(YYYYMMDD,7,2)
+			AS YYYYMMDD
+		</isEmpty>
+
+		,SUM(SRV_CNT) SRV_CNT
+		,SUM(S_CNT) S_CNT
+		,SUM(C_CNT) C_CNT
+		,SUM(M_CNT) M_CNT
+		,SUM(F_CNT) F_CNT
+		,SUM(L_CNT) L_CNT
+		,SUM(A_CNT) A_CNT
+		,SUM(V_CNT) V_CNT
+		FROM TB_STAT_OPEN
+		WHERE
+		YYYYMMDD BETWEEN #pubDttmFrom:VARCHAR# AND #pubDttmTo:VARCHAR#
+
+		GROUP BY
+
+		<isNotEmpty property="mode">
+			<isEqual property="mode" compareValue="D">
+				SUBSTR(YYYYMMDD,1,4)||'-'||SUBSTR(YYYYMMDD,5,2)||'-'||SUBSTR(YYYYMMDD,7,2)
+			</isEqual>
+			<isEqual property="mode" compareValue="M">
+				SUBSTR(YYYYMMDD,1,4)||'-'||SUBSTR(YYYYMMDD,5,2)
+			</isEqual>
+			<isEqual property="mode" compareValue="Y">
+				SUBSTR(YYYYMMDD,1,4)
+			</isEqual>
+		</isNotEmpty>
+		<isEmpty>
+			SUBSTR(YYYYMMDD,1,4)||'-'||SUBSTR(YYYYMMDD,5,2)||'-'||SUBSTR(YYYYMMDD,7,2)
+		</isEmpty>
+		ORDER BY YYYYMMDD DESC 
+	</select>
+
+
+	<!-- 개방 추이 Chart형 자료에서 X축 데이터 조회 -->
+	<select id="StatOpenPrgsDao.getChartDataX" parameterClass="egovframework.admin.stat.service.StatOpen"
+		resultClass="java.util.LinkedHashMap" remapResults="true">
+
+		SELECT
+		<isNotEmpty property="mode">
+			<isEqual property="mode" compareValue="D">
+				SUBSTR(YYYYMMDD,1,4)||'-'||SUBSTR(YYYYMMDD,5,2)||'-'||SUBSTR(YYYYMMDD,7,2)
+				AS YYYYMMDD
+			</isEqual>
+			<isEqual property="mode" compareValue="M">
+				SUBSTR(YYYYMMDD,1,4)||'-'||SUBSTR(YYYYMMDD,5,2) AS YYYYMMDD
+			</isEqual>
+			<isEqual property="mode" compareValue="Y">
+				SUBSTR(YYYYMMDD,1,4) AS
+				YYYYMMDD
+			</isEqual>
+		</isNotEmpty>
+		<isEmpty>
+			SUBSTR(YYYYMMDD,1,4)||'-'||SUBSTR(YYYYMMDD,5,2)||'-'||SUBSTR(YYYYMMDD,7,2)
+			AS YYYYMMDD
+		</isEmpty>
+
+		FROM TB_STAT_OPEN
+		WHERE YYYYMMDD BETWEEN #pubDttmFrom:VARCHAR# AND
+		#pubDttmTo:VARCHAR#
+		GROUP BY
+
+		<isNotEmpty property="mode">
+			<isEqual property="mode" compareValue="D">
+				SUBSTR(YYYYMMDD,1,4)||'-'||SUBSTR(YYYYMMDD,5,2)||'-'||SUBSTR(YYYYMMDD,7,2)
+			</isEqual>
+			<isEqual property="mode" compareValue="M">
+				SUBSTR(YYYYMMDD,1,4)||'-'||SUBSTR(YYYYMMDD,5,2)
+			</isEqual>
+			<isEqual property="mode" compareValue="Y">
+				SUBSTR(YYYYMMDD,1,4)
+			</isEqual>
+		</isNotEmpty>
+		<isEmpty>
+			SUBSTR(YYYYMMDD,1,4)||'-'||SUBSTR(YYYYMMDD,5,2)||'-'||SUBSTR(YYYYMMDD,7,2)
+		</isEmpty>
+	ORDER BY YYYYMMDD
+	</select>
+
+
+	<!-- 개방 추이 Chart형 자료에서 Y축 데이터 조회 -->
+	<select id="StatOpenPrgsDao.getChartDataY" parameterClass="egovframework.admin.stat.service.StatOpen"
+		resultClass="java.util.LinkedHashMap" remapResults="true">
+		SELECT
+		SUM(SRV_CNT) SRV_CNT
+		,SUM(S_CNT) S_CNT
+		,SUM(C_CNT) C_CNT
+		,SUM(M_CNT) M_CNT
+		,SUM(F_CNT) F_CNT
+		,SUM(L_CNT) L_CNT
+		,SUM(A_CNT) A_CNT
+		,SUM(V_CNT) V_CNT
+		FROM TB_STAT_OPEN
+		WHERE YYYYMMDD BETWEEN #pubDttmFrom:VARCHAR# AND #pubDttmTo:VARCHAR#
+		GROUP BY
+		<isNotEmpty property="mode">
+			<isEqual property="mode" compareValue="D">
+				SUBSTR(YYYYMMDD,1,4)||'-'||SUBSTR(YYYYMMDD,5,2)||'-'||SUBSTR(YYYYMMDD,7,2)
+				ORDER BY SUBSTR(YYYYMMDD,1,4)||'-'||SUBSTR(YYYYMMDD,5,2)||'-'||SUBSTR(YYYYMMDD,7,2)
+			</isEqual>
+			<isEqual property="mode" compareValue="M">
+				SUBSTR(YYYYMMDD,1,4)||'-'||SUBSTR(YYYYMMDD,5,2)
+				ORDER BY SUBSTR(YYYYMMDD,1,4)||'-'||SUBSTR(YYYYMMDD,5,2)
+			</isEqual>
+			<isEqual property="mode" compareValue="Y">
+				SUBSTR(YYYYMMDD,1,4)
+				ORDER BY SUBSTR(YYYYMMDD,1,4)
+			</isEqual>
+		</isNotEmpty>
+		<isEmpty>
+			SUBSTR(YYYYMMDD,1,4)||'-'||SUBSTR(YYYYMMDD,5,2)||'-'||SUBSTR(YYYYMMDD,7,2)
+			ORDER BY SUBSTR(YYYYMMDD,1,4)||'-'||SUBSTR(YYYYMMDD,5,2)||'-'||SUBSTR(YYYYMMDD,7,2)
+		</isEmpty>
+	</select>
+
+</sqlMap>

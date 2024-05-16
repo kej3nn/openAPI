@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="portalAssmChart" >
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+	
+	<!-- TreeMap Chart 데이터 조회 -->
+	<select id="assmMemberChartDao.selectTreeMapData" parameterClass="params" resultClass="record">
+		/* sql id : assmMemberChartDao.selectTreeMapData */
+		SELECT POLY_NM AS "name",
+		       COUNT(EMP_NO) AS "value" 
+		  FROM TV_THXPSN01 
+		 WHERE STATUS_YN = 'Y'   
+		 GROUP BY POLY_NM
+	</select>
+	
+	<!-- Column Chart 데이터 조회 -->
+	<select id="assmMemberChartDao.selectColumnReeleData" parameterClass="params" resultClass="record">
+		/* sql id : assmMemberChartDao.selectColumnReeleData */
+		SELECT 
+		       REELE_GBN_NM  AS "name", 
+		       COUNT(EMP_NO) AS "value" 
+		  FROM TV_THXPSN01
+		 WHERE STATUS_YN = 'Y'  
+		 GROUP BY REELE_GBN_NM 
+		 ORDER BY 
+		       CASE 
+		           WHEN REELE_GBN_NM ='초선' 
+		           THEN 1 
+		           WHEN REELE_GBN_NM ='재선' 
+		           THEN 2 
+		       END ,
+		       REELE_GBN_NM
+	</select>
+	
+	<!-- Pie Chart 데이터 조회 -->
+	<select id="assmMemberChartDao.selectPieData" parameterClass="params" resultClass="record">
+		/* sql id : assmMemberChartDao.selectPieData */
+		SELECT SEX_GBN_NM AS "name"
+       		   , COUNT(EMP_NO) AS "value"
+		 FROM TV_THXPSN01
+		WHERE STATUS_YN = 'Y' 
+		GROUP BY SEX_GBN_NM
+		ORDER BY SEX_GBN_NM
+	</select>
+	
+	<!-- Column Chart 데이터 조회(연령) -->
+	<select id="assmMemberChartDao.selectColumnAgeData" parameterClass="params" resultClass="record">
+		/* sql id : assmMemberChartDao.selectColumnAgeData */
+		SELECT AGE AS "name", 
+		       CNT AS "value" 
+		  FROM TV_THXPSN01_AGE
+	</select>
+	
+</sqlMap>

@@ -1,0 +1,361 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="OpenPub">
+	<typeAlias alias="egovMap"
+		type="egovframework.rte.psl.dataaccess.util.EgovMap" />
+	<resultMap id="OpenPubCfgListAll" class="egovframework.admin.openinf.service.OpenPubCfg">
+		<result column="PUB_ID" property="pubId" />
+		<result column="PUB_NM" property="pubNm" />
+		<result column="ENG_PUB_NM" property="pubNmEng" />
+		<result column="LANG_TAG" property="langTag" />
+		<result column="PUB_TAG" property="pubTag" />
+		<result column="DS_NM" property="dsNm" />
+		<result column="ORG_NM" property="orgNm" />
+		<result column="START_DTTM" property="startDttm" />
+		<result column="USE_YN" property="useYn" />
+	</resultMap>
+	
+	<resultMap id="OpenPubCfgOne" class="egovframework.admin.openinf.service.OpenPubCfg">
+		<result column="PUB_ID" property="pubId" />
+		<result column="PUB_NM" property="pubNm" />
+		<result column="ENG_PUB_NM" property="pubNmEng" />
+		<result column="LANG_TAG" property="langTag" />
+		<result column="PUB_TAG" property="pubTag" />
+		<result column="BASIS_MM" property="basisMm" />
+		<result column="BASIS_DD" property="basisDd" />
+		<result column="BASIS_WK" property="basisWk" />
+		<result column="BASIS_WD" property="basisWd" />
+		<result column="BASIS_HHMM" property="basisHhmm" />
+		<result column="BASIS_MODE" property="basisMode" />
+		<result column="AUTO_YN" property="autoYn" />
+		<result column="PUB_EXP" property="pubExp" />
+		<result column="ENG_PUB_EXP" property="pubExpEng" />
+		<result column="ORG_CD" property="orgCd" />
+		<result column="ORG_NM" property="orgNm" />
+		<result column="ORG_FULLNM" property="orgFullNm" />
+		<result column="USR_CD" property="usrCd" />
+		<result column="USR_NM" property="usrNm" />
+		<result column="REF_DS_ID" property="refDsId" />
+		<result column="REF_DS_ID_DUP" property="refDsIdDup" />
+		<result column="REF_COL_ID" property="refColId" />
+		<result column="REF_COL_ID_YN" property="refColIdYn" />
+		<result column="START_DTTM" property="startDttm" />
+		<result column="USE_YN" property="useYn" />
+		<result column="PUB_TAG_SET_YN" property="pubTagSetYn" />
+		<result column="REG_ID" property="regId" />
+		<result column="REG_DTTM" property="regDttm" />
+		<result column="UPD_ID" property="updId" />
+		<result column="UPD_DTTM" property="updDttm" />
+		<result column="REF_DS_NM" property="refDsNm" />
+		
+	</resultMap>
+
+	<resultMap id="OpenPubCfgRefColIdList" class="egovframework.admin.openinf.service.OpenPubCfg">
+		<result column="DS_ID" property="dsId" />
+		<result column="COL_SEQ" property="colSeq" />
+		<result column="SRC_COL_ID" property="srcColId" />
+		<result column="COL_NM" property="colNm" />
+	</resultMap>
+	
+	<!-- <resultMap id="SPMResult" class="egovframework.admin.openinf.service.OpenPubCfg">
+		<result column="p_retval" property="retval" />
+		<result column="p_retmsg" property="retmsg" />
+	</resultMap> -->
+	
+	
+	<parameterMap id="paramMap" class="egovframework.admin.openinf.service.OpenPubCfg">
+	<parameter property="pubId" jdbcType="INTEGER" javaType="java.lang.String" mode="IN"/>
+	<parameter property="retval" jdbcType="INTEGER" javaType="java.lang.Integer" mode="OUT"/>
+	<parameter property="retmsg" jdbcType="VARCHAR" javaType="java.lang.String" mode="OUT"/>
+	</parameterMap>
+	
+	<procedure id="OpenPubCfgDAO.callSPM" parameterMap="paramMap" resultClass="egovframework.admin.openinf.service.OpenPubCfg">
+
+	    <![CDATA[
+	      {CALL SP_EXEC_PUBLISH(?, '',?,?)}
+	      ]]>
+
+	</procedure>
+	
+	<!-- TB_OPEN_PUBCFG 테이블 없음 -->
+	<select id="OpenPubCfgDAO.selectOpenPubCfgListAll"	parameterClass="egovframework.admin.openinf.service.OpenPubCfg" resultMap="OpenPubCfgListAll">
+
+	SELECT
+	A.PUB_ID
+	,A.PUB_NM
+	,A.ENG_PUB_NM
+	,DECODE(A.LANG_TAG,'K','한글전용',	'E','영문전용','B','한/영모두') AS LANG_TAG
+	,DECODE(A.PUB_TAG,'D','일','W','주','M','월') AS PUB_TAG
+	,B.DS_NM
+	,C.ORG_NM
+	,TO_CHAR(A.START_DTTM,'YYYY-MM-DD HH24:MI:SS') AS START_DTTM
+	,A.USE_YN
+	FROM TB_OPEN_PUBCFG A
+	LEFT OUTER JOIN
+	TB_OPEN_DS B
+	ON A.REF_DS_ID = B.DS_ID
+	LEFT OUTER JOIN TB_COMM_ORG C
+	ON
+	A.ORG_CD = C.ORG_CD
+	WHERE 1 = 1
+
+		<isNotEmpty property="useYn">
+			AND A.USE_YN = #useYn#
+		</isNotEmpty>
+	
+		<isNotEmpty property="serVal">
+			<isEqual property="serSel" compareValue="NM">
+				AND A.PUB_NM LIKE '%'||#serVal#||'%'
+			</isEqual>
+			<isEqual property="serSel" compareValue="DS">
+				AND B.DS_NM LIKE '%'||#serVal#||'%'
+			</isEqual>
+			<isEqual property="serSel" compareValue="ALL">
+				AND
+				(
+				A.PUB_NM LIKE '%'||#serVal#||'%'
+				OR B.DS_NM LIKE '%'||#serVal#||'%'
+				)
+			</isEqual>
+		</isNotEmpty>
+		
+			<isEqual property="pubTagCheck" compareValue="Y">
+				AND A.PUB_TAG IN(#pubTagMonth#,#pubTagWeek#,#pubTagDay#)
+			</isEqual>
+			
+			<isNotEmpty property="langTag">
+				<isNotEqual property="langTag" compareValue="A">
+					AND A.LANG_TAG = #langTag#
+				</isNotEqual>
+			</isNotEmpty>
+			
+			ORDER BY PUB_ID DESC
+		
+	</select>
+	
+	<!-- TB_OPEN_PUBCFG 테이블 없음 -->
+	<select id="OpenPubCfgDAO.selectOpenPubCfgListAllCnt" parameterClass="egovframework.admin.openinf.service.OpenPubCfg" resultClass="java.lang.Integer">
+		SELECT
+	COUNT(A.PUB_ID)
+
+	FROM TB_OPEN_PUBCFG A
+	LEFT OUTER JOIN
+	TB_OPEN_DS B
+	ON A.REF_DS_ID = B.DS_ID
+	LEFT OUTER JOIN TB_COMM_ORG C
+	ON
+	A.ORG_CD = C.ORG_CD
+	WHERE 1 = 1
+
+		<isNotEmpty property="useYn">
+			AND A.USE_YN = #useYn#
+		</isNotEmpty>
+	
+		<isNotEmpty property="serVal">
+			<isEqual property="serSel" compareValue="NM">
+				AND A.PUB_NM LIKE '%'||#serVal#||'%'
+			</isEqual>
+			<isEqual property="serSel" compareValue="DS">
+				AND B.DS_NM LIKE '%'||#serVal#||'%'
+			</isEqual>
+			<isEqual property="serSel" compareValue="ALL">
+				AND
+				(
+				A.PUB_NM LIKE '%'||#serVal#||'%'
+				OR B.DS_NM LIKE '%'||#serVal#||'%'
+				)
+			</isEqual>
+		</isNotEmpty>
+		
+			<isEqual property="pubTagCheck" compareValue="Y">
+				AND A.PUB_TAG IN(#pubTagMonth#,#pubTagWeek#,#pubTagDay#)
+			</isEqual>
+			
+			<isNotEmpty property="langTag">
+				<isNotEqual property="langTag" compareValue="A">
+					AND A.LANG_TAG = #langTag#
+				</isNotEqual>
+			</isNotEmpty>
+	</select>
+	
+	
+	<!-- TB_OPEN_PUBCFG 테이블없음 -->
+	<select id="OpenPubCfgDAO.selectOpenPubCfgRefDsCheckDup" parameterClass="egovframework.admin.openinf.service.OpenPubCfg" resultClass="java.lang.Integer">
+		SELECT COUNT(1) AS CNT
+		FROM TB_OPEN_PUBCFG
+		WHERE REF_DS_ID = #refDsId#
+	</select>
+	
+	<!-- TB_OPEN_PUBCFG 테이블 없음 -->
+	<select id="OpenPubCfgDAO.selectOpenPubCfgOne" parameterClass="egovframework.admin.openinf.service.OpenPubCfg"	resultMap="OpenPubCfgOne">
+	SELECT
+	A.PUB_ID
+	,A.PUB_NM
+	,A.ENG_PUB_NM
+	,A.LANG_TAG
+	,A.PUB_TAG
+	,A.BASIS_MM
+	,A.BASIS_DD
+	,A.BASIS_WK
+	,A.BASIS_WD
+	<![CDATA[
+	,CASE WHEN PUB_TAG = 'M' AND INSTR(BASIS_DD,'Y') < 1 THEN 'MW' 
+	WHEN PUB_TAG = 'W' THEN 'W'
+	WHEN PUB_TAG = 'D' THEN 'D'
+	ELSE 'MD' END AS BASIS_MODE
+]]>
+	,A.BASIS_HHMM
+	,A.AUTO_YN
+	,A.PUB_EXP
+	,A.ENG_PUB_EXP
+	,B.ORG_CD
+	,B.ORG_NM
+	,B.ORG_FULLNM
+	,C.USR_CD
+	,C.USR_NM
+	,A.REF_DS_ID
+	,'Y' AS REF_DS_ID_DUP
+	,A.REF_COL_ID
+	, TO_CHAR(START_DTTM,'YYYY-MM-DD') AS START_DTTM
+	,A.USE_YN
+	,A.REG_ID
+	,A.REG_DTTM
+	,A.UPD_ID
+	,A.UPD_DTTM
+	,'N' AS PUB_TAG_SET_YN
+	,D.DS_NM AS REF_DS_NM
+	,CASE WHEN
+ 	(SELECT COUNT(DS_ID) FROM TB_OPEN_DSCOL WHERE SRC_COL_TYPE = 'DATE' AND DS_ID = A.REF_DS_ID) > 1 THEN 'Y' ELSE 'N' END
+ 	AS REF_COL_ID_YN
+	FROM TB_OPEN_PUBCFG A
+	LEFT OUTER JOIN TB_COMM_ORG B
+	ON A.ORG_CD = B.ORG_CD
+	LEFT OUTER JOIN TB_COMM_USR C
+	ON A.USR_CD = C.USR_CD
+	LEFT OUTER JOIN TB_OPEN_DS D
+	ON A.REF_DS_ID = D.DS_ID
+	WHERE PUB_ID = #pubId#
+	</select>
+	
+	
+	<select id="OpenPubCfgDAO.selectRefColId"	parameterClass="egovframework.admin.openinf.service.OpenPubCfg" resultMap="OpenPubCfgRefColIdList">
+	SELECT
+	DS_ID
+	,COL_SEQ
+	,SRC_COL_ID
+	,COL_NM
+	FROM TB_OPEN_DSCOL
+	WHERE 1=1
+	AND
+	SRC_COL_TYPE = 'DATE'
+	AND
+	DS_ID = #refDsId:VARCHAR#
+	</select>
+	
+	
+	
+	
+	<!-- TB_OPEN_PUBCFG 테이블 없음 -->
+	<select id="OpenPubCfgDAO.getOpenPubCfgMaxId" parameterClass="egovframework.admin.openinf.service.OpenPubCfg"	resultClass="java.lang.Integer">
+	SELECT  
+	NVL(MAX(PUB_ID),0)+1 AS PUB_ID 
+	FROM TB_OPEN_PUBCFG  
+	</select>
+	
+	<!-- TB_OPEN_PUBCFG 테이블 없음 -->
+	<insert id="OpenPubCfgDAO.insertOpenCfg" parameterClass="egovframework.admin.openinf.service.OpenPubCfg">
+	INSERT INTO TB_OPEN_PUBCFG
+	(PUB_ID,PUB_NM,ENG_PUB_NM,PUB_EXP,ENG_PUB_EXP,LANG_TAG,PUB_TAG,BASIS_MM,BASIS_DD,BASIS_WK,BASIS_WD,BASIS_HHMM
+	,AUTO_YN,ORG_CD,USR_CD,REF_DS_ID,REF_COL_ID,START_DTTM,USE_YN,REG_ID,REG_DTTM,UPD_ID,UPD_DTTM)
+	VALUES(
+	#pubId#
+	,#pubNm#
+	,#pubNmEng#
+	,#pubExp#
+	,#pubExpEng#
+	,#langTag#
+	,#pubTag#
+	,#basisMm#
+	,#basisDd#
+	,#basisWk#
+	,#basisWd#
+	,#basisHhmm#
+	,#autoYn#
+	,#orgCd#
+	,#usrCd#
+	,#refDsId#
+	,#refColId#
+	,TO_DATE(#startDttm#, 'YYYY-MM-DD')
+	,#useYn#
+	,#sessionUsrId#
+	,sysdate
+	,#sessionUsrId#
+	,sysdate)
+
+	</insert>
+	
+	<!-- TB_OPEN_PUBCFG 테이블 없음 -->
+	<update id="OpenPubCfgDAO.updateOpenCfg" parameterClass="egovframework.admin.openinf.service.OpenPubCfg">
+		UPDATE TB_OPEN_PUBCFG SET 
+		PUB_NM = #pubNm#
+		,ENG_PUB_NM = #pubNmEng#
+		,PUB_EXP = #pubExp#
+		,ENG_PUB_EXP = #pubExpEng#
+		,LANG_TAG = #langTag#
+		,PUB_TAG = #pubTag#
+		,BASIS_MM = #basisMm#
+		,BASIS_DD = #basisDd#
+		,BASIS_WK = #basisWk#
+		,BASIS_WD = #basisWd#
+		,BASIS_HHMM = #basisHhmm#
+		,AUTO_YN = #autoYn#
+		,ORG_CD = #orgCd#
+		,USR_CD = #usrCd#
+		,REF_COL_ID = #refColId#
+		,START_DTTM = TO_DATE(#startDttm#, 'YYYY-MM-DD')
+		,USE_YN = #useYn#
+		,UPD_ID = #sessionUsrId#
+		,UPD_DTTM = SYSDATE
+		WHERE PUB_ID = #pubId#
+	</update>
+	
+	<!-- TB_OPEN_PUBCFG 테이블 없음 -->
+	<update id="OpenPubCfgDAO.deleteOpenCfg" parameterClass="egovframework.admin.openinf.service.OpenPubCfg">
+		DELETE FROM TB_OPEN_PUBCFG 
+		WHERE PUB_ID = #pubId#
+	</update>
+	
+	<update id="OpenPubCfgDAO.updateOpenDsPubYn" parameterClass="egovframework.admin.openinf.service.OpenPubCfg">
+		UPDATE TB_OPEN_DS SET
+		PUB_YN = #useYn:CHAR# 
+		WHERE DS_ID = #refDsId:VARCHAR#
+	</update>
+	
+	<update id="OpenPubCfgDAO.updateOpenDsColPubYn" parameterClass="egovframework.admin.openinf.service.OpenPubCfg">
+		UPDATE TB_OPEN_DSCOL SET
+		PUB_YN = #useYn:CHAR# 
+		WHERE
+		DS_ID = #refDsId:VARCHAR#
+		AND SRC_COL_ID = #refColId:VARCHAR#
+		
+	</update>
+	
+	<update id="OpenPubCfgDAO.updateOpenDsPubN" parameterClass="egovframework.admin.openinf.service.OpenPubCfg">
+		UPDATE TB_OPEN_DS SET
+		PUB_YN = 'N' 
+		WHERE DS_ID = #refDsId:VARCHAR#
+	</update>
+	
+	<update id="OpenPubCfgDAO.updateOpenDsColPubN" parameterClass="egovframework.admin.openinf.service.OpenPubCfg">
+		UPDATE TB_OPEN_DSCOL SET
+		PUB_YN = 'N' 
+		WHERE
+		DS_ID = #refDsId:VARCHAR#
+		AND SRC_COL_ID = #refColId:VARCHAR#
+	</update>
+	
+	
+
+		
+</sqlMap>

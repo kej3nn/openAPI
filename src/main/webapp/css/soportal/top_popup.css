@@ -1,0 +1,192 @@
+@charset "UTF-8";
+
+/* top popup */
+.header-popup-area {
+	position: relative;
+	height: 163px;
+	background: #595d65 url(../../images/hfportal/main/bg_top_popup01.jpg) no-repeat center top;
+	z-index: 10;
+}
+
+.header-popup-area .header-popup-box {
+	position: relative;
+	max-width: 950px;
+	height: 131px;
+	margin: 0 auto;
+	padding: 0 25px;
+}
+
+.header-popup-area .header-popup-box  #responsive-popup {
+	display: block;
+	min-height: 100px;
+}
+
+.header-popup-area .header-popup-box  #responsive-popup li {
+	border: 0px solid red;
+}
+
+.header-popup-area .header-popup-box  #responsive-popup li a {
+	display: block;
+	height: 91px;
+	padding: 43px 0 0 20px;
+}
+
+.header-popup-area .header-popup-box  #responsive-popup li a .title {
+	display: block;
+	color: #fff;
+	font-size: 22px;
+	line-height: 24px;
+	margin-bottom: 8px;
+	overflow: hidden;
+	white-space: nowrap; 
+	text-overflow: ellipsis; 
+	-o-text-overow: ellipsis;
+	font-family: "notoKrM", sans-serif;
+	font-weight: 500;
+}
+
+.header-popup-area .header-popup-box #responsive-popup li a .submit {
+	display: block;
+	color: #aeafb3;
+	line-height: 24px;
+	font-family: "notoKrL", sans-serif;
+	font-weight: 100;
+
+	overflow: hidden;
+	text-overflow: ellipsis;
+	display: -webkit-box;
+	-webkit-line-clamp: 2; /* 라인수 */
+	-webkit-box-orient: vertical;
+	word-wrap:break-word; 
+	height: 48px;
+}
+
+.header-popup-area .header-popup-box #responsive-popup li a .word-detail-view {
+	display: inline-block;
+	padding-right: 12px;
+	font-size: 13px;
+	line-height: 15px;
+	color: #fff;
+	text-decoration: underline;
+	background: transparent url(../../images/hfportal/main/icon_detailview_arrow.gif) no-repeat right center;
+	background: -webkit-linear-gradient(transparent, transparent), url(../../images/hfportal/main/icon_detailview_arrow@2x.gif) no-repeat right center;
+	background: linear-gradient(transparent, transparent), url(../../images/hfportal/main/icon_detailview_arrow@2x.gif) no-repeat right center;
+	background-size: 5px 9px;
+}
+
+
+
+.header-popup-area .header-popup-box .bx-prev {
+	display: block;
+	position: absolute;
+	top: 50%;
+	left: 0;
+	width: 20px;
+	height: 32px;
+	border: 0;
+	margin-top: -16px;
+	text-indent: -5000em;
+	cursor: pointer;
+	background: transparent url(../../images/hfportal/main/btn_previous02.png) no-repeat 0 0;
+	background: -webkit-linear-gradient(transparent, transparent), url(../../images/hfportal/main/btn_previous02@2x.png) no-repeat 0 0;
+	background: linear-gradient(transparent, transparent), url(../../images/hfportal/main/btn_previous02@2x.png) no-repeat 0 0;
+	background-size: 20px 32px;
+}
+
+.header-popup-area .header-popup-box  .bx-next {
+	display: block;
+	position: absolute;
+	top: 50%;
+	right: 0;
+	width: 20px;
+	height: 32px;
+	border: 0;
+	margin-top: -16px;
+	text-indent: -5000em;
+	cursor: pointer;
+	background: transparent url(../../images/hfportal/main/btn_next02.png) no-repeat 0 0;
+	background: -webkit-linear-gradient(transparent, transparent), url(../../images/hfportal/main/btn_next02@2x.png) no-repeat 0 0;
+	background: linear-gradient(transparent, transparent), url(../../images/hfportal/main/btn_next02@2x.png) no-repeat 0 0;
+	background-size: 20px 32px;
+}
+
+
+.header-popup-area .btns-area {
+	padding: 0;
+	height: 32px;
+	background: url(../../images/hfportal/main/bg_top_popup02.png) repeat;
+}
+
+.header-popup-area .btns-area .btns-box {
+	max-width: 1000px;
+	height: 32px;
+	line-height: 32px;
+	margin: 0 auto;
+	text-align: right;
+}
+
+.header-popup-area .btns-area .btns-box .today-close {
+	display: inline-block;
+	vertical-align: middle;
+	margin-right: 10px;
+	background: transparent url(../../images/hfportal/main/icon_top_popup_bar01.gif) no-repeat right center;
+	background: -webkit-linear-gradient(transparent,transparent),url(../../images/hfportal/main/icon_top_popup_bar01@2x.gif) no-repeat right center;
+	background: linear-gradient(transparent,transparent),url(../../images/hfportal/main/icon_top_popup_bar01@2x.gif) no-repeat right center;
+	background-size: 1px 13px;
+}
+
+.header-popup-area .btns-area .btns-box .today-close input[type="checkbox"],
+.header-popup-area .btns-area .btns-box .today-close label {
+	display: inline-block;
+	vertical-align: middle;
+}
+
+.header-popup-area .btns-area .btns-box .today-close input[type="checkbox"] {
+	margin-right: 5px;
+	}
+
+
+.header-popup-area .btns-area .btns-box .today-close label {
+	color: #aeafb3;
+	padding-right: 15px;
+	font-family: "notoKrL", sans-serif;
+	font-weight: 100;
+}
+
+.header-popup-area .btns-area .btns-box .btn-top-popup-close {
+	display: inline-block;
+	vertical-align: middle;
+	padding-right: 18px;
+	color: #ffffff;
+	background: transparent url(../../images/hfportal/main/btn_top_popup_close.gif) no-repeat right center;
+	background: -webkit-linear-gradient(transparent,transparent),url(../../images/hfportal/main/btn_top_popup_close@2x.gif) no-repeat right center;
+	background: linear-gradient(transparent,transparent),url(../../images/hfportal/main/btn_top_popup_close@2x.gif) no-repeat right center;
+	background-size: 9px 9px;
+}
+
+@media only all and (max-width: 1199px) {
+	/* top popup */
+	.header-popup-area .header-popup-box {
+		padding: 0 20px;
+	}
+
+	.header-popup-area .btns-area .btns-box {
+		padding: 0 20px;
+	}
+}
+
+@media only all and (max-width: 767px) {
+	.header-popup-area .header-popup-box  #responsive-popup li a .title {
+		font-size: 18px;
+		line-height: 24px;
+	}
+	.header-popup-area .header-popup-box  #responsive-popup li a .word-detail-view {
+		display: inline-block;
+		padding-right: 12px;
+		font-size: 13px;
+		line-height: 15px;
+		color: #fff;
+		text-decoration: underline;
+	}
+}
+

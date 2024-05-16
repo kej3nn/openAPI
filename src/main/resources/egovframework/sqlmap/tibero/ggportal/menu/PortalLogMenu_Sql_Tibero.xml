@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- @(#)PortalLogMenu_Sql_Tibero.xml 1.0 2015/06/15                         -->
+<!--                                                                         -->
+<!-- COPYRIGHT (C) 2013 WISEITECH CO., LTD. ALL RIGHTS RESERVED.             -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- 메뉴 액세스 이력을 관리하는 SQL 파일이다.                               -->
+<!--                                                                         -->
+<!-- @author 김은삼                                                          -->
+<!-- @version 1.0 2015/06/15                                                 -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<sqlMap namespace="PortalLogMenuDao">
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Type Alias                                                          -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 메뉴 액세스 이력을 등록한다.                                        -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <insert id="PortalLogMenuDao.insertLogMenu" parameterClass="params">
+         INSERT INTO TB_LOG_COMM_MENU
+                (   SEQCE_NO,
+                	MENU_ID,
+                    SYS_TAG,
+                    USER_IP,
+				<isNotEmpty property="portalUserCd">                    
+                    USER_CD,
+                </isNotEmpty>
+                    REG_DTTM
+                )
+         SELECT SQ_LOG_COMM_MENU_SEQ.NEXTVAL,
+         		MENU_ID,
+                #sysTag:CHAR#    		AS "sysTag",
+                #userIp:VARCHAR#    	AS "userIp",
+			<isNotEmpty property="portalUserCd">
+                #portalUserCd:NUMERUC#	AS "userCd",
+            </isNotEmpty>
+                SYSDATE     			AS "regDttm"
+           FROM TB_COMM_MENU A
+          WHERE A.MENU_URL   = #menuUrl:VARCHAR#
+            AND A.USE_YN     = 'Y'
+    </insert>
+
+</sqlMap>

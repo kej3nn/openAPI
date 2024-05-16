@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="portalAssmPdta" >
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+	
+	<!-- 정책자료,보고서 -->
+	<sql id="pdta.col">
+		RPT_DIV_CD			AS "rptDivCd"
+		, RPT_DIV_NM		AS "rptDivNm"
+		, EMP_NO			AS "empNo"
+		, RPT_NO			AS "rptNo"
+		, RPT_TIT			AS "rptTit"
+		, RPT_AUT_NM		AS "rptAutNm"
+		, RPT_CN			AS "rptCn"
+		, IMG_URL			AS "imgUrl"
+		, LINK_URL			AS "linkUrl"
+		, FILE_NM			AS "fileNm"
+		, FILE_URL			AS "fileUrl"
+		, FILE_URL2			AS "fileUrl2"
+		, FILE_URL3			AS "fileUrl3"
+		, RPT_DT 			AS "rptDt"
+		, SRC_RPT_DT 		AS "srcRptDt"
+		, UNIT_NM           AS "unitNm"	
+	</sql>
+	<sql id="pdta.where">
+		WHERE EMP_NO LIKE '%' || #empNo:VARCHAR# || '%'
+		<isNotEmpty property="unitCd" prepend=" AND ">
+			UNIT_CD = #unitCd:VARCHAR#
+		</isNotEmpty>
+		<isNotEmpty property="rptTit" prepend=" AND ">
+			RPT_TIT LIKE '%' || #rptTit:VARCHAR# || '%'
+		</isNotEmpty>
+		<isNotEmpty property="rptDivCd" prepend=" AND ">
+			RPT_DIV_CD = #rptDivCd:VARCHAR#
+		</isNotEmpty>
+		<isNotEmpty property="rptDt" prepend=" AND ">
+			RPT_DT = #rptDt:VARCHAR#
+		</isNotEmpty>
+	</sql>
+	
+	<!-- 정책자료,보고서 조회 -->
+	<select id="assmPdtaDao.searchAssmPdta" remapResults="true" parameterClass="params" resultClass="record">
+		/* sql id : assmPdtaDao.searchAssmPdta */
+		<isEqual property="paging" compareValue="0">
+		SELECT AA.* 
+		FROM   (SELECT ROWNUM AS ROW_NUM, AA.*
+				FROM   (
+		</isEqual>
+		
+			SELECT
+			    <include refid="pdta.col"/>
+			FROM
+			    TV_ANC_ASSEM_RPT A
+			<include refid="pdta.where"/>
+		<isEqual property="paging" compareValue="0">
+		<![CDATA[
+				) AA
+			WHERE ROWNUM <= #end:NUMERIC#
+			) AA
+		WHERE AA.ROW_NUM >= #start:NUMERIC#
+		]]>
+		</isEqual>
+	</select>
+	<select id="assmPdtaDao.searchAssmPdtaCount" parameterClass="params" resultClass="int">
+		/* sql id : assmPdtaDao.searchAssmPdtaCount */
+		SELECT
+		    COUNT(*)
+		FROM
+		    TV_ANC_ASSEM_RPT A
+		<include refid="pdta.where"/>
+	</select>
+	
+	
+	
+	<!-- 정책자료 -->
+	<sql id="plcy.col">
+		  CONTROL_NO               AS "controlNo"
+		, TITLE                    AS "title"
+		, SEMINAR_DIV_CODE         AS "seminarDivCode"
+		, HOST_DT                  AS "hostDt"
+		, HOST_PLACE_NAME          AS "hostPlaceName"
+		, PUBLISHER                AS "publisher"
+		, HOST_INS_NAME            AS "hostInsName"
+		, ATTENDANCE_NAME1         AS "attendanceName1"
+		, ATTENDANCE_NAME2         AS "attendanceName2"
+		, FILE_URL                 AS "orgUrl"
+		, DETAIL_VIEW_URL          AS "detailViewUrl"
+		, UPDATE_DT                AS "updateDt"
+		, COMPLETE_DT              AS "completeDt"
+	</sql>
+	<sql id="plcy.where">
+		WHERE SEMINAR_DIV_CODE = #seminarDivCode:VARCHAR#
+		  AND HOST_INS_NAME LIKE '%' || #empNm:VARCHAR# || '%'
+		<isNotEmpty property="title" prepend=" AND ">
+			TITLE LIKE '%' || #title:VARCHAR# || '%'
+		</isNotEmpty>
+	</sql>
+	<!-- 정책자료,보고서 조회 -->
+	<select id="assmPdtaDao.searchPlcyList" remapResults="true" parameterClass="params" resultClass="record">
+		/* sql id : assmPdtaDao.searchPlcyList */
+		<isEqual property="paging" compareValue="0">
+		SELECT AA.* 
+		FROM   (SELECT ROWNUM AS ROW_NUM, AA.*
+				FROM   (
+		</isEqual>
+		
+			SELECT
+			    <include refid="plcy.col"/>
+			FROM
+			    TV_POLICY_DATA A
+			<include refid="plcy.where"/>
+		<isEqual property="paging" compareValue="0">
+		<![CDATA[
+				) AA
+			WHERE ROWNUM <= #end:NUMERIC#
+			) AA
+		WHERE AA.ROW_NUM >= #start:NUMERIC#
+		]]>
+		</isEqual>
+	</select>
+	<select id="assmPdtaDao.searchPlcyListCount" parameterClass="params" resultClass="int">
+		/* sql id : assmPdtaDao.searchPlcyListCount */
+		SELECT
+		    COUNT(*)
+		FROM
+		    TV_POLICY_DATA A
+		<include refid="plcy.where"/>
+	</select>
+	
+</sqlMap>

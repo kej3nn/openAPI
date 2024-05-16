@@ -1,0 +1,1433 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="PortalExposeInfo">
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 	-->
+    <!-- 정보공개 청구대상기관 정보를 조회한다.                            					-->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 	-->
+    <select id="PortalExposeInfoDao.getOpnInstCodeList" parameterClass="params" resultClass="record">
+    	/* sql id : PortalExposeInfoDao.getOpnInstCodeList  */
+        <![CDATA[
+		SELECT A.INST_CD 	AS "instCd"
+				 , A.INST_NM	AS "instNm"
+				 , A.INST_RDT AS "instRdt"
+		  FROM TV_OPNZ_INSTCD A
+		 ORDER BY INST_ORD
+        ]]>
+    </select>
+
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 	-->
+    <!-- 정보공개 코드 정보를 조회한다.                            						-->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 	-->
+    <select id="PortalExposeInfoDao.getOpnCommonCodeList" parameterClass="params" resultClass="record">
+    	/* sql id : PortalExposeInfoDao.getOpnCommonCodeList  */
+        <![CDATA[
+		SELECT A.BASE_CD 	AS "baseCd"
+				 , A.BASE_NM	AS "baseNm"
+		  FROM TV_OPNZ_BASECD A
+		WHERE A.LCLS_CD = #lclsCd:VARCHAR#
+		 ORDER BY BASE_CD
+        ]]>
+    </select>
+
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 	-->
+    <!-- 정보공개 청구 > 신청번호를 조회한다.                            					-->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 	-->
+	<select id="PortalExposeInfoDao.selectNextAplNo" parameterClass="params" resultClass="String">
+		/* sql id : PortalExposeInfoDao.selectNextAplNo */
+        <![CDATA[
+		SELECT to_char(sysdate, 'yymm')||lpad(nvl(substr(max(abs(apl_no)),5,8)+1, '1'),4,'0')
+		  FROM TB_OPNZ_APL 
+		 WHERE abs(substr(apl_no, 0, 4)) = abs(to_char(sysdate, 'yymm'))
+        ]]>
+	</select>
+	
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 	-->
+    <!-- 정보공개 청구서 등록/수정 한다.                            						-->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 	-->
+	<update id="PortalExposeInfoDao.saveAccount" parameterClass="params">
+		/* sql id : PortalExposeInfoDao.saveAccount */
+		MERGE INTO TB_OPNZ_APL A
+		USING (
+				SELECT
+					#aplNo#						AS APL_NO
+					, #aplDt#					AS APL_DT
+					, #prgStatCd#				AS PRG_STAT_CD
+					, #aplNtfrDiv#				AS APL_NTFR_DIV
+					, #aplPn#					AS APL_PN
+					, #aplRno1#				    AS APL_RNO1
+					, #aplRno2#				    AS APL_RNO2
+					, #aplCorpNm#				AS APL_CORP_NM
+					, #aplBno#					AS APL_BNO
+					, #aplZpno#				    AS APL_ZPNO
+					, #apl1Addr#				AS APL_1_ADDR
+					, #apl2Addr#				AS APL_2_ADDR
+					, #aplPno#					AS APL_PNO					
+					, #aplMblPno#				AS APL_MBL_PNO
+					, #aplFaxNo#				AS APL_FAX_NO
+					, #aplEmailAddr#			AS APL_EMAIL_ADDR
+					, #aplInstCd#				AS APL_INST_CD
+					, #aplDealInstCd#			AS APL_DEAL_INST_CD
+					, #aplSj#					AS APL_SJ
+					, #aplModSj#				AS APL_MOD_SJ
+					, #aplDtsCn#				AS APL_DTS_CN
+					, #aplModDtsCn#				AS APL_MOD_DTS_CN
+					, #attchFlNm#				AS ATTCH_FL_NM
+					, #attchFlPhNm#				AS ATTCH_FL_PH_NM
+					, #opbFomVal#				AS OPB_FOM_VAL
+					, #opbFomEtc#				AS OPB_FOM_ETC
+					, #aplTakMth#				AS APL_TAK_MTH
+					, #aplTakMthEtc#			AS APL_TAK_MTH_ETC
+					, #feeRdtnCd#				AS FEE_RDTN_CD
+					, #feeRdtnRson#				AS FEE_RDTN_RSON
+					, #feeAttchFlNm#			AS FEE_ATTCH_FL_NM
+					, #feeAttchFlPh#			AS FEE_ATTCH_FL_PH
+					, #dcsNtcRcvMthCd#			AS DCS_NTC_RCV_MTH_CD
+					, #dcsNtcRcvMthSms#			AS DCS_NTC_RCV_MTH_SMS
+					, #dcsNtcRcvMthMail#		AS DCS_NTC_RCV_MTH_MAIL
+					, #dcsNtcRcvMthTalk#		AS DCS_NTC_RCV_MTH_TALK
+					, #rgDiv#					AS RG_DIV
+				<isNotEmpty property="opbDcsFlNm">	
+					, #opbDcsFlNm#				AS OPB_DCS_FL_NM
+					, #opbDcsFlPh#				AS OPB_DCS_FL_PH
+				</isNotEmpty>
+					, #sysRegId#				AS SYS_REG_ID
+					, #sysRegDttm#				AS SYS_REG_DTTM
+					, #sysUpdId#				AS SYS_UPD_ID
+					, #sysUpdDttm#				AS SYS_UPD_DTTM
+					, #aplDi#                   AS APL_DI
+					, #userId#                  AS MEMBER_ID
+				FROM DUAL
+		) B
+		ON (
+			A.APL_NO 		= B.APL_NO
+		)
+		WHEN MATCHED THEN
+		UPDATE SET
+			A.PRG_STAT_CD 					= B.PRG_STAT_CD
+    		, A.APL_NTFR_DIV 				= B.APL_NTFR_DIV
+    		, A.APL_PN 						= B.APL_PN
+    		, A.APL_RNO1 					= B.APL_RNO1
+    		, A.APL_RNO2 					= pkg_crypto2.encrypt(B.APL_RNO2)
+			, A.APL_CORP_NM 				= B.APL_CORP_NM
+			, A.APL_BNO 					= B.APL_BNO
+			, A.APL_ZPNO 					= B.APL_ZPNO
+			, A.APL_1_ADDR 					= B.APL_1_ADDR
+			, A.APL_2_ADDR 					= pkg_crypto2.encrypt(B.APL_2_ADDR)
+			, A.APL_PNO 					= pkg_crypto2.encrypt(B.APL_PNO)
+			, A.APL_MBL_PNO 				= pkg_crypto2.encrypt(B.APL_MBL_PNO)
+			, A.APL_FAX_NO 					= pkg_crypto2.encrypt(B.APL_FAX_NO)
+			, A.APL_EMAIL_ADDR 			    = pkg_crypto2.encrypt(B.APL_EMAIL_ADDR)
+			, A.APL_INST_CD 				= B.APL_INST_CD
+			, A.APL_DEAL_INST_CD			= B.APL_DEAL_INST_CD
+			, A.APL_SJ 						= B.APL_SJ
+			, A.APL_MOD_SJ 					= NVL(B.APL_MOD_SJ, B.APL_SJ)
+			, A.APL_DTS_CN 					= B.APL_DTS_CN
+			, A.APL_MOD_DTS_CN 				= NVL(B.APL_MOD_DTS_CN, B.APL_DTS_CN)
+			, A.ATTCH_FL_NM 				= B.ATTCH_FL_NM
+			, A.ATTCH_FL_PH_NM 				= B.ATTCH_FL_PH_NM
+			, A.OPB_FOM_VAL 				= B.OPB_FOM_VAL
+			, A.OPB_FOM_ETC 				= B.OPB_FOM_ETC
+			, A.APL_TAK_MTH 				= B.APL_TAK_MTH
+			, A.APL_TAK_MTH_ETC 			= B.APL_TAK_MTH_ETC			
+			, A.FEE_RDTN_CD 				= B.FEE_RDTN_CD
+			, A.FEE_RDTN_RSON 			    = B.FEE_RDTN_RSON
+			, A.FEE_ATTCH_FL_NM 			= B.FEE_ATTCH_FL_NM
+			, A.FEE_ATTCH_FL_PH 			= B.FEE_ATTCH_FL_PH
+			, A.DCS_NTC_RCV_MTH_CD			= B.DCS_NTC_RCV_MTH_CD
+			, A.DCS_NTC_RCV_MTH_SMS			= B.DCS_NTC_RCV_MTH_SMS
+			, A.DCS_NTC_RCV_MTH_MAIL		= B.DCS_NTC_RCV_MTH_MAIL
+			, A.DCS_NTC_RCV_MTH_TALK		= B.DCS_NTC_RCV_MTH_TALK
+			, A.RG_DIV 						= B.RG_DIV
+		<isNotEmpty property="opbDcsFlNm">
+			, A.OPB_DCS_FL_NM 				= B.OPB_DCS_FL_NM
+			, A.OPB_DCS_FL_PH 				= B.OPB_DCS_FL_PH
+		</isNotEmpty>
+			, A.SYS_UPD_ID 					= B.SYS_UPD_ID
+			, A.SYS_UPD_DTTM 				= SYSDATE	
+			, A.APL_DI                     	= B.APL_DI
+			, A.MEMBER_ID                   = B.MEMBER_ID 	
+		WHEN NOT MATCHED THEN
+		INSERT (
+			A.APL_NO
+			, A.APL_DT
+			, A.PRG_STAT_CD
+			, A.APL_NTFR_DIV
+			, A.APL_PN
+			, A.APL_RNO1
+			, A.APL_RNO2
+			, A.APL_CORP_NM
+			, A.APL_BNO
+			, A.APL_ZPNO
+			, A.APL_1_ADDR
+			, A.APL_2_ADDR
+			, A.APL_PNO
+			, A.APL_MBL_PNO
+			, A.APL_FAX_NO
+			, A.APL_EMAIL_ADDR
+			, A.APL_INST_CD
+			, A.APL_DEAL_INST_CD
+			, A.APL_SJ
+			, A.APL_MOD_SJ
+			, A.APL_DTS_CN
+			, A.APL_MOD_DTS_CN
+		<isNotEmpty property="attchFlNm">	
+			, A.ATTCH_FL_NM
+			, A.ATTCH_FL_PH_NM
+		</isNotEmpty>
+			, A.OPB_FOM_VAL
+			, A.OPB_FOM_ETC
+			, A.APL_TAK_MTH
+			, A.APL_TAK_MTH_ETC
+			, A.FEE_RDTN_CD
+			, A.FEE_RDTN_RSON
+		<isNotEmpty property="feeAttchFlNm">	
+			, A.FEE_ATTCH_FL_NM
+			, A.FEE_ATTCH_FL_PH
+		</isNotEmpty>
+			, A.DCS_NTC_RCV_MTH_CD
+			, A.DCS_NTC_RCV_MTH_SMS
+			, A.DCS_NTC_RCV_MTH_MAIL
+			, A.DCS_NTC_RCV_MTH_TALK
+			, A.RG_DIV
+		<isNotEmpty property="opbDcsFlNm">	
+			, A.OPB_DCS_FL_NM
+			, A.OPB_DCS_FL_PH
+		</isNotEmpty>
+			, A.SYS_REG_ID
+			, A.SYS_REG_DTTM
+			, A.SYS_UPD_ID
+			, A.SYS_UPD_DTTM
+			, A.APL_DI
+			, A.MEMBER_ID
+		)
+		VALUES (
+			B.APL_NO
+			, to_char(sysdate, 'YYYYMMDD')
+			, B.PRG_STAT_CD
+			, B.APL_NTFR_DIV
+			, B.APL_PN
+			, B.APL_RNO1
+			, pkg_crypto2.encrypt(B.APL_RNO2)
+			, B.APL_CORP_NM
+			, B.APL_BNO
+			, B.APL_ZPNO
+			, B.APL_1_ADDR
+			, pkg_crypto2.encrypt(B.APL_2_ADDR)
+			, pkg_crypto2.encrypt(B.APL_PNO)
+			, pkg_crypto2.encrypt(B.APL_MBL_PNO)
+			, pkg_crypto2.encrypt(B.APL_FAX_NO)
+			, pkg_crypto2.encrypt(B.APL_EMAIL_ADDR)
+			, B.APL_INST_CD
+			, B.APL_DEAL_INST_CD
+			, B.APL_SJ
+		<isNotEmpty property="aplModSj">		
+			, B.APL_MOD_SJ
+		</isNotEmpty>
+		<isEmpty property="aplModSj">	
+			, B.APL_SJ
+		</isEmpty>
+			, B.APL_DTS_CN
+		<isNotEmpty property="aplModDtsCn">		
+			, B.APL_MOD_DTS_CN
+		</isNotEmpty>
+		<isEmpty property="aplModDtsCn">	
+			, B.APL_DTS_CN
+		</isEmpty>
+		<isNotEmpty property="attchFlNm">	
+			, B.ATTCH_FL_NM
+			, B.ATTCH_FL_PH_NM
+		</isNotEmpty>
+			, B.OPB_FOM_VAL
+			, B.OPB_FOM_ETC
+			, B.APL_TAK_MTH
+			, B.APL_TAK_MTH_ETC
+			, B.FEE_RDTN_CD
+			, B.FEE_RDTN_RSON
+		<isNotEmpty property="feeAttchFlNm">	
+			, B.FEE_ATTCH_FL_NM
+			, B.FEE_ATTCH_FL_PH
+		</isNotEmpty>
+			, B.DCS_NTC_RCV_MTH_CD
+			, B.DCS_NTC_RCV_MTH_SMS
+			, B.DCS_NTC_RCV_MTH_MAIL
+			, B.DCS_NTC_RCV_MTH_TALK
+			, B.RG_DIV
+		<isNotEmpty property="opbDcsFlNm">	
+			, B.OPB_DCS_FL_NM
+			, B.OPB_DCS_FL_PH
+		</isNotEmpty>
+			, B.SYS_REG_ID
+			, SYSDATE
+			, B.SYS_UPD_ID
+			, SYSDATE
+			, B.APL_DI
+			, B.MEMBER_ID
+		)
+	</update>
+
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 	-->
+    <!-- 청구서 내용을 검색한다.                                             			-->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 	-->
+    <!-- 검색 조건절 -->
+    <sql id="PortalExposeInfoDao.searchAccountWhere">
+		WHERE A.APL_NO     = B.APL_NO(+)
+		    AND A.APL_PN   = #aplPn:VARCHAR#
+		    AND A.APL_RNO1 = #aplRno1:VARCHAR#
+		    AND A.APL_DI   = #aplDi:VARCHAR#
+		    <!-- AND A.APL_RNO2 = pkg_crypto2.encrypt(#aplRno2:VARCHAR#) -->
+		<isNotEmpty prepend="AND" property="aplInst">
+			A.APL_INST_CD = #aplInst#
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="prgState">
+			A.PRG_STAT_CD = #prgState#
+			<isNotEqual prepend="AND" property="imd_deal_div" compareValue="1">
+				B.IMD_DEAL_DIV is null
+			</isNotEqual>	
+			<isEqual prepend="AND" property="imd_deal_div" compareValue="1">
+				(A.PRG_STAT_CD = #prgState:VARCHAR# OR B.IMD_DEAL_DIV = #imd_deal_div:VARCHAR#)
+			</isEqual>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="aplDtFrom">
+			A.APL_DT BETWEEN #aplDtFrom# AND #aplDtTo#
+		</isNotEmpty>	
+		<isNotEmpty prepend="AND" property="opbYn">
+			B.OPB_YN = #opbYn#
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="aplSj">
+			A.APL_SJ LIKE '%'||#aplSj#||'%'
+		</isNotEmpty>
+    </sql>
+    <!-- 검색 데이터 -->
+    <select id="PortalExposeInfoDao.searchAccount" parameterClass="params" resultClass="record">
+    	/* sql id : PortalExposeInfoDao.searchAccount */
+        <isEqual property="paging" compareValue="0">
+         SELECT A.ROW_NUM				AS "rowNum"
+         		  , A.APL_NO					AS "aplNo"
+         		  , A.APL_DT					AS "aplDt"
+         		  , A.PRG_STAT_CD			AS "prgStatCd"
+         		  , A.PRG_STAT_NM			AS "prgStatNm"
+         		  , A.APL_PN					AS "aplPn"
+         		  , A.APL_RNO1				AS "aplRno1"
+         		  , A.APL_RNO2				AS "aplRno2"
+         		  , A.APL_INST_CD			AS "aplInstCd"
+         		  , A.APL_INST_NM			AS "aplInstNm"
+         		  , A.APL_DEAL_INST_CD	AS "aplDealInstCd"
+         		  , A.APL_DEAL_INST_NM	AS "aplDealInstNm"
+         		  , A.APL_SJ 					AS "aplSj"
+            	  , A.IMD_DEAL_DIV			AS "imdDealDiv"
+            	  , A.OPB_YN					AS "opbYn"
+            	  , CASE WHEN A.OPB_YN = '0' THEN '공개'
+						            WHEN A.OPB_YN = '1' THEN '부분공개'
+						            WHEN A.OPB_YN = '2' THEN '비공개'
+						            WHEN A.OPB_YN = '3' THEN '부존재 등'
+						            WHEN A.OPB_YN = '' THEN ' '
+						            END                    	AS "opbYnNm"
+				  , A.APL_DTS_CN										AS "aplDtsCn"
+			      , A.CLSD_RMK										AS "clsdRmk"
+			      , FN_GET_OPNZ_CLSD(A.APL_NO)				AS "newClsdRmk"
+				  , A.CALL_VERSION	        						AS "callVersion"    
+           FROM (
+                     SELECT ROWNUM        			AS ROW_NUM
+                     		  , A.APL_NO 					AS APL_NO
+                     		  , A.APL_DT      				AS APL_DT
+                     		  , A.PRG_STAT_CD			AS PRG_STAT_CD
+                     		  , FC_COMCODE(A.PRG_STAT_CD, 'D') AS PRG_STAT_NM
+                     		  , A.APL_PN   					AS APL_PN
+                     		  , A.APL_RNO1     			AS APL_RNO1
+                     		  , A.APL_RNO2      			AS APL_RNO2
+                     		  , A.APL_INST_CD   			AS APL_INST_CD
+                     		  , FC_COMCODE(A.APL_INST_CD, '') AS APL_INST_NM
+                     		  , A.APL_DEAL_INST_CD    AS APL_DEAL_INST_CD
+                     		  , FC_COMCODE(A.APL_DEAL_INST_CD, '') AS APL_DEAL_INST_NM
+                     		  , A.APL_SJ     				AS APL_SJ
+                     		  , A.IMD_DEAL_DIV
+                     		  , A.OPB_YN
+                     		  , A.APL_DTS_CN	
+                     		  , A.CLSD_RMK
+                     		  , A.CALL_VERSION
+                       FROM (
+        </isEqual>
+                                 SELECT A.APL_NO 					AS APL_NO
+                     		  			  , A.APL_DT      				AS APL_DT
+                     		  			  , A.PRG_STAT_CD			AS PRG_STAT_CD
+                     		  			  , A.APL_PN   					AS APL_PN
+                     		  			  , A.APL_RNO1     			AS APL_RNO1
+                     		  			  , A.APL_RNO2      			AS APL_RNO2
+                     		  			  , A.APL_INST_CD   			AS APL_INST_CD
+                     		  			  , DECODE(A.APL_DEAL_INST_CD, NULL, A.APL_INST_CD, A.APL_DEAL_INST_CD)  AS APL_DEAL_INST_CD
+                     		  			  , A.APL_SJ
+                     		  			  , B.IMD_DEAL_DIV
+                     		  			  , B.OPB_YN
+                     		  			  , A.APL_DTS_CN	
+                     		  			  , B.CLSD_RMK
+                     		  			  , NVL2(B.DCS_NTC_DT, FN_GET_OPNZ_CALLVERSION(TO_CHAR(TO_DATE(B.DCS_NTC_DT, 'YYYYMMDD'), 'YYYYMMDD'))
+                     		  			  								, FN_GET_OPNZ_CALLVERSION(TO_CHAR(TO_DATE(A.APL_DT, 'YYYYMMDD'), 'YYYYMMDD'))) AS CALL_VERSION
+                                   FROM TB_OPNZ_APL  A, TB_OPNZ_DCS B
+                                   <include refid="PortalExposeInfoDao.searchAccountWhere" />
+                                  ORDER BY A.APL_NO DESC
+        <isEqual property="paging" compareValue="0">
+        <![CDATA[
+                            )       A
+                      WHERE ROWNUM <= #end:NUMERIC#
+                )          A
+          WHERE A.ROW_NUM >= #start:NUMERIC#
+        ]]>
+        </isEqual>
+    </select>
+    <!-- 검색 카운트 -->
+    <select id="PortalExposeInfoDao.searchAccountCount" parameterClass="params" resultClass="int">
+   		/* sql id : PortalExposeInfoDao.searchAccountCount */
+         SELECT COUNT(*)
+           FROM TB_OPNZ_APL  A, TB_OPNZ_DCS B
+           <include refid="PortalExposeInfoDao.searchAccountWhere" />
+    </select>
+
+	<!-- 정보공개 청구서작성 내용을 조회 -->
+	<select id="PortalExposeInfoDao.getInfoOpenApplyDetail" parameterClass="params" resultClass="java.util.HashMap">
+		/* sql id : PortalExposeInfoDao.getInfoOpenApplyDetail */
+		<![CDATA[
+		SELECT A.APL_NO												AS "aplNo"
+				 , A.APL_PN													AS "aplPn"
+				 , A.APL_DT													AS "aplDt"
+				 , A.APL_RNO1												AS "aplRno1"
+				 , pkg_crypto2.decrypt(A.APL_RNO2) 				AS "aplRno2"
+				 , A.APL_ZPNO												AS "aplZpno"
+				 , A.APL_1_ADDR											AS "apl1Addr"
+				 , pkg_crypto2.decrypt(A.APL_2_ADDR) 			AS "apl2Addr"
+				 , pkg_crypto2.decrypt(A.APL_PNO) 				AS "aplPno"
+				 , pkg_crypto2.decrypt(A.APL_MBL_PNO) 			AS "aplMblPno"
+				 , pkg_crypto2.decrypt(A.APL_FAX_NO) 			AS "aplFaxNo"
+				 , pkg_crypto2.decrypt(A.APL_EMAIL_ADDR)		AS "aplEmailAddr"
+				 , FC_COMCODE(A.APL_INST_CD, '')					AS "aplInstNm"
+				 , A.APL_INST_CD											AS "aplInstCd"
+				 , A.APL_SJ													AS "aplSj"
+				 , A.APL_DTS_CN											AS "aplDtsCn"
+				 , FC_COMCODE(A.OPB_FOM_VAL, 'A')				AS "opbFomNm"
+				 , A.OPB_FOM_VAL										AS "opbFomVal"
+				 , FC_COMCODE(A.APL_DEAL_INST_CD, '')				AS "aplDealInstNm"
+				 , A.APL_DEAL_INST_CD									AS "aplDealInstCd"
+				 , FC_COMCODE(A.APL_TAK_MTH, 'B') 					AS "aplTakMthNm"
+				 , A.APL_TAK_MTH											AS "aplTakMth"
+                 , DECODE(B.OPB_FOM_01_YN, 'Y', '열람,시청', '')		AS "opbFomNm1"
+                 , DECODE(B.OPB_FOM_02_YN, 'Y', '사본,출력물', '')	AS "opbFomNm2"
+                 , DECODE(B.OPB_FOM_03_YN, 'Y', '전자파일', '')		AS "opbFomNm3"
+                 , DECODE(B.OPB_FOM_04_YN, 'Y', '복제,인화물', '')	AS "opbFomNm4"
+                 , DECODE(B.OPB_FOM_05_YN, 'Y', '기타', '')			AS "opbFomNm5"
+                 , DECODE(B.GIVE_MTH_01_YN, 'Y', '직접방문', '')		AS "giveMthNm1"
+                 , DECODE(B.GIVE_MTH_02_YN, 'Y', '우편', '')			AS "giveMthNm2"
+                 , DECODE(B.GIVE_MTH_03_YN, 'Y', '모사전송', '')		AS "giveMthNm3"
+                 , DECODE(B.GIVE_MTH_04_YN, 'Y', '정보통신망', '')	AS "giveMthNm4"
+                 , DECODE(B.GIVE_MTH_05_YN, 'Y', '기타', '')			AS "giveMthNm5"                 	 
+				 , FC_COMCODE(A.FEE_RDTN_CD, 'C') 					AS "feeRdtnCdNm"
+				 , A.FEE_RDTN_CD											AS "feeRdtnCd"
+				 , A.FEE_RDTN_RSON										AS "feeRdtnRson"
+				 , CASE  WHEN A.DCS_NTC_RCV_MTH_CD IS NULL 
+		               THEN ( CASE WHEN NVL(A.DCS_NTC_RCV_MTH_SMS, 'N') = 'Y' AND  NVL(A.DCS_NTC_RCV_MTH_MAIL, 'N') = 'N' AND  NVL(A.DCS_NTC_RCV_MTH_TALK, 'N') = 'N' THEN 'SMS'
+		               			   WHEN NVL(A.DCS_NTC_RCV_MTH_SMS, 'N') = 'N' AND  NVL(A.DCS_NTC_RCV_MTH_MAIL, 'N') = 'Y' AND  NVL(A.DCS_NTC_RCV_MTH_TALK, 'N') = 'N' THEN '메일'   
+		 	    				   WHEN NVL(A.DCS_NTC_RCV_MTH_SMS, 'N') = 'N' AND  NVL(A.DCS_NTC_RCV_MTH_MAIL, 'N') = 'N' AND  NVL(A.DCS_NTC_RCV_MTH_TALK, 'N') = 'Y' THEN '카카오알림톡'
+		                           WHEN NVL(A.DCS_NTC_RCV_MTH_SMS, 'N') = 'Y' AND  NVL(A.DCS_NTC_RCV_MTH_MAIL, 'N') = 'Y' AND  NVL(A.DCS_NTC_RCV_MTH_TALK, 'N') = 'N' THEN 'SMS+메일' 
+		                           WHEN NVL(A.DCS_NTC_RCV_MTH_SMS, 'N') = 'N' AND  NVL(A.DCS_NTC_RCV_MTH_MAIL, 'N') = 'Y' AND  NVL(A.DCS_NTC_RCV_MTH_TALK, 'N') = 'Y' THEN '메일+카카오알림톡'
+		                       ELSE '수신거부'
+		                       END )
+			          ELSE ( CASE WHEN  NVL(A.DCS_NTC_RCV_MTH_CD, '0') = '0' THEN '수신거부'
+			           		      WHEN  NVL(A.DCS_NTC_RCV_MTH_CD, '0') = '1' THEN 'SMS'
+			                      WHEN  NVL(A.DCS_NTC_RCV_MTH_CD, '0') = '2' THEN '메일'
+			                      WHEN  NVL(A.DCS_NTC_RCV_MTH_CD, '0') = '3' THEN 'SMS+메일'
+			                 END )    
+		         END AS "dcsNtcRcvMthNm"
+				 , A.DCS_NTC_RCV_MTH_CD								AS "dcsNtcRcvMthCd"
+				 , A.DCS_NTC_RCV_MTH_SMS								AS "dcsNtcRcvMthSms"
+				 , A.DCS_NTC_RCV_MTH_MAIL							AS "dcsNtcRcvMthMail"
+				 , A.DCS_NTC_RCV_MTH_TALK							AS "dcsNtcRcvMthTalk"
+				 , DECODE(OPB_YN, '0', '공개'
+				 				, '1', '부분공개', '2', '비공개', '3', '부존재 등') 	AS "opbYn"
+				 , FC_COMCODE(CLSD_RSON_CD, 'F') 					AS "clsdRsonCd"
+				 , CLSD_RMK													AS "clsdRmk"
+				 , A.ATTCH_FL_NM											AS "attchFlNm"
+				 , A.ATTCH_FL_PH_NM										AS "attchFlPhNm"
+				 , A.FEE_ATTCH_FL_NM										AS "feeAttchFlNm"
+				 , A.FEE_ATTCH_FL_PH										AS "feeAttchFlPh"
+				 , OPB_FL_NM													AS "opbFlNm"
+				 , OPB_FL_PH													AS "opbFlPh"
+				 , A.PRG_STAT_CD 											AS "aplPrgStatCd"
+				 , DCS_PROD_ET_YN											AS "dcsProdEtyn"
+				 , DCS_PROD_ET_RSON										AS "dcsProdEtRson"
+				 , DCS_PROD_ET_DT											AS "dcsProdEtDt"
+				 , DCS_PROD_ETC												AS "dcsProdEtc"
+				 , B.OPB_FOM_ETC											AS "opbFomEtc"
+				 , B.GIVE_MTH_ETC											AS "aplTakMthEtc"
+				 , C.PRG_STAT_CD 											AS "rcpPrgStatCd"
+				 , C.TRSF_INST_NM											AS "trsfInstNm"
+				 , B.OPB_PSBJ													AS "opbPsbj"
+				 , B.CLSD_ATTCH_FL_NM									AS "clsdAttchFlNm"
+				 , B.CLSD_ATTCH_FL_PH_NM								AS "clsdAttchFlPhNm"
+				 , B.IMD_DEAL_DIV											AS "imdDealDiv"
+				 , B.OPB_FL_NM2												AS "opbFlNm2"
+				 , B.OPB_FL_PH2												AS "opbFlPh2"
+				 , B.OPB_FL_NM3												AS "opbFlNm3"
+				 , B.OPB_FL_PH3												AS "opbFlPh3"
+				 , B.NON_EXT													AS "nonExt"
+				 , C.END_CN													AS "endCn"
+				 , C.TRSF_DOC_NO											AS "trsfDocNo"
+				 , C.TRSF_DT													AS "trsfDt"
+				 , C.TRSF_CN													AS "trsfCn"
+				 , C.TRSF_ETC_CN											AS "trsfEtcCn"
+				 , C.TRSF_FL_NM												AS "trsfFlNm"
+				 , C.TRSF_FL_PH												AS "trsfFlPh"
+				 , B.IMD_FL_NM												AS "imdFlNm"
+				 , B.IMD_FL_PH												AS "imdFlPh"
+				 , B.NON_FL_NM												AS "nonFlNm"
+				 , B.NON_FL_PH												AS "nonFlPh"
+				 , (SELECT COUNT(*) from TB_OPNZ_HIST WHERE APL_NO = A.APL_NO AND HIST_DIV = '09') AS "transCnt"
+				 , FN_GET_OPNZ_CLSD(#aplNo#)						AS "newClsdRmk"
+				 , NVL2(B.DCS_NTC_DT, FN_GET_OPNZ_CALLVERSION(TO_CHAR(TO_DATE(B.DCS_NTC_DT), 'YYYYMMDD'))
+                   							   , FN_GET_OPNZ_CALLVERSION(TO_CHAR(TO_DATE(A.APL_DT), 'YYYYMMDD'))) AS "callVersion"
+	    FROM TB_OPNZ_APL A, TB_OPNZ_DCS B, TB_OPNZ_RCP C
+	    WHERE A.APL_NO = B.APL_NO(+)
+	    AND   A.APL_NO = C.APL_NO(+)
+	    AND   A.APL_NO = #aplNo:VARCHAR#
+	    AND   A.APL_RNO1 = #apl_rno1:VARCHAR#
+		]]>
+	    <!-- AND   A.APL_RNO2 = pkg_crypto2.encrypt(#apl_rno2:VARCHAR#) -->
+	</select>
+
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 	-->
+    <!-- 정보공개 청구를 취하한다.		                  								-->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 	-->
+	<update id="PortalExposeInfoDao.updateOpnApplyCancle" parameterClass="params">
+		/* sql id : PortalExposeInfoDao.updateOpnApplyCancle */
+		UPDATE TB_OPNZ_APL
+			 SET prg_stat_cd = #prg_stat_cd#
+		 WHERE apl_no = #apl_no#
+			 AND APL_RNO1 = #apl_rno1#
+			 <!-- AND APL_RNO2 = pkg_crypto2.encrypt(#apl_rno2#) -->
+	</update>
+
+	<update id="PortalExposeInfoDao.updateOpnRcpCancle" parameterClass="params">
+		/* sql id : PortalExposeInfoDao.updateOpnRcpCancle */
+		UPDATE TB_OPNZ_RCP
+			 SET prg_stat_cd = #prg_stat_cd#
+		 WHERE apl_no = #apl_no#
+			 AND APL_RNO1 = #apl_rno1#
+	</update>
+	
+	<!-- 정보공개 청구서 처리 이력을 조회 -->
+	<select id="PortalExposeInfoDao.getInfoOpenApplyHist" parameterClass="params" resultClass="java.util.HashMap">
+		/* sql id : PortalExposeInfoDao.getInfoOpenApplyHist */
+		<![CDATA[
+		SELECT HIST_SNO, APL_NO, HIST_DIV, FC_COMCODE(HIST_DIV, 'D') AS HIST_DIV_NM, USR_ID, HIST_DT, HIST_CN 
+		FROM TB_OPNZ_HIST
+		WHERE APL_NO = #aplNo#
+		AND HIST_DIV NOT IN ('06', '07', '98', '21', '22', '23', '24', '29')
+		UNION ALL
+		SELECT HIST_SNO, APL_NO, HIST_DIV, 
+		       DECODE(HIST_DIV, '21', '이의신청', '22', '이의신청처리중', '23', '이의신청결과등록', '24', '이의신청연장', '29', '이의신청취하'), 
+		       USR_ID, HIST_DT, HIST_CN
+		FROM TB_OPNZ_HIST
+		WHERE APL_NO = #aplNo:VARCHAR#
+		AND HIST_DIV IN ('21', '22', '23', '24', '29')
+		ORDER BY HIST_SNO
+		]]>
+	</select>
+	
+	<!-- 정보공개 이력 정보 등록 -->
+	<insert id="PortalExposeInfoDao.insertOpnHist" parameterClass="params">
+		/* sql id : PortalExposeInfoDao.insertOpnHist */
+		<![CDATA[
+		INSERT INTO TB_OPNZ_HIST
+		(hist_sno, apl_no, hist_div, usr_id, hist_dt, hist_cn)
+		VALUES ((select nvl(max(hist_sno)+1, 1) from TB_OPNZ_HIST where apl_no = #aplNo#), 
+						#aplNo#, #prg_stat_cd#, #usr_id:VARCHAR:NO_ENTRY#, to_char(sysdate, 'YYYYMMDDHH24MI'), #hist_cn#)
+		]]>
+	</insert>
+	
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 	-->
+    <!-- 이의신청서  대상을 검색한다.                                             		-->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 	-->
+    <!-- 검색 조건절 -->
+    <sql id="PortalExposeInfoDao.targetObjectionWhere">
+		WHERE A.APL_NO = B.APL_NO
+			<!-- AND A.APL_NO NOT IN (SELECT APL_NO FROM TB_OPNZ_OBJTN) -->
+		    AND (OPB_YN IS NULL OR B.OPB_YN <![CDATA[<>]]> '0')
+		    AND (
+		    		 (A.PRG_STAT_CD IN ('04','08') 
+		    			AND B.OPB_YN <![CDATA[<>]]> '3'  
+		    			AND TRUNC(SYSDATE - TO_DATE(B.DCS_NTC_DT, 'YYYYMMDD')) <![CDATA[<]]> 30)
+                OR (A.PRG_STAT_CD IN('01','02','03') 
+                		AND TRUNC(SYSDATE - TO_DATE(A.APL_DT, 'YYYYMMDD')) <![CDATA[>]]> 20)
+            )
+		    AND A.APL_PN = #aplPn:VARCHAR#
+		    AND A.APL_RNO1 = #aplRno1:VARCHAR#
+		    <!-- AND A.APL_RNO2 = pkg_crypto2.encrypt(#aplRno2:VARCHAR#) -->        
+		    AND A.APL_DI = #aplDi:VARCHAR#    
+        <isNotEmpty prepend="AND" property="aplInst">
+            A.APL_INST_CD = #aplInst#
+        </isNotEmpty>
+        <isNotEmpty prepend="AND" property="aplDtFrom">
+            REPLACE(A.APL_DT, '-', '') BETWEEN #aplDtFrom# AND #aplDtTo#
+        </isNotEmpty>
+    </sql>
+    <!-- 검색 데이터 -->
+    <select id="PortalExposeInfoDao.targetObjection" parameterClass="params" resultClass="record">
+    	/* sql id : PortalExposeInfoDao.targetObjection */
+        <isEqual property="paging" compareValue="0">
+         SELECT A.ROW_NUM				AS "rowNum"
+         		  , A.APL_NO					AS "aplNo"
+         		  , A.APL_PN					AS "aplPn"
+         		  , A.APL_RNO					AS "aplRno"
+         		  , A.APL_DT					AS "aplDt"
+         		  , A.APL_DTM					AS "aplDtm"
+         		  , A.APL_SJ 					AS "aplSj"
+         		  , A.APL_INST_CD			AS "aplInstCd"
+         		  , A.APL_INST_NM			AS "aplInstNm"
+         		  , A.APL_DEAL_INST_CD	AS "aplDealInstCd"
+         		  , A.APL_DEAL_INST_NM	AS "aplDealInstNm"
+         		  , A.DCS_NTC_DT			AS "dcsNtcDt"
+            	  , A.OPB_YN					AS "opbYn"
+            	  , A.DATE1					AS "date1"
+            	  , A.DATE2					AS "date2"
+           FROM (
+                     SELECT ROWNUM        			AS ROW_NUM
+                     		  , A.APL_NO 					AS APL_NO
+                     		  , A.APL_PN      				AS APL_PN
+                     		  , A.APL_RNO					AS APL_RNO
+                     		  , APL_DT 						AS APL_DT
+                     		  , A.APL_DTM   				AS APL_DTM
+                     		  , A.APL_SJ     				AS APL_SJ
+                     		  , A.APL_INST_CD      		AS APL_INST_CD
+                     		  , A.APL_INST_NM   		AS APL_INST_NM
+                     		  , A.APL_DEAL_INST_CD 	AS APL_DEAL_INST_CD
+                     		  , A.APL_DEAL_INST_NM   AS APL_DEAL_INST_NM
+                     		  , A.DCS_NTC_DT 			AS DCS_NTC_DT
+                     		  , A.OPB_YN     				AS OPB_YN
+                     		  , A.DATE1						AS DATE1
+                     		  , A.DATE2						AS DATE2
+                       FROM (
+        </isEqual>
+                                 SELECT A.APL_NO AS APL_NO
+                                 		  , A.APL_PN AS APL_PN
+                                 		  , A.APL_RNO1 || pkg_crypto2.decrypt(A.APL_RNO2) 			AS APL_RNO
+                                 		  , TO_CHAR(TO_DATE(A.APL_DT, 'YYYYMMDD'), 'YYYY"-"MM"-"DD') AS APL_DT
+                                 		  , A.APL_DT AS APL_DTM
+                                 		  , A.APL_SJ AS APL_SJ
+                                 		  , A.APL_INST_CD AS APL_INST_CD
+                                 		  , FC_COMCODE(A.APL_INST_CD, '') AS APL_INST_NM
+                                 		  , A.APL_DEAL_INST_CD AS APL_DEAL_INST_CD
+                                 		  , FC_COMCODE(A.APL_DEAL_INST_CD, '') AS APL_DEAL_INST_NM
+                                 		  , TO_CHAR(TO_DATE(B.DCS_NTC_DT, 'YYYYMMDD'), 'YYYY"-"MM"-"DD') AS DCS_NTC_DT
+                                 		  , B.OPB_YN AS OPB_YN
+                                 		  , TRUNC(SYSDATE - TO_DATE(B.DCS_NTC_DT, 'YYYYMMDD')) AS DATE1
+                                 		  , TRUNC(SYSDATE - TO_DATE(A.APL_DT, 'YYYYMMDD')) AS DATE2
+                                   FROM TB_OPNZ_APL  A, TB_OPNZ_DCS B
+                                   <include refid="PortalExposeInfoDao.targetObjectionWhere" />
+                                  ORDER BY A.APL_NO DESC
+        <isEqual property="paging" compareValue="0">
+        <![CDATA[
+                            )       A
+                      WHERE ROWNUM <= #end:NUMERIC#
+                )          A
+          WHERE A.ROW_NUM >= #start:NUMERIC#
+        ]]>
+        </isEqual>
+    </select>
+    <!-- 검색 카운트 -->
+    <select id="PortalExposeInfoDao.targetObjectionCount" parameterClass="params" resultClass="int">
+   		/* sql id : PortalExposeInfoDao.targetObjectionCount */
+         SELECT COUNT(*)
+           FROM TB_OPNZ_APL  A, TB_OPNZ_DCS B
+           <include refid="PortalExposeInfoDao.targetObjectionWhere" />
+    </select>
+
+	<!-- 정보공개 이의신청서 등록 내용을 조회 -->
+	<select id="PortalExposeInfoDao.getWriteBaseInfo" parameterClass="params" resultClass="java.util.HashMap">
+		/* sql id : PortalExposeInfoDao.getWriteBaseInfo */
+		SELECT A.APL_NO 						AS "aplNo"
+				 , A.APL_PN 						AS "aplPn"
+				 , A.APL_DT 						AS "aplDt"
+				 , A.APL_MBL_PNO 				AS "aplMblPno"
+				 , DATE1 							AS "date1"
+				 , A.APL_PNO 						AS "aplPno"
+				 , A.APL_RNO1 					AS "aplRno1"
+				 , A.APL_RNO2 					AS "aplRno2"
+				 , A.APL_CORP_NM 				AS "apCorpNm"
+				 , A.APL_BNO 						AS "aplBno"
+				 , A.APL_ZPNO 					AS "aplZpno"
+				 , A.APL_1_ADDR 					AS "apl1Addr"
+				 , A.APL_2_ADDR 					AS "apl2Addr"
+				 , A.APL_FAX_NO 					AS "aplFaxNo"
+				 , A.APL_EMAIL_ADDR 			AS "aplEmailAddr"
+				 , OPB_YN 							AS "opbYn"
+				 , OPB_CN 							AS "opbCn"
+				 , CLSD_RMK 						AS "clsdRmk"
+				 , DCS_NTC_DT 					AS "dcsNtcDt"
+				 , FIRST_DCS_DT 				AS "firstDcsDt"
+				 , DCS_NTC_YN 					AS "dcsNtcYn"
+				 , A.DCS_NTC_RCV_MTH_CD 	AS "dcsNtcRcvMthCd"
+				 , A.DCS_NTC_RCV_MTH_SMS 	AS "dcsNtcRcvMthSms"
+				 , A.DCS_NTC_RCV_MTH_MAIL 	AS "dcsNtcRcvMthMail"
+				 , A.DCS_NTC_RCV_MTH_TALK	AS "dcsNtcRcvMthTalk"
+				 , A.APL_DEAL_INST_CD 		AS "aplDealInstCd"
+				 , USR_ID 							AS "usrId"
+	    FROM
+	    (
+	    SELECT  APL_NO, APL_PN, APL_DT, APL_MBL_PNO, DATE1, APL_PNO, APL_RNO1, APL_RNO2, APL_CORP_NM, APL_BNO, APL_ZPNO, APL_1_ADDR, APL_2_ADDR,
+	                APL_FAX_NO, APL_EMAIL_ADDR, OPB_YN, OPB_CN, CLSD_RMK,
+	                CASE WHEN OPB_YN IS NULL THEN TO_CHAR(to_date(APL_DT, 'YYYYMMDD') + 20, 'YYYY-MM-DD')
+	                     WHEN OPB_YN IS NOT NULL THEN TO_CHAR(to_date(DCS_NTC_DT, 'yyyy-mm-dd'), 'YYYY-MM-DD')
+	                END AS DCS_NTC_DT,
+	                FIRST_DCS_DT, DCS_NTC_YN, DCS_NTC_RCV_MTH_CD, DCS_NTC_RCV_MTH_SMS, DCS_NTC_RCV_MTH_MAIL, DCS_NTC_RCV_MTH_TALK, APL_DEAL_INST_CD
+	         FROM (
+	            SELECT  A.APL_NO AS APL_NO,
+	                    A.APL_PN AS APL_PN,
+	                    A.APL_DT AS APL_DT,
+	                    pkg_crypto2.decrypt(A.APL_MBL_PNO) AS APL_MBL_PNO,
+	                    A.APL_RNO1 AS APL_RNO1,
+	                    pkg_crypto2.decrypt(A.APL_RNO2) AS APL_RNO2,
+	                    A.APL_CORP_NM AS APL_CORP_NM,
+	                    A.APL_BNO AS APL_BNO,
+	                    A.APL_ZPNO AS APL_ZPNO,
+	                    A.APL_1_ADDR AS APL_1_ADDR,
+	                    pkg_crypto2.decrypt(A.APL_2_ADDR)     AS APL_2_ADDR,
+	                    pkg_crypto2.decrypt(A.APL_PNO) 		  AS APL_PNO,
+	                    pkg_crypto2.decrypt(A.APL_FAX_NO) 	  AS APL_FAX_NO,
+	                    pkg_crypto2.decrypt(A.APL_EMAIL_ADDR) AS APL_EMAIL_ADDR,
+	                    B.OPB_YN AS OPB_YN,
+	                    DECODE(B.OPB_CN, NULL, '비공개건으로 해당없음.', B.OPB_CN) AS OPB_CN,
+	                    DECODE(B.OPB_YN, NULL, '결정되지 않은건 입니다.', B.CLSD_RMK) AS CLSD_RMK,
+	                    TO_CHAR(TO_DATE(B.DCS_NTC_DT, 'YYYYMMDD'), 'YYYY-MM-DD') AS DCS_NTC_DT,
+	                    TO_CHAR((TO_DATE(A.APL_DT, 'YYYYMMDD')+20), 'YYYY-MM-DD') AS FIRST_DCS_DT,
+	                    TRUNC(SYSDATE-TO_DATE(A.APL_DT, 'YYYYMMDD')) AS DATE1,
+	                    DECODE(B.DCS_NTC_DT, NULL, '1', '0') AS DCS_NTC_YN,
+	                    A.DCS_NTC_RCV_MTH_CD AS DCS_NTC_RCV_MTH_CD,
+	                    A.DCS_NTC_RCV_MTH_SMS AS DCS_NTC_RCV_MTH_SMS,
+	                    A.DCS_NTC_RCV_MTH_MAIL AS DCS_NTC_RCV_MTH_MAIL,
+	                    A.DCS_NTC_RCV_MTH_TALK AS DCS_NTC_RCV_MTH_TALK,
+	                    A.APL_DEAL_INST_CD AS APL_DEAL_INST_CD
+	            FROM    TB_OPNZ_APL A, TB_OPNZ_DCS B
+	            WHERE   A.APL_NO = B.APL_NO
+	            AND     (B.OPB_YN <![CDATA[<>]]> '0' or b.opb_yn is null)
+	        ))A, TB_OPNZ_RCP B
+	    WHERE A.APL_NO = B.APL_NO(+)
+	    AND A.APL_NO = #aplNo#
+	</select>
+
+	<!-- 정보공개 이의신청서 수정 내용을 조회 -->
+	<select id="PortalExposeInfoDao.getUpdateBaseInfo" parameterClass="params" resultClass="java.util.HashMap">
+		/* sql id : PortalExposeInfoDao.getUpdateBaseInfo */
+		SELECT APL_NO 							AS "aplNo"
+				 , APL_PN 							AS "aplPn"
+				 , APL_DT 							AS "aplDt"
+				 , APL_PNO 							AS "aplPno"
+				 , APL_RNO1 						AS "aplRno1"
+				 , APL_RNO2 						AS "aplRno2"
+				 , APL_CORP_NM 					AS "apCorpNm"
+				 , APL_BNO 							AS "aplBno"
+				 , APL_ZPNO 						AS "aplZpno"
+				 , APL_1_ADDR 					AS "apl1Addr"
+				 , APL_2_ADDR 					AS "apl2Addr"
+				 , APL_FAX_NO 					AS "aplFaxNo"
+				 , APL_EMAIL_ADDR 				AS "aplEmailAddr"
+				 , OPB_YN 							AS "opbYn"
+				 , OPB_CN 							AS "opbCn"
+				 , CLSD_RMK 						AS "clsdRmk"
+	             , CASE WHEN OPB_YN IS NULL THEN TO_CHAR(to_date(APL_DT, 'YYYYMMDD') + 20, 'YYYY-MM-DD')
+	               		WHEN OPB_YN IS NOT NULL THEN TO_CHAR(to_date(DCS_NTC_DT, 'yyyy-mm-dd'), 'YYYY-MM-DD')
+	            		END AS "dcsNtcDt"
+	              , FIRST_DCS_DT 				AS "firstDcsDt"
+	              , DCS_NTC_YN 					AS "dcsNtcYn"
+	              , OBJTN_SNO						AS "objtnSno"
+	              , OBJTN_RSON					AS "objtnRson"
+	              , OBJTN_APL_FL_NM			AS "objtnAplFlNm"
+	              , OBJTN_APL_FL_PH			AS "objtnAplFlPh"
+	              , OPB_CLSD_CN					AS "opbClsdCn"
+	    FROM (
+	        SELECT  A.APL_NO AS APL_NO,
+	                A.APL_DT AS APL_DT,
+	                A.APL_BNO AS APL_BNO,
+	                A.APL_CORP_NM AS APL_CORP_NM,
+	                A.APL_RNO1 AS APL_RNO1,
+	                A.APL_RNO2 AS APL_RNO2,
+	                A.APL_PN AS APL_PN,
+	                C.OBJTN_SNO AS OBJTN_SNO,
+	                A.PRG_STAT_CD AS PRG_STAT_CD,
+	                B.DCS_PROD_ET_YN AS DCS_PROD_ET_YN,
+	                B.DCS_PROD_ET_RSON AS DCS_PROD_ET_RSON,
+	                B.DCS_PROD_ET_DT AS DCS_PROD_ET_DT,
+	                B.DCS_PROD_ETC AS DCS_PROD_ETC, 
+	                A.APL_ZPNO AS APL_ZPNO,
+	                A.APL_1_ADDR AS APL_1_ADDR,
+	                pkg_crypto2.decrypt(A.APL_2_ADDR) 	  AS APL_2_ADDR,
+	                pkg_crypto2.decrypt(A.APL_PNO)    	  AS APL_PNO,
+	                pkg_crypto2.decrypt(A.APL_FAX_NO)     AS APL_FAX_NO,
+	                pkg_crypto2.decrypt(A.APL_EMAIL_ADDR) AS APL_EMAIL_ADDR,
+	                B.OPB_YN AS OPB_YN,
+	                DECODE(B.OPB_CN, NULL, '비공개 건으로 해당 없음.', B.OPB_CN) AS OPB_CN,
+	                DECODE(B.OPB_YN, NULL, '결정되지 않은건 입니다.', B.CLSD_RMK) AS CLSD_RMK,
+	                DECODE(C.OBJTN_NTCS_YN, '0', TO_CHAR(TO_DATE(B.DCS_NTC_DT, 'YYYYMMDD'), 'YYYY-MM-DD'), '') AS DCS_NTC_DT,
+	                DECODE(C.OBJTN_NTCS_YN, '1', TO_CHAR((TO_DATE(A.APL_DT, 'YYYYMMDD')+20), 'YYYY-MM-DD'), '') AS FIRST_DCS_DT,
+	                C.OBJTN_NTCS_YN AS OBJTN_NTCS_YN,
+	                C.OBJTN_RSON AS OBJTN_RSON,
+	                C.OBJTN_APL_FL_NM AS OBJTN_APL_FL_NM,
+	                C.OBJTN_APL_FL_PH AS OBJTN_APL_FL_PH,
+	                TRUNC(SYSDATE - TO_DATE(A.APL_DT, 'YYYYMMDD'))+1 AS DAYS,
+	                DECODE(B.DCS_NTC_DT, NULL, '1', '0') AS DCS_NTC_YN,
+	                c.opb_clsd_cn
+	        FROM TB_OPNZ_APL A, TB_OPNZ_DCS B, TB_OPNZ_OBJTN C
+	        WHERE A.APL_NO = B.APL_NO
+	        AND B.APL_NO = C.APL_NO
+	        AND B.OPB_YN <![CDATA[<>]]> '0'
+	    )
+	    WHERE APL_NO = #aplNo#
+	    AND OBJTN_SNO = #objtnSno#
+	</select>
+	
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 	-->
+    <!-- 정보공개 이의신청서를 등록한다.                            						-->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 	-->
+	<insert id="PortalExposeInfoDao.insertObjection" parameterClass="params">
+		/* sql id : PortalExposeInfoDao.insertObjection */
+		INSERT INTO TB_OPNZ_OBJTN ( 
+			  APL_NO, OBJTN_SNO, OBJTN_DT, OBJTN_NTCS_YN, DCS_NTC_DT, OBJTN_RSON
+			, OBJTN_APL_FL_NM, OBJTN_APL_FL_PH, OBJTN_STAT_CD, OBJTN_RG_DIV, OPB_CLSD_CN
+			, OPB_FOM_VAL, OPB_FOM_ETC, GIVE_MTH, GIVE_MTH_ETC, INST_CHRG_DEPT_NM
+			, INST_CHRG_CENT_CGP_1_NM, INST_CHRG_CENT_CGP_2_NM, INST_CHRG_CENT_CGP_3_NM
+			, INST_PNO, INST_FAX_NO)
+		(
+        SELECT #aplNo#
+             	 , #objtnSno#
+             	 , TO_CHAR(SYSDATE, 'YYYYMMDD')
+             	 , #objtnNtcsYn#
+             	 , #dcsNtcDt#
+             	 , #objtnRson#
+             	 , #objtnAplFlnm:VARCHAR#
+             	 , #objtnAplFlph:VARCHAR#
+             	 , #objtnStatCd#
+             	 , #objtnRgDiv#
+             	 , #opb_clsd_cn#
+             	 , B.OPB_FOM_VAL
+             	 , B.OPB_FOM_ETC
+             	 , B.APL_TAK_MTH
+             	 , B.APL_TAK_MTH_ETC
+             	 , C.INST_CHRG_DEPT_NM
+			 	 , C.INST_CHRG_CENT_CGP_1_NM
+			 	 , C.INST_CHRG_CENT_CGP_2_NM
+			 	 , C.INST_CHRG_CENT_CGP_3_NM
+			 	 , C.INST_PNO
+			 	 , C.INST_FAX_NO
+		  FROM (SELECT OPB_FOM_VAL
+		  					, OPB_FOM_ETC
+		  					, APL_TAK_MTH
+		  					, APL_TAK_MTH_ETC
+		  					, APL_DEAL_INST_CD
+		  			  FROM TB_OPNZ_APL
+		  			WHERE APL_NO = #aplNo#
+				) B
+				, (SELECT INST_CD
+							, INST_CHRG_DEPT_NM
+							, INST_CHRG_CENT_CGP_1_NM
+							, INST_CHRG_CENT_CGP_2_NM
+							, INST_CHRG_CENT_CGP_3_NM
+							, INST_PNO
+							, INST_FAX_NO
+					 FROM TV_OPNZ_INSTCD
+				) C
+		 WHERE B.APL_DEAL_INST_CD = C.INST_CD
+	)
+	</insert>
+
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 	-->
+    <!-- 정보공개 이의신청서 이력을 등록한다.                  								-->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 	-->
+	<insert id="PortalExposeInfoDao.objectionHist" parameterClass="params">
+		/* sql id : PortalExposeInfoDao.objectionHist */
+		INSERT INTO TB_OPNZ_HIST(HIST_SNO, APL_NO, HIST_DIV, USR_ID, HIST_DT, HIST_CN)
+		VALUES (
+			(select nvl(max(hist_sno+1), 1) from TB_OPNZ_HIST where apl_no = #aplNo#),
+			#aplNo#, #histDiv#, #usrId#, to_char(sysdate, 'yyyymmddhh24mi'), #histCn#
+		)
+	</insert>
+	
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 	-->
+    <!-- 정보공개 이의신청서 수정한다.		                  							-->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 	-->
+	<update id="PortalExposeInfoDao.updateObjection" parameterClass="params">
+		/* sql id : PortalExposeInfoDao.updateObjection */
+		UPDATE TB_OPNZ_OBJTN
+	    SET OBJTN_RSON = #objtnRson#
+	        , OPB_CLSD_CN = #opb_clsd_cn#
+	        <isNotEmpty prepend="," property="objtnAplFlnm">
+	            OBJTN_APL_FL_NM = #objtnAplFlnm#
+	        </isNotEmpty>
+	        <isNotEmpty prepend="," property="objtnAplFlph">
+	            OBJTN_APL_FL_PH = #objtnAplFlph#
+	        </isNotEmpty>
+	    WHERE APL_NO = #aplNo#
+	        AND OBJTN_SNO = #objtnSno#
+	</update>
+	
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 	-->
+    <!-- 정보공개 이의신청서 파일을 삭제한다.                  																								-->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 	-->
+	<update id="PortalExposeInfoDao.deleteObjectionFiles" parameterClass="params">
+		/* sql id : PortalExposeInfoDao.deleteObjectionFiles */
+		UPDATE TB_OPNZ_OBJTN
+	    SET OBJTN_APL_FL_NM = #objtnAplFlnm#,
+	        OBJTN_APL_FL_PH = #objtnAplFlph#
+	    WHERE APL_NO = #aplNo#
+	        AND OBJTN_SNO = #objtnSno#
+	</update>
+			
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 	-->
+    <!-- 이의신청서  처리현황을 검색한다.                                             		-->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 	-->
+    <!-- 검색 조건절 -->
+    <sql id="PortalExposeInfoDao.searchObjectionWhere">
+		WHERE A.APL_NO = B.APL_NO
+		    AND A.APL_NO IS NOT NULL
+          <isNotEmpty prepend="AND" property="aplPn">
+              A.APL_PN = #aplPn#
+          </isNotEmpty>
+          <!-- <isNotEmpty prepend="AND" property="aplRno">
+              A.APL_RNO1 || pkg_crypto2.decrypt(A.APL_RNO2) = #aplRno#
+          </isNotEmpty> -->
+          <isNotEmpty prepend="AND" property="aplDi">
+          	A.APL_DI = #aplDi#
+          </isNotEmpty>
+          <isNotEmpty prepend="AND" property="aplInst">
+              A.APL_DEAL_INST_CD = #aplInst#
+          </isNotEmpty>
+          <isNotEmpty prepend="AND" property="aplDtFrom">
+              REPLACE(B.OBJTN_DT, '-', '') BETWEEN #aplDtFrom# AND #aplDtTo#
+          </isNotEmpty>
+    </sql>
+    <!-- 검색 데이터 -->
+    <select id="PortalExposeInfoDao.searchObjection" parameterClass="params" resultClass="record">
+    	/* sql id : PortalExposeInfoDao.searchObjection */
+        <isEqual property="paging" compareValue="0">
+         SELECT A.ROW_NUM					AS "rowNum"
+         		  , A.APL_NO						AS "aplNo"
+         		  , A.RCP_DT						AS "rcpDt"
+         		  , A.APL_PN						AS "aplPn"
+         		  <!-- , A.APL_RNO						AS "aplRno" -->
+         		  , A.APL_SJ 						AS "aplSj"
+         		  , A.APL_DEAL_INST_CD		AS "aplDealInstCd"
+         		  , A.APL_DEAL_INST_NM		AS "aplDealInstNm"
+         		  , A.OBJTN_DEAL_RSLT_CD	AS "objtnDealRsltCd"
+         		  , A.APL_DT						AS "aplDt"
+         		  , A.OBJTN_SNO					AS "objtnSno"
+            	  , A.OBJTN_DT					AS "objtnDt"
+            	  , A.OBJTN_CNT_DT				AS "objtnCntDt"
+            	  , A.OBJTN_STAT_CD			AS "objtnStatCD"
+           FROM (
+                     SELECT ROWNUM        			AS ROW_NUM
+                     		  , A.APL_NO 					AS APL_NO
+                     		  , A.RCP_DT      				AS RCP_DT
+                     		  , A.APL_PN					AS APL_PN
+                     		  , A.APL_RNO     				AS APL_RNO
+                     		  , A.APL_SJ      				AS APL_SJ
+                     		  , A.APL_DEAL_INST_CD   AS APL_DEAL_INST_CD
+                     		  , A.APL_DEAL_INST_NM	AS APL_DEAL_INST_NM
+                     		  , A.OBJTN_NTC_DT     	AS OBJTN_DEAL_RSLT_CD
+                     		  , A.APL_DT					AS APL_DT
+                     		  , A.OBJTN_SNO				AS OBJTN_SNO
+                     		  , A.OBJTN_DT				AS OBJTN_DT
+                     		  , A.OBJTN_CNT_DT			AS OBJTN_CNT_DT
+                     		  , A.OBJTN_STAT_CD		AS OBJTN_STAT_CD
+                       FROM (
+        </isEqual>
+                                 SELECT A.APL_NO AS APL_NO
+                                 		  , TO_CHAR(TO_DATE(B.RCP_DT, 'YYYYMMDD'),'YYYY"-"MM"-"DD') AS RCP_DT
+                                 		  , A.APL_PN AS APL_PN
+                                 		  , A.APL_RNO1 || pkg_crypto2.decrypt(A.APL_RNO2) AS APL_RNO
+                                 		  , A.APL_SJ AS APL_SJ
+                                 		  , A.APL_DEAL_INST_CD AS APL_DEAL_INST_CD
+                                 		  , FC_COMCODE(A.APL_DEAL_INST_CD, '') AS APL_DEAL_INST_NM
+                                 		  , FC_COMCODE(B.OBJTN_DEAL_RSLT_CD, 'G') AS OBJTN_DEAL_RSLT_CD
+                                 		  , B.OBJTN_NTC_DT AS OBJTN_NTC_DT
+                                 		  , TO_CHAR(TO_DATE(A.APL_DT, 'YYYYMMDD'), 'YYYY"-"MM"-"DD') AS APL_DT
+                                 		  , B.OBJTN_SNO AS OBJTN_SNO
+                                 		  , TO_CHAR(TO_DATE(B.OBJTN_DT, 'YYYYMMDD'),'YYYY"-"MM"-"DD') AS OBJTN_DT
+                                 		  , B.OBJTN_CNC_DT AS OBJTN_CNT_DT
+                                 		  , decode(b.objtn_stat_cd, '01', '이의신청', '02', '처리중', 
+                                                    '03', '결과등록', '04', '연장', '05', '결정통지',
+                                                    '99', '취하') AS OBJTN_STAT_CD
+                                   FROM TB_OPNZ_APL  A, TB_OPNZ_OBJTN B
+                                   <include refid="PortalExposeInfoDao.searchObjectionWhere" />
+                                  ORDER BY TO_NUMBER(OBJTN_SNO) DESC
+        <isEqual property="paging" compareValue="0">
+        <![CDATA[
+                            )       A
+                      WHERE ROWNUM <= #end:NUMERIC#
+                )          A
+          WHERE A.ROW_NUM >= #start:NUMERIC#
+        ]]>
+        </isEqual>
+    </select>
+    <!-- 검색 카운트 -->
+    <select id="PortalExposeInfoDao.searchObjectionCount" parameterClass="params" resultClass="int">
+   		/* sql id : PortalExposeInfoDao.searchObjectionCount */
+         SELECT COUNT(*)
+           FROM TB_OPNZ_APL  A, TB_OPNZ_OBJTN B
+           <include refid="PortalExposeInfoDao.searchObjectionWhere" />
+    </select>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 	-->
+    <!-- 정보공개 이의신청서 이의취하한다.		                  							-->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 	-->
+	<update id="PortalExposeInfoDao.withdrawObjection" parameterClass="params">
+		/* sql id : PortalExposeInfoDao.withdrawObjection */
+		UPDATE TB_OPNZ_OBJTN
+	    SET OBJTN_STAT_CD = '99',
+	        OBJTN_DEAL_RSLT_CD = #objtnDealRslt#,
+	        OBJTN_CNC_DT = TO_CHAR(SYSDATE, 'YYYYMMDD')
+	    WHERE APL_NO = #aplNo#
+	      AND OBJTN_SNO = #objtnSno#
+	</update>
+	
+	<!-- 정보공개 이의신청서 작성 내용을 조회 -->
+	<select id="PortalExposeInfoDao.getOpnObjtnDetail" parameterClass="params" resultClass="java.util.HashMap">
+		/* sql id : PortalExposeInfoDao.getOpnObjtnDetail */
+		SELECT A.PRG_STAT_CD 														AS "prgStatCd"
+				 , C.RCP_NO 														AS "rcpNo"
+				 , C.RCP_DTS_NO 													AS "rcpDtsNo"
+				 , to_char(sysdate, 'yyyy-mm-dd') 									AS "objDt"
+				 , to_char(to_date(C.OBJTN_DT, 'yyyymmdd'), 'yyyy-mm-dd') 			AS "objtnDdt"
+				 , to_char(to_date(c.rcp_dt, 'yyyymmdd'), 'yyyy-mm-dd') 			AS "rcpDt"
+				 , C.OBJTN_SNO 														AS "objtnSno"
+				 , A.APL_NO 														AS "aplNo"
+				 , A.APL_PN 														AS "aplPn"
+				 , A.APL_RNO1 														AS "aplRno1"
+				 , A.APL_DT                                                         AS "aplDt"
+				 , pkg_crypto2.decrypt(A.APL_RNO2) 									AS "aplRno2"
+				 , A.APL_ZPNO 														AS "aplZpno"
+				 , A.APL_1_ADDR 													AS "apl1Addr"
+				 , pkg_crypto2.decrypt(A.APL_2_ADDR) 								AS "apl2Addr"
+				 , pkg_crypto2.decrypt(A.APL_PNO) 									AS "aplPno"
+				 , pkg_crypto2.decrypt(A.APL_FAX_NO) 								AS "aplFaxNo"
+				 , pkg_crypto2.decrypt(A.APL_EMAIL_ADDR) 							AS "aplEmailAddr"
+				 , DECODE(B.OPB_CN, NULL, '비공개 건으로 해당 없음', B.OPB_CN) 				AS "opbCn"
+				 , DECODE(B.OPB_YN, NULL, '결정되지 않은건 입니다.', B.CLSD_RMK) 			AS "clsdRmk"
+				 , TO_CHAR(to_date(C.DCS_NTC_DT, 'YYYYMMDD'), 'YYYY-MM-DD')	 		AS "dcsNtcDt"
+				 , B.OPB_YN 														AS "opbYn"
+				 , C.OBJTN_NTCS_YN 													AS "objtnNtcsYn"
+				 , C.OBJTN_RSON 													AS "objtnRson"
+				 , C.OBJTN_APL_FL_NM 												AS "objtnAplFlNm"
+				 , C.OBJTN_APL_FL_PH 												AS "objtnAplFlPh"
+				 , FC_COMCODE(A.APL_DEAL_INST_CD, '') 								AS "aplDealInstNm"
+				 , C.OBJTN_STAT_CD 													AS "objtnStatCd"
+				 , C.OBJTN_DEAL_RSLT_CD 											AS "objtnDealRsltCd"
+				 , FC_COMCODE(C.OBJTN_DEAL_RSLT_CD,'G')  							AS "objtnDealRsltNm"
+				 , C.OBJTN_APL_RSLT_CN 												AS "objtnAplRsltCn"
+				 , C.DCS_PROD_ETC 													AS "dcsProdEtc"
+				 , C.DCS_PROD_ET_RSON 												AS "dcsProdEtRson"
+				 , TO_CHAR(TO_DATE(C.DCS_PROD_ET_DT, 'YYYYMMDD'),'YYYY-MM-DD') 		AS "dcsProdEtDt"
+				 , C.DCS_PROD_ET_YN													AS "dcsProdEtYn"
+				 , C.OBJTN_RG_DIV 													AS "objtnRgDiv"
+				 , A.DCS_NTC_RCV_MTH_CD 											AS "dcsNtcRcvMthCd"
+				 , A.DCS_NTC_RCV_MTH_SMS 											AS "dcsNtcRcvMthSms"
+				 , A.DCS_NTC_RCV_MTH_MAIL 											AS "dcsNtcRcvMthMail"
+				 , A.DCS_NTC_RCV_MTH_TALK 											AS "dcsNtcRcvMthTalk"
+				 , A.APL_DEAL_INST_CD 												AS "aplDealInstCd"
+				 , pkg_crypto2.decrypt(A.APL_MBL_PNO) 								AS "aplMblPno"
+				 , C.OPB_CLSD_CN  													AS "opbClsdCn"
+		         , C.ATTCH_FL_NM     												AS "attchFlNm"
+				 , C.ATTCH_FL_PH_NM  												AS "attchFlPhNm"
+				 , C.OPB_FOM_VAL   													AS "opbFomVal"
+				 , FC_COMCODE(C.OPB_FOM_VAL,'A')  									AS "opbFomValNm"  
+				 , C.OPB_FOM_ETC     												AS "opbFomEtc"
+				 , C.GIVE_MTH    													AS "giveMth"
+		         , FC_COMCODE(C.GIVE_MTH,'B')  										AS "giveMthNm"      
+				 , C.GIVE_MTH_ETC     												AS "giveMthEtc"
+				 , nvl(C.OBJTN_MOD_RSON, C.OBJTN_RSON) 								AS "objtnModRson"     
+				 , C.OPB_DTM 														AS "opbDtm"
+				 , C.OPB_PLC_NM       												AS "opbPlcNm"
+				 , C.FEE_PAY_YN       												AS "feePayYn"
+				 , C.FEE              												AS "fee"
+				 , C.ZIP_FAR          												AS "zipFar"
+				 , C.FEE_RDTN_AMT     												AS "feeRdtnAmt"
+				 , C.FEE_EST_CN       												AS "feeEstCn"
+				 , C.FEE_PAID_ACC_NO  												AS "feePaidAccNo"
+				 , C.OPB_FL_NM1       												AS "opbFlNm1"
+				 , C.OPB_FL_NM2       												AS "opbFlNm2"
+				 , C.OPB_FL_NM3       												AS "opbFlNm3"
+				 , C.OPB_FL_PH1       												AS "opbFlPh1"
+				 , C.OPB_FL_PH2       												AS "opbFlPh2"
+				 , C.OPB_FL_PH3       												AS "opbFlPh3"
+				 , C.OPB_PSBJ       												AS "opbPsbj"
+				 , D.INST_BANK_NM 													AS "instBankNm"
+				 , D.INST_ACC_NO 													AS "instAccNo"
+				 , D.inst_chrg_dept_nm 												AS "instChrgDeptNm"
+				 , D.inst_chrg_cent_cgp_1_nm 										AS "instChrgCentCgp1Nm"
+				 , D.inst_chrg_cent_cgp_2_nm 										AS "instChrgCentCgp2Nm"
+				 , D.inst_chrg_cent_cgp_3_nm 										AS "instChrgCentCgp3Nm"
+				 , D.inst_pno 														AS "instPno"
+				 , D.inst_fax_no 													AS "instFaxNo"
+				 , D.INST_ACC_NM			 										AS "instAccNm"
+				 , A.FEE_RDTN_CD 													AS "feeRdtnCd"
+				 , FC_COMCODE(A.FEE_RDTN_CD, 'C') 									AS "feeRdtnCdNm"
+				 , A.FEE_RDTN_RSON 													AS "feeRdtnRson"
+				 , A.FEE_ATTCH_FL_NM  												AS "feeAttchFlNm"
+				 , A.FEE_ATTCH_FL_PH 												AS "feeAttchFlPh"
+				 , C.DCS_OBJTN_DOC_NO 												AS "dcsObjtnDocNo"
+				 , FN_GET_OPNZ_CLSD_OBJTN(#aplNo#, #objtnSno#, 'Q')		AS "newClsdRmk"
+				 , FN_GET_OPNZ_CLSD_OBJTN(#aplNo#, #objtnSno#, 'A')		AS "newObjtnRson"
+				 , DECODE(C.OPB_FOM_01_YN, 'Y', '열람,시청', '')			AS "opbFomNm1"
+                 , DECODE(C.OPB_FOM_02_YN, 'Y', '사본,출력물', '')		AS "opbFomNm2"
+                 , DECODE(C.OPB_FOM_03_YN, 'Y', '전자파일', '')			AS "opbFomNm3"
+                 , DECODE(C.OPB_FOM_04_YN, 'Y', '복제,인화물', '')		AS "opbFomNm4"
+                 , DECODE(C.OPB_FOM_05_YN, 'Y', '기타', '')				AS "opbFomNm5"
+                 , DECODE(C.GIVE_MTH_01_YN, 'Y', '직접방문', '')			AS "giveMthNm1"
+                 , DECODE(C.GIVE_MTH_02_YN, 'Y', '우편', '')				AS "giveMthNm2"
+                 , DECODE(C.GIVE_MTH_03_YN, 'Y', '모사전송', '')			AS "giveMthNm3"
+                 , DECODE(C.GIVE_MTH_04_YN, 'Y', '정보통신망', '')		AS "giveMthNm4"
+                 , DECODE(C.GIVE_MTH_05_YN, 'Y', '기타', '')				AS "giveMthNm5"
+				 , NVL2(C.DCS_NTC_DT, FN_GET_OPNZ_CALLVERSION(TO_CHAR(TO_DATE(C.DCS_NTC_DT, 'YYYYMMDD'), 'YYYYMMDD'))
+                   							   , FN_GET_OPNZ_CALLVERSION(TO_CHAR(TO_DATE(C.OBJTN_DT, 'YYYYMMDD'), 'YYYYMMDD'))) AS "callVersion"                   							   
+		FROM TB_OPNZ_APL A, TB_OPNZ_DCS B, TB_OPNZ_OBJTN C, TV_OPNZ_INSTCD D
+	    WHERE A.APL_NO = B.APL_NO
+	    AND B.APL_NO = C.APL_NO
+		AND A.APL_DEAL_INST_CD = D.INST_CD
+	    AND A.APL_NO = #aplNo#
+	    AND C.OBJTN_SNO = #objtnSno# 
+	    AND A.APL_RNO1 = #apl_rno1#
+	    <!-- AND A.APL_RNO2 = pkg_crypto2.encrypt(#apl_rno2#) -->
+	</select>
+
+	<!-- 정보공개 이의신청서 처리 이력을 조회 -->
+	<select id="PortalExposeInfoDao.getObjtnHist" parameterClass="params" resultClass="java.util.HashMap">
+		/* sql id : PortalExposeInfoDao.getObjtnHist */
+		SELECT LINE_NO AS "lineNo"
+				 , HIST_SNO AS "histSno"
+				 , HIST_DIV AS "histDiv"
+				 , HIST_CN AS "histCn"
+				 , HIST_DT AS "histDt"
+	    FROM (
+	        SELECT ROWNUM AS LINE_NO, HIST_SNO, HIST_DIV, HIST_CN, HIST_DT
+	        FROM (
+	                SELECT  A.HIST_SNO AS HIST_SNO, 
+	                		decode(hist_div, '21', '이의신청', '22', '처리중', '23', '이의신청결과등록', '24', '이의신청연장', '29', '이의신청취하') as hist_div,
+	                        HIST_CN, TO_CHAR(TO_DATE(HIST_DT, 'yyyymmddhh24mi'), 'YYYY"-"MM"-"DD"/"hh24":"mi') AS HIST_DT
+	                 FROM TB_OPNZ_HIST A, TB_OPNZ_OBJTN B 
+	                WHERE A.APL_NO = B.APL_NO 
+	                  AND HIST_DIV IN ('21','22','23', '24', '29')
+	                  AND A.APL_NO = #aplNo#
+	        )
+	        ORDER BY HIST_SNO asc
+	    ) 
+	</select>	
+	
+	<!-- 기관 정보 조회 -->
+	<select id="PortalExposeInfoDao.getOpnzInstInfo" parameterClass="string" resultClass="record">
+		/* sql id : PortalExposeInfoDao.getOpnzInstInfo */
+		SELECT INST_BANK_NM AS INST_BK_NM
+				 , INST_ACC_NM
+				 , INST_ACC_NO
+				 , INST_PNO
+		FROM TV_OPNZ_INSTCD
+		WHERE INST_CD = #inst_cd#
+	</select>
+	
+	<!-- 기관 담당자정보 조회 -->
+	<select id="PortalExposeInfoDao.getOpnUsrRelInfo" parameterClass="string" resultClass="record">
+		/* sql id : PortalExposeInfoDao.getOpnUsrRelInfo */
+		SELECT ROWNUM AS ROW_NUM
+				 , USR_ID
+				 , USR_NM
+				 , USR_PNO
+				 , INST_CD
+				 , INST_NM
+				 , USR_MBL_PNO
+				 , USR_EMAIL_ADDR AS USR_EMAIL
+				 <!-- , PKG_CRYPTO2.DECRYPT(USR_EMAIL_PSWD) USR_EMAIL_PSWD -->
+				 , USR_DIV
+				 , JGRD_NM
+				 , USE_DIV
+				 , NOTI_HH_CD
+				 , NOTI_START_HH
+				 , NOTI_END_HH
+		FROM  TV_OPNZ_USR 
+		WHERE USR_DIV = 'OPN' 
+		AND   USE_DIV = '0'
+		AND   INST_CD = #inst_cd#
+		AND   ROWNUM = 1
+	</select>
+		
+	<!-- SMS 기관명 -->
+	<select id="PortalExposeInfoDao.getInstNm" parameterClass="string" resultClass="string">
+		/* sql id : PortalExposeInfoDao.getInstNm */
+		SELECT INST_NM
+		  FROM TV_OPNZ_INSTCD
+		 WHERE INST_CD = #inst#
+	</select>
+	
+	<!-- SMS발송시 청구제목 가져옴 -->
+	<select id="PortalExposeInfoDao.getAplModSJ" parameterClass="string" resultClass="string" >
+		/* sql id : PortalExposeInfoDao.getAplModSJ */
+		SELECT APL_SJ 
+		  FROM TB_OPNZ_APL 
+		 WHERE APL_NO = #aplno#
+	</select>
+	
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 	-->
+    <!-- SMS발송정보를 등록한다.                            							-->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 	-->
+	<insert id="PortalExposeInfoDao.insertSMSRow" parameterClass="params">
+		/* sql id : PortalExposeInfoDao.insertSMSRow */
+		INSERT INTO BIZ_MSG ( 
+			   CMID
+			, MSG_TYPE
+			, STATUS
+			, REQUEST_TIME
+			, SEND_TIME
+			, DEST_PHONE
+			, DEST_NAME
+			, SEND_PHONE
+			, SEND_NAME
+			, SUBJECT
+			, MSG_BODY
+			)
+		VALUES(
+			 SQ_BIZ_MSG_CMID.NEXTVAL
+			, (CASE WHEN LENGTHB(#msg_body#)  <![CDATA[ > ]]>90 THEN 5 ELSE 0 END) <!--   5: MMS, 0 : 단문메시지  -->
+			, 0
+			, SYSDATE
+		<isEmpty property="sendTime">
+            , SYSDATE
+        </isEmpty>
+        <isNotEmpty property="sendTime">
+            , TO_DATE(#sendTime#, 'yyyy-mm-dd hh24:mi:ss')
+        </isNotEmpty>
+			, #dest_phone#
+			, #dest_name#
+			, #send_phone#
+			, #send_name#
+			, #subject#
+			, #msg_body#
+			)
+	</insert>
+	
+	<!-- 청구 기본정보(사용자정보) 입력 -->
+	<update id="PortalExposeInfoDao.updateExposeDefaultInfo" parameterClass="params">	
+		/* sql id : PortalExposeInfoDao.updateExposeDefaultInfo */
+		UPDATE TB_USER
+		SET
+			UPD_DTTM = SYSDATE
+			, USER_TEL = CASE WHEN #apl_pno1:VARCHAR#   IS NOT NULL AND #apl_pno2:VARCHAR# IS NOT NULL AND #apl_pno3:VARCHAR# IS NOT NULL
+	                          THEN pkg_crypto2.encrypt(#apl_pno1:VARCHAR# || '-' ||#apl_pno2:VARCHAR#|| '-' ||#apl_pno3:VARCHAR#)
+	                          WHEN #apl_pno1:VARCHAR# = '000' THEN pkg_crypto2.encrypt(#apl_pno1:VARCHAR#)      
+	                          ELSE USER_TEL
+	                          END
+            , USER_HP = CASE WHEN #apl_mbl_pno1:VARCHAR# IS NOT NULL AND #apl_mbl_pno2:VARCHAR#   IS NOT NULL AND #apl_mbl_pno3:VARCHAR# IS NOT NULL
+                             THEN pkg_crypto2.encrypt(#apl_mbl_pno1:VARCHAR#|| '-' ||#apl_mbl_pno2:VARCHAR#   || '-' ||#apl_mbl_pno3:VARCHAR#)
+                             WHEN #apl_mbl_pno1:VARCHAR# = '000' THEN pkg_crypto2.encrypt(#apl_mbl_pno1:VARCHAR#) 
+                             ELSE USER_HP
+                             END
+            , USER_FAX_TEL = CASE WHEN #apl_fax_no1:VARCHAR# IS NOT NULL AND #apl_fax_no2:VARCHAR# IS NOT NULL AND #apl_fax_no3:VARCHAR# IS NOT NULL
+                                  THEN pkg_crypto2.encrypt(#apl_fax_no1:VARCHAR#|| '-' ||#apl_fax_no2:VARCHAR#|| '-' ||#apl_fax_no3:VARCHAR#)
+                                  WHEN #apl_fax_no1:VARCHAR# = '000' THEN pkg_crypto2.encrypt(#apl_fax_no1:VARCHAR#) 
+                                  ELSE USER_FAX_TEL
+                                  END                    
+			, USER_EMAIL  = CASE WHEN #apl_email1:VARCHAR# IS NOT NULL AND #apl_email2:VARCHAR# IS NOT NULL
+                                 THEN pkg_crypto2.encrypt(#apl_email1:VARCHAR#|| '@' ||#apl_email2:VARCHAR#)
+                                 ELSE USER_EMAIL
+                                 END
+            <isNotEmpty property="apl_zpno">                     
+            , USER_ZIP = #apl_zpno:VARCHAR#
+            , USER_1_ADDR = #apl_addr1:VARCHAR#
+			</isNotEmpty>
+			<isNotEmpty property="apl_addr2">
+			, USER_2_SADDR = pkg_crypto2.encrypt(#apl_addr2:VARCHAR#)
+			</isNotEmpty>
+			, EMAIL_YN = #dcs_ntc_rcvmth_mail:CHAR#
+			, KAKAO_YN = #dcs_ntc_rcvmth_talk:CHAR# 
+			, HP_YN = #dcs_ntc_rcvmth_sms:CHAR#
+			<isNotEmpty property="user1Ssn">
+			, USER_1_SSN = pkg_crypto2.encrypt(#user1Ssn:VARCHAR#)
+			</isNotEmpty>
+			<isNotEmpty property="user2Ssn">
+			, USER_2_SSN = pkg_crypto2.encrypt(#user2Ssn:VARCHAR#)
+			</isNotEmpty>
+			<isNotEmpty property="rauthDi">
+			, RAUTH_DI = #rauthDi:VARCHAR#
+			, RAUTH_DTTM = SYSDATE
+			</isNotEmpty>
+			<isNotEmpty property="rauthBirth">
+			, RAUTH_BIRTH = #rauthBirth:CHAR#
+			</isNotEmpty>
+			<isNotEmpty property="rauthTag">
+			, RAUTH_TAG = #rauthTag:CHAR#
+			</isNotEmpty>
+			<isNotEmpty property="rauthNi">
+			, RAUTH_NI = #rauthNi:CHAR#
+			</isNotEmpty>
+			
+		WHERE
+			USER_CD = #regId:NUMERIC#
+	</update>
+	
+	<!-- 로그인 사용자정보를 조회한다. -->
+	<select id="PortalExposeInfoDao.selectLoginUserInfo" parameterClass="params" resultClass="java.util.HashMap">
+		/* sql id : PortalExposeInfoDao.selectLoginUserInfo */
+		SELECT
+			USER_CD             AS "userCd"
+			, USER_ID           AS "userId"
+			, USER_NM           AS "userNm"
+			, AGREE_YN          AS "agreeYn"
+			, AGREE1_YN         AS "agree1Yn"
+			, AGREE2_YN         AS "agree2Yn"
+			, AGREE_DTTM        AS "agreeDttm"
+			, RAUTH_TAG         AS "rauthTag"
+       	    , RAUTH_VID         AS "rauthVid"
+	        , RAUTH_DI          AS "rauthDi"
+	        , RAUTH_BIRTH       AS "rauthBirth"
+	        , RAUTH_SEX         AS "rauthSex"
+	        , RAUTH_NI          AS "rauthNi"
+	        , RAUTH_DTTM        AS "rauthDttm"
+			, pkg_crypto2.decrypt(USER_EMAIL) AS "userEmail"
+			, EMAIL_YN          AS "emailYn"
+			, EMAIL_DTTM        AS "emailDttm"
+			, pkg_crypto2.decrypt(USER_TEL) AS "userTel"
+			, pkg_crypto2.decrypt(USER_HP) AS "userHp"
+			, HP_YN             AS "hpYn"
+			, HP_DTTM           AS "hpDttm"
+			, pkg_crypto2.decrypt(USER_FAX_TEL) AS "userFaxTel"
+			, KAKAO_YN          AS "kakaoYn"
+			, USER_ZIP          AS "userZip"
+			, USER_1_ADDR       AS "user1Addr"
+			, pkg_crypto2.decrypt(USER_2_SADDR) AS "user2Saddr"
+			, KAKAO_DTTM        AS "kakaoDttm"
+			, pkg_crypto2.decrypt(USER_1_SSN) AS "user1Ssn"
+			, pkg_crypto2.decrypt(USER_2_SSN) AS "user2Ssn"
+		FROM
+			TB_USER
+		WHERE
+			USER_CD = #regId:NUMERIC#
+	</select>
+	
+	<!-- 이송중인 청구건이 있는지 체크 -->
+	<select id="PortalExposeInfoDao.selectOpnzAplTransCnt" parameterClass="params" resultClass="int">
+		/* sql id : PortalExposeInfoDao.selectOpnzAplTransCnt */
+		SELECT COUNT(*) AS CNT
+		FROM   TB_OPNZ_HIST 
+		WHERE  APL_NO = #apl_no:VARCHAR# 
+		AND    HIST_DIV = '09'
+	</select>
+	
+	<!-- 작성된 청구서 변경시 본인여부와 현재상태 조회 -->
+	<select id="PortalExposeInfoDao.selectOpnzUsrAccChkStatus" parameterClass="params" resultClass="string">
+		/* sql id : PortalExposeInfoDao.selectOpnzUsrAccChkStatus */
+		SELECT NVL(MAX(A.PRG_STAT_CD), 'X') AS STATUS
+		FROM   TB_OPNZ_APL A
+		WHERE  A.APL_NO   = #apl_no:VARCHAR# 
+		AND    A.APL_RNO1 = #aplRno1:VARCHAR#
+		<!-- AND    A.APL_RNO2 = pkg_crypto2.encrypt(#aplRno2:VARCHAR#) -->
+	</select>
+	
+	<!-- 작성된 이의신청서 변경시 본인여부와 현재상태 조회 -->
+	<select id="PortalExposeInfoDao.selectOpnzUsrObjChkStatus" parameterClass="params" resultClass="string">
+		/* sql id : PortalExposeInfoDao.selectOpnzUsrObjChkStatus */
+		SELECT NVL(MAX(B.OBJTN_STAT_CD), 'X') AS STATUS 
+		FROM   TB_OPNZ_APL A, 
+		       TB_OPNZ_OBJTN B 
+		 WHERE A.APL_NO = B.APL_NO 
+		 AND   A.APL_NO = #aplNo:VARCHAR# 
+		 AND   B.OBJTN_SNO = #objtnSno:VARCHAR# 
+		 <!-- AND   A.APL_RNO1 || pkg_crypto2.decrypt(A.APL_RNO2) = #aplRno1:VARCHAR# || #aplRno2:VARCHAR# -->
+	</select>
+	
+	<!-- 이의신청 대상 항목을 조회 -->
+	<select id="PortalExposeInfoDao.selectOpnDcsClsd" parameterClass="params" resultClass="java.util.HashMap">
+		/* sql id : PortalExposeInfoDao.selectOpnDcsClsd */
+         <![CDATA[
+			SELECT A.CLSD_NO 		AS "clsdNo"
+			     , A.CLSD_RMK			AS "clsdRmk"
+			     , A.CLSD_RSON_CD	AS "clsdRsonCd"
+			     , A.CLSD_RSON		AS "clsdRson"
+			     , A.OBJTN_YN 		AS "objtnYn"
+			     , A.OBJTN_SNO		AS "objtnSno"
+			     , A.OBJTN_RSON		AS "objtnRson"
+			     , A.OBJTN_REG_DTTM	AS "objtnRegDttm"
+			  FROM TB_OPNZ_DCS_CLSD A
+			 WHERE A.APL_NO = #aplNo:VARCHAR#
+			 ORDER BY CLSD_NO
+        ]]>
+	</select>	
+
+	<!-- 이의신청 대상 선택 항목을 조회 -->
+	<select id="PortalExposeInfoDao.selectOpnDcsChkClsd" parameterClass="params" resultClass="java.util.HashMap">
+		/* sql id : PortalExposeInfoDao.selectOpnDcsChkClsd */
+         <![CDATA[
+			SELECT A.CLSD_NO 		AS "clsdNo"
+			     , A.CLSD_RMK			AS "clsdRmk"
+			     , A.CLSD_RSON_CD	AS "clsdRsonCd"
+			     , A.CLSD_RSON		AS "clsdRson"
+			     , A.OBJTN_YN 		AS "objtnYn"
+			     , A.OBJTN_SNO		AS "objtnSno"
+			     , A.OBJTN_RSON		AS "objtnRson"
+			     , A.OBJTN_REG_DTTM	AS "objtnRegDttm"
+			  FROM TB_OPNZ_DCS_CLSD A
+			 WHERE A.APL_NO = #aplNo:VARCHAR#
+			     AND A.OBJTN_SNO = #objtnSno:VARCHAR#
+			 ORDER BY CLSD_NO
+        ]]>
+	</select>	
+	
+	<!-- 이의신청 다음순번 확인 -->
+	<select id="PortalExposeInfoDao.getInfoOpenObjtnSnoNext" parameterClass="params" resultClass="String">
+		SELECT nvl(max(objtn_sno+1),1)
+		FROM TB_OPNZ_OBJTN
+	</select>
+
+	<!-- 이의신청사유 등록-->
+	<insert id="PortalExposeInfoDao.updateOpnDcsClsd" parameterClass="params">
+		UPDATE TB_OPNZ_DCS_CLSD
+		SET OBJTN_YN = 'Y'
+			, OBJTN_SNO = #objtnSno#
+			, OBJTN_RSON = #objtnRson#
+			, OBJTN_REG_DTTM = sysdate
+		WHERE APL_NO = #aplNo#
+		    AND CLSD_NO = #clsdNo#
+	</insert>
+
+	<!-- 이의신청사유 지운다-->
+	<insert id="PortalExposeInfoDao.deleteOpnDcsClsd" parameterClass="params">
+		UPDATE TB_OPNZ_DCS_CLSD
+		SET OBJTN_YN = 'N'
+			, OBJTN_SNO = NULL
+			, OBJTN_RSON = NULL
+			, OBJTN_REG_DTTM = NULL
+		WHERE APL_NO = #aplNo#
+		    AND OBJTN_SNO = #objtnSno#
+	</insert>
+
+	<!-- 청구취하 시 상태만 변경 -->
+	<insert id="PortalExposeInfoDao.updateOpnDcsClsdYn" parameterClass="params">
+		UPDATE TB_OPNZ_DCS_CLSD
+		SET OBJTN_YN = 'N'
+		WHERE APL_NO = #aplNo#
+		    AND OBJTN_SNO = #objtnSno#
+	</insert>
+
+	<!-- 정보공개 처리상태를 조회 -->
+	<select id="PortalExposeInfoDao.getPrgStatCd" parameterClass="string" resultClass="string" >
+		/* sql id : PortalExposeInfoDao.getPrgStatCd */
+		SELECT PRG_STAT_CD 
+		  FROM TB_OPNZ_APL 
+		 WHERE APL_NO = #aplno#
+	</select>
+	
+	<!-- 실명인증 정보를 추가한다. -->
+	<update id="PortalExposeInfoDao.updateUserRauth" parameterClass="params">
+		/* sql id : PortalExposeInfoDao.updateUserRauth */
+		
+		UPDATE TB_USER 
+		   SET RAUTH_DI = #rauthDi:VARCHAR#
+			 , RAUTH_BIRTH = #rauthBirth:CHAR#
+			 , RAUTH_TAG = #rauthTag:CHAR#
+			 , RAUTH_NI = #rauthNi:CHAR#
+			 , RAUTH_DTTM = SYSDATE
+		 WHERE USER_CD = #portalUserCd:NUMERIC#	
+	</update>
+</sqlMap>

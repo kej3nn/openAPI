@@ -1,0 +1,434 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="portalInfsCont" >
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+
+	<!-- 정보분류 트리 목록을 조회 -->
+	<select id="portalInfsContDao.selectInfoCateTree" parameterClass="params" resultClass="record">
+		/* sql id : portalInfsContDao.selectInfoCateTree */
+		WITH
+		    TMP_INFO_SET AS (
+		        SELECT
+		            'C' AS GUBUN_TAG,
+		            C.CATE_ID AS INFS_ID,
+		            C.PAR_CATE_ID AS PAR_INFS_ID,
+		            C.CATE_NM AS INFS_NM,
+		            C.V_ORDER AS V_ORDER
+		        FROM
+		            TB_INFO_CATE C
+		        WHERE
+		            C.USE_YN = 'Y'
+		        UNION ALL
+		        SELECT
+		            'T' AS GUBUN_TAG,
+		            A.INFS_ID,
+		            B.CATE_ID AS PAR_INFS_ID,
+		            A.INFS_NM,
+		            B.V_ORDER
+		        FROM
+		            TB_INFO_SET A
+		            INNER JOIN TB_INFO_SET_CATE B ON A.INFS_ID = B.INFS_ID AND B.USE_YN = 'Y'
+		        WHERE
+		            A.USE_YN = 'Y'
+		        AND A.OPEN_STATE = 'Y'
+				AND A.OPEN_DTTM &lt; TRUNC(SYSDATE+1)
+		    )
+		SELECT
+		    LEVEL 				AS "Level",
+		    CONNECT_BY_ISLEAF 	AS "leaf",
+		    'false' 			AS "open",
+		    L.GUBUN_TAG 		AS "gubunTag",
+		    L.INFS_ID 			AS "infsId",
+		    L.PAR_INFS_ID 		AS "parInfsId",
+		    L.INFS_NM 			AS "infsNm",
+		    L.V_ORDER 			AS "vOrder",
+		    SUBSTR(SYS_CONNECT_BY_PATH(INFS_NM, '>'), 2) AS "fullPath"
+		FROM
+		    TMP_INFO_SET L
+		WHERE
+		    1 = 1
+		    <!-- 분류에 정보셋이 들어있는것만 표시하고싶을경우 --> 
+		    AND EXISTS (
+		        SELECT 1
+		        FROM   TMP_INFO_SET E
+		        WHERE  E.GUBUN_TAG = 'T'
+		        START WITH E.INFS_ID = L.INFS_ID
+		        CONNECT BY PRIOR E.INFS_ID = E.PAR_INFS_ID
+		    )
+		START WITH
+		    L.PAR_INFS_ID = 'T'
+		    AND L.GUBUN_TAG = 'C'
+		<!-- 분류중 지원조직별 공개는 표시안함.(sorg로 넘어온 경우만 표시) -->
+		<!-- 
+		<isEmpty property="cateDataGubun">
+		 	AND L.INFS_ID != 'NA30000'
+		</isEmpty> -->    
+		<isNotEmpty property="cateDataGubun">
+			<isEqual property="cateDataGubun" compareValue="subj">
+				AND L.INFS_ID != 'NA30000'
+			</isEqual>
+			<isEqual property="cateDataGubun" compareValue="sorg">
+				AND L.INFS_ID = 'NA30000'
+			</isEqual>
+		</isNotEmpty>
+		CONNECT BY
+		    PRIOR L.INFS_ID = L.PAR_INFS_ID
+		ORDER SIBLINGS BY
+		    L.V_ORDER,
+		    L.INFS_NM		
+	</select>
+	
+	
+	<!-- 정보셋 설명 조회 -->
+	<select id="portalInfsContDao.selectInfsExp" parameterClass="params" resultClass="record">
+		/* sql id : portalInfsContDao.selectInfsExp */
+		SELECT
+		    INFS_EXP_TIT	AS "infsExpTit",
+		    INFS_DTL_CONT	AS "infsDtlCont"
+		FROM
+		    TB_INFO_SET_EXP A
+		WHERE
+		    INFS_ID = #infsId:VARCHAR#
+		    AND USE_YN = 'Y'
+		ORDER BY V_ORDER    	
+	</select>
+	
+	<!-- 정보셋 상세 조회 -->
+	<select id="portalInfsContDao.selectInfsDtl" parameterClass="params" resultClass="record">
+		/* sql id : portalInfsContDao.selectInfsDtl */
+		SELECT
+		    A.INFS_ID 		AS "infsId",
+		    A.INFS_NM 		AS "infsNm",
+		    A.DOC_CNT 		AS "docCnt",
+		    A.INF_CNT 		AS "infCnt",
+		    A.STATBL_CNT 	AS "statblCnt",
+		<isEmpty property="parCateId">
+			A.CATE_ID		AS "cateId",
+		    A.CATE_NM		AS "cateNm",
+		    A.CATE_FULLNM	AS "cateFullnm",
+		    C.CATE_NM		AS "parCateNm"
+		</isEmpty>
+		<isNotEmpty property="parCateId">
+		    B.CATE_ID 		AS "cateId",
+		    C.CATE_NM		AS "cateNm",
+		    C.CATE_FULLNM	AS "cateFullnm",
+		    D.CATE_NM		AS "parCateNm"
+		</isNotEmpty>    
+		FROM
+		    TV_INFO_SET A
+		<isEmpty property="parCateId">
+			INNER JOIN TB_INFO_CATE B ON A.CATE_ID = B.CATE_ID
+		    AND B.USE_YN = 'Y'
+		    INNER JOIN TB_INFO_CATE C ON B.PAR_CATE_ID = C.CATE_ID
+		    AND C.USE_YN = 'Y'
+		</isEmpty>    
+		<isNotEmpty property="parCateId">
+		    INNER JOIN TB_INFO_SET_CATE B ON A.INFS_ID = B.INFS_ID
+		    AND B.USE_YN = 'Y'
+		    AND B.CATE_ID = #parCateId:VARCHAR#
+		    INNER JOIN TB_INFO_CATE C ON B.CATE_ID = C.CATE_ID
+		    AND C.USE_YN = 'Y'
+		    LEFT OUTER JOIN TB_INFO_CATE D ON C.PAR_CATE_ID = D.CATE_ID
+		    AND D.USE_YN = 'Y'
+		</isNotEmpty>    
+		WHERE
+		    A.INFS_ID = #infsId:VARCHAR#
+		    AND A.USE_YN = 'Y'
+		    AND A.OPEN_STATE = 'Y'		
+			AND A.OPEN_DTTM &lt; TRUNC(SYSDATE+1)	
+	</select>
+	
+	<!-- 정보셋에 연결된 문서, 공공데이터, 통계데이터를 조회한다.(OPENTY_TAG 에 따라) -->
+	<select id="portalInfsContDao.selectInfsRel" parameterClass="params" resultClass="record">
+		/* sql id : portalInfsContDao.selectInfsRel */
+		SELECT
+		    A.OPENTY_TAG		AS "opentyTag",
+		    A.OPENTY_TAG_NM		AS "opentyTagNm",
+		    A.INFA_ID			AS "infaId",
+		    A.INFA_NM			AS "infaNm",
+		    A.CATE_ID			AS "cateId",
+		    A.CATE_NM			AS "cateNm",
+		    A.OPEN_YMD			AS "openYmd",
+		    A.OPEN_SRV			AS "openSrv",
+		    A.VIEW_CNT			AS "viewCnt",
+		    A.INFA_EXP			AS "infaExp",
+		    CASE
+		        WHEN LENGTH(A.CATE_FULLNM) - LENGTH(REPLACE (A.CATE_FULLNM, '>', '')) > 2 THEN SUBSTR(A.CATE_FULLNM, 0, INSTR(A.CATE_FULLNM, '>', 1, 3) - 1)
+		        ELSE CATE_FULLNM
+		    END AS "cateFullnm"
+		FROM
+		    TV_INFA_LIST A
+		    INNER JOIN TB_INFO_SET_REL B ON A.INFA_ID = B.OBJ_ID
+		    AND B.USE_YN = 'Y'
+		    AND B.INFS_TAG = A.OPENTY_TAG
+		    AND B.INFS_ID = #infsId:VARCHAR#
+		WHERE
+			A.OPENTY_TAG = #opentyTag:CHAR#
+		ORDER BY B.V_ORDER
+	</select>
+	
+	
+	<!-- 모바일용 SQL -->
+	<sql id="infoSet.col">
+		A.INFS_ID		AS "infsId",
+	    A.INFS_NM		AS "infsNm",
+	    A.CATE_ID		AS "cateId",
+	    A.TOP_CATE_NM 	AS "topCateNm"
+	</sql>
+	<sql id="infoSet.table">
+		SELECT  
+			A.INFS_ID AS INFS_ID, 
+            A.SEQ, 
+            A.INFS_NM AS INFS_NM, 
+            P.PAR_CATE_ID, 
+            P.CATE_FULLNM AS PAR_CATE_FULLNM, 
+            T.CATE_ID, 
+            T.CATE_NM AS TOP_CATE_NM, 
+            ROW_NUMBER() OVER(PARTITION BY A.INFS_ID ORDER BY (T.V_ORDER), (P.V_ORDER), (C.V_ORDER) ) AS RN  
+         FROM TB_INFO_SET A  
+         INNER JOIN TB_INFO_SET_CATE C 
+              ON A.INFS_ID = C.INFS_ID 
+              AND C.USE_YN = 'Y' 
+         INNER JOIN TB_INFO_CATE P 
+              ON C.CATE_ID = P.CATE_ID 
+              AND P.USE_YN = 'Y'
+         INNER JOIN TB_INFO_CATE T 
+              ON P.TOP_CATE_ID = T.CATE_ID 
+              AND T.USE_YN = 'Y'
+	</sql>
+	<sql id="infoSet.where">
+		WHERE A.USE_YN = 'Y'
+		AND   A.OPEN_STATE = 'Y'
+		AND   A.OPEN_DTTM &lt; TRUNC(SYSDATE+1)	
+		<!-- 분류중 지원조직별 공개는 표시안함.(sorg로 넘어온 경우만 표시) 모바일 조회시는 전체 표시함 -->
+		<isNotEmpty property="cateDataGubun">
+			<isEmpty property="isMobile">
+				<isEqual property="cateDataGubun" compareValue="subj">
+					AND A.CATE_ID IN (
+				       	SELECT CATE_ID FROM TB_INFO_CATE
+				        START WITH PAR_CATE_ID = 'T'
+				        AND CATE_ID != 'NA30000'
+				        CONNECT BY PRIOR CATE_ID = PAR_CATE_ID
+				       )
+				</isEqual>
+				<isEqual property="cateDataGubun" compareValue="sorg">
+					AND A.CATE_ID IN (
+				       	SELECT CATE_ID FROM TB_INFO_CATE
+				        START WITH PAR_CATE_ID = 'T'
+				        AND CATE_ID = 'NA30000'
+				        CONNECT BY PRIOR CATE_ID = PAR_CATE_ID
+				       )
+				</isEqual>
+			</isEmpty>
+			<isNotEmpty property="isMobile">
+				<isNotEqual property="isMobile" compareValue="true">
+					<isEqual property="cateDataGubun" compareValue="subj">
+						AND A.CATE_ID IN (
+					       	SELECT CATE_ID FROM TB_INFO_CATE
+					        START WITH PAR_CATE_ID = 'T'
+					        AND CATE_ID != 'NA30000'
+					        CONNECT BY PRIOR CATE_ID = PAR_CATE_ID
+					       )
+					</isEqual>
+					<isEqual property="cateDataGubun" compareValue="sorg">
+						AND A.CATE_ID IN (
+					       	SELECT CATE_ID FROM TB_INFO_CATE
+					        START WITH PAR_CATE_ID = 'T'
+					        AND CATE_ID = 'NA30000'
+					        CONNECT BY PRIOR CATE_ID = PAR_CATE_ID
+					       )
+					</isEqual>
+				</isNotEqual>
+			</isNotEmpty>
+		</isNotEmpty>
+		<isNotEmpty property="searchVal">
+       	AND ( A.INFS_NM LIKE REPLACE('%' || UPPER(REPLACE(#searchVal:VARCHAR#, ' ', '')) || '%', ' ', '') 
+            OR A.TAG_INFS_NM LIKE REPLACE('%' || UPPER(REPLACE(#searchVal:VARCHAR#, ' ', '')) || '%', ' ', '') 
+            OR   A.INFS_ID  IN (
+            		SELECT DISTINCT R.INFS_ID 
+                      FROM TB_INFO_SET_REL R LEFT JOIN TB_DOC_INF D ON R.OBJ_ID = D.DOC_ID AND R.INFS_TAG = 'D' AND R.USE_YN = 'Y' AND D.USE_YN = 'Y'
+                    	             LEFT JOIN TB_OPEN_INF O ON R.OBJ_ID = O.INF_ID AND R.INFS_TAG = 'O' AND R.USE_YN = 'Y' AND O.USE_YN = 'Y'
+                                     LEFT JOIN TB_STTS_TBL S ON R.OBJ_ID = S.STATBL_ID AND R.INFS_TAG = 'S' AND R.USE_YN = 'Y' AND S.USE_YN = 'Y'
+                    WHERE ( D.DOC_NM LIKE REPLACE('%' || UPPER(REPLACE(#searchVal:VARCHAR#, ' ', '')) || '%', ' ', '') 
+                                     OR O.INF_NM LIKE REPLACE('%' || UPPER(REPLACE(#searchVal:VARCHAR#, ' ', '')) || '%', ' ', '') 
+                                     OR S.STATBL_NM  LIKE REPLACE('%' || UPPER(REPLACE(#searchVal:VARCHAR#, ' ', '')) || '%', ' ', '')
+                              )   
+            )
+		)
+		</isNotEmpty>
+		<isNotEmpty property="txtMbSearchVal">
+       	AND ( A.INFS_NM LIKE REPLACE('%' || UPPER(REPLACE(#txtMbSearchVal:VARCHAR#, ' ', '')) || '%', ' ', '') 
+            OR A.TAG_INFS_NM LIKE REPLACE('%' || UPPER(REPLACE(#txtMbSearchVal:VARCHAR#, ' ', '')) || '%', ' ', '') 
+            OR   A.INFS_ID  IN (
+            		SELECT DISTINCT R.INFS_ID 
+                      FROM TB_INFO_SET_REL R LEFT JOIN TB_DOC_INF D ON R.OBJ_ID = D.DOC_ID AND R.INFS_TAG = 'D' AND R.USE_YN = 'Y' AND D.USE_YN = 'Y'
+                    	             LEFT JOIN TB_OPEN_INF O ON R.OBJ_ID = O.INF_ID AND R.INFS_TAG = 'O' AND R.USE_YN = 'Y' AND O.USE_YN = 'Y'
+                                     LEFT JOIN TB_STTS_TBL S ON R.OBJ_ID = S.STATBL_ID AND R.INFS_TAG = 'S' AND R.USE_YN = 'Y' AND S.USE_YN = 'Y'
+                    WHERE ( D.DOC_NM LIKE REPLACE('%' || UPPER(REPLACE(#txtMbSearchVal:VARCHAR#, ' ', '')) || '%', ' ', '') 
+                                     OR O.INF_NM LIKE REPLACE('%' || UPPER(REPLACE(#txtMbSearchVal:VARCHAR#, ' ', '')) || '%', ' ', '') 
+                                     OR S.STATBL_NM  LIKE REPLACE('%' || UPPER(REPLACE(#txtMbSearchVal:VARCHAR#, ' ', '')) || '%', ' ', '')
+                              )   
+            )
+		)
+		</isNotEmpty>
+		<isNotEmpty property="cateId">
+			AND (A.INFS_ID, C.CATE_ID) IN (SELECT DISTINCT INFS_ID, CATE_ID FROM TB_INFO_SET_CATE
+							  WHERE  CATE_ID IN (
+								        SELECT CATE_ID FROM TB_INFO_CATE
+								        START WITH CATE_ID = #cateId:VARCHAR#
+								        CONNECT BY PRIOR CATE_ID = PAR_CATE_ID AND USE_YN = 'Y')
+							 )
+		</isNotEmpty>
+		<isNotEmpty property="isMobile">
+			AND (
+				EXISTS(SELECT 1 FROM TB_INFO_SET_REL WHERE INFS_ID = A.INFS_ID AND USE_YN = 'Y')
+            	OR EXISTS(SELECT 1 FROM TB_INFO_SET_EXP WHERE INFS_ID = A.INFS_ID AND USE_YN = 'Y')
+            ) 
+		</isNotEmpty>
+	</sql>
+	
+	<!-- 정보공개 컨텐츠 모바일 조회(페이징) -->
+	<select id="portalInfsContDao.selectInfsContPaging" remapResults="true" parameterClass="params" resultClass="record">
+		/* sql id : portalInfsContDao.selectInfsContPaging */
+		<isEqual property="paging" compareValue="0">
+		SELECT AA.* 
+		FROM   (SELECT ROWNUM AS ROW_NUM, AA.*
+				FROM   (
+		</isEqual>
+		
+			SELECT
+			    <include refid="infoSet.col"/>
+			FROM (
+			    <include refid="infoSet.table"/>
+			    
+				<include refid="infoSet.where"/>
+				
+				<isEmpty property="orderBy">
+			    	ORDER BY T.V_ORDER, P.V_ORDER, C.V_ORDER, A.INFS_NM  
+				</isEmpty>
+				<isNotEmpty property="orderBy">
+					<isEqual property="orderBy" compareValue="A">
+						ORDER BY A.INFS_NM, T.V_ORDER, P.V_ORDER, C.V_ORDER
+					</isEqual>
+					<isEqual property="orderBy" compareValue="D">
+						ORDER BY A.INFS_NM DESC
+					</isEqual>
+				</isNotEmpty>
+                ) A
+			WHERE RN = 1	<!-- 중복된 데이터는 제거함 -->
+		<isEqual property="paging" compareValue="0">
+		<![CDATA[
+				) AA
+			WHERE ROWNUM <= #end:NUMERIC#
+			) AA
+		WHERE AA.ROW_NUM >= #start:NUMERIC#
+		]]>
+		</isEqual>
+	</select>
+	<select id="portalInfsContDao.selectInfsContPagingCount" parameterClass="params" resultClass="int">
+		/* sql id : portalInfsContDao.selectInfsContPagingCount */
+		SELECT
+		    COUNT(*)
+		FROM (
+		    <include refid="infoSet.table"/>
+			<include refid="infoSet.where"/>
+			 ) A
+		WHERE RN = 1
+	</select>
+	
+	<!-- 정보셋 조회 로그를 등록한다. -->
+	<insert id="portalInfsContDao.insertLogInfs" parameterClass="params">
+		/* sql id : portalInfsContDao.insertLogInfs */
+		INSERT INTO TB_LOG_INFO_SET (
+			SEQCE_NO,
+			INFS_ID,
+			SYS_TAG,
+			USER_CD,
+			USER_IP,
+			REG_DTTM
+		)
+		VALUES (
+			SQ_LOG_INFO_SEQ.NEXTVAL,
+			#infsId:VARCHAR#,
+			'K',
+			#userCd:NUMERIC#,
+			#userIp:VARCHAR#,
+			SYSDATE
+		)
+	</insert>
+	
+	<!-- 정보분류 부모ID가 속한 하위의 카테고리를 조회한다. -->
+	<select id="portalInfsContDao.selectInfoCateChild" parameterClass="params" resultClass="record">
+		/* sql id : portalInfsContDao.selectInfoCateChild */
+		WITH TMP_INFO_SET AS 
+	       (SELECT 'C' AS GUBUN_TAG, 
+	              C.CATE_ID AS INFS_ID, 
+	              C.PAR_CATE_ID AS PAR_INFS_ID, 
+	              C.CATE_NM AS INFS_NM, 
+	              C.V_ORDER AS V_ORDER,
+	              C.CATE_LVL AS LVL 
+	         FROM TB_INFO_CATE C 
+	        WHERE C.USE_YN = 'Y' 
+	           UNION ALL 
+	       SELECT 'T' AS GUBUN_TAG, 
+	              A.INFS_ID, 
+	              B.CATE_ID AS PAR_INFS_ID, 
+	              A.INFS_NM, 
+	              B.V_ORDER,
+	              1 AS LVL 
+	         FROM TB_INFO_SET A 
+	          INNER JOIN TB_INFO_SET_CATE B 
+	              ON A.INFS_ID = B.INFS_ID 
+	              AND B.USE_YN = 'Y' 
+	        WHERE A.USE_YN = 'Y' 
+	              AND A.OPEN_STATE = 'Y'
+	              <![CDATA[
+	              AND A.OPEN_DTTM < TRUNC(SYSDATE+1)
+	              ]]> 
+	       ) 
+		SELECT 
+			   L.INFS_ID 		AS "cateId", 
+		       L.PAR_INFS_ID 	AS "parCateId", 
+		       L.INFS_NM 		AS "cateNm",
+		       LVL 				AS "cateLvl", 
+		       L.V_ORDER 		AS "vOrder", 
+		       <![CDATA[
+		       SUBSTR(SYS_CONNECT_BY_PATH(INFS_NM, '>'), 2) AS "fullPath"
+		       ]]> 
+		  FROM TMP_INFO_SET L 
+		 WHERE 1 = 1 
+		       AND GUBUN_TAG = 'C' 
+			<isEmpty property="parCateId">
+		       	AND L.PAR_INFS_ID = 'T' 
+			</isEmpty>
+			<isNotEmpty property="parCateId">
+				AND L.PAR_INFS_ID = #parCateId:VARCHAR#
+			</isNotEmpty>
+		       AND EXISTS 
+		       (SELECT 1 
+		         FROM TMP_INFO_SET E 
+		        WHERE E.GUBUN_TAG = 'T'
+		        START WITH E.INFS_ID = L.INFS_ID 
+		        CONNECT BY PRIOR E.INFS_ID = E.PAR_INFS_ID 
+		       ) 
+		  START WITH L.GUBUN_TAG = 'C'
+			<isEmpty property="parCateId">	      	   
+			  AND L.PAR_INFS_ID = 'T' 
+			</isEmpty>
+			<isNotEmpty property="parCateId">
+				AND L.PAR_INFS_ID = #parCateId:VARCHAR#
+			</isNotEmpty>
+		  CONNECT BY PRIOR L.INFS_ID = L.PAR_INFS_ID 
+		  ORDER SIBLINGS BY L.V_ORDER, L.INFS_NM
+	</select>
+	
+	<select id="portalInfsContDao.selectInfoCateFullPathCateId" parameterClass="params" resultClass="record">
+		/* sql id : portalInfsContDao.selectInfoCateFullPathCateId */
+		SELECT NVL(MAX(SUBSTR(SYS_CONNECT_BY_PATH(CATE_ID, ','), 2)), '') AS "pathCateId" 
+		  FROM TB_INFO_CATE 
+		 WHERE CATE_ID = #cateId# 
+		START WITH PAR_CATE_ID = 'T' 
+		CONNECT BY PRIOR CATE_ID = PAR_CATE_ID	
+	</select>
+</sqlMap>

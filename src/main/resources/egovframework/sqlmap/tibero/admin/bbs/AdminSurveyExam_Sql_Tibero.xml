@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="SurveyExam">
+	<typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+	<resultMap class="egovframework.admin.bbs.service.SurveyExam" id="SurveyExamList">
+		<result property="surveyId" column="SURVEY_ID"/>
+		<result property="questSeq" column="QUEST_SEQ"/>
+		<result property="examSeq" column="EXAM_SEQ"/>
+		<result property="grpExp" column="GRP_EXP"/>
+		<result property="examNm" column="EXAM_NM"/>
+		<result property="examExp" column="EXAM_EXP"/>
+		<result property="etcYn" column="ETC_YN"/>
+		<result property="vOrder" column="V_ORDER"/>
+		<result property="useYn" column="USE_YN"/>
+	</resultMap>
+	
+	<resultMap class="egovframework.admin.bbs.service.SurveyExam" id="SurveyExamPop">
+		<result property="surveyId" column="SURVEY_ID"/>
+		<result property="questSeq" column="QUEST_SEQ"/>
+		<result property="examSeq" column="EXAM_SEQ"/>
+		<result property="grpExp" column="GRP_EXP"/>
+		<result property="examNm" column="EXAM_NM"/>
+		<result property="examExp" column="EXAM_EXP"/>
+		<result property="etcYn" column="ETC_YN"/>
+		
+		<result property="questNo" column="QUEST_NO"/>
+		<result property="examCd" column="EXAM_CD"/>
+	</resultMap>
+	
+	<resultMap class="egovframework.admin.bbs.service.SurveyExam" id="SurveyExamCdPop">
+		<result property="ditcCd" column="DITC_CD"/>
+		<result property="examSeq" column="SEQ"/>
+		<result property="examVal" column="EXAM_VAL"/>
+		<result property="examNm" column="EXAM_NM"/>
+		
+	</resultMap>
+	
+	<resultMap class="egovframework.admin.bbs.service.SurveyExam" id="TvSurveyExamCd">
+		<result property="examSeq" column="SEQ"/>
+		<result property="examNm" column="EXAM_NM"/>
+		<result property="examVal" column="EXAM_VAL"/>
+		<result property="ditcCd" column="DITC_CD"/>
+	</resultMap>
+	
+	
+	<update id="SurveyExamDAO.insertSurveyExam" parameterClass="egovframework.admin.bbs.service.SurveyExam" >
+	   
+		MERGE INTO TB_SURVEY_EXAM
+		USING DUAL
+		ON (SURVEY_ID = #surveyId# AND QUEST_SEQ = #questSeq# AND EXAM_SEQ = #examSeq#)
+		WHEN MATCHED THEN
+			UPDATE   
+			   SET    GRP_EXP = #grpExp#
+			   		, EXAM_NM = #examNm#
+			   		, EXAM_EXP = #examExp#
+			   		, V_ORDER = #vOrder#
+			   		, UPD_DTTM = SYSDATE
+			   		<isEqual property="etcYn" compareValue="N" >
+				 	, ETC_YN = 'N'
+				 	</isEqual>
+				 	<isEqual property="etcYn" compareValue="Y" >
+				 	, ETC_YN = 'Y'
+				 	</isEqual>
+				 	<isEqual property="useYn" compareValue="N" >
+				 	, USE_YN = 'N'
+				 	</isEqual>
+				 	<isEqual property="useYn" compareValue="Y" >
+				 	, USE_YN = 'Y'
+				 	</isEqual>
+			 WHERE   SURVEY_ID = #surveyId#
+			   AND   QUEST_SEQ = #questSeq#
+			   AND   EXAM_SEQ = #examSeq#
+		WHEN NOT MATCHED THEN
+			INSERT 
+				(  SURVEY_ID
+				 , QUEST_SEQ
+				 , EXAM_SEQ
+				 , EXAM_NM
+				 , EXAM_EXP
+				 , GRP_EXP
+				 , V_ORDER
+				 <isEqual property="etcYn" compareValue="Y" >
+				 	, ETC_YN 
+				 </isEqual>
+				 <isEqual property="useYn" compareValue="N" >
+				 	, USE_YN 
+				 </isEqual>
+				) 
+			VALUES
+				(
+					  #surveyId#
+					, #questSeq#
+					, (SELECT NVL(MAX(EXAM_SEQ)+1,1) FROM TB_SURVEY_EXAM WHERE SURVEY_ID = #surveyId# AND QUEST_SEQ = #questSeq#)
+					, #examNm#
+					, #examExp#
+					, #grpExp#
+					, (SELECT NVL(MAX(V_ORDER)+1,1) FROM TB_SURVEY_EXAM WHERE SURVEY_ID = #surveyId# AND QUEST_SEQ = #questSeq#)
+					<isEqual property="etcYn" compareValue="Y">
+				   	   , 'Y'
+				   	</isEqual>
+					<isEqual property="useYn" compareValue="N">
+				   	   , 'N'
+				   	</isEqual>
+					
+				)	   
+	
+	</update>
+	
+	
+	
+	<update id="SurveyExamDAO.insertSurveyExamAuto" parameterClass="egovframework.admin.bbs.service.SurveyExam" >
+	
+			INSERT INTO TB_SURVEY_EXAM
+				(  SURVEY_ID
+				 , QUEST_SEQ
+				 , EXAM_SEQ
+				 , EXAM_NM
+				 , V_ORDER
+				 , EXAM_VAL
+				) 
+		   SELECT #surveyId#
+			     ,#questSeq#
+			     ,SEQ
+			     ,EXAM_NM
+			     ,RANK() OVER(ORDER BY SEQ)
+			     ,EXAM_VAL 
+		    FROM TV_SURVEY_EXAM_CD
+		   WHERE DITC_CD = #examCd#    
+	
+	</update>
+	
+	
+	<update id="SurveyExamDAO.deleteSurveyExamAuto" parameterClass="egovframework.admin.bbs.service.SurveyExam">
+		   DELETE FROM TB_SURVEY_EXAM
+		    WHERE SURVEY_ID = #surveyId#
+		      AND QUEST_SEQ = #questSeq#
+	</update>
+	
+	<select id="SurveyExamDAO.selectSurveyExamAutoCnt" parameterClass="egovframework.admin.bbs.service.SurveyExam" resultClass="java.lang.Integer">
+		SELECT COUNT(*) 
+		  FROM TB_SURVEY_EXAM
+		 WHERE SURVEY_ID = #surveyId#
+		   AND QUEST_SEQ = #questSeq#
+	</select>
+	
+	<select id="SurveyExamDAO.selectSurveyExamAll" parameterClass="egovframework.admin.bbs.service.SurveyExam" resultMap="SurveyExamList">
+		SELECT SURVEY_ID
+				, QUEST_SEQ
+				, EXAM_SEQ
+				, EXAM_NM
+				, EXAM_EXP
+				, ETC_YN
+				, USE_YN
+				, V_ORDER
+				, GRP_EXP
+		  FROM TB_SURVEY_EXAM
+		 WHERE 1=1
+		   AND SURVEY_ID = #surveyId#
+		   AND QUEST_SEQ = #questSeq#
+		 ORDER BY V_ORDER 
+	</select>
+	
+	<update id="SurveyExamDAO.deleteSurveyExam" parameterClass="egovframework.admin.bbs.service.SurveyExam">
+		DELETE FROM TB_SURVEY_EXAM
+		WHERE SURVEY_ID = #surveyId#
+		  AND QUEST_SEQ = #questSeq#
+		  AND EXAM_SEQ = #examSeq#
+	</update>
+	
+	
+	<select id="SurveyExamDAO.selectSurveyExamPop" parameterClass="egovframework.admin.bbs.service.SurveyExam" resultMap="SurveyExamPop" >
+		SELECT  A.SURVEY_ID
+		 		,A.QUEST_SEQ
+		 		,A.EXAM_SEQ
+		 		,A.GRP_EXP
+		 		,A.EXAM_NM
+		 		,A.EXAM_EXP
+		 		,A.ETC_YN
+		 		,B.QUEST_NO
+<!-- 		 		,B.EXAM_CD -->
+				,B.EXAM_CD
+		  FROM TB_SURVEY_EXAM A
+		 INNER JOIN TB_SURVEY_QUEST B
+			ON A.SURVEY_ID = B.SURVEY_ID
+		   AND A.QUEST_SEQ = B.QUEST_SEQ
+		   AND B.SURVEY_ID = #surveyId#	  
+		 WHERE A.SURVEY_ID = #surveyId#
+		 ORDER BY A.V_ORDER
+	</select>
+	
+	<select id="SurveyExamDAO.selectSurveyExamCdPop" parameterClass="egovframework.admin.bbs.service.SurveyExam" resultMap="SurveyExamCdPop">
+		 SELECT DITC_CD, SEQ, EXAM_VAL, EXAM_NM
+	       FROM TV_SURVEY_EXAM_CD
+	</select>
+	
+	
+	<select id="SurveyExamDAO.selectTvSurveyExamCd" parameterClass="egovframework.admin.bbs.service.SurveyExam" resultMap="TvSurveyExamCd">
+		   SELECT A.DITC_CD , A.SEQ, A.EXAM_VAL, A.EXAM_NM
+		     FROM (
+		     	SELECT DITC_CD,SEQ, EXAM_VAL,EXAM_NM , RANK() OVER(ORDER BY SEQ) AS NUM
+		     	  FROM TV_SURVEY_EXAM_CD
+		     	 WHERE DITC_CD = #examCd#
+		     	 )A
+		    WHERE NUM = #num#
+	</select>
+	
+	
+</sqlMap>

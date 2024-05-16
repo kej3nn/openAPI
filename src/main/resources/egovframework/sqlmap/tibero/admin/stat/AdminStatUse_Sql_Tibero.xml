@@ -1,0 +1,507 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="StatUse" >
+  <typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+	<resultMap id="StatCateUse" class="egovframework.admin.stat.service.StatUse" >
+		<result column="TOP_CATE_NM"        property="cateNmTop"                />
+		<result column="CATE_NM"        property="cateNm"                />
+	    <result column="CATE_ID"        property="cateId"                />
+		<result column="TOT_USE_CNT"        property="totUseCnt"                />
+   	    <result column="S_USE_CNT"        property="sUseCnt"                />
+	    <result column="C_USE_CNT"        property="cUseCnt"                />
+	    <result column="M_USE_CNT"        property="mUseCnt"                />
+	    <result column="F_USE_CNT"        property="fUseCnt"                />
+	    <result column="L_USE_CNT"        property="lUseCnt"                />
+	    <result column="A_USE_CNT"        property="aUseCnt"                />
+	    <result column="V_USE_CNT"        property="vUseCnt"                />
+	    <result column="EXCEL_CNT"        property="excelCnt"                />
+	    <result column="CSV_CNT"        property="csvCnt"                />
+	    <result column="JSON_CNT"        property="jsonCnt"                />
+	    <result column="XML_CNT"        property="xmlCnt"                />
+	    <result column="TXT_CNT"        property="txtCnt"                />
+	    <result column="FILE_USE_CNT"        property="fileUseCnt"                />
+	    <result column="LINK_USE_CNT"        property="linkUseCnt"                />
+	    <result column="API_USE_CNT"        property="apiUseCnt"                />
+	    <result column="APIS_USE_CNT"        property="apisUseCnt"                />
+
+    </resultMap>
+    
+    <resultMap id="StatOrgUse" class="egovframework.admin.stat.service.StatUse" >
+		<result column="ORG_NM"        property="orgNm"                />
+	    <result column="ORG_CD"        property="orgCd"                />
+		<result column="TOT_USE_CNT"        property="totUseCnt"                />
+   	    <result column="S_USE_CNT"        property="sUseCnt"                />
+	    <result column="C_USE_CNT"        property="cUseCnt"                />
+	    <result column="M_USE_CNT"        property="mUseCnt"                />
+	    <result column="F_USE_CNT"        property="fUseCnt"                />
+	    <result column="L_USE_CNT"        property="lUseCnt"                />
+	    <result column="A_USE_CNT"        property="aUseCnt"                />
+	    <result column="V_USE_CNT"        property="vUseCnt"                />
+	    <result column="EXCEL_CNT"        property="excelCnt"                />
+	    <result column="CSV_CNT"        property="csvCnt"                />
+	    <result column="JSON_CNT"        property="jsonCnt"                />
+	    <result column="XML_CNT"        property="xmlCnt"                />
+	    <result column="TXT_CNT"        property="txtCnt"                />
+	    
+	    <result column="FILE_USE_CNT"        property="fileUseCnt"                />
+	    <result column="LINK_USE_CNT"        property="linkUseCnt"                />
+	    <result column="API_USE_CNT"        property="apiUseCnt"                />
+	    <result column="APIS_USE_CNT"        property="apisUseCnt"                />
+    </resultMap>
+    
+   <!--  <resultMap id="StatDtUse" class="egovframework.admin.stat.service.StatUse" >
+		<result column="DT_NM"        property="dtNm"                />
+	    <result column="DT_ID"        property="dtId"                />
+		<result column="TOT_USE_CNT"        property="totUseCnt"                />
+   	   <result column="S_USE_CNT"        property="sUseCnt"                />
+	    <result column="C_USE_CNT"        property="cUseCnt"                />
+	    <result column="M_USE_CNT"        property="mUseCnt"                />
+	    <result column="F_USE_CNT"        property="fUseCnt"                />
+	    <result column="L_USE_CNT"        property="lUseCnt"                />
+	    <result column="A_USE_CNT"        property="aUseCnt"                />
+	    <result column="V_USE_CNT"        property="vUseCnt"                />
+	    <result column="EXCEL_CNT"        property="excelCnt"                />
+	    <result column="CSV_CNT"        property="csvCnt"                />
+	    <result column="JSON_CNT"        property="jsonCnt"                />
+	    <result column="XML_CNT"        property="xmlCnt"                />
+	    <result column="TXT_CNT"        property="txtCnt"                />
+	    <result column="FILE_USE_CNT"        property="fileUseCnt"                />
+	    <result column="LINK_USE_CNT"        property="linkUseCnt"                />
+	    <result column="API_USE_CNT"        property="apiUseCnt"                />
+	    <result column="APIS_USE_CNT"        property="apisUseCnt"                />
+	    <result column="CATALOG_USE_CNT"        property="catalogUseCnt"                />
+	    <result column="VISUAL_USE_CNT"        property="visualUseCnt"                />
+    </resultMap> -->
+    
+    <resultMap id="seriesResult" class="egovframework.admin.stat.service.StatUse" >
+		<result column="COLUMN_NM"        property="columnNm"                />
+		<!-- <result column="ENG_COLUMN_NM"        property="columnNmEng"                /> -->
+    </resultMap> 
+    
+    <!-- 활용 현황 Chart형 자료에서 시리즈 목록 조회 ==> 대표적으로 TB_STAT_USE_CATE에서 뽑음(어차피 다른 테이블도 컬럼명은 같음) -->
+	<select id="StatUseDao.getUseSeriesResult" parameterClass="egovframework.admin.stat.service.StatUse"  resultMap="seriesResult" remapResults="true">
+	<!-- COLUMN_NM만 조회 -->
+	SELECT B.COMMENTS COLUMN_NM
+		FROM DBA_TAB_COLUMNS A, DBA_COL_COMMENTS B
+		WHERE A.OWNER = B.OWNER
+		AND A.TABLE_NAME = B.TABLE_NAME
+		AND A.COLUMN_NAME = B.COLUMN_NAME
+		AND A.TABLE_NAME = 'TB_STAT_USE' AND B.TABLE_NAME = 'TB_STAT_USE'
+		AND A.COLUMN_NAME LIKE '%CNT'
+		AND B.COMMENTS NOT IN('시계열사용수')
+	
+	<!-- ENG_COLUMN_NM만 조회 -->
+	<!-- 	SELECT 
+	A.COLUMN_NAME ENG_COLUMN_NM
+	FROM DBA_TAB_COLUMNS A, DBA_COL_COMMENTS B
+	WHERE A.OWNER = B.OWNER
+	AND A.TABLE_NAME = B.TABLE_NAME
+	AND A.COLUMN_NAME = B.COLUMN_NAME
+	AND A.TABLE_NAME = 'TB_STAT_USE_CATE' AND B.TABLE_NAME = 'TB_STAT_USE_CATE'
+	AND A.COLUMN_NAME LIKE '%CNT' -->
+		
+	<!-- 컬럼명,컬럼 코멘트 함께 조회 -->
+	<!--SELECT B.COMMENTS COLUMN_NM,
+	A.COLUMN_NAME ENG_COLUMN_NM
+	FROM DBA_TAB_COLUMNS A, DBA_COL_COMMENTS B
+	WHERE A.OWNER = B.OWNER
+	AND A.TABLE_NAME = B.TABLE_NAME
+	AND A.COLUMN_NAME = B.COLUMN_NAME
+	AND A.TABLE_NAME = 'TB_STAT_USE_CATE' AND B.TABLE_NAME = 'TB_STAT_USE_CATE'
+	AND A.COLUMN_NAME LIKE '%CNT' -->
+	</select>
+    
+    
+    <!-- 분류별 활용 현황에서 Sheet형 데이터 조회 -->
+	<select id="StatUseDao.getUseStatCateSheetAll" parameterClass="egovframework.admin.stat.service.StatUse" resultMap="StatCateUse">
+		SELECT (SELECT CATE_NM FROM TB_OPEN_CATE WHERE CATE_ID = B.TOP_CATE_ID) TOP_CATE_NM
+			  ,B.CATE_NM
+		  	  ,A.CATE_ID
+			  ,SUM(A.TOT_USE_CNT) TOT_USE_CNT 
+			  ,SUM(A.S_USE_CNT) S_USE_CNT
+		  	  ,SUM(A.C_USE_CNT) C_USE_CNT
+		  	  ,SUM(A.M_USE_CNT) M_USE_CNT
+		  	  ,SUM(A.F_USE_CNT) F_USE_CNT
+		  	  ,SUM(A.L_USE_CNT) L_USE_CNT
+		  	  ,SUM(A.A_USE_CNT) A_USE_CNT
+		  	  ,SUM(A.V_USE_CNT) V_USE_CNT
+		  	  ,SUM(A.EXCEL_CNT) EXCEL_CNT
+		  	  ,SUM(A.CSV_CNT) CSV_CNT
+		  	  ,SUM(A.JSON_CNT) JSON_CNT
+		  	  ,SUM(A.XML_CNT) XML_CNT
+		  	  ,SUM(A.TXT_CNT) TXT_CNT
+		  	  ,SUM(A.FILE_USE_CNT) FILE_USE_CNT
+		  	  ,SUM(A.LINK_USE_CNT) LINK_USE_CNT
+		  	  ,SUM(A.API_USE_CNT) API_USE_CNT
+		  	  ,SUM(A.APIS_USE_CNT) APIS_USE_CNT
+		FROM TB_STAT_USE A
+			,TB_OPEN_CATE B
+		WHERE A.CATE_ID= B.CATE_ID
+		AND A.YYYYMMDD BETWEEN #pubDttmFrom:VARCHAR# AND #pubDttmTo:VARCHAR#
+		GROUP BY B.CATE_NM,A.CATE_ID,B.TOP_CATE_ID
+		ORDER BY
+			TOP_CATE_NM, B.CATE_NM
+	</select>
+	
+
+	<!-- 분류별 활용 현황 Chart형 자료에서 X축 데이터 조회 -->
+	<select id="StatUseDao.getCateChartDataX" parameterClass="egovframework.admin.stat.service.StatUse"  resultClass="java.util.LinkedHashMap" remapResults="true">
+		SELECT DISTINCT
+			(SELECT CATE_NM FROM TB_OPEN_CATE WHERE CATE_ID = B.TOP_CATE_ID) TOP_CATE_NM
+		FROM TB_STAT_OPEN A
+			,TB_OPEN_CATE B
+		WHERE A.CATE_ID= B.CATE_ID
+		GROUP BY B.CATE_NM,A.CATE_ID,B.TOP_CATE_ID
+		ORDER BY
+			TOP_CATE_NM
+	</select>
+	
+	
+	<!-- 분류별 활용 현황 Chart형 자료에서 Y축 데이터 조회 -->
+	<select id="StatUseDao.getCateChartDataY" parameterClass="egovframework.admin.stat.service.StatUse"  resultClass="java.util.LinkedHashMap" remapResults="true">
+		SELECT
+			SUM(C.S_USE_CNT) S_USE_CNT
+		  	,SUM(C.C_USE_CNT) C_USE_CNT
+		  	,SUM(C.M_USE_CNT) M_USE_CNT
+		  	,SUM(C.F_USE_CNT) F_USE_CNT
+		  	,SUM(C.L_USE_CNT) L_USE_CNT
+		  	,SUM(C.A_USE_CNT) A_USE_CNT
+		  	,SUM(C.V_USE_CNT) V_USE_CNT
+		  	,SUM(C.EXCEL_CNT) EXCEL_CNT
+		  	,SUM(C.CSV_CNT) CSV_CNT
+		  	,SUM(C.JSON_CNT) JSON_CNT
+		  	,SUM(C.XML_CNT) XML_CNT
+		  	,SUM(C.TXT_CNT) TXT_CNT
+		  	,SUM(C.FILE_USE_CNT) FILE_USE_CNT
+		  	,SUM(C.LINK_USE_CNT) LINK_USE_CNT
+		  	,SUM(C.API_USE_CNT) API_USE_CNT
+		  	,SUM(C.APIS_USE_CNT) APIS_USE_CNT
+		FROM (
+			SELECT	  
+					(SELECT CATE_NM FROM TB_OPEN_CATE WHERE CATE_ID = B.TOP_CATE_ID) TOP_CATE_NM
+						,B.TOP_CATE_ID
+					  ,SUM(A.S_USE_CNT) S_USE_CNT
+				  	  ,SUM(A.C_USE_CNT) C_USE_CNT
+				  	  ,SUM(A.M_USE_CNT) M_USE_CNT
+				  	  ,SUM(A.F_USE_CNT) F_USE_CNT
+				  	  ,SUM(A.L_USE_CNT) L_USE_CNT
+				  	  ,SUM(A.A_USE_CNT) A_USE_CNT
+				  	  ,SUM(A.V_USE_CNT) V_USE_CNT
+				  	  ,SUM(A.EXCEL_CNT) EXCEL_CNT
+				  	  ,SUM(A.CSV_CNT) CSV_CNT
+				  	  ,SUM(A.JSON_CNT) JSON_CNT
+				  	  ,SUM(A.XML_CNT) XML_CNT
+				  	  ,SUM(A.TXT_CNT) TXT_CNT
+				  	  ,SUM(A.FILE_USE_CNT) FILE_USE_CNT
+				  	  ,SUM(A.LINK_USE_CNT) LINK_USE_CNT
+				  	  ,SUM(A.API_USE_CNT) API_USE_CNT
+				  	  ,SUM(A.APIS_USE_CNT) APIS_USE_CNT
+				FROM TB_STAT_USE A
+					,TB_OPEN_CATE B
+				WHERE A.CATE_ID= B.CATE_ID
+				AND A.YYYYMMDD BETWEEN #pubDttmFrom:VARCHAR# AND #pubDttmTo:VARCHAR#
+				GROUP BY B.CATE_NM,A.CATE_ID,B.TOP_CATE_ID
+			) C
+		GROUP BY
+			C.TOP_CATE_ID, TOP_CATE_NM
+		ORDER BY
+			TOP_CATE_NM
+	</select>
+	
+	
+	
+    <!-- 기관별 활용 현황에서 Sheet형 데이터 조회 -->
+	<select id="StatUseDao.getUseStatOrgSheetAll" parameterClass="egovframework.admin.stat.service.StatUse" resultMap="StatOrgUse">
+		SELECT B.ORG_NM
+		  	  ,A.ORG_CD
+			  ,SUM(A.TOT_USE_CNT) TOT_USE_CNT 
+			  ,SUM(A.S_USE_CNT) S_USE_CNT
+		  	  ,SUM(A.C_USE_CNT) C_USE_CNT
+		  	  ,SUM(A.M_USE_CNT) M_USE_CNT
+		  	  ,SUM(A.F_USE_CNT) F_USE_CNT
+		  	  ,SUM(A.L_USE_CNT) L_USE_CNT
+		  	  ,SUM(A.A_USE_CNT) A_USE_CNT
+		  	  ,SUM(A.V_USE_CNT) V_USE_CNT
+		  	  ,SUM(A.EXCEL_CNT) EXCEL_CNT
+		  	  ,SUM(A.CSV_CNT) CSV_CNT
+		  	  ,SUM(A.JSON_CNT) JSON_CNT
+		  	  ,SUM(A.XML_CNT) XML_CNT
+		  	  ,SUM(A.TXT_CNT) TXT_CNT
+		  	  ,SUM(A.FILE_USE_CNT) FILE_USE_CNT
+		  	  ,SUM(A.LINK_USE_CNT) LINK_USE_CNT
+		  	  ,SUM(A.API_USE_CNT) API_USE_CNT
+		  	  ,SUM(A.APIS_USE_CNT) APIS_USE_CNT
+		  	  <!-- 
+		  	  ,SUM(A.CATALOG_USE_CNT) CATALOG_USE_CNT
+		  	  ,SUM(A.VISUAL_USE_CNT) VISUAL_USE_CNT -->
+		FROM TB_STAT_USE A
+			,TB_COMM_ORG B
+		WHERE A.ORG_CD= B.ORG_CD
+		AND A.YYYYMMDD BETWEEN #pubDttmFrom:VARCHAR# AND #pubDttmTo:VARCHAR#
+		GROUP BY B.ORG_NM,A.ORG_CD
+	</select>
+	
+
+	<!-- 기관별 활용 현황 Chart형 자료에서 X축 데이터 조회 -->
+	<select id="StatUseDao.getOrgChartDataX" parameterClass="egovframework.admin.stat.service.StatUse"  resultClass="java.util.LinkedHashMap" remapResults="true">
+	SELECT B.ORG_NM
+		FROM TB_STAT_USE A
+			,TB_COMM_ORG B
+		WHERE A.ORG_CD= B.ORG_CD
+		<!-- AND B.ORG_LVL = 1 -->
+		GROUP BY B.ORG_NM,A.ORG_CD
+	</select>
+	
+	
+	<!-- 기관별 활용 현황 Chart형 자료에서 Y축 데이터 조회 -->
+	<select id="StatUseDao.getOrgChartDataY" parameterClass="egovframework.admin.stat.service.StatUse"  resultClass="java.util.LinkedHashMap" remapResults="true">
+	SELECT	   SUM(A.TOT_USE_CNT) TOT_USE_CNT 
+			  ,SUM(A.S_USE_CNT) S_USE_CNT
+		  	  ,SUM(A.C_USE_CNT) C_USE_CNT
+		  	  ,SUM(A.M_USE_CNT) M_USE_CNT
+		  	  ,SUM(A.F_USE_CNT) F_USE_CNT
+		  	  ,SUM(A.L_USE_CNT) L_USE_CNT
+		  	  ,SUM(A.A_USE_CNT) A_USE_CNT
+		  	  ,SUM(A.V_USE_CNT) V_USE_CNT
+		  	  ,SUM(A.EXCEL_CNT) EXCEL_CNT
+		  	  ,SUM(A.CSV_CNT) CSV_CNT
+		  	  ,SUM(A.JSON_CNT) JSON_CNT
+		  	  ,SUM(A.XML_CNT) XML_CNT
+		  	  ,SUM(A.TXT_CNT) TXT_CNT
+		  	  ,SUM(A.FILE_USE_CNT) FILE_USE_CNT
+		  	  ,SUM(A.LINK_USE_CNT) LINK_USE_CNT
+		  	  ,SUM(A.API_USE_CNT) API_USE_CNT
+		  	  ,SUM(A.APIS_USE_CNT) APIS_USE_CNT
+		  	  <!-- 
+		  	  ,SUM(A.CATALOG_USE_CNT) CATALOG_USE_CNT
+		  	  ,SUM(A.VISUAL_USE_CNT) VISUAL_USE_CNT -->
+		FROM TB_STAT_USE A
+			,TB_COMM_ORG B
+		WHERE A.ORG_CD= B.ORG_CD
+		AND A.YYYYMMDD BETWEEN #pubDttmFrom:VARCHAR# AND #pubDttmTo:VARCHAR#
+		GROUP BY B.ORG_NM,A.ORG_CD
+	</select>
+	
+	<select id="StatUseDao.getUseStatDatasetSheetAll" parameterClass="egovframework.admin.stat.service.StatUse" resultClass="java.util.HashMap">
+		SELECT
+		  	A.INF_ID "infId"
+			, (SELECT CATE_NM FROM TB_OPEN_CATE WHERE CATE_ID = C.TOP_CATE_ID) "cateNmTop"
+			, C.CATE_NM "cateNm"
+			, B.INF_NM "infNm"
+			, SUM(TOT_USE_CNT) "totUseCnt"
+			, SUM(S_USE_CNT + C_USE_CNT + M_USE_CNT + F_USE_CNT + L_USE_CNT + A_USE_CNT + V_USE_CNT) "totViewCnt"
+			, SUM(S_USE_CNT) "sUseCnt"
+			, SUM(C_USE_CNT) "cUseCnt"
+			, SUM(M_USE_CNT) "mUseCnt"
+			, SUM(F_USE_CNT) "fUseCnt"
+			, SUM(L_USE_CNT) "lUseCnt"
+			, SUM(A_USE_CNT) "aUseCnt"
+			, SUM(V_USE_CNT) "vUseCnt"
+			, SUM(EXCEL_CNT + CSV_CNT + JSON_CNT + XML_CNT + TXT_CNT) "totDownCnt"
+			, SUM(EXCEL_CNT) "excelCnt"
+			, SUM(CSV_CNT) "csvCnt"
+			, SUM(JSON_CNT) "jsonCnt"
+			, SUM(XML_CNT) "xmlCnt"
+			, SUM(TXT_CNT) "txtCnt"
+			, SUM(FILE_USE_CNT) "fileUseCnt"
+			, SUM(LINK_USE_CNT) "linkUseCnt"
+			, SUM(API_USE_CNT) "apiUseCnt"
+			, SUM(APIS_USE_CNT) "apisUseCnt"
+		FROM
+			TB_STAT_USE A
+			, TB_OPEN_INF B
+			, TB_OPEN_CATE C
+		WHERE
+			A.INF_ID = B.INF_ID
+			AND B.CATE_ID = C.CATE_ID
+			AND A.YYYYMMDD BETWEEN #pubDttmFrom:VARCHAR# AND #pubDttmTo:VARCHAR#
+			<isNotEmpty property="infNm">
+			AND UPPER(B.INF_NM) LIKE '%' || UPPER(#infNm#) || '%'
+			</isNotEmpty>
+			<isNotEmpty property="cateId">
+			AND C.TOP_CATE_ID = #cateId#
+			</isNotEmpty>
+		GROUP BY
+			B.INF_NM
+			, A.INF_ID	
+			, C.CATE_NM
+			, C.TOP_CATE_ID
+		ORDER BY
+			5 DESC
+	</select>
+	
+		<select id="StatUseDao.getUseStatDatasetSheetCnt"  parameterClass="egovframework.admin.stat.service.StatUse"  resultClass="java.util.LinkedHashMap" remapResults="true">
+		SELECT
+		  	MAX(A.INF_ID) "infId"
+			, C.CATE_NM "cateNm"
+			, MAX(B.INF_NM) "infNm"
+			, SUM(TOT_USE_CNT) "totUseCnt"
+			, SUM(S_USE_CNT + C_USE_CNT + M_USE_CNT + F_USE_CNT + L_USE_CNT + A_USE_CNT + V_USE_CNT) "totViewCnt"
+			, SUM(S_USE_CNT) "sUseCnt"
+			, SUM(C_USE_CNT) "cUseCnt"
+			, SUM(M_USE_CNT) "mUseCnt"
+			, SUM(F_USE_CNT) "fUseCnt"
+			, SUM(L_USE_CNT) "lUseCnt"
+			, SUM(A_USE_CNT) "aUseCnt"
+			, SUM(V_USE_CNT) "vUseCnt"
+			, SUM(EXCEL_CNT + CSV_CNT + JSON_CNT + XML_CNT + TXT_CNT) "totDownCnt"
+			, SUM(EXCEL_CNT) "excelCnt"
+			, SUM(CSV_CNT) "csvCnt"
+			, SUM(JSON_CNT) "jsonCnt"
+			, SUM(XML_CNT) "xmlCnt"
+			, SUM(TXT_CNT) "txtCnt"
+			, SUM(FILE_USE_CNT) "fileUseCnt"
+			, SUM(LINK_USE_CNT) "linkUseCnt"
+			, SUM(API_USE_CNT) "apiUseCnt"
+			, SUM(APIS_USE_CNT) "apisUseCnt"
+		FROM
+			TB_STAT_USE A
+			, TB_OPEN_INF B
+			, TB_OPEN_CATE C
+		WHERE
+			A.INF_ID = B.INF_ID
+			AND B.CATE_ID = C.CATE_ID
+			AND A.YYYYMMDD BETWEEN #pubDttmFrom:VARCHAR# AND #pubDttmTo:VARCHAR#
+			<isNotEmpty property="infNm">
+			AND UPPER(B.INF_NM) LIKE '%' || UPPER(#infNm#) || '%'
+			</isNotEmpty>
+			<isNotEmpty property="cateId">
+			AND C.TOP_CATE_ID = #cateId#
+			</isNotEmpty>
+		GROUP BY
+			C.CATE_NM
+		ORDER BY
+			5 DESC
+	</select>
+	
+	
+	
+	<select id="StatUseDao.getActKeySheetAll" parameterClass="egovframework.admin.stat.service.StatUse" resultClass="java.util.HashMap">
+		SELECT  DECODE(C.CONT_SITE_CD, '01', '네이버', '02', '다음', '03', '카카오톡', '04', '구글', '05', '페이스북' ,'06', '트위터', '') AS "siteNm"
+                     ,C.USER_NM "userNm"
+                     ,B.ACT_KEY "actKey"
+                     ,A.API_RES_P "apiResP"
+                     ,D.INF_NM "infnm"
+                     ,A.DN_TYPE "dnType"
+                     ,A.REQ_CNT "reqCnt"
+                     ,A.ROW_CNT "rowCnt"
+                     ,A.LEADTIME "lendtime"
+                     ,TO_CHAR(A.REG_DTTM, 'YYYYMMDD HH24' || ':' || 'MI' || ':' || 'SS') AS "regDttm"
+           FROM   TB_LOG_OPEN_INF_A A
+                     INNER JOIN       TB_USER_KEY B
+                                ON       A.USER_CD = B.USER_CD
+                                AND     A.KEY_SEQ = B.KEY_SEQ
+                     INNER JOIN       TB_USER C
+                                ON       A.USER_CD = C.USER_CD
+                     INNER JOIN       TB_OPEN_INF D
+                                ON       A.INF_ID = D.INF_ID
+		WHERE 1=1  
+		<![CDATA[
+		AND A.REG_DTTM >= TO_DATE('20150923', 'YYYYMMDD')
+		AND A.REG_DTTM >= TO_DATE(#pubDttmFrom:VARCHAR#, 'YYYYMMDD')
+		AND A.REG_DTTM < TO_DATE(#pubDttmTo:VARCHAR#, 'YYYYMMDD') + 1
+		]]>
+		<isNotEmpty property="infNm">
+		AND UPPER(D.INF_NM) LIKE '%' || UPPER(#infNm#) || '%'
+		</isNotEmpty>
+		ORDER BY A.REG_DTTM DESC	
+	</select>
+	
+	 <!-- 보유데이터별 활용 현황에서 Sheet형 데이터 조회 언젠가는 쓰겟지.....-->
+<!-- 	<select id="StatUseDao.getUseStatDtSheetAll" parameterClass="egovframework.admin.stat.service.StatUse" resultMap="StatDtUse"> -->
+<!-- 		SELECT        B.INF_NM -->
+<!-- 		  	  ,A.INF_ID -->
+<!-- 			  ,SUM(A.TOT_USE_CNT) TOT_USE_CNT  -->
+<!-- 			  ,SUM(A.S_USE_CNT) S_USE_CNT -->
+<!-- 		  	  ,SUM(A.C_USE_CNT) C_USE_CNT -->
+<!-- 		  	  ,SUM(A.M_USE_CNT) M_USE_CNT -->
+<!-- 		  	  ,SUM(A.F_USE_CNT) F_USE_CNT -->
+<!-- 		  	  ,SUM(A.L_USE_CNT) L_USE_CNT -->
+<!-- 		  	  ,SUM(A.A_USE_CNT) A_USE_CNT -->
+<!-- 		  	  ,SUM(A.V_USE_CNT) V_USE_CNT -->
+<!-- 		  	  ,SUM(A.EXCEL_CNT) EXCEL_CNT -->
+<!-- 		  	  ,SUM(A.CSV_CNT) CSV_CNT -->
+<!-- 		  	  ,SUM(A.JSON_CNT) JSON_CNT -->
+<!-- 		  	  ,SUM(A.XML_CNT) XML_CNT -->
+<!-- 		  	  ,SUM(A.TXT_CNT) TXT_CNT -->
+<!-- 		  	  ,SUM(A.FILE_USE_CNT) FILE_USE_CNT -->
+<!-- 		  	  ,SUM(A.LINK_USE_CNT) LINK_USE_CNT -->
+<!-- 		  	  ,SUM(A.API_USE_CNT) API_USE_CNT -->
+<!-- 		  	  ,SUM(A.APIS_USE_CNT) APIS_USE_CNT -->
+<!-- 		  	  ,SUM(A.CATALOG_USE_CNT) CATALOG_USE_CNT -->
+<!-- 		  	  ,SUM(A.VISUAL_USE_CNT) VISUAL_USE_CNT -->
+<!-- 		FROM TB_STAT_USE A -->
+<!-- 			,TB_OPEN_INF B -->
+<!-- 		WHERE A.INF_ID= B.INF_ID -->
+<!-- 		AND A.YYYYMMDD BETWEEN #pubDttmFrom# AND #pubDttmTo# -->
+<!-- 		GROUP BY B.INF_NM, A.INF_ID -->
+<!-- 	</select> -->
+	
+
+<!-- 	보유데이터별 활용 현황 Chart형 자료에서 X축 데이터 조회  -->
+	<select id="StatUseDao.getDtChartDataX" parameterClass="egovframework.admin.stat.service.StatUse"  resultClass="java.util.LinkedHashMap" remapResults="true">
+	SELECT C.CATE_NM
+		FROM
+			TB_STAT_USE A
+			, TB_OPEN_INF B
+			, TB_OPEN_CATE C
+		WHERE
+			A.INF_ID = B.INF_ID
+			AND B.CATE_ID = C.CATE_ID
+			AND A.YYYYMMDD BETWEEN #pubDttmFrom:VARCHAR# AND #pubDttmTo:VARCHAR#
+			<isNotEmpty property="infNm">
+			AND UPPER(B.INF_NM) LIKE '%' || UPPER(#infNm#) || '%'
+			</isNotEmpty>
+			<isNotEmpty property="cateId">
+			AND C.TOP_CATE_ID = #cateId#
+			</isNotEmpty>
+		GROUP BY C.CATE_NM
+		ORDER BY C.CATE_NM
+	</select>
+	
+	
+<!--  	보유데이터별 활용 현황 Chart형 자료에서 Y축 데이터 조회  -->
+	<select id="StatUseDao.getDtChartDataY" parameterClass="egovframework.admin.stat.service.StatUse"  resultClass="java.util.LinkedHashMap" remapResults="true">
+	SELECT	   SUM(A.TOT_USE_CNT) TOT_USE_CNT 
+			  ,SUM(A.S_USE_CNT) S_USE_CNT
+		  	  ,SUM(A.C_USE_CNT) C_USE_CNT
+		  	  ,SUM(A.M_USE_CNT) M_USE_CNT
+		  	  ,SUM(A.F_USE_CNT) F_USE_CNT
+		  	  ,SUM(A.L_USE_CNT) L_USE_CNT
+		  	  ,SUM(A.A_USE_CNT) A_USE_CNT
+		  	  ,SUM(A.V_USE_CNT) V_USE_CNT
+		  	  ,SUM(A.EXCEL_CNT) EXCEL_CNT
+		  	  ,SUM(A.CSV_CNT) CSV_CNT
+		  	  ,SUM(A.JSON_CNT) JSON_CNT
+		  	  ,SUM(A.XML_CNT) XML_CNT
+		  	  ,SUM(A.TXT_CNT) TXT_CNT
+		  	  ,SUM(A.FILE_USE_CNT) FILE_USE_CNT
+		  	  ,SUM(A.LINK_USE_CNT) LINK_USE_CNT
+		  	  ,SUM(A.API_USE_CNT) API_USE_CNT
+		  	  ,SUM(A.APIS_USE_CNT) APIS_USE_CNT
+		  	  ,SUM(A.C_USE_CNT) CATALOG_USE_CNT
+		  	  ,SUM(A.V_USE_CNT) VISUAL_USE_CNT
+		FROM
+			TB_STAT_USE A
+			, TB_OPEN_INF B
+			, TB_OPEN_CATE C
+		WHERE
+			A.INF_ID = B.INF_ID
+			AND B.CATE_ID = C.CATE_ID
+			AND A.YYYYMMDD BETWEEN #pubDttmFrom:VARCHAR# AND #pubDttmTo:VARCHAR#
+			<isNotEmpty property="infNm">
+			AND UPPER(B.INF_NM) LIKE '%' || UPPER(#infNm#) || '%'
+			</isNotEmpty>
+			<isNotEmpty property="cateId">
+			AND C.TOP_CATE_ID = #cateId#
+			</isNotEmpty>
+		GROUP BY C.CATE_NM
+		ORDER BY C.CATE_NM
+<!-- 		GROUP BY -->
+<!-- 			B.INF_NM -->
+<!-- 			, A.INF_ID	 -->
+<!-- 			, C.CATE_NM -->
+<!-- 			, C.TOP_CATE_ID -->
+	</select>
+	
+</sqlMap>

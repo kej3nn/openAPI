@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- @(#)AdminNaCmps_Sql_Tibero.xml 1.0 2019/07/29                       -->
+<!--                                                                         -->
+<!-- COPYRIGHT (C) 2013 WISEITECH CO., LTD. ALL RIGHTS RESERVED.             -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- 관리자 정보카달로그 관리 SQL 파일이다.	                                  -->
+<!--                                                                         -->
+<!-- @author                                                        	-->
+<!-- @version 1.0 2019/07/29                                                -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<sqlMap namespace="NaCmps">
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Type Alias                                                          -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+     <!-- 메인리스트 쿼리 -->
+    <sql id="NaCmpsDao.main">
+    	SELECT A.INFO_ID  			    AS "infoId"
+			   , A.INFO_NM  			AS "infoNm"
+			   , A.ORG_CD  		 	    AS "orgCd"
+			   , A.CATE_ID              AS "cateId"
+			   , (SELECT CATE_NM FROM TB_NA_CATE B WHERE B.CATE_ID = A.CATE_ID) AS "cateNm"
+			   , A.ORG_CD               AS "orgCd"
+			   , (SELECT ORG_NM FROM TB_COMM_ORG B WHERE B.ORG_CD = A.ORG_CD)   AS "orgNm"
+			   , A.SRV_INFO_CD          AS "srvInfoCd"
+			   , (SELECT DITC_NM FROM TB_COMM_CODE WHERE GRP_CD = 'A8011' AND DITC_CD = SRV_INFO_CD) "srvInfoNm"
+			   , A.INFO_SMRY_EXP      	AS "infoSmryExp"
+			   , A.SRC_SYS_CD           AS "srcSysCd" 
+			   , (SELECT DITC_NM FROM TB_COMM_CODE WHERE GRP_CD = 'A8010' AND DITC_CD = SRC_SYS_CD) "srcSysNm"
+			   , A.MENU_FULLNM          AS "menuFullnm"
+			   , A.SRC_URL  			AS "srcUrl"
+			   , A.TMNL_IMG_FILE  	    AS "tmnlImgFile"
+			   , A.V_ORDER  			AS "vOrder"
+			   , A.VIEW_CNT  		    AS "viewCnt"
+			   , A.USE_YN  			    AS "useYn"
+			   , A.REG_ID  			    AS "regId"
+			   , A.REG_DTTM  		    AS "regDttm"
+			   , A.UPD_ID  			    AS "updId"
+			   , A.UPD_DTTM  		    AS "updDttm"
+			   , A.VIEW_YN  		    AS "viewYn"
+		  FROM TB_NA_CMPS A
+    </sql>
+   
+    <sql id="NaCmpsDao.main.where">
+		WHERE 1=1
+		<isNotEmpty property="accCd">
+			<isNotEqual property="accCd" compareValue="SYS">
+					<isEmpty property="SysInpGbn">
+						AND	A.USR_CD = #inpUsrCd:NUMERIC#
+					</isEmpty>
+					<isNotEmpty property="SysInpGbn">
+						<isEqual property="SysInpGbn" compareValue="ORG">
+							AND A.ORG_CD = #inpOrgCd:VARCHAR# 
+						</isEqual>
+						<isEqual property="SysInpGbn" compareValue="USR">
+							AND	A.USR_CD = #inpUsrCd:NUMERIC#	
+						</isEqual>
+					</isNotEmpty>	
+			</isNotEqual>
+		</isNotEmpty>
+		<isNotEmpty property="useYn" prepend="AND">
+	    	A.USE_YN = #useYn#
+	    </isNotEmpty>
+		<isNotEmpty property="viewYn" prepend="AND">
+	    	A.VIEW_YN = #viewYn#
+	    </isNotEmpty>
+		<isNotEmpty property="searchVal">			 
+			<isEqual property="searchGubun" compareValue="INFO_NM" >
+				AND A.INFO_NM LIKE '%'||#searchVal#||'%'
+			</isEqual>
+		
+			<isEqual property="searchGubun" compareValue="INFO_ID" >
+				AND  A.INFO_ID LIKE '%'||#searchVal#||'%'
+			</isEqual>
+		</isNotEmpty>
+	   	<isNotEmpty property="iterCateId" prepend="AND">
+		   	  A.CATE_ID IN
+	   		<iterate property="iterCateId" open="(" close=")" conjunction=", ">
+          		#iterCateId[]:VARCHAR#
+          	</iterate>
+        </isNotEmpty>
+        <isNotEmpty property="srvInfoCd" prepend="AND">
+	   	  A.SRV_INFO_CD = #srvInfoCd:VARCHAR#
+        </isNotEmpty>
+        <isNotEmpty property="orgCd" prepend="AND">
+	   	  A.ORG_CD = #orgCd:VARCHAR#
+        </isNotEmpty>
+    </sql>
+  
+ 	<!-- 메인 리스트 조회 -->
+  	<select id="NaCmpsDao.selectNaCmpsList" parameterClass="params" resultClass="record">
+  		/* sql id : NaCmpsDao.selectNaCmpsList */
+  		<isEqual property="paging" compareValue="0">
+		SELECT AA.* 
+		FROM   (SELECT ROWNUM AS ROW_NUM, AA.*
+				FROM   (  
+		</isEqual>
+			<include refid="NaCmpsDao.main"></include>
+			<include refid="NaCmpsDao.main.where"></include>
+			ORDER BY
+			    A.V_ORDER
+		<isEqual property="paging" compareValue="0">
+		<![CDATA[
+				) AA
+			WHERE ROWNUM <= #end:NUMERIC#
+			) AA
+		WHERE AA.ROW_NUM >= #start:NUMERIC#
+		]]>
+		</isEqual> 
+  	</select>
+  	<select id="NaCmpsDao.selectNaCmpsListCount" parameterClass="params" resultClass="int">
+  		/* sql id : NaCmpsDao.selectNaCmpsListCount */
+		SELECT COUNT(*)
+		FROM   TB_NA_CMPS A
+		<include refid="NaCmpsDao.main.where"></include>
+  	</select>
+  	
+  	<!-- 정보카달로그 ID 중복체크 -->
+    <select id="NaCmpsDao.selectNaCmpsDupChk" parameterClass="params" resultClass="record">
+    	/* sql id : NaCmpsDao.selectNaCmpsDupChk */
+		SELECT COUNT(*) AS "dupCnt"
+		FROM   TB_NA_CMPS
+		WHERE  INFO_ID = #infoId:VARCHAR#
+	</select>
+	
+	<!-- 정보카달로그 등록/수정 -->
+	<update id="NaCmpsDao.mergeNaCmps" parameterClass="params">
+		/* sql id : NaCmpsDao.mergeNaCmps */
+		MERGE INTO TB_NA_CMPS A
+		USING (
+				SELECT
+					#infoId:VARCHAR#   			    AS INFO_ID
+					, #infoNm:VARCHAR#   			AS INFO_NM
+					, #orgCd:VARCHAR#   			AS ORG_CD
+					, #infoSmryExp:VARCHAR#   		AS INFO_SMRY_EXP
+					, #srcUrl:VARCHAR#   			AS SRC_URL
+					, #tmnlImgFileNm:VARCHAR#   	AS TMNL_IMG_FILE
+					, #useYn:CHAR#   				AS USE_YN
+					, #usrId:VARCHAR#				AS REG_ID
+					, #cateId:VARCHAR#              AS CATE_ID    
+					, #srvInfoCd:VARCHAR#           AS SRV_INFO_CD
+					, #srcSysCd:VARCHAR#            AS SRC_SYS_CD 
+					, #menuFullnm:VARCHAR#          AS MENU_FULLNM
+					, #viewYn:VARCHAR#              AS VIEW_YN
+				FROM DUAL
+		) B
+		ON (
+			A.INFO_ID		= B.INFO_ID
+		)
+		WHEN MATCHED THEN
+		UPDATE SET
+			A.INFO_NM			= B.INFO_NM
+			, A.ORG_CD			= B.ORG_CD
+			, A.INFO_SMRY_EXP	= B.INFO_SMRY_EXP
+			, A.SRC_URL			= B.SRC_URL
+		<isNotEmpty property="tmnlImgFileNm">
+			, A.TMNL_IMG_FILE	= B.TMNL_IMG_FILE
+		</isNotEmpty>
+			, A.CATE_ID         = B.CATE_ID
+			, A.SRV_INFO_CD     = B.SRV_INFO_CD
+			, A.SRC_SYS_CD      = B.SRC_SYS_CD
+			, A.MENU_FULLNM     = B.MENU_FULLNM
+			, A.USE_YN			= B.USE_YN
+			, A.UPD_ID			= B.REG_ID
+			, A.UPD_DTTM		= sysdate
+			, A.VIEW_YN			= B.VIEW_YN
+		WHEN NOT MATCHED THEN
+		INSERT (
+			A.INFO_ID
+			, A.INFO_NM        
+			, A.ORG_CD         
+			, A.INFO_SMRY_EXP  
+			, A.SRC_URL      
+			, A.TMNL_IMG_FILE  
+			, A.USE_YN
+			, A.CATE_ID 
+			, A.SRV_INFO_CD
+			, A.SRC_SYS_CD
+			, A.MENU_FULLNM
+			, A.V_ORDER   
+			, A.REG_ID
+			, A.REG_DTTM
+			, A.VIEW_YN
+		)
+		VALUES (
+			B.INFO_ID    
+			, B.INFO_NM        
+			, B.ORG_CD         
+			, B.INFO_SMRY_EXP  
+			, B.SRC_URL        
+			, B.TMNL_IMG_FILE  
+			, B.USE_YN
+			, B.CATE_ID 
+			, B.SRV_INFO_CD
+			, B.SRC_SYS_CD
+			, B.MENU_FULLNM
+			, (SELECT NVL(MAX(V_ORDER)+ 1,0) FROM TB_NA_CMPS)
+			, B.REG_ID
+			, SYSDATE
+			, B.VIEW_YN
+		)
+	</update>
+	
+	<!-- 정보카달로그 상세 조회 -->
+	<select id="NaCmpsDao.selectNaCmpsDtl" parameterClass="params" resultClass="record">
+		/* sql id : NaCmpsDao.selectNaCmpsDtl */
+		SELECT A.INFO_ID  			AS "infoId"
+			   , A.INFO_NM  		AS "infoNm"
+			   , A.ORG_CD  		    AS "orgCd"
+			   , (SELECT ORG_NM FROM TB_COMM_ORG WHERE ORG_CD = A.ORG_CD) AS "orgNm"
+			   , A.INFO_SMRY_EXP 	AS "infoSmryExp"
+			   , A.SRC_URL  		AS "srcUrl"
+			   , A.TMNL_IMG_FILE  	AS "tmnlImgFileNm"
+			   , A.V_ORDER  		AS "vOrder"
+			   , A.VIEW_CNT  		AS "viewCnt"
+			   , A.USE_YN  		    AS "useYn"
+			   , A.CATE_ID          AS "cateId"
+			   , (SELECT CATE_NM FROM TB_NA_CATE B WHERE B.CATE_ID = A.CATE_ID) AS "cateNm"
+			   , A.SRV_INFO_CD      AS "srvInfoCd"
+			   , A.SRC_SYS_CD       AS "srcSysCd"
+			   , A.MENU_FULLNM      AS "menuFullnm"
+			   , A.REG_ID  		    AS "regId"
+			   , A.REG_DTTM  		AS "regDttm"
+			   , A.UPD_ID  		    AS "updId"
+			   , A.UPD_DTTM  		AS "updDttm"
+			   , A.VIEW_YN  		AS "viewYn"
+			   , TO_CHAR(A.LINK_CHK_DTTM, 'yyyy-mm-dd')	    AS "linkChkDttm"
+		  FROM TB_NA_CMPS A
+		 WHERE A.INFO_ID = #infoId:VARCHAR#
+	</select>
+	
+	<!-- 정보카달로그 삭제 -->
+	<delete id="NaCmpsDao.deleteNaCmps" parameterClass="params">
+		/* sql id : NaCmpsDao.deleteNaCmps */
+		DELETE FROM TB_NA_CMPS
+		 WHERE INFO_ID = #infoId:VARCHAR#
+	</delete>
+	
+	<!-- 정보카달로그 순서 저장 -->
+	<update id="NaCmpsDao.saveNaDataSiteMapOrder" parameterClass="record">
+		/* sql id : NaCmpsDao.saveNaDataSiteMapOrder */
+		UPDATE TB_NA_CMPS
+		   SET  V_ORDER = #vOrder:NUMERIC#
+		  WHERE INFO_ID = #infoId:VARCHAR#
+	</update>
+    
+	
+</sqlMap>

@@ -1,0 +1,501 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!--                                                                         -->
+<!-- COPYRIGHT (C) 2013 WISEITECH CO., LTD. ALL RIGHTS RESERVED.             -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- MyPage SQL 파일이다.                                  -->
+<!--                                                                         -->
+<!-- @author 장홍식                                                          -->
+<!-- @version 1.0 2015/08/20                                                 -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<sqlMap namespace="PortalMyPageDao">
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Type Alias                                                          -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+
+
+	<!-- Open API 검색 -->
+	<select id="PortalMyPageDao.searchOpenAPI" parameterClass="params" resultClass="record">
+		SELECT
+			A.INF_ID "infId"
+			, C.URI_NM "infNm"
+			, B.API_EP "apiEp"
+			, B.API_TYPE "apiType"
+        	, C.URI  "uri"
+		FROM
+			TV_OPEN_INF A
+			, TB_OPEN_INF_SRV B
+			, TB_OPEN_INF_AURI C
+		WHERE
+			A.INF_NM LIKE '%' || #infNm:VARCHAR# || '%'
+			AND A.INF_ID = B.INF_ID
+			AND A.INF_ID = C.INF_ID		
+			AND B.SRV_CD = 'A'
+			AND B.SRV_YN = 'Y'
+			AND C.USE_YN = 'Y'
+		ORDER BY C.URI_NM
+	</select>
+	
+	    		
+	<select id="PortalMyPageDao.selectUserInfo" parameterClass="params" resultClass="record">
+		SELECT
+			USER_NM "userNm"
+			, USER_TEL "userTel"
+			<!-- 2015.09.08 김은삼 [1] 휴대폰 항목 추가 BEGIN -->
+			, USER_HP "userHp"
+			<!-- 2015.09.08 김은삼 [1] 휴대폰 항목 추가 END -->
+			, USER_EMAIL "userEmail"
+			, EMAIL_YN "emailYn"
+		FROM
+			TB_USER
+		WHERE
+			USER_CD = #userCd:NUMERIC#
+	</select>
+	
+	<update id="PortalMyPageDao.updateUserInfo" parameterClass="params">
+		UPDATE TB_USER
+		SET
+			UPD_DTTM = SYSDATE
+			<isNotEmpty property="userNm">
+			, USER_NM = #userNm#
+			</isNotEmpty>
+			, USER_TEL = CASE
+                                WHEN #userTel1:VARCHAR#   IS NOT NULL
+                                 AND #userTel2:VARCHAR#   IS NOT NULL
+                                 AND #userTel3:VARCHAR#   IS NOT NULL
+                                THEN #userTel1:VARCHAR#   || '-' ||
+                                     #userTel2:VARCHAR#   || '-' ||
+                                     #userTel3:VARCHAR#
+                                ELSE USER_TEL
+                                END
+            <!-- 2015.09.08 김은삼 [1] 휴대폰 항목 추가 BEGIN -->
+            , USER_HP = CASE
+                                WHEN #userHp1:VARCHAR#   IS NOT NULL
+                                 AND #userHp2:VARCHAR#   IS NOT NULL
+                                 AND #userHp3:VARCHAR#   IS NOT NULL
+                                THEN #userHp1:VARCHAR#   || '-' ||
+                                     #userHp2:VARCHAR#   || '-' ||
+                                     #userHp3:VARCHAR#
+                                ELSE USER_HP
+                                END
+            <!-- 2015.09.08 김은삼 [1] 휴대폰 항목 추가 END -->
+			, USER_EMAIL  = CASE
+                                WHEN #userEmail1:VARCHAR# IS NOT NULL
+                                 AND #userEmail2:VARCHAR# IS NOT NULL
+                                THEN #userEmail1:VARCHAR# || '@' ||
+                                     #userEmail2:VARCHAR#
+                                ELSE USER_EMAIL
+                                END
+			, EMAIL_YN = #emailYn:CHAR#                                
+		WHERE
+			USER_CD = #userCd:NUMERIC#                                
+	</update>
+	
+	<delete id="PortalMyPageDao.deleteUserKey" parameterClass="params">
+		DELETE FROM TB_USER_KEY
+		WHERE
+			USER_CD = #userCd:NUMERIC#
+	</delete>
+	
+	<delete id="PortalMyPageDao.deleteUserInfo" parameterClass="params">
+		DELETE FROM TB_USER
+		WHERE
+			USER_CD = #userCd:NUMERIC#
+	</delete>
+	
+	<!-- 인증키 이용 내역 -->
+	<select id="PortalMyPageDao.selectListUseActKey" parameterClass="params" resultClass="record">
+		SELECT  
+			         TO_CHAR(A.REG_DTTM, 'YYYY-MM-DD') AS "regDttm"
+                     ,COUNT(A.REQ_CNT) "reqCnt"
+                     ,SUM(A.ROW_CNT) "rowCnt"
+                     ,FN_GET_DMPOINT(AVG(A.LEADTIME), '') "lendtime"
+                     ,ROUND(SUM(A.DB_SIZE)/1024, 2) "dbSize"
+           FROM   TB_LOG_OPEN_INF_A A
+                     INNER JOIN       TB_USER_KEY B
+                                ON       A.USER_CD = B.USER_CD
+                                AND     A.KEY_SEQ = B.KEY_SEQ
+                     INNER JOIN       TB_USER C
+                                ON       A.USER_CD = C.USER_CD
+                     INNER JOIN       TB_OPEN_INF D
+                                ON       A.INF_ID = D.INF_ID
+		WHERE 1=1  
+		AND C.USER_CD = #userCd:NUMERIC#
+		AND B.ACT_KEY = #actKey:VARCHAR#
+		<![CDATA[
+		AND A.REG_DTTM >= ADD_MONTHS(SYSDATE, -1)
+		]]>
+		GROUP BY TO_CHAR(A.REG_DTTM, 'YYYY-MM-DD')
+		ORDER BY 1 DESC
+	</select>
+	
+	<!-- 통계스크랩 목록 조회 -->
+	<select id="PortalMyPageDao.selectStatUserScrapList" parameterClass="params" resultClass="record">
+		<isEqual property="paging" compareValue="0">
+		SELECT AA.* 
+		FROM   (SELECT ROWNUM AS ROW_NUM, AA.*
+				FROM   (  
+		</isEqual>
+			SELECT 
+				SEQCE_NO		AS "seqceNo"	
+				, SIMMIX_TAG	AS "simmixTag"
+				, STATBL_NM		AS "statblNm"
+				, SEARCH_TAG	AS "searchTag"
+				, STATBL_EXP	AS "statblExp"
+				, TO_CHAR(REG_DTTM, 'YYYY-MM-DD')	AS "regDttm"
+				, DECODE(SIMMIX_TAG, 'S', '간편통계', 'M', '복수통계', '') AS "simmixTagNm"
+				, DECODE(CALL_TAG, 'F', '최신데이터', 'B', '기준데이터', '') AS "searchTagNm"
+			FROM
+				TB_USER_TBL
+			WHERE
+				USER_CD = #regId:NUMERIC#	
+			ORDER BY REG_DTTM DESC		
+		<isEqual property="paging" compareValue="0">
+		<![CDATA[
+				) AA
+			WHERE ROWNUM <= #end:NUMERIC#
+			) AA
+		WHERE AA.ROW_NUM >= #start:NUMERIC#
+		]]>
+			<isNotEmpty property="viewCnt" prepend="AND">
+				<![CDATA[ ROW_NUM <= #viewCnt:NUMERIC# ]]>
+			</isNotEmpty>
+		</isEqual>
+	</select>
+	
+	<!-- 통계스크랩 목록 전체 카운트 조회 -->
+	<select id="PortalMyPageDao.selectStatUserScrapListCount" parameterClass="params" resultClass="int">
+		SELECT COUNT(*)
+		FROM   TB_USER_TBL	
+		WHERE  USER_CD = #regId:NUMERIC#		
+		ORDER BY REG_DTTM DESC
+	</select>	
+	
+	<!-- 통계스크랩 삭제 -->
+	<delete id="PortalMyPageDao.delStatUserScrap" parameterClass="params">
+		DELETE FROM TB_USER_TBL
+		WHERE  SEQCE_NO = #seqceNo:NUMERIC#
+	</delete>
+	<delete id="PortalMyPageDao.delStatUserItmScrap" parameterClass="params">
+		DELETE FROM TB_USER_TBL_ITM
+		WHERE  SEQCE_NO = #seqceNo:NUMERIC#
+	</delete>
+	<delete id="PortalMyPageDao.delStatUserItmMScrap" parameterClass="params">
+		DELETE FROM TB_USER_TBL_ITM_M
+		WHERE  SEQCE_NO = #seqceNo:NUMERIC#
+	</delete>
+	
+	<!-- 뉴스레터 수신정보 조회 -->
+	<select id="PortalMyPageDao.selectNewsletter" parameterClass="params" resultClass="record">
+		/* sql id : PortalMyPageDao.selectNewsletter */
+		SELECT PKG_CRYPTO2.DECRYPT(USER_EMAIL) AS "userEmail"
+		     , NVL(EMAIL_YN, 'N') 	AS "emailYn"
+		FROM   TB_USER	
+		WHERE  USER_CD = #regId:NUMERIC#		
+	</select>	
+	
+	<!-- 뉴스레터 수신정보 수정 -->
+	<delete id="PortalMyPageDao.saveNewsletterAgree" parameterClass="params">
+		/* sql id : PortalMyPageDao.saveNewsletterAgree */
+		UPDATE TB_USER
+		SET    USER_EMAIL 	= PKG_CRYPTO2.ENCRYPT(#userEmail:VARCHAR#)
+		     , EMAIL_YN 	= #emailYn:VARCHAR# 
+		WHERE  USER_CD 		= #regId:NUMERIC#
+	</delete>
+	
+	
+	<!-- 검색 로그정보 조회 -->
+	<select id="PortalMyPageDao.searchSearchHisData" parameterClass="params" resultClass="record">
+		/* sql id : PortalMyPageDao.searchSearchHisData */
+		<isEqual property="paging" compareValue="0">
+		SELECT AA.* 
+		FROM   (SELECT ROWNUM AS ROW_NUM, AA.*
+				FROM   (  
+		</isEqual> 
+		SELECT SEARCH_STR						AS "searchStr",
+			   TO_CHAR(REG_DTTM, 'YYYY-MM-DD') 	AS "regDttm"
+		FROM   TB_LOG_SEARCH
+		WHERE  USER_CD = #regId:NUMERIC#	
+		ORDER BY REG_DTTM DESC
+		<isEqual property="paging" compareValue="0">
+		<![CDATA[
+				) AA
+			WHERE ROWNUM <= #end:NUMERIC#
+			) AA
+		WHERE AA.ROW_NUM >= #start:NUMERIC#
+		]]>
+		</isEqual>
+	</select>
+	<select id="PortalMyPageDao.searchSearchHisDataCount" parameterClass="params" resultClass="int">
+		/* sql id : PortalMyPageDao.searchSearchHisDataCount */
+		SELECT COUNT(*)
+		FROM   TB_LOG_SEARCH
+		WHERE  USER_CD = #regId:NUMERIC#	
+	</select>
+	
+	<!-- 청구 기본정보 조회 -->
+	<select id="PortalMyPageDao.selectExposeDefaultUpdInfo" parameterClass="params" resultClass="record">
+	/* sql id : PortalMyPageDao.selectExposeDefaultUpdInfo */
+		SELECT
+			USER_CD             AS "userCd"
+			, USER_ID           AS "userId"
+			, USER_NM           AS "userNm"
+			, AGREE_YN          AS "agreeYn"
+			, AGREE1_YN         AS "agree1Yn"
+			, AGREE2_YN         AS "agree2Yn"
+			, AGREE_DTTM        AS "agreeDttm"
+			, PKG_CRYPTO2.DECRYPT(USER_EMAIL) AS "userEmail"
+			, EMAIL_YN          AS "emailYn"
+			, EMAIL_DTTM        AS "emailDttm"
+			, PKG_CRYPTO2.DECRYPT(USER_TEL) AS "userTel"
+			, PKG_CRYPTO2.DECRYPT(USER_HP) AS "userHp"
+			, HP_YN             AS "hpYn"
+			, HP_DTTM           AS "hpDttm"
+			, PKG_CRYPTO2.DECRYPT(USER_FAX_TEL) AS "userFaxTel"
+			, KAKAO_YN          AS "kakaoYn"
+			, USER_ZIP          AS "userZip"
+			, USER_1_ADDR       AS "user1Addr"
+			, PKG_CRYPTO2.DECRYPT(USER_2_SADDR) AS "user2Saddr"
+			, KAKAO_DTTM        AS "kakaoDttm"
+			, PKG_CRYPTO2.DECRYPT(USER_1_SSN) AS "user1Ssn"
+			, PKG_CRYPTO2.DECRYPT(USER_2_SSN) AS "user2Ssn"
+		FROM
+			TB_USER
+		WHERE
+			USER_CD = #regId:NUMERIC#
+	</select>
+	
+	<!-- 청구 기본정보 수정-->
+	<update id="PortalMyPageDao.updateExposeDefaultUpd" parameterClass="params">	
+		/* sql id : PortalMyPageDao.updateExposeDefaultUpd */
+		UPDATE TB_USER
+		SET
+			UPD_DTTM = SYSDATE
+			, USER_TEL = CASE WHEN #userTel:VARCHAR#   IS NOT NULL AND #userTel2:VARCHAR# IS NOT NULL AND #userTel3:VARCHAR# IS NOT NULL
+	                          THEN PKG_CRYPTO2.ENCRYPT(#userTel:VARCHAR# || '-' ||#userTel2:VARCHAR#|| '-' ||#userTel3:VARCHAR#)
+	                          WHEN #userTel:VARCHAR# = '000' THEN PKG_CRYPTO2.ENCRYPT(#userTel:VARCHAR#)
+	                          ELSE USER_TEL
+	                          END
+            , USER_HP = CASE WHEN #userHp:VARCHAR# IS NOT NULL AND #userHp2:VARCHAR#   IS NOT NULL AND #userHp3:VARCHAR# IS NOT NULL
+                             THEN PKG_CRYPTO2.ENCRYPT(#userHp:VARCHAR#|| '-' ||#userHp2:VARCHAR#   || '-' ||#userHp3:VARCHAR#)
+                             WHEN #userHp:VARCHAR# = '000' THEN PKG_CRYPTO2.ENCRYPT(#userHp:VARCHAR#) 
+                             ELSE USER_HP
+                             END
+            , USER_FAX_TEL = CASE WHEN #userFaxTel:VARCHAR# IS NOT NULL AND #userFaxTel2:VARCHAR# IS NOT NULL AND #userFaxTel3:VARCHAR# IS NOT NULL
+                                  THEN PKG_CRYPTO2.ENCRYPT(#userFaxTel:VARCHAR#|| '-' ||#userFaxTel2:VARCHAR#|| '-' ||#userFaxTel3:VARCHAR#)
+                                  WHEN #userFaxTel:VARCHAR# = '000' THEN PKG_CRYPTO2.ENCRYPT(#userFaxTel:VARCHAR#)
+                                  ELSE USER_FAX_TEL
+                                  END                    
+			, USER_EMAIL  = CASE WHEN #userEmail1:VARCHAR# IS NOT NULL AND #userEmail2:VARCHAR# IS NOT NULL
+                                 THEN PKG_CRYPTO2.ENCRYPT(#userEmail1:VARCHAR#|| '@' ||#userEmail2:VARCHAR#)
+                                 ELSE USER_EMAIL
+                                 END
+            <isNotEmpty property="userZip">                     
+            , USER_ZIP = #userZip:VARCHAR#
+            , USER_1_ADDR = #user1Addr:VARCHAR#
+			</isNotEmpty>
+			<isNotEmpty property="user2Saddr">
+			, USER_2_SADDR = PKG_CRYPTO2.ENCRYPT(#user2Saddr:VARCHAR#)
+			</isNotEmpty>
+			<isNotEmpty property="emailYn"> 
+			, EMAIL_YN = #emailYn:CHAR#
+			, EMAIL_DTTM = SYSDATE
+			</isNotEmpty>
+			<isEmpty property="emailYn"> 
+			, EMAIL_YN = 'N'
+			, EMAIL_DTTM = SYSDATE
+			</isEmpty>
+			<isNotEmpty property="kakaoYn"> 
+			, KAKAO_YN = #kakaoYn:CHAR# 
+			, KAKAO_DTTM = SYSDATE
+			</isNotEmpty>
+			<isEmpty property="kakaoYn"> 
+			, KAKAO_YN = 'N' 
+			, KAKAO_DTTM = SYSDATE
+			</isEmpty>
+			<isNotEmpty property="hpYn"> 
+			, HP_YN = #hpYn:CHAR#
+			, HP_DTTM = SYSDATE
+			</isNotEmpty>
+			<isEmpty property="hpYn"> 
+			, HP_YN = 'N'
+			, HP_DTTM = SYSDATE
+			</isEmpty>
+			<isNotEmpty property="user1Ssn">
+			, USER_1_SSN = PKG_CRYPTO2.ENCRYPT(#user1Ssn:VARCHAR#)
+			</isNotEmpty>
+			<isNotEmpty property="user2Ssn">
+			, USER_2_SSN = PKG_CRYPTO2.ENCRYPT(#user2Ssn:VARCHAR#)
+			</isNotEmpty>
+		WHERE
+			USER_CD = #regId:NUMERIC#
+	</update>
+	
+	<!-- OpenAPI 인증키 폐기-->
+	<update id="PortalMyPageDao.updateDiscardActKey" parameterClass="params">
+		/* sql id : PortalMyPageDao.updateDiscardActKey */
+		UPDATE TB_USER_KEY
+		   SET KEY_STATE = 'P'
+			  , UPD_DTTM = SYSDATE
+	     WHERE ACT_KEY =#delActKey:VARCHAR#
+	</update>
+	
+	<!-- 활용데이터(공공데이터) 목록 리스트 조회(팝업) -->
+	<select id="PortalMyPageDao.selectOpenInfSearchPop" parameterClass="params" resultClass="record">
+		/* sql id : PortalMyPageDao.selectOpenInfSearchPop */
+		SELECT
+		    INF_ID			AS "infId",
+		    SEQ				AS "seq",
+		    INF_NM			AS "infNm",
+		    CATE_ID			AS "cateId",
+		    CATE_NM			AS "cateNm",
+		    CATE_FULLNM		AS "cateFullNm",
+		    ORG_CD			AS "orgCd",
+		    ORG_NM			AS "orgNm",
+		    ORG_FULLNM		AS "orgFullnm",
+		    CCL_NM			AS "cclNm",
+		    OPEN_DTTM		AS "openDttm",
+		    INF_STATE		AS "infState"
+		FROM
+		    TV_MNG_INF A
+		WHERE 1=1
+		 AND INF_STATE = 'Y'
+		<isNotEmpty property="searchVal">
+	   		<isEqual property="searchGubun" compareValue="INF_NM">
+				AND   A.INF_NM LIKE '%' || REPLACE(UPPER(#searchVal#), ' ', '') || '%'	   	 
+	   		</isEqual>
+	   		<isEqual property="searchGubun" compareValue="INF_ID">
+				AND   A.INF_ID LIKE '%' || #searchVal# || '%'
+	   		</isEqual>
+	   	</isNotEmpty>						
+	</select>
+	
+	<!-- 안내수신  등록 -->
+	<update id="PortalMyPageDao.updateDvp" parameterClass="params" >
+		UPDATE TB_USER SET
+			 <dynamic prepend=" " close=" ">
+			 <isNotNull property="dvpEmailYn" prepend=",">
+				DVP_EMAIL_YN = #dvpEmailYn#,
+				DVP_EMAIL_DTTM = SYSDATE
+			 </isNotNull>
+			 <isNull property="dvpEmailYn" prepend=",">
+				DVP_EMAIL_YN = 'N',
+				DVP_EMAIL_DTTM = SYSDATE
+			 </isNull>
+			 <isNotNull property="dvpHpYn" prepend=",">
+				DVP_HP_YN = #dvpHpYn#,
+				DVP_HP_DTTM = SYSDATE
+			 </isNotNull>
+			 <isNull property="dvpHpYn" prepend=",">
+				DVP_HP_YN = 'N',
+				DVP_HP_DTTM = SYSDATE
+			 </isNull>
+			 <isNotNull property="dvpKakaoYn" prepend=",">
+				DVP_KAKAO_YN = #dvpKakaoYn#,
+				DVP_KAKAO_DTTM = SYSDATE
+			 </isNotNull>
+			 <isNull property="dvpKakaoYn" prepend=",">
+				DVP_KAKAO_YN = 'N',
+				DVP_KAKAO_DTTM = SYSDATE
+			 </isNull>
+			</dynamic>		
+	 	 WHERE USER_CD = #regId:NUMERIC#
+	</update>
+	
+	<!-- 정보공개 나의 청구서검색 조건절 -->
+    <sql id="PortalMyPageDao.searchMyOpnzAplListWhere">
+		WHERE A.APL_DI IS NULL
+		<isNotEmpty prepend="AND" property="aplPn">    
+		    A.APL_PN   = #aplPn:VARCHAR#
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="aplRno1">    
+		    A.APL_RNO1 = #aplRno1:VARCHAR#
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="aplConnCd">    
+		    A.APL_CONN_CD = #aplConnCd:VARCHAR#
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="aplRno2">    
+		    A.APL_RNO2 = pkg_crypto2.encrypt(#aplRno2:VARCHAR#)
+		</isNotEmpty>    
+    </sql>
+    <!-- 정보공개 나의 청구서 목록을 조회한다. -->
+    <select id="PortalMyPageDao.searchMyOpnzAplList" parameterClass="params" resultClass="record">
+    	/* sql id : PortalMyPageDao.searchMyOpnzAplList */
+        <isEqual property="paging" compareValue="0">
+		SELECT AA.* 
+		FROM   (SELECT ROWNUM AS ROW_NUM, AA.*
+				FROM   (  
+		</isEqual>
+			SELECT A.APL_NO                                  AS "aplNo"
+				  , TO_CHAR(TO_DATE(A.APL_DT), 'YYYY-MM-DD') AS "aplDt"
+				  , A.PRG_STAT_CD                            AS "prgStatCd"
+				  , A.APL_NTFR_DIV                           AS "aplNtfrDiv"
+				  , A.APL_PN                                 AS "aplPn"
+				  , A.APL_RNO1                               AS "aplRno1"
+				  , A.APL_RNO2                               AS "aplRno2"
+				  , A.APL_CORP_NM                            AS "aplCorpNm"
+				  , A.APL_BNO                                AS "aplBno"
+				  , A.APL_ZPNO                               AS "aplZpno"
+				  , A.APL_1_ADDR                             AS "apl1Addr"
+				  , A.APL_2_ADDR                             AS "apl2Addr"
+				  , A.APL_PNO                                AS "aplPno"
+				  , A.APL_MBL_PNO                            AS "aplMblPno"
+				  , A.APL_FAX_NO                             AS "aplFaxNo"
+				  , A.APL_EMAIL_ADDR                         AS "aplEmailAddr"
+				  , A.APL_INST_CD                            AS "aplInstCd"
+				  , A.APL_DEAL_INST_CD                       AS "aplDealInstCd"
+				  , FC_COMCODE(A.APL_INST_CD, '')            AS "aplInstNm"
+				  , A.APL_SJ                                 AS "aplSj"
+				  , A.RG_DIV                                 AS "rgDiv"
+				  , A.APL_DEPT_CD                            AS "aplDeptCd"
+				  , A.APL_DI                                 AS "aplDi"
+				  , A.MEMBER_ID                              AS "memberId"
+				  , A.APL_CONN_CD                            AS "aplConnCd"
+			FROM TB_OPNZ_APL A  
+			<include refid="PortalMyPageDao.searchMyOpnzAplListWhere" />
+			ORDER BY A.APL_DT DESC
+		<isEqual property="paging" compareValue="0">
+		<![CDATA[
+				) AA
+			WHERE ROWNUM <= #end:NUMERIC#
+			) AA
+		WHERE AA.ROW_NUM >= #start:NUMERIC#
+		]]>
+		</isEqual> 
+    </select>
+    
+    <!-- 정보공개 나의 청구서 검색 카운트 -->
+    <select id="PortalMyPageDao.searchMyOpnzAplListCount" parameterClass="params" resultClass="int">
+   		/* sql id : PortalMyPageDao.searchMyOpnzAplListCount */
+         SELECT COUNT(*)
+           FROM TB_OPNZ_APL  A
+           <include refid="PortalMyPageDao.searchMyOpnzAplListWhere" />
+    </select>
+	
+	<!-- 기존 청구서 저장-->
+	<update id="PortalMyPageDao.updateMyOpnzApl" parameterClass="record">	
+		/* sql id : PortalMyPageDao.updateMyOpnzApl */
+		UPDATE TB_OPNZ_APL SET 
+			 MEMBER_ID = #userId:VARCHAR#
+		    , APL_DI   = #aplDi:VARCHAR#
+		WHERE APL_RNO1 = #aplRno1:VARCHAR#
+		  AND APL_PN   = #aplPn:VARCHAR#
+		  AND APL_DI IS NULL
+		  AND APL_NO = #aplNo:VARCHAR#	
+	</update>
+	
+	<!-- 청구서 조회 -->
+	<select id="PortalMyPageDao.getOpnAplNoList" parameterClass="params" resultClass="record">
+		/* sql id : PortalMyPageDao.getOpnAplNoList */
+		SELECT A.APL_NO AS "aplNo"
+		  FROM TB_OPNZ_APL  A 
+		  <include refid="PortalMyPageDao.searchMyOpnzAplListWhere" />
+	</select>	
+</sqlMap>

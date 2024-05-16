@@ -1,0 +1,895 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- @(#)AdminStatInput_Sql_Tibero.xml 1.0 2017/06/02                       -->
+<!--                                                                         -->
+<!-- COPYRIGHT (C) 2013 WISEITECH CO., LTD. ALL RIGHTS RESERVED.             -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- 통계표 입력관련 SQL 파일이다.	                                    	-->
+<!--                                                                         -->
+<!-- @author 김정호                                                        	-->
+<!-- @version 1.0 2017/06/02                                                 -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<sqlMap namespace="StatInput">
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Type Alias                                                          -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+    
+	<!-- 통계표 입력 메인 리스트 조회 -->
+	<select id="StatInputDao.selectStatInputMainList" parameterClass="params" resultClass="record">
+		/* sql id : StatInputDao.selectStatInputMainList */
+		<isEqual property="paging" compareValue="0">
+		SELECT AA.* 
+		FROM   (SELECT ROWNUM AS ROW_NUM, AA.*
+				FROM   (  
+		</isEqual>
+		SELECT
+			WRT_SEQ			AS "wrtSeq"
+			, A.STATBL_ID	AS "statblId"
+			, B.STATBL_NM	AS "statblNm"
+			, B.CATE_NM		AS "cateNm"
+			, A.DTACYCLE_CD	AS "dtacycleCd"
+			, A.WRTSTATE_CD AS "wrtstateCd"
+			, C.DITC_NM 	AS "wrtstateNm"
+			, WRT_ORG_NM 	AS "wrtOrgUsrNm"	
+			, TO_CHAR(TO_DATE(A.WRT_START_YMD, 'YYYY-MM-DD'), 'YYYY-MM-DD') || 
+				' ~ ' || TO_CHAR(TO_DATE(A.WRT_END_YMD, 'YYYY-MM-DD'), 'MM-DD')  	AS "wrtBetweenYmd"	
+			, WRTTIME_IDTFR_ID 														AS "wrttimeIdtfrId"
+			, FN_GET_WRTTIME_IDTFR_NM(A.DTACYCLE_CD, A.WRTTIME_IDTFR_ID) 			AS "wrttimeDesc"
+			, CASE WHEN C.DITC_CD != 'AC' THEN
+				<![CDATA[
+				CASE WHEN SYSDATE <= TO_DATE(A.WRT_END_YMD, 'YYYY/MM/DD') THEN 'D-' || TRUNC(TO_DATE(A.WRT_END_YMD, 'YYYY/MM/DD') - TRUNC(SYSDATE))
+				]]> 
+					ELSE '만료' END 
+				ELSE TO_CHAR(A.WRT_DTTM, 'YYYY-MM-DD') END AS "wrtDttm"
+			<![CDATA[
+            , B.STATBL_NM  ||
+              CASE
+                                WHEN B.STATBL_TAG = 'T'
+                                THEN ' <a href="/admin/stat/popup/statMetaExpPopup.do?statblId='
+                                                                    || B.STATBL_ID
+                                                                    || '" target="_blank" title="통계설명(팝업)"><img src="../../images/admin/icon_book.png"/></a>'
+                                ELSE ''
+              END
+              ||                  
+              CASE
+                                WHEN B.CTS_SRV_CD = 'N'
+                                THEN '<a href="/admin/stat/statPreviewPage/'
+                                                                    || B.STATBL_ID
+                                                                    || '.do" target="_blank" title="통계표(팝업)"><img src="../../images/admin/icon_file.gif"/></a>'
+                                ELSE ''
+              END "statblNmExp"
+		     ]]>				
+		FROM
+			TB_STTS_WRTLIST A
+			INNER JOIN TV_STTS_TBL B
+				ON  A.STATBL_ID = B.STATBL_ID
+				AND B.USE_YN = 'Y'	
+			INNER JOIN TB_COMM_CODE C
+				ON  C.GRP_CD = 'S1006'
+				AND A.WRTSTATE_CD = C.DITC_CD
+		WHERE
+			1=1
+		<isNotEmpty property="wrttime">
+			AND A.DTACYCLE_CD = #wrttime:VARCHAR#
+		</isNotEmpty>
+		<isEmpty property="inputStatusAll" prepend="AND">
+			<isNotEmpty property="inputStatusArr">
+				<iterate prepend="A.WRTSTATE_CD IN" property="inputStatusArr" open="(" close=")" conjunction=",">
+					#inputStatusArr[]# 
+				</iterate>
+			</isNotEmpty>
+		</isEmpty>
+		<isNotEmpty property="orgCd">
+			AND A.WRT_ORG_CD = #orgCd#
+		</isNotEmpty>
+		<isNotEmpty property="iterCateId">	<!-- 특정 분류체계가 인자로 넘어올경우 조회 -->
+			AND B.CATE_ID IN 
+			<iterate property="iterCateId" open="(" close=")" conjunction=", ">
+           		#iterCateId[]#
+           	</iterate>	
+		</isNotEmpty>
+		<isNotEmpty property="wrtStartYmd">
+			 AND A.WRT_START_YMD >= #wrtStartYmd#
+		</isNotEmpty>
+		<isNotEmpty property="wrtEndYmd">
+			 AND A.WRT_END_YMD >= #wrtEndYmd#
+		</isNotEmpty>
+	   	<isNotEmpty property="searchVal">
+	   		<isEqual property="searchGubun" compareValue="STATBL_NM">
+				AND   B.TAG_STATBL_NM LIKE '%' || REPLACE(UPPER(#searchVal#), ' ', '') || '%'	   	 
+	   		</isEqual>
+			<isEqual property="searchGubun" compareValue="STATBL_ID" >
+				AND   B.STATBL_ID LIKE '%' || #searchVal# || '%'
+			</isEqual>
+	   	</isNotEmpty>
+		<isNotEmpty property="accCd" prepend="AND">
+			<isNotEqual property="accCd" compareValue="SYS">
+				EXISTS (SELECT 1 FROM TB_STTS_TBL_USR 
+						WHERE  STATBL_ID = A.STATBL_ID
+						AND    USE_YN = 'Y'
+					<isEmpty property="SysInpGbn">
+						AND	USR_CD = #inpUsrCd:NUMERIC#
+					</isEmpty>
+					<isNotEmpty property="SysInpGbn">
+						<isEqual property="SysInpGbn" compareValue="ORG">
+							AND ORG_CD = #inpOrgCd:VARCHAR# 
+						</isEqual>
+						<isEqual property="SysInpGbn" compareValue="USR">
+							AND	USR_CD = #inpUsrCd:NUMERIC#	
+						</isEqual>
+					</isNotEmpty>						
+						
+				<isEmpty property="valueCd">
+						AND    PRSS_ACC_CD <![CDATA[ > ]]> 0
+				</isEmpty>	 
+				<!-- valueCd가 Q, A만 승인권한을 준다. -->
+				<isNotEmpty property="valueCd">
+					<isEqual property="valueCd" compareValue="Q">
+						AND    PRSS_ACC_CD <![CDATA[ > ]]> 30
+					</isEqual>
+					<isNotEqual property="valueCd" compareValue="Q">
+						<isEqual property="valueCd" compareValue="A">
+							AND    PRSS_ACC_CD <![CDATA[ > ]]> 30
+						</isEqual>
+						<isNotEqual property="valueCd" compareValue="A">
+							AND    PRSS_ACC_CD <![CDATA[ > ]]> 0
+						</isNotEqual>
+					</isNotEqual>
+				</isNotEmpty>
+					)
+			</isNotEqual>
+		</isNotEmpty>
+		ORDER BY DECODE(C.DITC_CD, 'AC',9999, 'WW', 9998, C.V_ORDER) ASC, A.WRT_END_YMD ASC
+		<isEqual property="paging" compareValue="0">
+		<![CDATA[
+				) AA
+			WHERE ROWNUM <= #end:NUMERIC#
+			) AA
+		WHERE AA.ROW_NUM >= #start:NUMERIC#
+		]]>
+		</isEqual>
+	</select>
+	<select id="StatInputDao.selectStatInputMainListCount" parameterClass="params" resultClass="int">
+		/* sql id : StatInputDao.selectStatInputMainListCount */
+		SELECT
+			COUNT(*)
+		FROM
+			TB_STTS_WRTLIST A
+			INNER JOIN TV_STTS_TBL B
+				ON  A.STATBL_ID = B.STATBL_ID
+				AND B.USE_YN = 'Y'	
+			INNER JOIN TB_COMM_CODE C
+				ON  C.GRP_CD = 'S1006'
+				AND A.WRTSTATE_CD = C.DITC_CD
+		WHERE
+			1=1
+		<isNotEmpty property="wrttime">
+			AND A.DTACYCLE_CD = #wrttime#
+		</isNotEmpty>
+		<isEmpty property="inputStatusAll" prepend="AND">
+			<isNotEmpty property="inputStatusArr">
+				<iterate prepend="A.WRTSTATE_CD IN" property="inputStatusArr" open="(" close=")" conjunction=",">
+					#inputStatusArr[]# 
+				</iterate>
+			</isNotEmpty>
+		</isEmpty>
+		<isNotEmpty property="orgCd">
+			AND A.WRT_ORG_CD = #orgCd#
+		</isNotEmpty>
+		<isNotEmpty property="iterCateId">	<!-- 특정 분류체계가 인자로 넘어올경우 조회 -->
+			AND B.CATE_ID IN 
+			<iterate property="iterCateId" open="(" close=")" conjunction=", ">
+           		#iterCateId[]#
+           	</iterate>	
+		</isNotEmpty>
+		<isNotEmpty property="wrtStartYmd">
+			 AND A.WRT_START_YMD >= #wrtStartYmd#
+		</isNotEmpty>
+		<isNotEmpty property="wrtEndYmd">
+			 AND A.WRT_END_YMD >= #wrtEndYmd#
+		</isNotEmpty>
+	   	<isNotEmpty property="searchVal">
+	   		<isEqual property="searchGubun" compareValue="STATBL_NM">
+				AND   B.TAG_STATBL_NM LIKE '%' || REPLACE(UPPER(#searchVal#), ' ', '') || '%'	   	 
+	   		</isEqual>
+			<isEqual property="searchGubun" compareValue="STATBL_ID" >
+				AND   B.STATBL_ID LIKE '%' || #searchVal# || '%'
+			</isEqual>
+	   	</isNotEmpty>
+		<isNotEmpty property="accCd" prepend="AND">
+			<isNotEqual property="accCd" compareValue="SYS">
+				EXISTS (SELECT 1 FROM TB_STTS_TBL_USR 
+						WHERE  STATBL_ID = A.STATBL_ID
+						AND    USE_YN = 'Y'
+					<isEmpty property="SysInpGbn">
+						AND	USR_CD = #inpUsrCd:NUMERIC#
+					</isEmpty>
+					<isNotEmpty property="SysInpGbn">
+						<isEqual property="SysInpGbn" compareValue="ORG">
+							AND ORG_CD = #inpOrgCd:VARCHAR#
+						</isEqual>
+						<isEqual property="SysInpGbn" compareValue="USR">
+							AND	USR_CD = #inpUsrCd:NUMERIC#	
+						</isEqual>
+					</isNotEmpty>							
+						
+						
+				<isEmpty property="valueCd">
+						AND    PRSS_ACC_CD <![CDATA[ > ]]> 0
+				</isEmpty>	 
+				<!-- valueCd가 Q, A만 승인권한을 준다. -->
+				<isNotEmpty property="valueCd">
+					<isEqual property="valueCd" compareValue="Q">
+						AND    PRSS_ACC_CD <![CDATA[ > ]]> 30
+					</isEqual>
+					<isNotEqual property="valueCd" compareValue="Q">
+						<isEqual property="valueCd" compareValue="A">
+							AND    PRSS_ACC_CD <![CDATA[ > ]]> 30
+						</isEqual>
+						<isNotEqual property="valueCd" compareValue="A">
+							AND    PRSS_ACC_CD <![CDATA[ > ]]> 0
+						</isNotEqual>
+					</isNotEqual>
+				</isNotEmpty>
+					)
+			</isNotEqual>
+		</isNotEmpty>
+	</select>
+	
+	<!-- 통계표 상세 조회 -->
+	<select id="StatInputDao.selectStatInputDtl" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		/* sql id : StatInputDao.selectStatInputDtl */
+		SELECT
+			WRT_SEQ			AS "wrtSeq"
+			, A.STATBL_ID	AS "statblId"
+			, B.STATBL_NM	AS "statblNm"
+			, D.CATE_NM		AS "cateNm"
+			, D.CATE_FULLNM AS "cateFullNm"
+			, A.DTACYCLE_CD	AS "dtacycleCd"
+			, A.WRTSTATE_CD AS "wrtStateCd"
+			, C.DITC_NM 	AS "wrtstateNm"
+			, A.WRT_ORG_CD	AS "wrtOrgCd"
+			, A.WRT_ORG_NM	AS "wrtOrgNm"
+			, A.WRT_USR_CD	AS "wrtUsrCd"
+			, A.WRT_USR_Nm	AS "wrtUsrNm"
+			, TO_CHAR(A.WRT_DTTM, 'YYYY-MM-DD') 		AS "wrtDttm"
+			, TO_CHAR(A.ACC_DTTM, 'YYYY-MM-DD') 		AS "accDttm"			
+			, TO_CHAR(TO_DATE(A.WRT_START_YMD, 'YYYY-MM-DD'), 'YYYY-MM-DD') || 
+				' ~ ' || TO_CHAR(TO_DATE(A.WRT_END_YMD, 'YYYY-MM-DD'), 'MM-DD')  	AS "wrtBetweenYmd"	
+			, FN_GET_WRTTIME_IDTFR_NM(A.DTACYCLE_CD, A.WRTTIME_IDTFR_ID) 			AS "wrttimeDesc"
+			, WRTTIME_IDTFR_ID 														AS "wrttimeIdtfrId"
+			, CASE WHEN C.DITC_CD = 'WW' THEN
+				<![CDATA[
+				CASE WHEN SYSDATE < TO_DATE(A.WRT_END_YMD, 'YYYY/MM/DD') THEN
+				]]>
+					'D-' || TRUNC(TO_DATE(A.WRT_END_YMD, 'YYYY/MM/DD') - SYSDATE)
+				ELSE
+					'만료'	
+				END
+			  ELSE TO_CHAR(A.WRT_DTTM, 'YYYY-MM-DD')
+			END 	AS "wrtDttmDesc"
+		FROM
+			TB_STTS_WRTLIST A
+			INNER JOIN TB_STTS_TBL B
+				ON  A.STATBL_ID = B.STATBL_ID
+			INNER JOIN TB_COMM_CODE C
+				ON  C.GRP_CD = 'S1006'
+				AND A.WRTSTATE_CD = C.DITC_CD
+			INNER JOIN TB_STTS_CATE D
+				ON  B.CATE_ID = D.CATE_ID
+		WHERE
+				A.STATBL_ID = #statblId:VARCHAR#
+			AND A.WRTTIME_IDTFR_ID = #wrttimeIdtfrId:VARCHAR#
+		ORDER BY A.STATBL_ID	
+	</select>
+	
+	<!-- 통계표 분류/항목 조회 -->
+	<select id="StatInputDao.selectStatInputItm" parameterClass="params" resultClass="java.util.HashMap">
+		/* sql id : StatInputDao.selectStatInputItm */
+		SELECT 
+				  L.ITM_ID					AS "itmId"
+				, L.DATANO					AS "datano"
+				, L.VIEW_ITM_NM				AS "itmNm"
+				, L.DUMMY_YN				AS "dummyYn"
+				, L.INPUT_NEED_YN			AS "inputNeedYn"
+				, L.LVL						AS "level"
+				, MAX(L.LVL) OVER() 		AS "maxLevel"
+				, L.LEAF 		AS "leaf"
+				, L.ITM_FULLNM	AS "itmFullNm"
+			<isNotEmpty property="itmTag">
+				, L.UI_ID					AS "uiId"
+				, L.UI_NM					AS "uiNm"
+			</isNotEmpty>
+		FROM (
+					SELECT 
+						  A.ITM_ID
+						, A.DATANO
+						, A.VIEW_ITM_NM
+						, A.DUMMY_YN
+						, A.INPUT_NEED_YN
+						, LEVEL						AS LVL
+						, CONNECT_BY_ISLEAF 		AS LEAF
+						, LTRIM(SYS_CONNECT_BY_PATH(A.VIEW_ITM_NM, '>'), '>')	AS ITM_FULLNM
+					<isNotEmpty property="itmTag">
+						<isEqual property="itmTag" compareValue="I">
+						, A.UI_ID					AS UI_ID
+						, B.UI_NM					AS UI_NM		
+						</isEqual>
+						<isNotEqual property="itmTag" compareValue="I">
+						, ''						AS UI_ID
+						, ''						AS UI_NM		
+						</isNotEqual>
+					</isNotEmpty>
+					FROM 
+						TB_STTS_TBL_ITM A
+					<isNotEmpty property="itmTag">
+						<isEqual property="itmTag" compareValue="I">	
+						INNER JOIN TB_STTS_STDDUI B
+							ON A.UI_ID = B.UI_ID
+						</isEqual>
+					</isNotEmpty>
+					WHERE A.DUMMY_YN = 'N'
+					START WITH 
+						STATBL_ID = #statblId:VARCHAR#
+						AND PAR_DATANO = 0
+					    AND ITM_TAG = #itmTag:CHAR#
+					    AND A.USE_YN = 'Y' 	
+					CONNECT BY  
+						PRIOR DATANO = PAR_DATANO
+						AND PRIOR STATBL_ID = STATBL_ID
+						AND A.USE_YN = 'Y'
+					ORDER SIBLINGS BY A.V_ORDER	
+		) L
+	</select>
+	
+	<!-- 통계 데이터 조회 -->
+	<select id="StatInputDao.selectStatInputData" parameterClass="params" resultClass="java.util.HashMap" remapResults="true">
+		/* sql id : StatInputDao.selectStatInputData */
+		SELECT 
+			A.STATBL_ID				AS "statblId"
+			, A.WRTTIME_IDTFR_ID	AS "wrttimeIdtfrId"
+			, A.DTADVS_CD			AS "dtadvsCd"
+			, A.ITM_DATANO			AS "itmDatano"
+			, A.CLS_DATANO			AS "clsDatano"
+			, A.GRP_DATANO			AS "grpDatano"
+			, A.CMMT_IDTFR			AS "cmmtIdtfr"
+		<isEmpty property="markYn">	
+			, A.DTA_VAL				AS "dtaVal"
+		</isEmpty>
+		<isNotEmpty property="markYn">
+			<isEqual property="markYn" compareValue="Y">
+			, A.DTA_SVAL			AS "dtaVal"
+			</isEqual>
+			<isNotEqual property="markYn" compareValue="Y">
+			, A.DTA_VAL				AS "dtaVal"
+			</isNotEqual>
+		</isNotEmpty>
+		<isNotEmpty property="verify">
+			<!-- 검증여부 확인하겠을경우 -->
+			<isEqual property="verify" compareValue="Y">		
+			, A.CHCK_CD				AS "chckCd"
+			, A.VERIFY_YN			AS "verifyYn"
+			, B.CD_EXP				AS "verifyRslt"
+			</isEqual>
+		</isNotEmpty>	
+		FROM TB_STTSDATA_01 A
+		<isNotEmpty property="verify">
+			<!-- 검증여부 확인하겠을경우 -->
+			<isEqual property="verify" compareValue="Y">		
+			INNER JOIN TB_COMM_CODE B
+   				ON  A.CHCK_CD = B.DITC_CD
+   				AND B.GRP_CD = 'S1007'
+   				AND B.USE_YN = 'Y'
+   			</isEqual>
+   		</isNotEmpty>
+		WHERE
+			A.STATBL_ID = #statblId:VARCHAR#
+		AND A.WRTTIME_IDTFR_ID IN
+			<isEmpty property="batchYn">
+				(#wrttimeIdtfrId:VARCHAR#)
+			</isEmpty>
+			<isNotEmpty property="batchYn">
+				<isEqual property="batchYn" compareValue="Y">
+	            	<iterate property="iterBatchWrttimeIdtfrId" open="(" close=")" conjunction=", ">
+	            		#iterBatchWrttimeIdtfrId[]#
+	            	</iterate>
+				</isEqual>
+				<isEqual property="batchYn" compareValue="N">
+	            	(#wrttimeIdtfrId:VARCHAR#)
+				</isEqual>
+			</isNotEmpty>
+			
+		<isNotEmpty property="clsExistYn">
+			<isEqual property="clsExistYn" compareValue="Y">	
+			AND A.CLS_DATANO IN 
+			(
+				SELECT B.DATANO FROM TB_STTS_TBL_ITM B
+				WHERE  B.STATBL_ID = A.STATBL_ID
+				AND    B.DUMMY_YN = 'N'
+				AND    B.USE_YN = 'Y'
+			)
+			</isEqual>
+		</isNotEmpty>
+		<isNotEmpty property="grpExistYn">
+			<isEqual property="grpExistYn" compareValue="Y">	
+			AND A.GRP_DATANO IN 
+			(
+				SELECT B.DATANO FROM TB_STTS_TBL_ITM B
+				WHERE  B.STATBL_ID = A.STATBL_ID
+				AND    B.DUMMY_YN = 'N'
+				AND    B.USE_YN = 'Y'
+			)
+			</isEqual>
+		</isNotEmpty>
+			AND A.DTADVS_CD IN 
+			(
+				SELECT C.OPT_VAL FROM TB_STTS_TBL_OPT C
+				WHERE  C.STATBL_ID = A.STATBL_ID
+				AND    C.OPT_CD = 'DD'
+				AND    C.USE_YN = 'Y'
+				AND    C.OPT_VAL = 'OD'	<!-- 원자료만 입력받음 -->
+			)
+		<isNotEmpty property="verify">
+			<!-- 검증여부 확인하겠을경우 -->
+			<isEqual property="verify" compareValue="Y">
+			AND A.CHCK_CD IS NOT NULL
+			AND A.VERIFY_YN = 'N'
+			</isEqual>	
+		</isNotEmpty>
+	</select>
+	
+	<!-- 통계자료 비교자료 구분코드 조회 -->
+	<select id="StatInputDao.selectStatDtadvsCd" parameterClass="params" resultClass="java.util.HashMap">
+		/* sql id : StatInputDao.selectStatDtadvsCd */
+		SELECT 
+			A.OPT_VAL		AS "dtadvsCd"
+			, B.DITC_NM		AS "dtadvsNm"
+		FROM
+			TB_STTS_TBL_OPT A
+			INNER JOIN TB_COMM_CODE B
+				ON  B.GRP_CD = 'S1102'
+				AND A.OPT_VAL = B.DITC_CD
+				AND B.USE_YN = 'Y'
+		WHERE
+			A.STATBL_ID = #statblId:VARCHAR#
+			AND	A.OPT_CD = 'DD'	
+			AND A.USE_YN = 'Y'
+			AND A.OPT_VAL = 'OD'	<!-- 원자료만 입력받음 -->
+		ORDER BY B.V_ORDER
+	</select>
+	
+	<!-- 통계표 항목의 검증코드와 정규식 확인 -->
+	<select id="StatInputDao.selectStatChckRegExp" parameterClass="params" resultClass="java.util.HashMap">
+		/* sql id : StatInputDao.selectStatChckRegExp */
+		SELECT 
+			STATBL_ID		AS "statblId"
+			, DATANO		AS "datano"
+			, CHCK_CD		AS "chckCd"
+			, DITC_NM		AS "chckNm"
+			, VALUE_CD		AS "valueCd"
+			, VALUE2_CD		AS "regExpPattern"
+		FROM 
+			TB_STTS_TBL_ITM A
+			INNER JOIN TB_COMM_CODE B
+				ON  B.GRP_CD = 'S1007'
+				AND A.CHCK_CD = B.DITC_CD
+				AND B.USE_YN = 'Y'
+		WHERE  
+			A.STATBL_ID = #statblId:VARCHAR#
+			AND A.ITM_TAG = 'I'
+			AND A.USE_YN = 'Y'	
+	</select>
+	
+	<!-- 통계표 입력 데이터 저장 -->
+	<update id="StatInputDao.insertStatInputData" parameterClass="java.util.HashMap">
+		/* sql id : StatInputDao.insertStatInputData */
+		MERGE INTO TB_STTSDATA_01 A
+		USING (
+			<!-- 배치 처리로 변경 -->
+				SELECT
+					#statblId:VARCHAR#					AS STATBL_ID
+					, #dtacycleCd:VARCHAR#				AS DTACYCLE_CD
+					, #wrttimeIdtfrId:VARCHAR#			AS WRTTIME_IDTFR_ID
+					, #dtadvsCd:VARCHAR#				AS DTADVS_CD
+					, #itmDatano:NUMERIC#				AS ITM_DATANO
+					, #clsDatano:NUMERIC#				AS CLS_DATANO
+					, #grpDatano:NUMERIC#				AS GRP_DATANO
+				<isEmpty property="markYn">	
+					, TO_NUMBER(#dtaVal:VARCHAR#)		AS DTA_VAL
+				</isEmpty>
+				<isNotEmpty property="markYn">
+					<isEqual property="markYn" compareValue="Y">
+						<!-- 기호가 x(초기화)로 입력되었을 경우 값 삭제 -->
+						, DECODE(#dtaVal:VARCHAR#, 'x', '', #dtaVal:VARCHAR#)	AS DTA_SVAL
+					</isEqual>
+					<isNotEqual property="markYn" compareValue="Y">
+						, TO_NUMBER(#dtaVal:VARCHAR#)		AS DTA_VAL
+					</isNotEqual>
+				</isNotEmpty>						
+					, 'PG'							AS WRTSTATE_CD
+					, #chckCd:VARCHAR#				AS CHCK_CD
+					, NVL(#verifyYn:CHAR#, 'N')		AS VERIFY_YN
+				FROM DUAL			
+		) B
+		ON (
+			A.STATBL_ID 			= B.STATBL_ID
+			AND A.DTACYCLE_CD		= B.DTACYCLE_CD
+			AND A.WRTTIME_IDTFR_ID 	= B.WRTTIME_IDTFR_ID
+			AND A.DTADVS_CD 		= B.DTADVS_CD
+			AND A.ITM_DATANO 		= B.ITM_DATANO
+		<isNotEmpty property="clsExistYn">
+			<isEqual property="clsExistYn" compareValue="Y">	
+			AND A.CLS_DATANO 		= B.CLS_DATANO
+			</isEqual>
+		</isNotEmpty>
+		<isNotEmpty property="grpExistYn">
+			<isEqual property="grpExistYn" compareValue="Y">	
+			AND A.GRP_DATANO 		= B.GRP_DATANO
+			</isEqual>
+		</isNotEmpty>
+		)
+		WHEN MATCHED THEN
+		UPDATE SET
+		<isEmpty property="markYn">	
+			A.DTA_VAL = B.DTA_VAL
+			, A.CHCK_CD = B.CHCK_CD
+			, A.VERIFY_YN = B.VERIFY_YN	
+		</isEmpty>
+		<isNotEmpty property="markYn">
+			<isEqual property="markYn" compareValue="Y">
+				A.DTA_SVAL = B.DTA_SVAL
+			</isEqual>
+			<isNotEqual property="markYn" compareValue="Y">
+				A.DTA_VAL = B.DTA_VAL
+				, A.CHCK_CD = B.CHCK_CD
+				, A.VERIFY_YN = B.VERIFY_YN	
+			</isNotEqual>
+		</isNotEmpty>
+			, A.REG_DTTS = SYSTIMESTAMP
+	
+		WHEN NOT MATCHED THEN
+		INSERT
+		(
+			A.SEQCE_NO
+			, A.STATBL_ID
+			, A.DTACYCLE_CD
+			, A.WRTTIME_IDTFR_ID
+			, A.DTADVS_CD
+			, A.ITM_DATANO
+			, A.CLS_DATANO
+			, A.GRP_DATANO
+		<isEmpty property="markYn">	
+			, A.DTA_VAL
+		</isEmpty>
+		<isNotEmpty property="markYn">
+			<isEqual property="markYn" compareValue="Y">
+				, A.DTA_SVAL
+			</isEqual>
+			<isNotEqual property="markYn" compareValue="Y">
+				, A.DTA_VAL
+			</isNotEqual>
+		</isNotEmpty>			
+			, A.REG_DTTS
+			, A.WRTSTATE_CD
+			, A.CHCK_CD
+			, A.VERIFY_YN
+		)
+		VALUES (
+			SQ_STTS_DATA_SEQ.NEXTVAL
+			, B.STATBL_ID
+			, B.DTACYCLE_CD
+			, B.WRTTIME_IDTFR_ID
+			, B.DTADVS_CD
+			, B.ITM_DATANO
+			, B.CLS_DATANO
+			, B.GRP_DATANO
+		<isEmpty property="markYn">	
+			, B.DTA_VAL
+		</isEmpty>
+		<isNotEmpty property="markYn">
+			<isEqual property="markYn" compareValue="Y">
+				, B.DTA_SVAL
+			</isEqual>
+			<isNotEqual property="markYn" compareValue="Y">
+				, B.DTA_VAL
+			</isNotEqual>
+		</isNotEmpty>				
+			, SYSTIMESTAMP
+			, B.WRTSTATE_CD
+			, B.CHCK_CD
+			, B.VERIFY_YN
+		)
+	</update>		
+	
+	<!-- 통계표 주석 데이터 저장 -->
+	<update id="StatInputDao.saveStatInputDataCmmt" parameterClass="java.util.HashMap">
+		/* sql id : StatInputDao.saveStatInputDataCmmt */
+		UPDATE TB_STTSDATA_01
+		SET
+			CMMT_IDTFR 	= #cmmtIdtfr:VARCHAR#
+			, CMMT_CONT = #cmmtCont:VARCHAR#
+			, ENG_CMMT_CONT = #engCmmtCont:VARCHAR#
+		WHERE
+			STATBL_ID = #statblId:VARCHAR#
+			AND WRTTIME_IDTFR_ID = #wrttimeIdtfrId:VARCHAR#
+			AND DTADVS_CD = #dtadvsCd:VARCHAR#
+			AND ITM_DATANO = #itmDatano:NUMERIC#
+			<isNotEmpty property="clsDatano">
+			AND CLS_DATANO = #clsDatano:NUMERIC#
+			</isNotEmpty>
+			<isNotEmpty property="grpDatano">
+			AND GRP_DATANO = #grpDatano:NUMERIC#
+			</isNotEmpty>
+	</update>
+	
+	<!-- 통계데이터 주석 조회 -->
+	<select id="StatInputDao.selectStatInputCmmtList" parameterClass="params" resultClass="java.util.HashMap">
+		/* sql id : StatInputDao.selectStatInputCmmtList */
+		SELECT
+			DTADVS_CD 		AS "dtadvsCd"
+			, ITM_DATANO	AS "itmDatano"
+			, WRTTIME_IDTFR_ID	AS "wrttimeIdtfrId"
+			,  (SELECT VIEW_ITM_FULLNM FROM TB_STTS_TBL_ITM 
+	            WHERE  STATBL_ID = A.STATBL_ID 
+	            AND    ITM_TAG = 'I' 
+	            AND DATANO = A.ITM_DATANO )	AS "itmFullNm"
+			, CLS_DATANO	AS "clsDatano"
+			,  (SELECT VIEW_ITM_FULLNM FROM TB_STTS_TBL_ITM 
+	            WHERE  STATBL_ID = A.STATBL_ID 
+	            AND    ITM_TAG = 'C' 
+	            AND DATANO = A.CLS_DATANO )	AS "clsFullNm"
+	        , GRP_DATANO	AS "grpDatano" 
+	        ,  (SELECT VIEW_ITM_FULLNM FROM TB_STTS_TBL_ITM 
+	            WHERE  STATBL_ID = A.STATBL_ID 
+	            AND    ITM_TAG = 'G' 
+	            AND DATANO = A.GRP_DATANO )	AS "grpFullNm"   
+			, CMMT_IDTFR	AS "cmmtIdtfr"
+			, CMMT_CONT		AS "cmmtCont"
+			, ENG_CMMT_CONT	AS "engCmmtCont"
+			, 'iCol_' || ITM_DATANO || DTADVS_CD || WRTTIME_IDTFR_ID || CLS_DATANO || GRP_DATANO AS "cmmtKey"
+		FROM TB_STTSDATA_01 A
+		WHERE
+			STATBL_ID = #statblId:VARCHAR#
+			AND WRTTIME_IDTFR_ID IN
+			<isEmpty property="batchYn">
+				(#wrttimeIdtfrId:VARCHAR#)
+			</isEmpty>
+			<isNotEmpty property="batchYn">
+				<isEqual property="batchYn" compareValue="Y">
+	            	<iterate property="iterBatchWrttimeIdtfrId" open="(" close=")" conjunction=", ">
+	            		#iterBatchWrttimeIdtfrId[]#
+	            	</iterate>
+				</isEqual>
+				<isEqual property="batchYn" compareValue="N">
+	            	(#wrttimeIdtfrId:VARCHAR#)
+				</isEqual>
+			</isNotEmpty>			
+			
+			AND CMMT_IDTFR IS NOT NULL	
+	</select>
+	<select id="StatInputDao.selectStatInputCmmtListCount" parameterClass="params" resultClass="java.util.HashMap">
+		/* sql id : StatInputDao.selectStatInputCmmtListCount */
+		SELECT
+			COUNT(*)
+		FROM TB_STTSDATA_01
+		WHERE
+			STATBL_ID = #statblId:VARCHAR#
+			AND WRTTIME_IDTFR_ID = #wrttimeIdtfrId:VARCHAR#
+			AND CMMT_IDTFR IS NOT NULL	
+	</select>
+	
+	<!-- 통계 데이터셋 연계정보 조회 -->
+	<select id="StatInputDao.selectStatInputDscn" parameterClass="params" resultClass="java.util.HashMap">
+		/* sql id : StatInputDao.selectStatInputDscn */
+		SELECT 
+			DSCN_ID			AS "dscnId"
+			, DSCN_NM		AS "dscnNm"
+			, DSCNTY_CD		AS "dscntyCd"
+			, OWNER_CD		AS "ownerCd"
+			, DS_ID			AS "dsId"
+		FROM
+			TB_STTS_DSCN
+		WHERE
+			USE_YN = 'Y'	
+		AND DSCN_ID = ( SELECT DSCN_ID 
+					    FROM   TB_STTS_TBL
+					    WHERE  STATBL_ID = #statblId:VARCHAR#)	
+	</select>
+	
+	<!-- 아이템 갯수 확인 -->
+	<select id="StatInputDao.selectStatInputGrpClsCnt" parameterClass="params" resultClass="Integer">
+		/* sql id : StatInputDao.selectStatInputGrpClsCnt */
+		SELECT
+			COUNT(*)
+		FROM
+			TB_STTS_TBL_ITM
+		WHERE
+			STATBL_ID = #statblId:VARCHAR#
+			AND ITM_TAG = #itmTag:VARCHAR#
+	</select>
+	
+	<!-- 통계자료작성 처리 기록 -->
+	<insert id="StatInputDao.insertStatInputLogWrtList" parameterClass="params" >
+		/* sql id : StatInputDao.insertStatInputLogWrtList */
+		INSERT INTO TB_LOG_STTS_WRTLIST A (
+			WRT_SEQCE_NO
+			, WRT_SEQ
+			, STATBL_ID
+			, STATBL_NM
+			, WRTSTATE_CD
+			, WRT_MSG_CONT
+			, SRC_FILE_NM
+			, SAVE_FILE_NM
+			, WRT_DTTM
+			, WRT_ORG_CD
+			, WRT_ORG_NM
+			, WRT_USR_CD
+			, WRT_USR_NM
+			, REG_ID
+		)
+		SELECT
+			SQ_LOG_STTS_MNG_SEQ.NEXTVAL 
+			, A.WRT_SEQ
+			, A.STATBL_ID
+			, B.STATBL_NM
+			, #wrtStateCd:VARCHAR#
+			, #wrtMsgCont:VARCHAR#
+			, #srcFileNm:VARCHAR#
+			, #saveFileNm:VARCHAR#
+			, SYSDATE
+			, A.WRT_ORG_CD
+			, (SELECT ORG_NM FROM TB_COMM_ORG WHERE ORG_CD = A.WRT_ORG_CD)
+			, A.WRT_USR_CD
+			, (SELECT USR_NM FROM TB_COMM_USR WHERE USR_CD = A.WRT_USR_CD)
+			, #usrId:VARCHAR#
+		FROM
+			TB_STTS_WRTLIST A
+		 	INNER JOIN TB_STTS_TBL B
+		 		ON  A.STATBL_ID = B.STATBL_ID
+		WHERE
+			A.WRT_SEQ = #wrtSeq:VARCHAR# 
+	</insert>	
+	
+	<!-- 검증 데이터 null 처리 -->
+	<update id="StatInputDao.updateStatVerifyDataInit" parameterClass="java.util.HashMap">
+		/* sql id : StatInputDao.updateStatVerifyDataInit */
+		UPDATE TB_STTSDATA_01
+		SET
+			CHCK_CD 	= NULL
+		WHERE
+			STATBL_ID = #statblId:VARCHAR#
+			AND WRTTIME_IDTFR_ID = #wrttimeIdtfrId:VARCHAR#
+	</update>
+	
+	<!-- 자료작성코드 변경처리시 검증데이터 오류 건수 조회 -->
+	<select id="StatInputDao.selectStatInputVerifyCnt" parameterClass="params" resultClass="Integer">
+		/* sql id : StatInputDao.selectStatInputVerifyCnt */
+		SELECT COUNT(A.DTA_VAL) AS CNT 
+		  FROM TV_STTSDATA_ALL A 
+		 WHERE ( 
+		           A.STATBL_ID, 
+		           DTACYCLE_CD, 
+		           WRTTIME_IDTFR_ID 
+		       ) 
+		       IN 
+		       (SELECT STATBL_ID, 
+		              DTACYCLE_CD, 
+		              WRTTIME_IDTFR_ID 
+		         FROM TB_STTS_WRTLIST 
+		        WHERE WRT_SEQ IN
+				<iterate property="iterWrtSeqs" open="(" close=")" conjunction=", ">
+	            	#iterWrtSeqs[]:NUMERIC#
+	            </iterate>		        
+		       ) 
+		       AND A.CHCK_CD IS NOT NULL 
+		       AND A.VERIFY_YN = 'N' 
+		       AND A.DTADVS_CD = 'OD'
+	</select>
+	
+	<!-- 승인시 통계 분석자료 생성 -->
+	<procedure id="StatInputDao.execSpCreateSttsAnals" parameterClass="params" resultClass="record" >
+		/* sql id : StatInputDao.execSpCreateSttsAnals */
+	    <![CDATA[
+	      { CALL SP_CREATE_STTS_ANALS(#wrtSeq:VARCHAR#)}
+	      ]]>
+	</procedure>
+	
+	<!-- 자료시점 주석 조회 -->
+	<select id="StatInputDao.selectSttsTblDif" parameterClass="params" resultClass="record">
+		SELECT CMMT_IDTFR 		AS "cmmtIdtfr"
+		       , CMMT_CONT 		AS "cmmtCont"
+		       , ENG_CMMT_CONT 	AS "engCmmtCont"
+		  FROM TB_STTS_TBL_DIF 
+		 WHERE STATBL_ID 			= #statblId:VARCHAR#
+		       AND DTACYCLE_CD 		= #dtacycleCd:VARCHAR#
+		       AND WRTTIME_IDTFR_ID = #wrttimeIdtfrId:VARCHAR#	
+	</select>
+	
+	<!-- 자료시점 주석 머지처리 -->
+	<update id="StatInputDao.saveSttsTblDif" parameterClass="java.util.HashMap">
+		MERGE INTO TB_STTS_TBL_DIF A
+		USING (
+			SELECT 
+				#statblId:VARCHAR# 			AS STATBL_ID
+				, #dtacycleCd:VARCHAR#		AS DTACYCLE_CD
+				, #wrttimeIdtfrId:VARCHAR#	AS WRTTIME_IDTFR_ID
+				, #cmmtIdtfr:VARCHAR#		AS CMMT_IDTFR
+				, #cmmtCont:VARCHAR#		AS CMMT_CONT
+				, #engCmmtCont:VARCHAR#		AS ENG_CMMT_CONT
+				, (SELECT MAX(WRTSTATE_CD) 
+				   FROM   TB_STTS_WRTLIST 
+				   WHERE  STATBL_ID 		= #statblId:VARCHAR#		
+				   AND    DTACYCLE_CD 		= #dtacycleCd:VARCHAR#
+				   AND    WRTTIME_IDTFR_ID 	= #wrttimeIdtfrId:VARCHAR#
+				 ) AS WRTSTATE_CD
+			FROM DUAL
+		) B
+		ON (
+			A.STATBL_ID 			= B.STATBL_ID
+			AND A.DTACYCLE_CD 		= B.DTACYCLE_CD
+			AND A.WRTTIME_IDTFR_ID 	= B.WRTTIME_IDTFR_ID
+		)
+		WHEN MATCHED THEN 
+		UPDATE SET
+			A.CMMT_IDTFR 		= B.CMMT_IDTFR
+			, A.CMMT_CONT 		= B.CMMT_CONT
+			, A.ENG_CMMT_CONT 	= B.ENG_CMMT_CONT
+			, A.UPD_DTTM 		= SYSDATE
+		WHEN NOT MATCHED THEN
+		INSERT (
+			A.STATBL_ID, A.DTACYCLE_CD, A.WRTTIME_IDTFR_ID, A.CMMT_IDTFR, A.CMMT_CONT, A.ENG_CMMT_CONT, A.WRTSTATE_CD, A.REG_DTTM, A.UPD_DTTM
+		)
+		VALUES (
+			B.STATBL_ID, B.DTACYCLE_CD, B.WRTTIME_IDTFR_ID, B.CMMT_IDTFR, B.CMMT_CONT, B.ENG_CMMT_CONT, B.WRTSTATE_CD, SYSDATE, SYSDATE
+		)	
+	</update>
+	
+	
+		<!-- 통계자료작성 처리기록 팝업 리스트 조회 -->
+	<select id="StatInputDao.selectStatLogSttsWrtList" parameterClass="params" resultClass="record">
+		/* sql id : StatInputDao.selectStatLogSttsWrtList */
+		SELECT   A.WRT_SEQCE_NO                              AS "wrtSeqceNo" ,
+		         A.WRT_MSG_CONT                              AS "wrtMsgCont",
+		         A.WRT_ORG_NM                                AS "wrtOrgNm",
+		         A.WRT_USR_NM                                AS "wrtUsrNm",
+		         TO_CHAR(A.WRT_DTTM, 'YYYY-MM-DD HH24:MI')   AS "wrtDttm",
+		         FN_GET_COMM_CODE_NM('S1006', A.WRTSTATE_CD) AS "wrtstateNm",
+				 FN_GET_WRTTIME_IDTFR_NM(B.DTACYCLE_CD, B.WRTTIME_IDTFR_ID) 	AS "wrttimeDesc"
+		FROM     TB_LOG_STTS_WRTLIST A
+		         INNER JOIN TB_STTS_WRTLIST B
+		         ON       A.WRT_SEQ          = B.WRT_SEQ
+				<iterate prepend="AND B.WRTTIME_IDTFR_ID IN" property="wrttimeIdtfrIdArr" open="(" close=")" conjunction=",">
+					#wrttimeIdtfrIdArr[]# 
+				</iterate>
+		WHERE    A.STATBL_ID                 = #statblId:VARCHAR#
+		ORDER BY B.WRTTIME_IDTFR_ID DESC, A.WRT_SEQCE_NO DESC
+	</select>
+	
+	<!-- 통계 사용자 입력권한체크 -->
+	<select id="StatInputDao.selectStatsInputUsrAcc" parameterClass="params" resultClass="string">
+		/* sql id : StatInputDao.selectStatsInputUsrAcc */
+		SELECT NVL(MAX(A.PRSS_ACC_CD), 0)
+		FROM   TB_STTS_TBL_USR A
+		WHERE  STATBL_ID = #statblId:VARCHAR#
+		AND	   A.USE_YN = 'Y'		
+		<isEmpty property="SysInpGbn">
+			AND	A.USR_CD = #inpUsrCd:NUMERIC#
+		</isEmpty>
+		<isNotEmpty property="SysInpGbn">
+			<isEqual property="SysInpGbn" compareValue="ORG">
+				AND ORG_CD = #inpOrgCd:VARCHAR# 
+			</isEqual>
+			<isEqual property="SysInpGbn" compareValue="USR">
+				AND	A.USR_CD = #inpUsrCd:NUMERIC#	
+			</isEqual>
+		</isNotEmpty>		
+	</select>
+	
+</sqlMap>

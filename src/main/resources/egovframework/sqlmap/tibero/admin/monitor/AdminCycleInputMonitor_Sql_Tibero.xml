@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- @(#)AdminOpenInputMonitor_Sql_Tibero.xml 1.0 2019/10/15                     -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- 공공데이터 입력현황을 관리하는 SQL 파일이다.	                                     -->
+<!--                                                                         -->
+<!-- @author JSSON                                                    	-->
+<!-- @version 1.0 2019/10/05                                                -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<sqlMap namespace="cycleInputMonitor">
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Type Alias                                                          -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+    <!-- 코드정보 조회 -->
+    <select id="cycleInputMonitorDao.selectOption" parameterClass="params" resultClass="record">
+    	/* sql id : cycleInputMonitorDao.selectOption */
+        SELECT 
+        	DITC_CD AS "code",
+        	DITC_NM AS "name"
+        FROM TB_COMM_CODE
+        WHERE GRP_CD = #grpCd#
+        	AND USE_YN = 'Y'
+        	<isNotEmpty property="valueCd" prepend="AND">
+        		VALUE_CD LIKE '%' || #valueCd# || '%'
+        	</isNotEmpty>
+        ORDER BY V_ORDER
+    </select>     
+    <!-- 메인리스트 쿼리 -->
+    <sql id="cycleInputMonitorDao.main">
+		SELECT D.DS_ID 			     AS "dsId"
+       		 , MAX(D.DS_NM)    		 AS "dsNm"
+       		 , L.LOAD_ORG_CD
+       		 , FN_GET_COMM_CODE_NM('D1009', L.LOAD_CD) 		AS "loadNm" 		 
+       		 , MAX(L.LOAD_ORG_NM)	 AS "loadOrgNm" 
+       		 , COUNT(*)           	 AS "cnt" 
+       		 , SUM(CASE WHEN LDSTATE_CD = 'AC' THEN 1 ELSE 0 END)           AS "acCnt"  
+       		 , SUM(CASE WHEN LDSTATE_CD IN ('AW') THEN 1 ELSE 0 END)        AS "awCnt"  
+       		 , SUM(CASE WHEN D.LOAD_CD NOT IN ('RECY06', 'RECY07') AND L.LDSTATE_CD NOT IN ('AC', 'AW') 
+          <![CDATA[
+                   AND L.LOAD_PLAN_YMD < TO_CHAR(SYSDATE, 'YYYYMMDD') THEN 1  ELSE 0 END) AS "nawCnt" 
+                ]]>     
+       		 , SUM(CASE WHEN ( D.LOAD_CD IN ('RECY06', 'RECY07')
+                     AND L.LDSTATE_CD NOT IN ('AC', 'AW')) 
+                      OR (L.LDSTATE_CD NOT IN ('AC', 'AW') 
+           <![CDATA[
+                     AND L.LOAD_PLAN_YMD >= TO_CHAR(SYSDATE, 'YYYYMMDD')) THEN 1 ELSE 0 END) AS "pnawCnt"
+           ]]>
+		 FROM TB_OPEN_DS D 
+        INNER JOIN TB_OPEN_LDLIST L
+           ON D.DS_ID = L.DS_ID 
+          AND D.USE_YN = 'Y' 
+	     
+	</sql>
+		    	
+    <sql id="cycleInputMonitorDao.main.where">
+    	WHERE 1=1
+    	  AND D.CONNTY_CD = 'UI'
+			<isNotEmpty property="searchVal" prepend="AND">
+				<isEqual property="searchGubun" compareValue="DS_NM" >
+					D.DS_NM LIKE '%' || #searchVal# || '%'
+				</isEqual>
+				<isEqual property="searchGubun" compareValue="DS_ID" >
+					D.DS_ID LIKE '%' || #searchVal# || '%'
+				</isEqual>
+		   	</isNotEmpty>
+   		<isNotEmpty property="beginOpenDttm" prepend="AND">
+		   TO_DATE(L.LOAD_PLAN_YMD, 'YYYY-MM-DD') BETWEEN TO_DATE(#beginOpenDttm#, 'YYYY-MM-DD') AND TO_DATE(#endOpenDttm#, 'YYYY-MM-DD')	   	 
+	   	</isNotEmpty>
+   		<isNotEmpty property="orgCd" prepend="AND">
+		  L.LOAD_ORG_CD LIKE #orgCd#	   	 
+	   	</isNotEmpty>
+   		<isNotEmpty property="nawYn" prepend="AND">
+   		<![CDATA[
+   		 (D.LOAD_CD NOT IN ('RECY06', 'RECY07') AND L.LDSTATE_CD NOT IN ('AC', 'AW') AND L.LOAD_PLAN_YMD < TO_CHAR(SYSDATE, 'YYYYMMDD'))
+	   	]]>
+	   	</isNotEmpty>
+		<isEmpty property="loadCdAll" prepend="AND">
+			<isNotEmpty property="loadCdArr">
+				<iterate prepend="L.LOAD_CD IN" property="loadCdArr" open="(" close=")" conjunction=",">
+					#loadCdArr[]# 
+				</iterate>
+			</isNotEmpty>
+		</isEmpty>	   	
+	   	
+	   	GROUP BY D.DS_ID, L.LOAD_ORG_CD, L.LOAD_CD 
+    </sql>
+  
+  	<sql id="cycleInputMonitorDao.main.whereChart">
+  		WHERE D.CONNTY_CD  = 'UI'
+  		 <isNotEmpty property="beginOpenDttm" prepend="AND">
+		   TO_DATE(L.LOAD_PLAN_YMD, 'YYYY-MM-DD') BETWEEN TO_DATE(#beginOpenDttm#, 'YYYY-MM-DD') AND TO_DATE(#endOpenDttm#, 'YYYY-MM-DD')	   	 
+	   	</isNotEmpty>
+		<isNotEmpty property="searchVal" prepend="AND">
+			<isEqual property="searchGubun" compareValue="DS_NM" >
+				D.DS_NM LIKE '%' || #searchVal# || '%'
+			</isEqual>
+			<isEqual property="searchGubun" compareValue="DS_ID" >
+				D.DS_ID LIKE '%' || #searchVal# || '%'
+			</isEqual>
+	   	</isNotEmpty>
+   		<isNotEmpty property="beginOpenDttm" prepend="AND">
+		   TO_DATE(L.LOAD_PLAN_YMD, 'YYYY-MM-DD') BETWEEN TO_DATE(#beginOpenDttm#, 'YYYY-MM-DD') AND TO_DATE(#endOpenDttm#, 'YYYY-MM-DD')	   	 
+	   	</isNotEmpty>
+   		<isNotEmpty property="orgCd" prepend="AND">
+		  L.LOAD_ORG_CD LIKE #orgCd#	   	 
+	   	</isNotEmpty>
+   		<isNotEmpty property="nawYn" prepend="AND">
+   		<![CDATA[
+   		 (D.LOAD_CD NOT IN ('RECY06', 'RECY07') AND L.LDSTATE_CD NOT IN ('AC', 'AW') AND L.LOAD_PLAN_YMD < TO_CHAR(SYSDATE, 'YYYYMMDD'))
+	   	]]>
+	   	</isNotEmpty>
+		<isEmpty property="loadCdAll" prepend="AND">
+			<isNotEmpty property="loadCdArr">
+				<iterate prepend="L.LOAD_CD IN" property="loadCdArr" open="(" close=")" conjunction=",">
+					#loadCdArr[]# 
+				</iterate>
+			</isNotEmpty>
+		</isEmpty>		   	
+  	</sql>	
+  
+  	<!-- 메인 리스트 조회 -->
+  	<select id="cycleInputMonitorDao.selectCycleInputMonitorList" parameterClass="params" resultClass="record">
+  		/* sql id : cycleInputMonitorDao.selectCycleInputMonitorList */
+  		<isEqual property="paging" compareValue="0">
+		SELECT AA.* 
+		FROM   (SELECT ROWNUM AS ROW_NUM, AA.*
+				FROM   (  
+		</isEqual>
+			<include refid="cycleInputMonitorDao.main"></include>
+			<include refid="cycleInputMonitorDao.main.where"></include>
+			ORDER BY
+			    D.DS_ID DESC
+		<isEqual property="paging" compareValue="0">
+		<![CDATA[
+				) AA
+			WHERE ROWNUM <= #end:NUMERIC#
+			) AA
+		WHERE AA.ROW_NUM >= #start:NUMERIC#
+		]]>
+		</isEqual>
+  	</select>
+  	<select id="cycleInputMonitorDao.selectCycleInputMonitorListCount" parameterClass="params" resultClass="int">
+  		/* sql id : cycleInputMonitorDao.selectCycleInputMonitorListCount */
+		SELECT COUNT(*) 
+		  FROM (SELECT COUNT(*) 
+		          FROM   TB_OPEN_DS D
+			     INNER JOIN TB_OPEN_LDLIST L
+           		ON D.DS_ID = L.DS_ID 
+          		 AND D.USE_YN = 'Y' 
+		<include refid="cycleInputMonitorDao.main.where"></include>
+		) AA
+  	</select>
+  	
+  	
+  	<select id="cycleInputMonitorDao.selectCycleInputMonitorChart" parameterClass="params" resultClass="record">
+  		/* sql id : cycleInputMonitorDao.selectCycleInputMonitorChart */
+		SELECT TOT_CNT, AC_CNT, AW_CNT
+			 , NAW_CNT
+    	    , pNAW_CNT 
+		    , (CASE WHEN (TOT_CNT - pNAW_CNT) = 0 THEN 0 ELSE ROUND((AC_CNT + AW_CNT)*100 / (TOT_CNT - pNAW_CNT),2) END) AW_RATE  
+		  FROM
+			(
+     		 SELECT	COUNT(*) AS TOT_CNT 
+          		  , SUM(CASE WHEN L.LDSTATE_CD = 'AC' THEN 1 ELSE 0 END) AS AC_CNT  
+          		  , SUM(CASE WHEN L.LDSTATE_CD IN ('AW') THEN 1 ELSE 0 END) AS AW_CNT  
+          		  <![CDATA[
+          		  , SUM(CASE WHEN D.LOAD_CD NOT IN ('RECY06', 'RECY07') AND L.LDSTATE_CD NOT IN ('AC', 'AW') AND L.LOAD_PLAN_YMD < TO_CHAR(SYSDATE, 'YYYYMMDD') THEN 1 ELSE 0 END) AS NAW_CNT 
+          		  , SUM(CASE WHEN (D.LOAD_CD IN ('RECY06', 'RECY07') AND  L.LDSTATE_CD NOT IN ('AC', 'AW') ) OR ( L.LDSTATE_CD NOT IN ('AC', 'AW') AND L.LOAD_PLAN_YMD >= TO_CHAR(SYSDATE, 'YYYYMMDD')) THEN 1 ELSE 0 END) AS PNAW_CNT 
+					]]>
+      		  FROM TB_OPEN_DS D INNER JOIN  TB_OPEN_LDLIST L ON D.DS_ID =  L.DS_ID AND D.USE_YN = 'Y'
+     		 <include refid="cycleInputMonitorDao.main.whereChart"></include>
+			)
+  	</select>
+  	
+  	
+</sqlMap>

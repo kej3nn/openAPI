@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+
+<sqlMap namespace="MainMngDAO">
+
+		<resultMap id="OpenMetaOrderListAllMainTree" class="egovframework.admin.openinf.service.OpenMetaOrder" >
+    <result column="INF_ID" property="infId"  />
+    <result column="INF_NM" property="infNm" />
+    <result column="DT_NM" property="dtNm"  />
+    <result column="CCL_NM" property="cclNm"  />
+    <!-- <result column="INF_STATE" property="infState" /> -->
+    <result column="OPEN_DTTM" property="openDttm"  />
+     <result column="ORG_NM" property="orgNm" />
+     <result column="CATE_NM" property="cateNm" />
+     <result column="CATE_FULLNM" property="cateFullnm" />
+     <result column="USR_NM" property="usrNm"  />
+     <!-- <result column="INF_TAG" property="infTag"  />  -->
+     <result column="OPEN_SRV" property="openSrv"  />
+     <result column="USE_ORG_CNT" property="useOrgCnt"  />
+     <result column="APRV_PROC_YN" property="aprvProcYn"  />
+     <result column="FVT_DATA_ORDER" property="fvtDataOrder"  />
+     <result column="V_ORDER" property="vOrder" />
+     
+         
+  </resultMap>
+
+	<select id="MainMngDAO.selectListCate" resultClass="java.util.HashMap">
+		SELECT 
+			CATE_ID "cateId"
+		    , CATE_NM "cateNm"
+		    , V_ORDER "vOrder"
+		FROM
+			TB_OPEN_CATE
+		WHERE
+			PAR_CATE_ID IS NULL
+			AND CATE_ID = TOP_CATE_ID
+			AND USE_YN = 'Y'
+		 ORDER BY V_ORDER 
+	</select>
+
+	<update id="MainMngDAO.updateCateOrder" parameterClass="egovframework.admin.openinf.service.OpenMetaOrder">
+		UPDATE TB_OPEN_CATE
+		SET 
+			V_ORDER = #vOrder:NUMERIC#
+		WHERE
+			CATE_ID = #cateId:VARCHAR#
+	</update>
+	
+	<select id="MainMngDAO.selectListMainMng" resultClass="java.util.HashMap">
+		SELECT
+			HOME_SEQ "seqceNo"
+			, SRV_NM "srvTit"
+			, HOME_TAG_CD "homeTagCd"
+			, (SELECT DITC_NM FROM TB_COMM_CODE WHERE GRP_CD = 'B1009' AND DITC_CD = HOME_TAG_CD) "homeTagNm"
+			, TO_CHAR(START_DTTM, 'YYYY-MM-DD') "strtDttm"
+			, TO_CHAR(END_DTTM, 'YYYY-MM-DD') "endDttm"
+			, LINK_URL "linkUrl"
+			, SAVE_FILE_NM "saveFileNm"
+			, SUB_SAVE_FILE_NM "subSaveFileNm"
+			, POPUP_YN "popupYn"
+			, V_ORDER "vOrder"
+			, USE_YN "useYn"
+			, SRV_CONT "srvCont"
+		FROM
+			TB_COMM_HOME
+			
+		WHERE 1 =1 
+		<isNotEmpty property="homeTagCd" >
+		AND HOME_TAG_CD = #homeTagCd#
+		</isNotEmpty>
+		<isNotEmpty property="searchWord" >
+		<isEqual property="searchWd" compareValue="1" >
+		AND SRV_NM LIKE '%'||#searchWord#||'%'
+		</isEqual>
+		<isEqual property="searchWd" compareValue="2">
+		AND LINK_URL LIKE '%'||#searchWord#||'%'
+		</isEqual>
+		</isNotEmpty>
+		<isEqual property="useYn" compareValue="Y">
+	 		AND USE_YN = 'Y'
+	 	</isEqual>
+	 	<isEqual property="useYn" compareValue="N">
+	 		AND USE_YN = 'N'
+	 	</isEqual>
+		ORDER BY
+			V_ORDER
+	</select>
+	
+	<update id="MainMngDAO.saveMainMngData" parameterClass="java.util.HashMap">
+		MERGE INTO TB_COMM_HOME
+		USING DUAL ON (HOME_SEQ = #seqceNo:NUMERIC#)
+		WHEN MATCHED THEN
+			UPDATE SET
+				SRV_NM = #srvTit:VARCHAR#
+				, HOME_TAG_CD = #homeTagCd:VARCHAR#
+				, START_DTTM = TO_DATE(#strtDttm:VARCHAR#, 'YYYY-MM-DD')
+				, END_DTTM = TO_DATE(#endDttm:VARCHAR#, 'YYYY-MM-DD')
+				, LINK_URL = #linkUrl:VARCHAR#
+				, SAVE_FILE_NM = #saveFileNm:VARCHAR#
+				, POPUP_YN = #popupYn:CHAR#
+				, USE_YN = #useYn:CHAR#
+				, UPD_DTTM = SYSDATE
+				, UPD_ID = #usrId:VARCHAR#
+				, SUB_SAVE_FILE_NM = #subSaveFileNm:VARCHAR#
+				, SRV_CONT = #srvCont:VARCHAR#
+		WHEN NOT MATCHED THEN
+			INSERT (
+				HOME_SEQ
+				, SRV_NM
+				, HOME_TAG_CD
+				, START_DTTM
+				, END_DTTM
+				, LINK_URL
+				, SAVE_FILE_NM
+				, POPUP_YN
+				, USE_YN
+				, V_ORDER
+				, REG_ID
+				, REG_DTTM
+				, SUB_SAVE_FILE_NM
+				, SRV_CONT
+			) VALUES (
+				SQ_COMM_HOME_SEQ.NEXTVAL
+				, #srvTit:VARCHAR#
+				, #homeTagCd:VARCHAR#
+				, TO_DATE(#strtDttm:VARCHAR#, 'YYYY-MM-DD')
+				, TO_DATE(#endDttm:VARCHAR#, 'YYYY-MM-DD')
+				, #linkUrl:VARCHAR#
+				, #saveFileNm:VARCHAR#
+				, #popupYn:CHAR#
+				, #useYn:CHAR#
+				, (SELECT COUNT(HOME_SEQ)+1 FROM TB_COMM_HOME)
+				, #usrId:VARCHAR#
+				, SYSDATE
+				, #subSaveFileNm:VARCHAR#
+				, #srvCont:VARCHAR#
+			)
+	</update>
+
+	<update id="MainMngDAO.updateMainMngOrder" parameterClass="egovframework.admin.mainmng.service.MainMngOrder">
+		UPDATE TB_COMM_HOME
+		SET 
+			V_ORDER = #vOrder:NUMERIC#
+		WHERE
+			HOME_SEQ = #seqceNo:NUMERIC#
+	</update>
+	
+	<delete id="MainMngDAO.deleteMainMng" parameterClass="string">
+		DELETE FROM	TB_COMM_HOME
+		WHERE HOME_SEQ = #value:NUMERIC#
+	</delete>
+	
+	<select id="MainMngDAO.selectOpenCateListAllMainTree" parameterClass="egovframework.admin.openinf.service.OpenMetaOrder" resultMap="OpenMetaOrderListAllMainTree" >
+	SELECT *
+	  FROM(
+		SELECT ROWNUM AS RN, TB.*
+		  FROM
+		  (
+			SELECT A.INF_ID, A.DT_NM, A.INF_NM, A.CCL_NM, A.CATE_NM, A.CATE_FULLNM, A.ORG_NM, A.USR_NM, A.USE_ORG_CNT, A.APRV_PROC_YN, B.FVT_DATA_ORDER, B.V_ORDER
+			
+			,TO_CHAR(A.OPEN_DTTM,'YYYY-MM-DD') AS OPEN_DTTM
+			,FN_GET_OPEN_SRV_HTML(A.OPEN_SRV) AS OPEN_SRV
+			,DS_CD
+			FROM TV_MNG_INF A
+			INNER JOIN TB_OPEN_INF B
+			ON A.INF_ID = B.INF_ID
+		 	WHERE 1=1 
+		 	AND B.INF_STATE = 'Y' 
+		 	<![CDATA[
+		 	AND B.OPEN_DTTM <= SYSDATE
+		 	]]>
+		 	AND A.OPEN_SRV IS NOT NULL
+		 	AND NOT REGEXP_LIKE (A.INF_NM,'(유흥|유해|안마|여관|캬바레|단란|성인|나이트|모텔)')
+		 	<isNotEmpty property="searchWord" >
+				
+				AND A.INF_NM LIKE '%'||#searchWord#||'%'
+				
+			</isNotEmpty>
+		 	ORDER BY B.FVT_DATA_ORDER
+	    )TB
+	)	
+	</select>
+
+	<update id="MainMngDAO.updateOrderby" parameterClass="egovframework.admin.openinf.service.OpenMetaOrder">
+		UPDATE TB_OPEN_INF A SET A.V_ORDER=#vOrder:NUMERIC#
+		,A.FVT_DATA_ORDER = #fvtDataOrder:NUMERIC#
+		WHERE INF_ID = #infId:VARCHAR#
+	</update>
+	
+</sqlMap>

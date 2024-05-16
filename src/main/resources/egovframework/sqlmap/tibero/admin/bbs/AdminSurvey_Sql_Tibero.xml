@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="Survey">
+	<typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+	 <typeAlias alias="clobHandler" type="com.ibatis.sqlmap.engine.type.ClobTypeHandlerCallback" />
+	<resultMap id="SurveyList" class="egovframework.admin.bbs.service.Survey">
+		<result property="surveyId" column="SURVEY_ID"/>
+		<result property="surveyNm" column="SURVEY_NM"/>
+		<result property="langTag" column="LANG_TAG"/>
+		<result property="ipDupYn" column="IP_DUP_YN"/>
+		<result property="startDttm" column="START_DTTM"/>
+		<result property="endDttm" column="END_DTTM"/>
+		<result property="orgCd" column="ORG_CD"/>
+		<result property="orgNm" column="ORG_NM"/>
+		<result property="usrCd" column="USR_CD"/>
+		<result property="usrNm" column="USR_NM"/>
+		<result property="useYn" column="USE_YN"/>
+	</resultMap>
+	
+	<resultMap id="SurveyPop" class="egovframework.admin.bbs.service.Survey">
+		<result property="surveyId" column="SURVEY_ID"/>
+		<result property="surveyNm" column="SURVEY_NM"/>
+		<result property="langTag" column="LANG_TAG"/>
+		<result property="ipDupYn" column="IP_DUP_YN"/>
+		<result property="startDttm" column="START_DTTM"/>
+		<result property="endDttm" column="END_DTTM"/>
+		<result property="orgCd" column="ORG_CD"/>
+		<result property="usrCd" column="USR_CD"/>
+		<result property="useYn" column="USE_YN"/>
+		<result property="surveyPpose" column="SURVEY_PPOSE"/>
+		<result property="surveyExp" column="SURVEY_EXP"/>
+		<result property="loginYn" column="LOGIN_YN"/>
+		<result property="user1Yn" column="USER1_YN"/>
+		<result property="user2Yn" column="USER2_YN"/>
+	</resultMap>
+	
+	<resultMap id="SurveyRetr" class="egovframework.admin.bbs.service.Survey">
+		<result property="surveyId" column="SURVEY_ID"/>
+		<result property="surveyNm" column="SURVEY_NM"/>
+		<result property="langTag" column="LANG_TAG"/>
+		<result property="ipDupYn" column="IP_DUP_YN"/>
+		<result property="startDttm" column="START_DTTM"/>
+		<result property="endDttm" column="END_DTTM"/>
+		<result property="orgCd" column="ORG_CD"/>
+		<result property="usrCd" column="USR_CD"/>
+		<result property="useYn" column="USE_YN"/>
+		
+		<result property="surveyPpose" column="SURVEY_PPOSE"/>
+		<result property="surveyExp" column="SURVEY_EXP"/>
+		<result property="loginYn" column="LOGIN_YN"/>
+		<result property="user1Yn" column="USER1_YN"/>
+		<result property="user2Yn" column="USER2_YN"/>
+		<result property="orgNm" column="ORG_NM"/>
+		<result property="usrNm" column="USR_NM"/>
+		<result property="surveyDesc" column="SURVEY_DESC" jdbcType="CLOB" javaType="java.lang.String" typeHandler="clobHandler"/>
+		
+	</resultMap>
+	
+	<select id="SurveyDao.selectSurveyAll" parameterClass="egovframework.admin.bbs.service.Survey" resultMap="SurveyList">
+		SELECT   A.SURVEY_ID
+			   , A.SURVEY_NM
+			   , A.LANG_TAG
+			   , A.IP_DUP_YN
+			   , A.START_DTTM
+			   , A.END_DTTM
+			   , A.ORG_CD
+			   , O.ORG_NM
+			   , A.USR_CD
+			   , U.USR_NM
+			   , A.USE_YN
+		  FROM TB_SURVEY A
+		  	   INNER JOIN TB_COMM_ORG O ON A.ORG_CD = O.ORG_CD
+		       INNER JOIN TB_COMM_USR U ON A.USR_CD = U.USR_CD
+	 	 WHERE 1=1
+	 	<isNotEmpty property="searchWord">
+	 		<isEqual property="searchWd" compareValue="1">
+	 		AND ( A.SURVEY_NM LIKE '%' || #searchWord#  || '%' 
+	 			 OR  A.SURVEY_NM LIKE '%' || UPPER(#searchWord#)  || '%'
+	 			 OR  A.SURVEY_NM LIKE '%' || LOWER(#searchWord#)  || '%'
+	 		 )
+	 		</isEqual>
+	 	</isNotEmpty>
+	 	<isEqual property="useYn" compareValue="Y">
+	 		AND A.USE_YN = 'Y'
+	 	</isEqual>
+	 	<isEqual property="useYn" compareValue="N">
+	 		AND A.USE_YN = 'N'
+	 	</isEqual>
+	 	 ORDER BY END_DTTM DESC
+	</select>
+	
+	
+	<select id="SurveyDao.getSurveyId" parameterClass="egovframework.admin.bbs.service.Survey" resultClass="java.lang.Integer">
+	    SELECT NVL(MAX(SURVEY_ID)+1,10000)
+	      FROM TB_SURVEY
+	</select>
+	
+	
+	<insert id="SurveyDao.insertSurvey" parameterClass="egovframework.admin.bbs.service.Survey" >
+			
+		
+		INSERT INTO TB_SURVEY 
+			(  SURVEY_ID
+			 , LANG_TAG
+			 , SURVEY_PPOSE
+			 , SURVEY_NM
+			 , SURVEY_EXP
+			 , SURVEY_DESC
+			 , START_DTTM
+			 , END_DTTM
+			 , ORG_CD
+			 , USR_CD
+			 , USE_YN
+			 <isNotNull property="ipDupYn">
+					, IP_DUP_YN
+			 </isNotNull>
+			 <isNotNull property="user1Yn">
+					, USER1_YN
+			 </isNotNull>
+			 <isNotNull property="user2Yn">
+					, USER2_YN
+			 </isNotNull>
+			 <isNotNull property="loginYn">
+					, LOGIN_YN
+			 </isNotNull>
+			) 
+		VALUES
+			(
+				  #surveyId#
+				, #langTag#
+				, #surveyPpose#
+				, #surveyNm#
+				, #surveyExp#
+				, #surveyDesc:CLOB#
+				, TO_DATE(#startDttm#, 'YYYY-MM-DD')
+				, TO_DATE(#endDttm#, 'YYYY-MM-DD')
+				, #orgCd#
+				, #usrCd#
+				, #useYn#
+				<isNotNull property="ipDupYn">
+					, #ipDupYn#
+				</isNotNull>
+				<isNotNull property="user1Yn">
+					, #user1Yn#
+				</isNotNull>
+				<isNotNull property="user2Yn">
+					, #user2Yn#
+				</isNotNull>
+				<isNotNull property="loginYn">
+					, #loginYn#
+				</isNotNull>
+			)
+	</insert>
+	
+	<update id="SurveyDao.updateSurvey" parameterClass="egovframework.admin.bbs.service.Survey">
+		
+		UPDATE TB_SURVEY
+		   SET   LANG_TAG = #langTag#
+		   	   , SURVEY_PPOSE = #surveyPpose#
+		   	   , SURVEY_NM = #surveyNm#
+		   	   , SURVEY_EXP = #surveyExp#
+		   	   , SURVEY_DESC = #surveyDesc:CLOB#
+		   	   , START_DTTM = TO_DATE(#startDttm#, 'YYYY-MM-DD')
+		   	   , END_DTTM = TO_DATE(#endDttm#, 'YYYY-MM-DD')
+		   	   , ORG_CD = #orgCd#
+		   	   , USR_CD = #usrCd#
+		   	   , USE_YN = #useYn#
+		   	   , UPD_DTTM = SYSDATE
+		   	   
+		   	   <isNotEmpty property="loginYn">
+		   	   , LOGIN_YN = #loginYn#
+		   	   </isNotEmpty>
+		   	   <isEmpty property="loginYn">
+		   	   , LOGIN_YN = 'N'
+		   	   </isEmpty>
+		   	   <isNotEmpty property="ipDupYn">
+		   	   , IP_DUP_YN = #ipDupYn#
+		   	   </isNotEmpty>
+		   	   <isEmpty property="ipDupYn">
+		   	   , IP_DUP_YN = 'N'
+		   	   </isEmpty>
+		   	   <isNotEmpty property="user1Yn">
+		   	   , USER1_YN = #user1Yn#
+		   	   </isNotEmpty>
+		   	   <isEmpty property="user1Yn">
+		   	   , USER1_YN = 'N'
+		   	   </isEmpty>
+		   	   <isNotEmpty property="user2Yn">
+		   	   , USER2_YN = #user2Yn#
+		   	   </isNotEmpty>
+		   	   <isEmpty property="user2Yn">
+		   	   , USER2_YN = 'N'
+		   	   </isEmpty>
+		 WHERE SURVEY_ID = #surveyId#
+	</update>
+	
+	<!-- 설문응답을 한명이라도 했다면 설문삭제를 못한다.  -->
+	<delete id="SurveyDao.deleteSurvey" parameterClass="egovframework.admin.bbs.service.Survey">
+		<![CDATA[
+	
+		 DELETE
+		   FROM TB_SURVEY A
+		  WHERE A.SURVEY_ID = #surveyId#
+		    AND NOT EXISTS (
+		  				 SELECT 1
+		  				   FROM TB_SURVEY_ANS B
+		  				  WHERE 1=1
+		  				    AND A.SURVEY_ID = B.SURVEY_ID
+		  				    AND B.SURVEY_ID = #surveyId#
+		  				)
+		]]>
+	</delete>
+	
+	<delete id="SurveyDao.deleteSurveyQuest" parameterClass="egovframework.admin.bbs.service.Survey">
+		DELETE FROM TB_SURVEY_QUEST
+		WHERE SURVEY_ID = #surveyId#
+	</delete>
+	
+	<delete id="SurveyDao.deleteSurveyExam" parameterClass="egovframework.admin.bbs.service.Survey">
+		DELETE FROM TB_SURVEY_EXAM
+		WHERE SURVEY_ID = #surveyId#
+	</delete>
+	
+	<!-- 설문 단건조회  -->
+	<select id="SurveyDao.surveyRetr" parameterClass="egovframework.admin.bbs.service.Survey" resultMap="SurveyRetr" >
+		SELECT  A.SURVEY_ID
+			  , A.SURVEY_NM
+			  , A.SURVEY_PPOSE
+			  , A.LANG_TAG
+			  , A.IP_DUP_YN
+			  , A.SURVEY_EXP
+			  , TO_CHAR(A.START_DTTM,'YYYY-MM-DD') AS START_DTTM
+			  , TO_CHAR(A.END_DTTM,'YYYY-MM-DD') AS END_DTTM
+			  , A.USER1_YN
+			  , A.USER2_YN
+			  , A.ORG_CD
+			  , A.USR_CD
+			  , A.LOGIN_YN
+			  , A.USE_YN
+			  , C.ORG_NM
+			  , D.USR_NM
+			  , A.SURVEY_DESC
+		  FROM TB_SURVEY A
+		 INNER JOIN TB_SURVEY B
+		    ON A.SURVEY_ID = B.SURVEY_ID
+		   AND B.SURVEY_ID = #surveyId#
+		 INNER JOIN TB_COMM_ORG C
+		    ON A.ORG_CD = C.ORG_CD
+		  LEFT OUTER JOIN TB_COMM_USR D
+		    ON A.USR_CD = D.USR_CD
+		  WHERE 1=1
+	</select>
+	
+	<select id="SurveyDao.selectSurveyPop" parameterClass="egovframework.admin.bbs.service.Survey" resultMap="SurveyPop">
+		SELECT   A.SURVEY_ID
+			   , A.SURVEY_NM
+			   , A.LANG_TAG
+			   , A.IP_DUP_YN
+			   , TO_CHAR(A.START_DTTM,'YYYY-MM-DD') AS START_DTTM
+			   , TO_CHAR(A.END_DTTM,'YYYY-MM-DD') AS END_DTTM
+			   , A.ORG_CD
+			   , A.USR_CD
+			   , A.USE_YN
+			   , A.SURVEY_EXP
+			   , A.USER1_YN
+			   , A.USER2_YN
+			   , A.USE_YN
+			   , A.LOGIN_YN
+			   , A.SURVEY_PPOSE
+		  FROM TB_SURVEY A
+	 	 WHERE A.SURVEY_ID = #surveyId#
+	</select>
+	
+	<select id="SurveyDao.selectSurveyQuestCnt" parameterClass="egovframework.admin.bbs.service.Survey" resultClass="java.lang.Integer">
+		SELECT COUNT(*) FROM TB_SURVEY_QUEST
+		WHERE SURVEY_ID = #surveyId#
+	</select>
+	
+	<select id="SurveyDao.selectSurveyExamCnt" parameterClass="egovframework.admin.bbs.service.Survey" resultClass="java.lang.Integer">
+		SELECT COUNT(*) FROM TB_SURVEY_EXAM
+		WHERE SURVEY_ID = #surveyId#
+	</select>
+	
+	
+	
+</sqlMap>

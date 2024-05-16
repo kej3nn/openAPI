@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<config xmlns="http://www.nhncorp.com/lucy-xss"
+	extends="lucy-xss-superset.xml">
+	<elementRule>
+		<element name="base" disable="true" />
+		<element name="body" disable="true" />
+		<element name="html" disable="true" />
+		<element name="meta" disable="true" />
+		<element name="style" disable="true" />
+		<element name="textarea" disable="true" />
+		<element name="xml" disable="true" />
+		<element name="xmp" disable="true" />
+		<element name="tt" disable="true" />
+		<element name="i" disable="true" />
+		<element name="b" disable="true" />
+		<element name="u" disable="true" />
+		<element name="s" disable="true" />
+		<element name="strike" disable="true" />
+		<element name="big" disable="true" />
+		<element name="small" disable="true" />
+		<element name="center" disable="true" />
+		<element name="em" disable="true" />
+		<element name="strong" disable="true" />
+		<element name="dfn" disable="true" />
+		<element name="code" disable="true" />
+		<element name="samp" disable="true" />
+		<element name="kbd" disable="true" />
+		<element name="var" disable="true" />
+		<element name="cite" disable="true" />
+		<element name="abbr" disable="true" />
+		<element name="acronym" disable="true" />
+		<element name="bdi" disable="true" />
+		<element name="mark" disable="true" />
+		<element name="a" disable="true" />
+		<element name="img" disable="true" />
+		<element name="applet" disable="true" />
+		<element name="font" disable="true" />
+		<element name="basefont" disable="true" />
+		<!--
+		<element name="br" disable="true" />
+		 -->
+		<element name="script" disable="true" />
+		<element name="map" disable="true" />
+		<element name="q" disable="true" />
+		<element name="sub" disable="true" />
+		<element name="sup" disable="true" />
+		<element name="span" disable="true" />
+		<element name="bdo" disable="true" />
+		<element name="iframe" disable="true" />
+		<element name="progress" disable="true" />
+		<element name="meter" disable="true" />
+		<element name="time" disable="true" />
+		<element name="input" disable="true" />
+		<element name="select" disable="true" />
+		<element name="textarea" disable="true" />
+		<element name="label" disable="true" />
+		<element name="button" disable="true" />
+		<element name="command" disable="true" />
+		<element name="datalist" disable="true" />
+		<element name="keygen" disable="true" />
+		<element name="output" disable="true" />
+		<element name="Fontstyle" disable="true" />
+		<element name="Phrase" disable="true" />
+		<element name="Special" disable="true" />
+		<element name="Formctrl" disable="true" />
+		<element name="h1" disable="true" />
+		<element name="h2" disable="true" />
+		<element name="h3" disable="true" />
+		<element name="h4" disable="true" />
+		<element name="h5" disable="true" />
+		<element name="h6" disable="true" />
+		<element name="ul" disable="true" />
+		<element name="ol" disable="true" />
+		<element name="li" disable="true" />
+		<element name="p" disable="true" />
+		<element name="Heading" disable="true" />
+		<element name="List" disable="true" />
+		<element name="pre" disable="true" />
+		<element name="dl" disable="true" />
+		<element name="dt" disable="true" />
+		<element name="dd" disable="true" />
+		<element name="div" disable="true" />
+		<element name="noscript" disable="true" />
+		<element name="blockquote" disable="true" />
+		<element name="form" disable="true" />
+		<element name="hr" disable="true" />
+		<element name="caption" disable="true" />
+		<element name="col" disable="true" />
+		<element name="colgroup" disable="true" />
+		<element name="thead" disable="true" />
+		<element name="tbody" disable="true" />
+		<element name="tfoot" disable="true" />
+		<element name="tr" disable="true" />
+		<element name="td" disable="true" />
+		<element name="fieldset" disable="true" />
+		<element name="address" disable="true" />
+		<element name="details" disable="true" />
+		<element name="figure" disable="true" />
+		<element name="article" disable="true" />
+		<element name="aside" disable="true" />
+		<element name="footer" disable="true" />
+		<element name="header" disable="true" />
+		<element name="hgroup" disable="true" />
+		<element name="nav" disable="true" />
+		<element name="section" disable="true" />
+		<element name="img" disable="true" />
+		<element name="iframe" disable="true" />
+		<element name="embed" disable="true" />
+		<element name="object" disable="true" />
+		<element name="param" disable="true" />
+		<element name="video" disable="true" />
+		<element name="audio" disable="true" />
+		<element name="canvas" disable="true" />
+		<element name="Block" disable="true" />
+		<element name="Inline" disable="true" />
+		<element name="EmbeddedContent" disable="true" />
+	</elementRule>
+
+	<attributeRule>
+		<attribute name="AllowScriptAccess" />
+		<attribute name="volume" />
+		<attribute name="omcontextmenu" />
+		<attribute name="wmode" />
+		<attribute name="allowNetworking" />
+		<attribute name="allowScriptAccess" />
+		<attribute name="invokeURLs" />
+		<attribute name="autostart" />
+		<attribute name="onresize" />
+	</attributeRule>
+	<!--  참조 url : https://github.com/naver/lucy-xss-filter/blob/master/docs/kr/rule-config.adoc -->
+</config>

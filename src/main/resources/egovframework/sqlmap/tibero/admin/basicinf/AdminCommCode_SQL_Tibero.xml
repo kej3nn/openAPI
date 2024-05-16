@@ -1,0 +1,407 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="Commcode">
+	<typeAlias alias="egovMap"
+		type="egovframework.rte.psl.dataaccess.util.EgovMap" />
+	<resultMap id="CommCodeList" class="egovframework.admin.basicinf.service.CommCode">
+		<result column="GRP_CD" property="grpCd" />
+		<result column="DITC_CD" property="ditcCd" />
+		<result column="DITC_NM" property="ditcNm" />
+		<result column="ENG_DITC_NM" property="ditcNmEng" />
+		<!-- <result column="REF_CD" property="refCd" /> -->
+		<result column="V_ORDER" property="vOrder" />
+		<result column="USE_YN" property="useYn" />
+	</resultMap>
+
+	<resultMap id="CommCodeOne" class="egovframework.admin.basicinf.service.CommCode">
+		<result column="GRP_CD" property="preGrpCd" />
+		<result column="GRP_CD" property="grpCd" />
+		<result column="GRP_NM" property="grpNm" />
+		<result column="DITC_CD" property="ditcCd" />
+		<result column="DITC_NM" property="ditcNm" />
+		<result column="ENG_DITC_NM" property="ditcNmEng" />
+		<!-- <result column="REF_CD" property="refCd" /> -->
+		<result column="V_ORDER" property="vOrder" />
+		<result column="USE_YN" property="useYn" />
+		<result column="VALUE_CD" property="valueCd" />
+		<result column="VALUE_CD2" property="valueCd2" />
+		<result column="CD_EXP" property="cdExp" />
+		<result column="ENG_CD_EXP" property="cdExpEng" />
+		<result column="LOCK_YN" property="lockYn" />
+		<result column="GRP_IS" property="grpIs" />
+		<result column="GRP_CIB" property="grpCib" />
+	</resultMap>
+
+	<!-- 조건에 맞는 공통코드 목록을 조회 한다. -->
+	<select id="CommCodeDAO.selectCommCodeAllList" parameterClass="egovframework.admin.basicinf.service.CommCode" resultMap="CommCodeList">
+		SELECT GRP_CD
+		,DITC_CD
+		,DITC_NM
+		,ENG_DITC_NM
+		<!-- ,REF_CD -->
+		,V_ORDER
+		,USE_YN
+		FROM
+		TB_COMM_CODE
+		WHERE 1=1
+
+		<isNotEmpty property="useYn">
+			AND USE_YN = #useYn#
+		</isNotEmpty>
+
+		<isEmpty property="serVal">
+			<isEmpty property="grpCd" prepend="AND">
+				GRP_CD = '00000'
+			</isEmpty>
+			<isNotEmpty property="grpCd" prepend="AND">
+				GRP_CD = #grpCd#
+			</isNotEmpty>
+		</isEmpty>
+
+		<isNotEmpty property="serVal">
+			AND GRP_CD = '00000'
+			<isEqual property="serSel" compareValue="NM">
+				AND DITC_NM LIKE
+				'%'||#serVal#||'%'
+			</isEqual>
+			<isEqual property="serSel" compareValue="ENG">
+				AND ENG_DITC_NM LIKE
+				'%'||#serVal#||'%'
+			</isEqual>
+			<isEqual property="serSel" compareValue="CODE">
+				AND DITC_CD LIKE
+				'%'||#serVal#||'%'
+			</isEqual>
+			<isEqual property="serSel" compareValue="ALL">
+				AND
+				(
+				DITC_NM LIKE
+				'%'||#serVal#||'%'
+				OR ENG_DITC_NM LIKE '%'||#serVal#||'%'
+				)
+			</isEqual>
+		</isNotEmpty>
+
+		ORDER BY DITC_CD, V_ORDER
+	</select>
+
+	<!-- 조건에 맞는 공통코드 목록에 대한 전체 건수를 조회 한다. -->
+	<select id="CommCodeDAO.selectCommCodeAllListCnt" parameterClass="egovframework.admin.basicinf.service.CommCode" resultClass="java.lang.Integer">
+		SELECT COUNT(GRP_CD)
+		FROM TB_COMM_CODE
+		WHERE 1=1
+
+		<isNotEmpty property="useYn">
+			AND USE_YN = #useYn#
+		</isNotEmpty>
+
+		<isEmpty property="serVal">
+			<isEmpty property="grpCd" prepend="AND">
+				GRP_CD = '00000'
+			</isEmpty>
+			<isNotEmpty property="grpCd" prepend="AND">
+				GRP_CD = #grpCd#
+			</isNotEmpty>
+		</isEmpty>
+
+		<isNotEmpty property="serVal">
+			AND GRP_CD = '00000'
+			<isEqual property="serSel" compareValue="NM">
+				AND DITC_NM LIKE
+				'%'||#serVal#||'%'
+			</isEqual>
+			<isEqual property="serSel" compareValue="ENG">
+				AND ENG_DITC_NM LIKE
+				'%'||#serVal#||'%'
+			</isEqual>
+			<isEqual property="serSel" compareValue="ALL">
+				AND
+				(
+				DITC_NM LIKE
+				'%'||#serVal#||'%'
+				OR ENG_DITC_NM LIKE '%'||#serVal#||'%'
+				)
+			</isEqual>
+		</isNotEmpty>
+	</select>
+
+	<!-- 공통코드를 단건 조회한다. -->
+	<select id="CommCodeDAO.selectCommCodeOne" parameterClass="egovframework.admin.basicinf.service.CommCode" resultMap="CommCodeOne">
+		SELECT GRP_CD
+		,DITC_CD
+		,DITC_NM
+		,ENG_DITC_NM
+		<!-- ,REF_CD -->
+		,USE_YN
+		,V_ORDER
+		,VALUE_CD
+		,VALUE2_CD AS VALUE_CD2
+		,CD_EXP
+		,ENG_CD_EXP
+		,LOCK_YN
+		,(SELECT DITC_NM
+		FROM TB_COMM_CODE WHERE GRP_CD = '00000' AND DITC_CD = #grpCd#) AS GRP_NM
+		,DECODE(#grpCd#,'00000','Y','N') AS GRP_IS
+		,(SELECT NVL((SELECT'Y' FROM TB_COMM_CODE WHERE GRP_CD = #ditcCd# AND ROWNUM = 1),'N') FROM TB_COMM_CODE WHERE ROWNUM = 1) AS GRP_CIB
+
+		FROM TB_COMM_CODE
+
+		WHERE
+		GRP_CD = #grpCd#
+		AND DITC_CD = #ditcCd#
+	</select>
+
+	<!-- 공통코드를 등록한다. -->
+	<insert id="CommCodeDAO.insertCommCode" parameterClass="egovframework.admin.basicinf.service.CommCode">
+		INSERT INTO TB_COMM_CODE (
+		GRP_CD
+		,DITC_CD
+		,DITC_NM
+		,ENG_DITC_NM
+		,VALUE_CD
+		,VALUE2_CD
+		<!-- ,REF_CD -->
+		,CD_EXP
+		,ENG_CD_EXP
+		,V_ORDER
+		,LOCK_YN
+		,USE_YN
+		,REG_ID
+		,REG_DTTM
+		,UPD_ID
+		,UPD_DTTM
+		)
+		VALUES
+		(
+		<isEmpty property="grpCd">
+			'00000'
+		</isEmpty>
+		<isNotEmpty property="grpCd">
+			#grpCd:VARCHAR#
+		</isNotEmpty>
+		,#ditcCd:VARCHAR#
+		,#ditcNm:VARCHAR#
+		,#ditcNmEng:VARCHAR#
+		,#valueCd:VARCHAR#
+		,#valueCd2:VARCHAR#
+<!-- 		,#refCd# -->
+		,#cdExp:VARCHAR#
+		,#cdExpEng:VARCHAR#
+		<isEmpty property="vOrder">
+			,'0'
+		</isEmpty>
+		<isNotEmpty property="vOrder">
+			,#vOrder:NUMERIC#
+		</isNotEmpty>
+		,#lockYn:CHAR#
+		,#useYn:CHAR#
+		,#sessionUsrId:VARCHAR#
+		,SYSDATE
+		,#sessionUsrId:VARCHAR#
+		,SYSDATE
+		)
+	</insert>
+
+	<!-- 공통코드를 변경한다. -->
+	<update id="CommCodeDAO.updateCommCode" parameterClass="egovframework.admin.basicinf.service.CommCode">
+		UPDATE TB_COMM_CODE SET
+		<isEmpty property="grpCd">
+			GRP_CD = '00000'
+		</isEmpty>
+		<isNotEmpty property="grpCd">
+			GRP_CD = #grpCd:VARCHAR#
+		</isNotEmpty>
+		,DITC_NM = #ditcNm:VARCHAR#
+		,ENG_DITC_NM = #ditcNmEng:VARCHAR#
+		,VALUE_CD = #valueCd:VARCHAR#
+		,VALUE2_CD = #valueCd2:VARCHAR#
+		<!-- ,REF_CD = #refCd# -->
+		,CD_EXP = #cdExp:VARCHAR#
+		,ENG_CD_EXP = #cdExpEng:VARCHAR#
+		<isEmpty property="vOrder">
+			,V_ORDER = '0'
+		</isEmpty>
+		<isNotEmpty property="vOrder">
+			,V_ORDER = #vOrder:NUMERIC#
+		</isNotEmpty>
+		,LOCK_YN = #lockYn:VARCHAR#
+		,USE_YN = #useYn#
+		,REG_ID = #sessionUsrId:VARCHAR#
+		,REG_DTTM = SYSDATE
+		,UPD_ID = #sessionUsrId:VARCHAR#
+		,UPD_DTTM = SYSDATE
+
+		WHERE 1=1
+		<isEmpty property="preGrpCd" prepend="AND">
+			GRP_CD = #grpCd:VARCHAR#
+		</isEmpty>
+		<isNotEmpty property="preGrpCd" prepend="AND">
+			GRP_CD = #preGrpCd:VARCHAR#
+		</isNotEmpty>
+		AND DITC_CD = #ditcCd:VARCHAR#
+
+	</update>
+
+	<!-- 해당 공통코드가 그룹코드일 경우 하위 서브 코드들의 정보를 수정한다. -->
+	<update id="CommCodeDAO.updateSubCommCode" parameterClass="egovframework.admin.basicinf.service.CommCode">
+		UPDATE TB_COMM_CODE SET
+		LOCK_YN = #lockYn:CHAR#
+		,USE_YN = #useYn:CHAR#
+		WHERE
+		GRP_CD = #ditcCd:VARCHAR#
+	</update>
+
+	<!-- 공통코드 정보를 삭제한다. -->
+	<update id="CommCodeDAO.deleteCommCode" parameterClass="egovframework.admin.basicinf.service.CommCode">
+		DELETE
+		FROM TB_COMM_CODE
+		WHERE GRP_CD = #grpCd:VARCHAR#
+		AND DITC_CD = #ditcCd:VARCHAR#
+	</update>
+
+	<!-- 해당 공통코드가 그룹코드일 경우 하위 서브 코드들을 삭제한다. -->
+	<update id="CommCodeDAO.deleteSubCommCode" parameterClass="egovframework.admin.basicinf.service.CommCode">
+		DELETE FROM TB_COMM_CODE
+		WHERE GRP_CD =#ditcCd:VARCHAR#
+	</update>
+
+	<!-- 공통코드 중복을 체크한다. -->
+	<select id="CommCodeDAO.selectCommCodeCheckDup" parameterClass="egovframework.admin.basicinf.service.CommCode" resultClass="java.lang.Integer">
+		SELECT COUNT(1) AS CNT
+		FROM TB_COMM_CODE
+		WHERE 1=1
+		<isEmpty property="grpCd" prepend="AND">
+			GRP_CD = '00000'
+		</isEmpty>
+		<isNotEmpty property="grpCd" prepend="AND">
+			GRP_CD = #grpCd#
+		</isNotEmpty>
+
+		AND DITC_CD = #ditcCd:VARCHAR#
+	</select>
+
+	<!-- 공통코드 순서를 변경 한다. -->
+	<update id="CommCodeDAO.updateOrderby" parameterClass="egovframework.admin.basicinf.service.CommCode">
+		UPDATE
+		TB_COMM_CODE A SET A.V_ORDER=#vOrder:NUMERIC#
+		WHERE
+		GRP_CD = #grpCd:VARCHAR# AND
+		DITC_CD = #ditcCd:VARCHAR#
+	</update>
+
+	<!-- 그룹 코드 목록을 조회 한다.(팝업) -->
+	<select id="CommCodeDAO.selectGrpcodeList" parameterClass="egovframework.admin.basicinf.service.CommCode" resultMap="CommCodeList">
+		SELECT GRP_CD
+		,DITC_CD
+		,DITC_NM
+		,ENG_DITC_NM
+		<!-- ,REF_CD -->
+		,USE_YN
+		,V_ORDER
+		FROM
+		TB_COMM_CODE
+		WHERE 1=1
+
+		<isNotEmpty property="useYn">
+			AND USE_YN = #useYn#
+		</isNotEmpty>
+
+		<isNotEmpty property="grpIs">
+			<isEqual property="grpIs" compareValue="Y">
+				AND GRP_CD = '00000'
+						<![CDATA[
+						AND DITC_CD <> #ditcCd:VARCHAR#
+							]]>
+			</isEqual>
+			<isEqual property="grpIs" compareValue="N">
+				AND GRP_CD = '00000'
+						<![CDATA[	
+						AND DITC_CD <> #grpCd:VARCHAR#
+						  	]]>
+			</isEqual>
+		</isNotEmpty>
+
+		<isEmpty property="grpIs">
+						<![CDATA[
+						AND GRP_CD = '00000'
+			          	  	]]>
+		</isEmpty>
+
+		<isNotEmpty property="serVal">
+			<isEqual property="serSel" compareValue="NM">
+				AND DITC_NM LIKE
+				'%'||#serVal:VARCHAR#||'%'
+			</isEqual>
+			<isEqual property="serSel" compareValue="ENG">
+				AND ENG_DITC_NM LIKE
+				'%'||#serVal:VARCHAR#||'%'
+			</isEqual>
+			<isEqual property="serSel" compareValue="ALL">
+				AND
+				(
+				DITC_NM LIKE
+				'%'||#serVal:VARCHAR#||'%'
+				OR ENG_DITC_NM LIKE '%'||#serVal:VARCHAR#||'%'
+				)
+			</isEqual>
+		</isNotEmpty>
+
+		ORDER BY V_ORDER
+
+
+	</select>
+
+	<!-- 그룹 코드 목록에 대한 전체 건수를 조회 한다.(팝업) -->
+	<select id="CommCodeDAO.selectGrpcodeListCnt" parameterClass="egovframework.admin.basicinf.service.CommCode" resultClass="java.lang.Integer">
+		SELECT COUNT(GRP_CD) AS CNT
+
+		FROM TB_COMM_CODE
+		WHERE 1=1
+
+		<isNotEmpty property="useYn">
+			AND USE_YN = #useYn:CHAR#
+		</isNotEmpty>
+
+		<isNotEmpty property="grpIs">
+			<isEqual property="grpIs" compareValue="Y">
+				AND GRP_CD = '00000'
+						<![CDATA[
+						AND DITC_CD <> #ditcCd:VARCHAR#
+							]]>
+			</isEqual>
+			<isEqual property="grpIs" compareValue="N">
+				AND GRP_CD = '00000'
+						<![CDATA[	
+						AND DITC_CD <> #grpCd:VARCHAR#
+						  	]]>
+			</isEqual>
+		</isNotEmpty>
+
+		<isEmpty property="grpIs">
+						<![CDATA[
+						AND GRP_CD = '00000'
+			          	  	]]>
+		</isEmpty>
+
+		<isNotEmpty property="serVal">
+			<isEqual property="serSel" compareValue="NM">
+				AND DITC_NM LIKE
+				'%'||#serVal:VARCHAR#||'%'
+			</isEqual>
+			<isEqual property="serSel" compareValue="ENG">
+				AND ENG_DITC_NM LIKE
+				'%'||#serVal:VARCHAR#||'%'
+			</isEqual>
+			<isEqual property="serSel" compareValue="ALL">
+				AND
+				(
+				DITC_NM LIKE
+				'%'||#serVal:VARCHAR#||'%'
+				OR ENG_DITC_NM LIKE '%'||#serVal:VARCHAR#||'%'
+				)
+			</isEqual>
+		</isNotEmpty>
+	</select>
+
+</sqlMap>

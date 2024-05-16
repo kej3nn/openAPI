@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="StatUseaAPI" >
+  <typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+	<resultMap id="StatUseAPI" class="egovframework.admin.stat.service.StatUseAPI" >
+		<result column="YYYYMMDD"        property="yyyyMmDd"                />
+		<result column="INF_CNT"        property="infCnt"                />
+		<result column="CALL_CNT"        property="callCnt"                />
+		<result column="ROW_CNT"        property="rowCnt"                />
+		<result column="AVG_LT"        property="avgLt"                />
+		<result column="DB_SIZE"        property="dbSize"                />
+<!-- 		<result column="OUT_SIZE"        property="outSize"                /> -->
+    </resultMap>
+    
+    <resultMap id="seriesUseAPIResult" class="egovframework.admin.stat.service.StatUseAPI" >
+		<result column="COLUMN_NM"        property="columnNm"                />
+		<!-- <result column="ENG_COLUMN_NM"        property="columnNmEng"                /> -->
+    </resultMap> 
+    
+    
+    
+    <!-- 활용피드백 현황 Chart형 자료에서 시리즈 목록 조회 ==> 대표적으로 TB_STAT_USE_CATE에서 뽑음(어차피 다른 테이블도 컬럼명은 같음) -->
+	<select id="StatUseAPIDao.getUseAPISeriesResult" parameterClass="egovframework.admin.stat.service.StatUseAPI"  resultMap="seriesUseAPIResult" remapResults="true">
+	<!-- COLUMN_NM만 조회 -->
+	SELECT B.COMMENTS COLUMN_NM
+		FROM DBA_TAB_COLUMNS A, DBA_COL_COMMENTS B
+		WHERE A.OWNER = B.OWNER
+		AND A.TABLE_NAME = B.TABLE_NAME
+		AND A.COLUMN_NAME = B.COLUMN_NAME
+		AND A.TABLE_NAME = 'TB_STAT_PERF_API' AND B.TABLE_NAME = 'TB_STAT_PERF_API'
+		<![CDATA[
+		AND A.COLUMN_NAME <> 'YYYYMMDD' 
+		AND A.COLUMN_NAME <> 'REG_DTTM'
+		]]>	
+	
+	<!-- ENG_COLUMN_NM만 조회 -->
+	<!-- 		SELECT	A.COLUMN_NAME ENG_COLUMN_NM
+	FROM DBA_TAB_COLUMNS A, DBA_COL_COMMENTS B
+	WHERE A.OWNER = B.OWNER
+	AND A.TABLE_NAME = B.TABLE_NAME
+	AND A.COLUMN_NAME = B.COLUMN_NAME
+	AND A.TABLE_NAME = 'TB_STAT_PERF_API' AND B.TABLE_NAME = 'TB_STAT_PERF_API'
+	<![CDATA[
+		AND A.COLUMN_NAME <> 'YYYYMMDD' 
+		AND A.COLUMN_NAME <> 'REG_DTTM'
+		]]>		
+ -->
+		
+	<!-- 컬럼명,컬럼 코멘트 함께 조회 -->
+	<!--SELECT B.COMMENTS COLUMN_NM,
+	A.COLUMN_NAME ENG_COLUMN_NM
+	FROM DBA_TAB_COLUMNS A, DBA_COL_COMMENTS B
+	WHERE A.OWNER = B.OWNER
+	AND A.TABLE_NAME = B.TABLE_NAME
+	AND A.COLUMN_NAME = B.COLUMN_NAME
+	AND A.TABLE_NAME = 'TB_STAT_PERF_API' AND B.TABLE_NAME = 'TB_STAT_PERF_API'
+	<![CDATA[
+		AND A.COLUMN_NAME <> 'YYYYMMDD' 
+		AND A.COLUMN_NAME <> 'REG_DTTM'
+		]]>	 
+		-->
+	</select>
+    
+    
+    <!-- 활용피드백 현황에서 Sheet형 데이터 조회 -->
+	<select id="StatUseAPIDao.getUseAPIStatSheetAll" parameterClass="egovframework.admin.stat.service.StatUseAPI" resultMap="StatUseAPI">
+<!-- 	SELECT	SUBSTR(YYYYMMDD,1,4)||'-'||SUBSTR(YYYYMMDD,5,2)||'-'||SUBSTR(YYYYMMDD,7,2)
+				AS YYYYMMDD
+			  ,SUM(INF_CNT) AS INF_CNT
+			  ,SUM(CALL_CNT) AS CALL_CNT
+			  ,SUM(ROW_CNT) AS ROW_CNT
+			  ,SUM(AVG_LT) AS AVG_LT
+			  ,SUM(DB_SIZE) AS DB_SIZE 
+  			  ,SUM(OUT_SIZE) AS OUT_SIZE 
+		FROM TB_STAT_PERF_API
+		WHERE
+			YYYYMMDD BETWEEN #pubDttmFrom# AND #pubDttmTo#
+		GROUP BY 
+		(SUBSTR(YYYYMMDD,1,4)||'-'||SUBSTR(YYYYMMDD,5,2)||'-'||SUBSTR(YYYYMMDD,7,2))
+		ORDER BY YYYYMMDD DESC -->
+		SELECT
+			COUNT(DISTINCT INF_ID) INF_CNT
+			, COUNT(*) CALL_CNT
+			, NVL(SUM(ROW_CNT), 0) ROW_CNT
+			, NVL(ROUND(AVG(LEADTIME),5), 0.0) AVG_LT
+			, NVL(SUM(DB_SIZE), 0) DB_SIZE
+			, NVL(SUM(OUT_SIZE), 0) OUT_SIZE 
+			, SUBSTR(TO_CHAR(REG_DTTM, 'YYYYMMDD'),1,4)||'-'||SUBSTR(TO_CHAR(REG_DTTM, 'YYYYMMDD'),5,2)||'-'||SUBSTR(TO_CHAR(REG_DTTM, 'YYYYMMDD'),7,2) YYYYMMDD
+		FROM
+			TB_LOG_OPEN_INF_A
+		WHERE
+			TO_CHAR(REG_DTTM, 'YYYYMMDD') BETWEEN #pubDttmFrom:VARCHAR# AND #pubDttmTo:VARCHAR#
+		GROUP BY
+			TO_CHAR(REG_DTTM, 'YYYYMMDD')
+		ORDER BY
+			YYYYMMDD DESC
+	</select>
+	
+
+	<!-- 활용피드백 현황 Chart형 자료에서 X축 데이터 조회 -->
+	<select id="StatUseAPIDao.getChartDataX" parameterClass="egovframework.admin.stat.service.StatUseAPI"  resultClass="java.util.LinkedHashMap" remapResults="true">
+<!-- 		SELECT	SUBSTR(YYYYMMDD,1,4)||'-'||SUBSTR(YYYYMMDD,5,2)||'-'||SUBSTR(YYYYMMDD,7,2)
+				AS YYYYMMDD
+			  		FROM TB_STAT_PERF_API
+		WHERE
+			YYYYMMDD BETWEEN #pubDttmFrom# AND #pubDttmTo#
+		GROUP BY 
+		(SUBSTR(YYYYMMDD,1,4)||'-'||SUBSTR(YYYYMMDD,5,2)||'-'||SUBSTR(YYYYMMDD,7,2))
+		ORDER BY YYYYMMDD -->
+		SELECT
+			SUBSTR(TO_CHAR(REG_DTTM, 'YYYYMMDD'),1,4)||'-'||SUBSTR(TO_CHAR(REG_DTTM, 'YYYYMMDD'),5,2)||'-'||SUBSTR(TO_CHAR(REG_DTTM, 'YYYYMMDD'),7,2) YYYYMMDD
+		FROM
+			TB_LOG_OPEN_INF_A
+		WHERE
+			TO_CHAR(REG_DTTM, 'YYYYMMDD') BETWEEN #pubDttmFrom:VARCHAR# AND #pubDttmTo:VARCHAR#
+		GROUP BY
+			TO_CHAR(REG_DTTM, 'YYYYMMDD')
+		ORDER BY
+			TO_CHAR(REG_DTTM, 'YYYYMMDD')
+	</select>
+	
+	
+	<!-- 활용피드백 현황 Chart형 자료에서 Y축 데이터 조회 -->
+	<select id="StatUseAPIDao.getChartDataY" parameterClass="egovframework.admin.stat.service.StatUseAPI"  resultClass="java.util.LinkedHashMap" remapResults="true">
+<!-- 		SELECT	INF_CNT,CALL_CNT,ROW_CNT,AVG_LT,DB_SIZE
+		,OUT_SIZE
+		FROM TB_STAT_PERF_API
+		WHERE 
+			YYYYMMDD BETWEEN #pubDttmFrom# AND #pubDttmTo#
+		ORDER BY YYYYMMDD
+		 -->
+		SELECT
+			COUNT(DISTINCT INF_ID) INF_CNT
+			, COUNT(*) CALL_CNT
+			, NVL(SUM(ROW_CNT), 0) ROW_CNT
+			, NVL(ROUND(AVG(LEADTIME),5), 0.0) AVG_LT
+			, NVL(SUM(DB_SIZE), 0) DB_SIZE
+		FROM
+			TB_LOG_OPEN_INF_A
+		WHERE
+			TO_CHAR(REG_DTTM, 'YYYYMMDD') BETWEEN #pubDttmFrom:VARCHAR# AND #pubDttmTo:VARCHAR#
+		GROUP BY
+			TO_CHAR(REG_DTTM, 'YYYYMMDD')
+		ORDER BY
+			TO_CHAR(REG_DTTM, 'YYYYMMDD')
+	</select>
+	
+</sqlMap>

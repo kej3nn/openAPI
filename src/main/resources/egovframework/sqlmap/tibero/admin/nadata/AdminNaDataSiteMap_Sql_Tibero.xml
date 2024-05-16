@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- @(#)AdminNaDataSiteMap_Sql_Tibero.xml 1.0 2019/09/09                    -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- 사이트맵을 관리하는 SQL 파일이다.	                                    			 -->
+<!--                                                                         -->
+<!-- @author 김재한                            					                             	 -->
+<!-- @version 1.0 2019/09/09                                                 -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<sqlMap namespace="naDataSiteMap">
+
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Type Alias                                                          -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+    
+    <!-- 메인리스트 쿼리 -->
+    <sql id="naDataSiteMapDao.main">
+		SELECT
+			A.SRVM_ID  			AS  "srvmId"
+			,A.SRVM_NM  		AS  "srvmNm"
+			,A.ORG_CD  			AS  "orgCd"
+			,(SELECT ORG_NM FROM TB_COMM_ORG B WHERE B.ORG_CD = A.ORG_CD) AS "orgNm"
+			,A.INFO_SMRY_EXP 	AS  "infoSmryExp"
+			,A.SRC_URL  		AS  "srcUrl"
+			,A.TMNL_IMG_FILE  	AS  "tmnlImgFile"
+			,A.TMNL_2_IMG_FILE  AS  "tmnl2ImgFile"
+			,A.V_ORDER  		AS  "vOrder"
+			,A.VIEW_CNT  		AS  "viewCnt"
+			,A.USE_YN  			AS  "useYn"
+			,A.REG_ID  			AS  "regId"
+			,A.REG_DTTM  		AS  "regDttm"
+			,A.UPD_ID  			AS  "updId"
+			,A.UPD_DTTM  		AS  "updDttm"
+			,A.VIEW_YN  		AS  "viewYn"
+		FROM
+		    TB_NA_SITEMAP A
+	</sql>
+		    	
+    <sql id="naDataSiteMapDao.main.where">
+			WHERE 1=1
+			<isNotEmpty property="accCd">
+			<isNotEqual property="accCd" compareValue="SYS">
+					<isEmpty property="SysInpGbn">
+						AND	A.USR_CD = #inpUsrCd:NUMERIC#
+					</isEmpty>
+					<isNotEmpty property="SysInpGbn">
+						<isEqual property="SysInpGbn" compareValue="ORG">
+							AND A.ORG_CD = #inpOrgCd:VARCHAR# 
+						</isEqual>
+						<isEqual property="SysInpGbn" compareValue="USR">
+							AND	A.USR_CD = #inpUsrCd:NUMERIC#	
+						</isEqual>
+					</isNotEmpty>	
+			</isNotEqual>
+		</isNotEmpty>
+			<isNotEmpty property="useYn" prepend="AND">
+		      A.USE_YN = #useYn#
+		     </isNotEmpty>
+			<isNotEmpty property="viewYn" prepend="AND">
+		      A.VIEW_YN = #viewYn#
+		     </isNotEmpty>
+			<isNotEmpty property="searchVal">			 
+				<isEqual property="searchGubun" compareValue="SRVM_NM" >
+					AND A.SRVM_NM LIKE '%'||#searchVal#||'%'
+				</isEqual>
+				<isEqual property="searchGubun" compareValue="INFO_SMRY_EXP" >
+					AND  A.INFO_SMRY_EXP LIKE '%'||#searchVal#||'%'
+				</isEqual>
+			</isNotEmpty>
+		   	<isNotEmpty property="orgList" prepend="AND">
+		   	  A.ORG_CD = #orgList:VARCHAR#
+           	</isNotEmpty>
+           	<isNotEmpty property="orgCd" prepend="AND">
+		   	  A.ORG_CD = #orgCd:VARCHAR#
+           	</isNotEmpty>
+    </sql>
+  
+ 	<!-- 메인 리스트 조회 -->
+  	<select id="naDataSiteMapDao.selectMainList" parameterClass="params" resultClass="record">
+  		/* sql id : naDataSiteMapDao.selectMainList */
+  		<isEqual property="paging" compareValue="0">
+		SELECT AA.* 
+		FROM   (SELECT ROWNUM AS ROW_NUM, AA.*
+				FROM   (  
+		</isEqual>
+			<include refid="naDataSiteMapDao.main"></include>
+			<include refid="naDataSiteMapDao.main.where"></include>
+			ORDER BY
+			    A.V_ORDER
+		<isEqual property="paging" compareValue="0">
+		<![CDATA[
+				) AA
+			WHERE ROWNUM <= #end:NUMERIC#
+			) AA
+		WHERE AA.ROW_NUM >= #start:NUMERIC#
+		]]>
+		</isEqual> 
+  	</select>
+  	<select id="naDataSiteMapDao.selectMainListCount" parameterClass="params" resultClass="int">
+  		/* sql id : naDataSiteMapDao.selectMainListCount */
+		SELECT COUNT(*)
+		FROM   TB_NA_SITEMAP A
+		<include refid="naDataSiteMapDao.main.where"></include>
+  	</select>
+  	
+  	<!-- 기관정보 리스트조회 -->
+  	<select id="naDataSiteMapDao.selectOrgList" parameterClass="params" resultClass="record">
+  		/* sql id : naDataSiteMapDao.selectOrgList */
+  		SELECT A.ORG_CD		AS "orgCd"
+  				,A.ORG_NM	AS "orgNm"
+  		FROM TB_COMM_ORG A
+  		WHERE 1=1
+  		<isNotEmpty property="accCd">
+			<isNotEqual property="accCd" compareValue="SYS">
+					<isEmpty property="SysInpGbn">
+						AND	A.USR_CD = #inpUsrCd:NUMERIC#
+					</isEmpty>
+					<isNotEmpty property="SysInpGbn">
+						<isEqual property="SysInpGbn" compareValue="ORG">
+							AND A.ORG_CD = #inpOrgCd:VARCHAR# 
+						</isEqual>
+						<isEqual property="SysInpGbn" compareValue="USR">
+							AND	A.USR_CD = #inpUsrCd:NUMERIC#	
+						</isEqual>
+					</isNotEmpty>	
+			</isNotEqual>
+		</isNotEmpty>
+  		AND A.USE_YN = 'Y'
+  		AND A.ORG_CD NOT LIKE '%test%'
+  		ORDER BY A.V_ORDER
+  	</select>
+  	
+  	    <!-- 사이트맵 ID 중복체크 -->
+    <select id="naDataSiteMapDao.selectNaDataSiteMapDupChk" parameterClass="params" resultClass="record">
+    	/* sql id : naDataSiteMapDao.selectNaDataSiteMapDupChk */
+		SELECT COUNT(*) AS "dupCnt"
+		FROM   TB_NA_SITEMAP
+		WHERE  SRVM_ID = #srvmId:VARCHAR#
+	</select>
+	
+	<!-- 사이트맵 등록/수정 -->
+	<update id="naDataSiteMapDao.mergeNaDataSiteMap" parameterClass="params">
+		/* sql id : naDataSiteMapDao.mergeNaDataSiteMap */
+		MERGE INTO TB_NA_SITEMAP A
+		USING (
+				SELECT
+					#srvmId:VARCHAR#   			AS SRVM_ID
+					, #srvmNm:VARCHAR#   			AS SRVM_NM
+					, #orgCd:VARCHAR#   			AS ORG_CD
+					, #infoSmryExp:VARCHAR#   		AS INFO_SMRY_EXP
+					, #srcUrl:VARCHAR#   			AS SRC_URL
+					, #tmnlImgFileNm:VARCHAR#   		AS TMNL_IMG_FILE
+					, #tmnl2ImgFileNm:VARCHAR#   		AS TMNL_2_IMG_FILE
+					, #useYn:CHAR#   				AS USE_YN
+					, #usrId:VARCHAR#				AS REG_ID
+					, #viewYn:VARCHAR#				AS VIEW_YN
+					, #cateId:VARCHAR#				AS CATE_ID
+				FROM DUAL
+		) B
+		ON (
+			A.SRVM_ID		= B.SRVM_ID
+		)
+		WHEN MATCHED THEN
+		UPDATE SET
+			A.SRVM_NM			= B.SRVM_NM
+			, A.ORG_CD			= B.ORG_CD
+			, A.INFO_SMRY_EXP	= B.INFO_SMRY_EXP
+			, A.SRC_URL			= B.SRC_URL
+		<isNotEmpty property="tmnlImgFileNm">
+			, A.TMNL_IMG_FILE	= B.TMNL_IMG_FILE
+		</isNotEmpty>
+		<isNotEmpty property="tmnl2ImgFileNm">
+			, A.TMNL_2_IMG_FILE = B.TMNL_2_IMG_FILE
+		</isNotEmpty>
+			, A.USE_YN			= B.USE_YN
+			, A.UPD_ID			= B.REG_ID
+			, A.UPD_DTTM		= sysdate
+			, A.VIEW_YN		= B.VIEW_YN
+			, A.CATE_ID		= B.CATE_ID
+		WHEN NOT MATCHED THEN
+		INSERT (
+			A.SRVM_ID
+			, A.SRVM_NM        
+			, A.ORG_CD         
+			, A.INFO_SMRY_EXP  
+			, A.SRC_URL      
+			, A.TMNL_IMG_FILE  
+			, A.TMNL_2_IMG_FILE
+			, A.USE_YN
+			, A.V_ORDER   
+			, A.REG_ID
+			, A.REG_DTTM
+			, A.VIEW_YN
+			, A.CATE_ID
+		)
+		VALUES (
+			B.SRVM_ID    
+			, B.SRVM_NM        
+			, B.ORG_CD         
+			, B.INFO_SMRY_EXP  
+			, B.SRC_URL        
+			, B.TMNL_IMG_FILE  
+			, B.TMNL_2_IMG_FILE
+			, B.USE_YN
+			, (SELECT NVL(MAX(V_ORDER)+ 1,0) FROM TB_NA_SITEMAP)
+			, B.REG_ID
+			, sysdate
+			, B.VIEW_YN
+			, B.CATE_ID
+		)
+	</update>
+	
+	<!-- 사이트맵 상세 조회 -->
+	<select id="naDataSiteMapDao.selectNaDataSiteMapDtl" parameterClass="params" resultClass="record">
+		/* sql id : naDataSiteMapDao.selectNaDataSiteMapDtl */
+		SELECT
+			A.SRVM_ID  			AS  "srvmId"
+			,A.SRVM_NM  		AS  "srvmNm"
+			,A.ORG_CD  			AS  "orgCd"
+			,B.ORG_NM			AS	"orgNm"
+			,A.INFO_SMRY_EXP 	AS  "infoSmryExp"
+			,A.SRC_URL  		AS  "srcUrl"
+			,A.TMNL_IMG_FILE  	AS  "tmnlImgFileNm"
+			,A.TMNL_2_IMG_FILE  AS  "tmnl2ImgFileNm"
+			,A.V_ORDER  		AS  "vOrder"
+			,A.VIEW_CNT  		AS  "viewCnt"
+			,A.USE_YN  			AS  "useYn"
+			,A.REG_ID  			AS  "regId"
+			,A.REG_DTTM  		AS  "regDttm"
+			,A.UPD_ID  			AS  "updId"
+			,A.UPD_DTTM  		AS  "updDttm"
+			,A.VIEW_YN  		AS  "viewYn"
+			,A.VIEW_YN  		AS  "viewYn"
+			,TO_CHAR(A.LINK_CHK_DTTM, 'yyyy-mm-dd')	    AS "linkChkDttm"
+			,A.CATE_ID			AS "cateId"
+			,(SELECT CATE_NM FROM TB_NA_CATE Z WHERE Z.CATE_ID = A.CATE_ID)	AS "cateNm"
+		FROM
+		    TB_NA_SITEMAP A
+		    LEFT JOIN TB_COMM_ORG B
+		    ON A.ORG_CD = B.ORG_CD
+		WHERE A.SRVM_ID		=	#srvmId:VARCHAR#
+	</select>
+	
+	<!-- 사이트맵 삭제 -->
+	<delete id="naDataSiteMapDao.deleteNaDataSiteMap" parameterClass="params">
+		/* sql id : naDataSiteMapDao.deleteNaDataSiteMap */
+		DELETE FROM TB_NA_SITEMAP
+		WHERE  SRVM_ID = #srvmId:VARCHAR#
+	</delete>
+	
+	<!-- 사이트맵 순서 저장 -->
+	<update id="naDataSiteMapDao.saveNaDataSiteMapOrder" parameterClass="record">
+		/* sql id : naDataSiteMapDao.saveNaDataSiteMapOrder */
+		UPDATE TB_NA_SITEMAP
+		SET    V_ORDER = #vOrder:NUMERIC#
+		WHERE  SRVM_ID = #srvmId:VARCHAR#
+	</update>
+</sqlMap>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="portalMainPopup">
+	<typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+    
+    <!-- 퀴즈이벤트 내용을 등록 -->
+	<insert id="PortalMainPopupDao.mainQuizEventInsert" parameterClass="params">
+		/* sql id : PortalMainPopupDao.mainQuizEventInsert */
+		INSERT INTO TB_EVENT_QUIZ_ANS (
+			SEQCE_NO
+			, USER_NM
+			, USER_HP
+			, USER_CD
+			, Q1_MEMBER_VAL
+			, Q2_MEMBER_VAL
+		) VALUES (
+			(SELECT NVL(MAX(SEQCE_NO) + 1, '10001') FROM TB_EVENT_QUIZ_ANS)
+			, #userNm#
+			, pkg_crypto2.encrypt(#userHp#)
+			, #userCd#
+			, #q1MemberVal#
+			, #q2MemberVal#
+		)
+	</insert>
+	
+</sqlMap>

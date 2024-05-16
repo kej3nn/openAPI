@@ -1,0 +1,327 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="OpenInfFcol" >
+  <typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+	<resultMap id="OpenInfCol" class="egovframework.admin.service.service.OpenInfFcol" >
+		<result column="INF_ID"        		property="infId"                />
+		<result column="SEQ"        		property="mstSeq"                />
+		<result column="INF_SEQ"       		property="infSeq"               />
+		<result column="FILE_SEQ"       	property="fileSeq"               />
+		<result column="ARR_FILE_SEQ"       property="arrFileSeq"               />
+		<result column="VIEW_CNT"        	property="viewCnt"                />
+		<result column="USE_YN"        		property="useYn"                />               
+		<result column="SRC_FILE_NM"        property="srcFileNm"                />               
+		<result column="DP_SRC_FILE_NM"        property="dpSrcFileNm"                />               
+		<result column="SAVE_FILE_NM"       property="saveFileNm"                />               
+		<result column="VIEW_FILE_NM"       property="viewFileNm"                />                  
+		<result column="DP_VIEW_FILE_NM"       property="dpViewFileNm"                />                  
+		<result column="FILE_SIZE"        	property="fileSize"                />               
+		<result column="FILE_SIZE_KB"       property="fileSizeKb"                />               
+		<result column="FILE_EXT"        	property="fileExt"                />               
+		<result column="FT_CR_DTTM"        	property="ftCrDttm"                />               
+		<result column="LT_CR_DTTM"        	property="ltCrDttm"                />      
+		<result column="VIEW_LANG"        	property="viewLang"                />           
+		<result column="WRT_NM"        	property="wrtNm"                />
+		<result column="V_ORDER"        	property="vOrder"                />                      
+	</resultMap>
+  <!-- 
+
+	<resultMap id="OpenInfColOptPop" class="egovframework.admin.service.service.OpenInfLcol" >
+		<result column="INF_NM"          property="infNm"        />            
+		<result column="INF_ID"        property="infId"                />
+		<result column="INF_SEQ"       property="infSeq"               />
+		<result column="SRV_CD"       property="srvCd"               />
+		<result column="OWNER_CD"        property="ownerCd"      />
+		<result column="DS_ID"           property="dsId"         />
+		<result column="DS_NM"           property="dsNm"         />
+		<result column="COL_ID"        property="colId"               />
+		<result column="COL_NM"        property="colNm"            />
+		<result column="COL_SEQ"       property="colSeq"               />
+		<result column="COND_YN"         property="condYn"       />           
+		<result column="COND_OP"         property="condOp"       />
+		<result column="COND_VAR"        property="condVar"      />
+		<result column="FILT_CODE"       property="filtCode"     />
+		<result column="REQ_YN"       property="reqYn"     />
+		<result column="REQ_OP"       property="reqOp"     />
+		<result column="REQ_VAR"       property="reqVar"     />
+		<result column="REQ_NEED"       property="reqNeed"     />
+		<result column="REQ_TYPE"       property="reqType"     />
+	</resultMap>
+	-->
+	
+	<select id="OpenInfFcolDAO.selectOpenInfColList" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultMap="OpenInfCol" >
+		SELECT   A.INF_ID
+		       , B.SEQ
+		       , A.INF_SEQ
+		       , A.FILE_SEQ
+		       , A.FILE_SEQ AS ARR_FILE_SEQ
+		       , A.SRC_FILE_NM
+		       , A.SRC_FILE_NM||'.'||A.FILE_EXT AS DP_SRC_FILE_NM
+		       , A.SAVE_FILE_NM
+		       , A.VIEW_FILE_NM
+		       , A.VIEW_FILE_NM||'.'||A.FILE_EXT AS DP_VIEW_FILE_NM
+		       , A.FILE_SIZE
+		       <![CDATA[
+		       , CASE  WHEN A.FILE_SIZE < 1024 THEN 1
+                       ELSE ROUND(A.FILE_SIZE/1024, 2) END FILE_SIZE_KB
+               ]]> 
+		       , A.FILE_EXT
+		       , TO_CHAR(A.FT_CR_DTTM, 'YYYY-MM-DD') FT_CR_DTTM
+		       , TO_CHAR(A.LT_CR_DTTM, 'YYYY-MM-DD') LT_CR_DTTM
+		       , A.VIEW_CNT
+		       , NVL(A.USE_YN, 'Y') USE_YN
+		       , NVL(#viewLang:VARCHAR#, '') VIEW_LANG
+		       , A.WRT_NM
+		       , A.V_ORDER
+		  FROM   TB_OPEN_INF_FILE A INNER JOIN TB_OPEN_INF B
+		                            ON  A.INF_ID = B.INF_ID						   
+		 WHERE   1=1
+		   AND   A.INF_ID = #infId:VARCHAR#
+		<isNotEmpty property="popupUse" >		
+		   AND   A.USE_YN = #popupUse:CHAR#
+		</isNotEmpty>
+		ORDER BY A.V_ORDER, A.LT_CR_DTTM DESC, A.FILE_SEQ DESC   
+	</select>
+	
+	<update id="OpenInfFcolDAO.mergeIntoCol" parameterClass="egovframework.admin.service.service.OpenInfFcol" >
+		<![CDATA[
+		MERGE INTO TB_OPEN_INF_FILE A
+		USING(
+				SELECT #infId:VARCHAR#         	AS INF_ID
+					  ,#infSeq:NUMERIC#	       	AS INF_SEQ
+					  ,#fileSeq:NUMERIC#       	AS FILE_SEQ
+					  ,(SELECT SGRP_CD FROM TB_OPEN_INF_SRV 
+					    WHERE  INF_ID = #infId:VARCHAR# 
+					    AND    SRV_CD = 'F' 
+					    AND    SRV_YN = 'Y')    AS FILE_CD
+					  ,#srcFileNm:VARCHAR#		AS SRC_FILE_NM
+					  ,#saveFileNm:VARCHAR# 	AS SAVE_FILE_NM
+					  ,#viewFileNm:VARCHAR#		AS VIEW_FILE_NM
+					  ,#fileSize:NUMERIC#		AS FILE_SIZE
+					  ,#fileExt:VARCHAR#		AS FILE_EXT
+					  ,TO_DATE(#ftCrDttm:VARCHAR#, 'YYYY-MM-DD')		AS FT_CR_DTTM
+					  ,TO_DATE(#ltCrDttm:VARCHAR#, 'YYYY-MM-DD')		AS LT_CR_DTTM
+					  ,#useYn:CHAR#			AS USE_YN
+					  ,#sessionUsrId:VARCHAR#  	AS REG_ID 
+					  ,SYSDATE         	AS REG_DTTM
+					  ,#sessionUsrId:VARCHAR#  	AS UPD_ID
+					  ,SYSDATE         	AS UPD_DTTM
+					  ,#wrtNm#         	AS WRT_NM
+					  ,#vOrder#			AS V_ORDER
+				  FROM DUAL
+			)B
+		ON ( A.INF_ID = B.INF_ID AND A.INF_SEQ = B.INF_SEQ AND A.FILE_SEQ =B.FILE_SEQ)
+		WHEN MATCHED THEN
+		UPDATE SET
+				 A.USE_YN = B.USE_YN
+				,A.FILE_CD = B.FILE_CD
+				,A.SRC_FILE_NM = B.SRC_FILE_NM
+				,A.SAVE_FILE_NM = B.SAVE_FILE_NM
+				,A.VIEW_FILE_NM = B.VIEW_FILE_NM
+				,A.FILE_SIZE = B.FILE_SIZE
+				,A.FILE_EXT = B.FILE_EXT
+				,A.FT_CR_DTTM = B.FT_CR_DTTM
+				,A.LT_CR_DTTM = B.LT_CR_DTTM
+				,A.UPD_ID = B.UPD_ID
+				,A.UPD_DTTM = B.UPD_DTTM
+				,A.WRT_NM = B.WRT_NM
+				,A.V_ORDER = B.V_ORDER
+		WHEN NOT MATCHED THEN
+		INSERT 
+		(
+			 A.INF_ID
+			,A.INF_SEQ
+			,A.FILE_SEQ
+			,A.FILE_CD
+			,A.SRC_FILE_NM
+			,A.SAVE_FILE_NM
+			,A.VIEW_FILE_NM
+			,A.FILE_SIZE
+			,A.FILE_EXT
+			,A.FT_CR_DTTM
+			,A.LT_CR_DTTM
+			,A.USE_YN
+			,A.REG_ID 
+			,A.REG_DTTM
+			,A.UPD_ID
+			,A.UPD_DTTM
+			,A.WRT_NM
+			,A.V_ORDER
+		)VALUES
+		(
+			 B.INF_ID
+			,B.INF_SEQ
+			,B.FILE_SEQ
+			,B.FILE_CD
+			,B.SRC_FILE_NM
+			,B.SAVE_FILE_NM
+			,B.VIEW_FILE_NM
+			,B.FILE_SIZE
+			,B.FILE_EXT
+			,B.FT_CR_DTTM
+			,B.LT_CR_DTTM
+			,B.USE_YN
+			,B.REG_ID 
+			,B.REG_DTTM
+			,B.UPD_ID
+			,B.UPD_DTTM
+			,B.WRT_NM
+			,(SELECT NVL(COUNT(*), 0)+1 FROM TB_OPEN_INF_FILE WHERE INF_ID = #infId# AND INF_SEQ = #infSeq#)
+		)
+		]]>
+	</update>
+	
+	
+	<update id="OpenInfFcolDAO.deleteFcol" parameterClass="egovframework.admin.service.service.OpenInfFcol" >
+		DELETE FROM TB_OPEN_INF_FILE
+		 WHERE FILE_SEQ = #fileSeq:NUMERIC# 
+	</update>
+<!-- 
+	<update id="OpenInfAcolDAO.mergeIntoApi" parameterClass="egovframework.admin.service.service.OpenInfAcol" >
+		<![CDATA[
+		MERGE INTO TB_OPEN_INF_AURI A
+		USING(
+				SELECT #infId#         					AS INF_ID
+					  ,#infSeq#	       					AS INF_SEQ
+					  ,#uriSeq#        					AS URI_SEQ
+					  ,#uriNm# 							AS URI_NM
+					  ,#uriNm#							AS ENG_URI_NM
+					  ,CONCAT(#uri#||'?', #uriParam#)	AS URI
+					  ,#uriUseYn#						AS USE_YN
+					  ,#uriVOrder#						AS V_ORDER
+					  ,#sessionUsrId#  					AS REG_ID 
+					  ,SYSDATE         					AS REG_DTTM
+					  ,#sessionUsrId#  					AS UPD_ID
+					  ,SYSDATE         					AS UPD_DTTM  
+				  FROM DUAL
+			)B
+		ON ( A.INF_ID = B.INF_ID AND A.INF_SEQ = B.INF_SEQ AND A.URI_SEQ =B.URI_SEQ)
+		WHEN MATCHED THEN
+		UPDATE SET
+				 A.V_ORDER = B.V_ORDER
+				,A.URI = B.URI  
+				,A.URI_NM = B.URI_NM
+				,A.ENG_URI_NM = B.ENG_URI_NM
+				,A.USE_YN = B.USE_YN
+				,A.UPD_ID = B.UPD_ID
+				,A.UPD_DTTM = B.UPD_DTTM
+		WHEN NOT MATCHED THEN
+		INSERT 
+		(
+			 A.INF_ID
+			,A.INF_SEQ
+			,A.URI_SEQ
+			,A.URI_NM
+			,A.ENG_URI_NM
+			,A.URI
+			,A.V_ORDER
+			,A.USE_YN
+			,A.REG_ID 
+			,A.REG_DTTM
+			,A.UPD_ID
+			,A.UPD_DTTM  
+		)VALUES
+		(
+			 B.INF_ID
+			,B.INF_SEQ
+			,B.URI_SEQ
+			,B.URI_NM
+			,B.ENG_URI_NM
+			,B.URI
+			,B.V_ORDER
+			,B.USE_YN
+			,B.REG_ID 
+			,B.REG_DTTM
+			,B.UPD_ID
+			,B.UPD_DTTM  	
+		)
+		]]>
+	</update>
+	
+	<select id="OpenInfAcolDAO.apiDup" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultClass="java.lang.Integer">
+		SELECT   NVL(COUNT(*), 0) AS CNT
+		  FROM   TB_OPEN_INF_SRV
+		 WHERE   API_RES = #apiRes#
+	</select>
+	
+	
+	<select id="OpenInfAcolDAO.selectApiUri" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultMap="sampleUriMap">
+		SELECT   INF_ID
+		       , INF_SEQ
+		       , URI_SEQ
+		       , URI_NM
+		       , ENG_URI_NM
+		       , SUBSTR(URI, 1, INSTR(URI, '?')-1) URI
+		       , SUBSTR(URI, INSTR(URI, '?')+1, LENGTH(URI)) AS URI_PARAM
+		       , USE_YN
+		       , URI_SEQ
+		       , V_ORDER
+		  FROM   TB_OPEN_INF_AURI
+		 WHERE   INF_ID = #infId#
+		ORDER BY V_ORDER 
+	</select>
+
+	<select id="OpenInfAcolDAO.selectOpenInfColInfo" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultMap="OpenInfColOptPop" >
+			SELECT 
+					   A.INF_ID
+					  ,A.INF_SEQ 
+					  ,A.INF_NM
+					  ,A.SRV_CD
+		              ,A.OWNER_CD
+		              ,A.DS_ID
+		              ,A.DS_NM
+		              ,B.COL_ID
+		              ,B.COL_NM
+		              ,B.COL_SEQ
+		              ,COND_YN
+		              ,COND_OP
+		              ,COND_VAR
+		              ,FILT_CODE
+		              ,REQ_YN
+		              ,REQ_OP
+		              ,REQ_VAR
+		              ,REQ_NEED
+		              ,REQ_TYPE
+		         FROM TV_MNG_INF_SRV A
+		         INNER JOIN TB_OPEN_DSCOL B
+		            ON A.DS_ID = B.DS_ID
+		           AND B.USE_YN ='Y'   
+		         LEFT OUTER JOIN TB_OPEN_INF_ACOL C
+		           ON A.INF_ID = C.INF_ID
+		          AND A.INF_SEQ = C.INF_SEQ
+		          AND B.COL_SEQ = C.COL_SEQ
+		         WHERE C.INF_ID=#infId#
+		           AND C.INF_SEQ=#infSeq#
+		           AND C.COL_SEQ=#colSeq# 
+	</select>
+	
+	<update id="OpenInfAcolDAO.updateOpt" parameterClass="egovframework.admin.service.service.OpenInfAcol" >
+		<![CDATA[
+		UPDATE   TB_OPEN_INF_ACOL 
+		   SET   COND_YN = #condYn#
+			   , COND_OP = #condOp#
+			   , COND_VAR =  #condVar#
+			   , REQ_YN = #reqYn#
+		       , REQ_OP = #reqOp#
+		       , REQ_VAR = #reqVar#
+		       , REQ_NEED = #reqNeed#
+		       , REQ_TYPE = #reqType#
+			   , UPD_ID = #sessionUsrId#
+			   , UPD_DTTM = SYSDATE
+		 WHERE   INF_ID=#infId#
+		   AND   INF_SEQ=#infSeq#
+		   AND   COL_SEQ=#colSeq# 
+		]]>
+	</update>
+	
+	 -->
+	 
+	<select id="OpenInfFcolDAO.getMstSeq" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultClass="java.lang.Integer">
+		SELECT NVL(SEQ, 0) FROM TB_OPEN_INF WHERE INF_ID = #infId:VARCHAR#
+	</select>
+	
+	<select id="OpenInfFcolDAO.getInfSeq" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultClass="java.lang.Integer">
+		SELECT NVL(INF_SEQ, 0) FROM TB_OPEN_INF_SRV WHERE INF_ID = #infId:VARCHAR# AND SRV_CD='F'
+	</select>
+	
+</sqlMap>

@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="OpenInfLog" >
+  <typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+  
+<update id="PortalOpenInfLogDAO.saveLogOpenInfSave" parameterClass="egovframework.portal.service.service.OpenInfLog" >
+		<![CDATA[
+			INSERT INTO TB_LOG_OPEN_INF_SAVE
+			 (
+			     SEQCE_NO
+			 	,INF_ID
+			 	,INF_SEQ
+			 	,SRV_CD
+			 	,SYS_TAG
+			 	,USER_CD
+			 	,USER_IP
+			 	,SAVE_EXT
+			 	,ROW_CNT
+			 	,DB_SIZE
+			 	,OUT_SIZE
+			 	,REG_DTTM
+			 )VALUES
+			 (   SQ_LOG_SEQ.NEXTVAL
+			 	,#infId#
+			 	,#infSeq#
+			 	,#srvCd#
+			 	,#sysTag#
+			 	,#userCd#
+			 	,#userIp#
+			 	,#saveExt#
+			 	,#rowCnt#
+			 	,#dbSize#
+			 	,#outSize#
+			 	,SYSDATE
+			 )
+		]]>
+	</update>
+	<update id="PortalOpenInfLogDAO.saveLogOpenInfViewCnt" parameterClass="egovframework.portal.service.service.OpenInfLog" >
+		<![CDATA[
+			 UPDATE TB_OPEN_INF_SRV SET VIEW_CNT = NVL(VIEW_CNT,0)+1
+			 WHERE INF_ID =#infId#
+			   AND INF_SEQ =#infSeq#
+			   AND SRV_CD=#srvCd#
+		]]>
+	</update>
+	<update id="PortalOpenInfLogDAO.saveLogOpenInfSrv" parameterClass="egovframework.portal.service.service.OpenInfLog" >
+		<![CDATA[
+			INSERT INTO TB_LOG_OPEN_INF_SRV
+			 (
+			 	 INF_ID
+			 	,INF_SEQ
+			 	,SRV_CD
+			 	,SYS_TAG
+			 	,USER_CD
+			 	,USER_IP
+			 	,REG_DTTM
+			 )VALUES
+			 (
+			 	 #infId#
+			 	,#infSeq#
+			 	,#srvCd#
+			 	,#sysTag#
+			 	,#userCd#
+			 	,#userIp#
+			 	,SYSDATE
+			 )
+		]]>
+	</update>
+	
+	
+	
+	
+	<update id="PortalOpenInfLogDAO.insertLogOpenInfFile" parameterClass="egovframework.portal.service.service.OpenInfLog" >
+
+	INSERT INTO TB_LOG_OPEN_INF_FILE
+	(INF_ID,INF_SEQ,FILE_SEQ,SYS_TAG,USER_CD,USER_IP,FILE_SIZE,REG_DTTM)
+	VALUES(
+	#infId#
+	,#infSeq#
+	,#fileSeq#
+ 	,#sysTag#
+	,#userCd#
+	,#userIp#
+	,#fileSize#
+	,SYSDATE)
+	
+	</update>
+	
+	
+	<update id="PortalOpenInfLogDAO.upOpenInfFileViewCnt" parameterClass="egovframework.portal.service.service.OpenInfLog" >
+
+	UPDATE TB_OPEN_INF_FILE SET VIEW_CNT = VIEW_CNT + 1
+	WHERE INF_ID = #infId# AND
+	INF_SEQ = #infSeq# AND
+	FILE_SEQ = #fileSeq#
+	
+	</update>
+		
+	
+	<update id="PortalOpenInfLogDAO.insertLogOpenInfLink" parameterClass="egovframework.portal.service.service.OpenInfLog" >
+
+	INSERT INTO TB_LOG_OPEN_INF_LINK
+	(SEQCE_NO,INF_ID,INF_SEQ,LINK_SEQ,SYS_TAG,USER_CD,USER_IP,REG_DTTM)
+	VALUES(
+	 SQ_LOG_SEQ.NEXTVAL,
+	,#infId#
+	,#infSeq#
+	,#linkSeq#
+	,#sysTag#
+	,#userCd#
+	,#userIp#
+	,sysdate)
+
+	</update>
+	
+	
+	<update id="PortalOpenInfLogDAO.upOpenInfLinkViewCnt" parameterClass="egovframework.portal.service.service.OpenInfLog" >
+
+	UPDATE TB_OPEN_INF_LINK SET VIEW_CNT = VIEW_CNT + 1
+	WHERE INF_ID = #infId# AND
+	INF_SEQ = #infSeq# AND
+	LINK_SEQ = #linkSeq#
+	
+	</update>
+		
+		
+	<select id="PortalOpenInfLogDAO.getInfSeq" parameterClass="egovframework.portal.service.service.OpenInfLog" resultClass="java.lang.Integer">
+	SELECT INF_SEQ 
+	
+	FROM TB_OPEN_INF_SRV 
+	
+	WHERE 
+	INF_ID=#infId# AND 
+	SRV_CD = #srvCd#
+	
+	
+	</select>
+	
+	<update id="PortalOpenInfLogDAO.insertLogPortal" parameterClass="egovframework.portal.service.service.OpenInfLog" >
+
+	INSERT INTO TB_LOG_SITE_MENU
+	(SEQCE_NO,SYS_TAG,USER_IP,MENU_URL,MENU_NM,REG_DTTM)
+	VALUES(
+	 SQ_LOG_SEQ.NEXTVAL
+	,#sysTag#
+	,#userIp#
+	,#menuUrl#
+	,#menuNm#
+	,sysdate)
+	
+	</update>
+	
+	
+</sqlMap>

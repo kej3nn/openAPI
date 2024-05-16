@@ -1,0 +1,323 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="HubList">
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+	
+	<select id="HubListDao.selectApiMessageList" resultClass="record"  parameterClass="egovframework.hub.service.Hub">
+		SELECT MSG_TAG 
+			   ,MSG_CD 
+			   ,MSG_EXP
+		  FROM TB_OPEN_INF_AMSG
+		 WHERE USE_YN ='Y'
+		   AND MSG_CD NOT IN ('980','990')
+		UNION ALL
+		SELECT  'ERROR' AS MSG_TAG
+		       ,'980' AS MSG_CD
+		       ,FN_GET_COMM_CODE_NM('D1030',LIMIT_CD) AS MSG_EXP
+		  FROM TB_USER_KEY
+		 WHERE ACT_KEY = #actKey#
+		   AND LIMIT_CD !='NONE'
+		UNION ALL
+		SELECT  'ERROR' AS MSG_TAG
+		       ,'990' AS MSG_CD
+		       ,PAUSE_MSG AS MSG_EXP
+		  FROM TB_USER_KEY
+		 WHERE ACT_KEY = #actKey#
+		   AND KEY_STATE='P'
+	</select>
+	
+	<select id="HubListDao.selectCheckUsrKey" resultClass="record"  parameterClass="egovframework.hub.service.Hub">
+		SELECT  USER_CD
+		          ,KEY_SEQ
+		          ,KEY_STATE
+			      ,LIMIT_CD
+			  FROM TB_USER_KEY
+			 WHERE ACT_KEY = #actKey#
+	</select>
+	<select id="HubListDao.selectService" resultClass="record"  parameterClass="egovframework.hub.service.Hub">
+		SELECT DS_ID
+		        ,INF_ID
+		        ,INF_SEQ
+		        ,OWNER_CD
+		        ,'' AS DS_CD
+		    FROM TV_OPEN_INF_SRV 
+		  WHERE API_RES = #apiRes#
+	</select>
+	
+	<select id="HubListDao.selectApiTrf" resultClass="Integer"  parameterClass="egovframework.hub.service.Hub">
+		SELECT COUNT(1) AS CNT
+	    FROM TB_STAT_API_D A
+	  INNER JOIN TB_OPEN_INF_SRV B
+	     ON A.INF_ID = B.INF_ID
+	  INNER JOIN TB_USER_KEY C
+	     ON A.USER_CD = C.USER_CD
+	    AND A.KEY_SEQ = C.KEY_SEQ
+	    AND B.SRV_CD ='A'
+	    AND B.API_TRF != 0
+	    <![CDATA[
+	    AND B.API_TRF <= A.CALL_CNT
+	    ]]>
+	    AND A.YYYYMMDD = TO_CHAR(SYSDATE,'YYYYMMDD')
+	  WHERE C.ACT_KEY=#actKey#
+    	AND B.INF_ID=#infId#
+	</select>
+	<select id="HubListDao.selectServiceRegNeed" resultClass="record"  parameterClass="egovframework.hub.service.Hub">
+		SELECT   
+		    C.COL_ID
+		FROM TV_OPEN_INF_SRV S
+		INNER JOIN TB_OPEN_DSCOL C 
+		   ON S.DS_ID = C.DS_ID 
+		INNER JOIN  TB_OPEN_INF_ACOL A 
+		   ON S.INF_ID = A.INF_ID 
+		  AND C.COL_SEQ = A.COL_SEQ 
+		  AND S.SRV_CD = 'A'
+		WHERE 1=1
+		  AND S.INF_ID = #infId#
+          AND S.INF_SEQ = #infSeq#
+		  AND A.USE_YN = 'Y'
+		  AND A.REQ_NEED ='Y'
+          AND A.REQ_YN ='Y'
+	</select>
+	
+	<select id="HubListDao.selectServiceColList" resultClass="record"  parameterClass="egovframework.hub.service.Hub">
+		SELECT   
+		    'A.'||C.SRC_COL_ID||' AS '||C.COL_ID AS COL_NM
+		FROM TV_OPEN_INF_SRV S
+		INNER JOIN TB_OPEN_DSCOL C 
+		   ON S.DS_ID = C.DS_ID 
+		INNER JOIN  TB_OPEN_INF_ACOL A 
+		   ON S.INF_ID = A.INF_ID 
+		  AND C.COL_SEQ = A.COL_SEQ 
+		  AND S.SRV_CD = 'A'
+		WHERE S.DS_ID = #dsId#
+		  AND S.INF_ID = #infId#
+		  AND A.USE_YN = 'Y'
+		  AND C.USE_YN = 'Y'
+		  AND A.VIEW_YN ='Y'
+		ORDER BY A.V_ORDER
+	</select>
+	
+	<select id="HubListDao.selectServiceColCdataList" resultClass="record"  parameterClass="egovframework.hub.service.Hub">
+		SELECT   
+		    C.COL_ID AS COL_NM
+		FROM TV_OPEN_INF_SRV S
+		INNER JOIN TB_OPEN_DSCOL C 
+		   ON S.DS_ID = C.DS_ID 
+		INNER JOIN  TB_OPEN_INF_ACOL A 
+		   ON S.INF_ID = A.INF_ID 
+		  AND C.COL_SEQ = A.COL_SEQ 
+		  AND S.SRV_CD = 'A'
+		WHERE S.DS_ID = #dsId#
+		  AND S.INF_ID = #infId#
+		  AND A.USE_YN = 'Y'
+		  AND C.USE_YN = 'Y'
+		  AND A.VIEW_YN ='Y'
+		  AND A.VIEW_CD ='Stext'
+	</select>
+	
+	<select id="HubListDao.selectServiceSystemValList" resultClass="record" parameterClass="egovframework.hub.service.Hub">
+		SELECT   
+			 'AND A.'||C.SRC_COL_ID||' '||A.COND_OP||' ' AS  SYSTEM_VAR
+			 , (CASE WHEN A.COND_OP =  'IN' THEN '(' || A.COND_VAR || ')' ELSE A.COND_VAR END) AS COND_VAR
+		<!-- 	 
+			 ,CASE C.SRC_COL_TYPE 
+			 	WHEN 'VARCHAR' THEN ''''||A.COND_VAR||''''
+			 	WHEN 'DATE'    THEN CASE WHEN upper(A.COND_VAR) LIKE '%SYSDATE%' THEN A.COND_VAR
+			 					 ELSE ''''||A.COND_VAR||'''' END 
+			 	ELSE A.COND_VAR END AS COND_VAR
+			 	 -->
+		FROM TV_OPEN_INF_SRV S
+		INNER JOIN TB_OPEN_DSCOL C 
+		   ON S.DS_ID = C.DS_ID 
+		INNER JOIN  TB_OPEN_INF_ACOL A 
+		   ON S.INF_ID = A.INF_ID 
+		  AND C.COL_SEQ = A.COL_SEQ 
+		  AND S.SRV_CD = 'A'
+		WHERE S.DS_ID = #dsId# 
+		  AND S.INF_ID = #infId#
+		  AND A.USE_YN = 'Y'
+		  AND A.COND_YN ='Y'
+		  AND C.USE_YN = 'Y'
+		  AND A.COND_OP IS NOT NULL
+		  AND A.COND_VAR IS NOT NULL
+	</select>
+	
+	<select id="HubListDao.selectServiceUserValList" resultClass="record" parameterClass="egovframework.hub.service.Hub">
+		SELECT   
+			 'AND A.'||C.SRC_COL_ID||' '||A.REQ_OP||' ' AS USER_VAR
+			 ,C.SRC_COL_ID   AS REQ_VAR
+			 ,A.REQ_NEED
+			 ,C.COL_ID
+			 ,C.SRC_COL_TYPE
+			 ,A.REQ_OP
+		FROM TV_OPEN_INF_SRV S
+		INNER JOIN TB_OPEN_DSCOL C 
+		   ON S.DS_ID = C.DS_ID 
+		INNER JOIN  TB_OPEN_INF_ACOL A 
+		   ON S.INF_ID = A.INF_ID 
+		  AND C.COL_SEQ = A.COL_SEQ 
+		  AND S.SRV_CD = 'A'
+		WHERE S.DS_ID = #dsId# 
+		  AND S.INF_ID = #infId#
+		  AND A.USE_YN = 'Y'
+		  AND C.USE_YN = 'Y'
+		  AND A.REQ_YN ='Y'
+		  AND A.REQ_OP IS NOT NULL
+	</select>
+	
+	<select id="HubListDao.selectServiceOrderByList" resultClass="record" parameterClass="egovframework.hub.service.Hub">
+		SELECT   
+			'A.'||C.SRC_COL_ID ||' '||
+			CASE A.SORT_TAG  WHEN 'A' THEN 'ASC'
+			ELSE 'DESC' END AS ORDER_SORT
+		FROM TV_OPEN_INF_SRV S
+		INNER JOIN TB_OPEN_DSCOL C 
+		   ON S.DS_ID = C.DS_ID 
+		INNER JOIN  TB_OPEN_INF_ACOL A 
+		   ON S.INF_ID = A.INF_ID 
+		  AND C.COL_SEQ = A.COL_SEQ 
+		  AND S.SRV_CD = 'A'
+		WHERE S.DS_ID = #dsId# 
+		  AND S.INF_ID = #infId#
+		  AND A.USE_YN = 'Y'
+		  AND C.USE_YN = 'Y'
+		  AND SORT_TAG IS NOT NULL
+		ORDER BY A.V_ORDER
+	</select>
+	
+	<select id="HubListDao.selectHubData" resultClass="record" parameterClass="egovframework.hub.service.Hub" remapResults="true">
+	SELECT A.*
+		FROM(
+		SELECT ROWNUM AS RN, TB.*
+		 FROM 
+		 (
+			SELECT 
+				$selectColString$
+			  FROM $tableString$ A
+			   <isNotEmpty property="tsJoinString">
+				$tsJoinString$
+			</isNotEmpty>
+			 WHERE 1=1
+			 $sysVarString$
+			 $userValString$
+			 $orderByString$
+		)TB
+	) A
+	WHERE A.RN BETWEEN #startNum# AND #endNum#
+	</select>
+	
+	<select id="HubListDao.selectHubDataCnt" resultClass="Integer" parameterClass="egovframework.hub.service.Hub" remapResults="true">
+		SELECT 
+			COUNT(1) AS cnt
+		  FROM $tableString$ A
+		 WHERE 1=1
+		 $sysVarString$
+		 $userValString$
+	</select>
+	
+	
+	<insert id="HubListDao.insertLog" parameterClass="egovframework.hub.service.Hub" >
+			INSERT INTO TB_LOG_OPEN_INF_A
+			(
+			  INF_ID
+			  ,INF_SEQ
+			  ,USER_CD
+			  ,KEY_SEQ
+			  ,USER_IP
+			  ,API_RES_P
+			  ,DN_TYPE
+			  ,REQ_CNT
+			  ,ROW_CNT
+			  ,LEADTIME
+			  ,DB_SIZE
+			  ,OUT_SIZE
+			  ,REG_DTTM
+			  ,SEQCE_NO
+			<isNotEmpty property="msgTag">
+			  ,MSG_TAG
+			</isNotEmpty>
+			<isNotEmpty property="msgCd">
+			  ,MSG_CD
+			</isNotEmpty>
+			<isNotEmpty property="msgExp">
+			  ,MSG_EXP
+			</isNotEmpty>
+			)VALUES
+			(
+				 NVL(#infId#, 'ERR')
+				,#infSeq#
+				,#userCd#
+				,#keySeq#
+				,#userIp#
+				,#apiRes#
+				,#type#
+				,#pSize#
+				,NVL(#rowCnt#,0)
+				,#leadTime#
+				,NVL(#dbSize#,0)
+				,NVL(#outSize#,0)
+				,sysdate
+				,SQ_LOG_SEQ.NEXTVAL
+			<isNotEmpty property="msgTag">
+			  ,#msgTag#
+			</isNotEmpty>
+			<isNotEmpty property="msgCd">
+			  ,#msgCd#
+			</isNotEmpty>
+			<isNotEmpty property="msgExp">
+			  ,#msgExp#
+			</isNotEmpty>
+			)
+	</insert>
+	
+	<insert id="HubListDao.insertLogSimple" parameterClass="egovframework.hub.service.Hub" >
+			INSERT INTO TB_LOG_OPEN_INF_AS
+			(
+			  INF_ID
+			  ,INF_SEQ
+			  ,USER_IP
+			  ,API_RES_P
+			  ,DN_TYPE
+			  ,REQ_CNT
+			  ,ROW_CNT
+			  ,LEADTIME
+			  ,DB_SIZE
+			  ,OUT_SIZE
+			  ,REG_DTTM
+			  ,SEQCE_NO
+			<isNotEmpty property="msgTag">
+			  ,MSG_TAG
+			</isNotEmpty>
+			<isNotEmpty property="msgCd">
+			  ,MSG_CD
+			</isNotEmpty>
+			<isNotEmpty property="msgExp">
+			  ,MSG_EXP
+			</isNotEmpty>
+			)VALUES
+			(
+				 NVL(#infId#, 'ERR')
+				,#infSeq#
+				,#userIp#
+				,#apiRes#
+				,#type#
+				,#pSize#
+				,NVL(#rowCnt#,0)
+				,#leadTime#
+				,NVL(#dbSize#,0)
+				,NVL(#outSize#,0)
+				,sysdate
+				,SQ_LOG_SEQ.NEXTVAL
+			<isNotEmpty property="msgTag">
+			  ,#msgTag#
+			</isNotEmpty>
+			<isNotEmpty property="msgCd">
+			  ,#msgCd#
+			</isNotEmpty>
+			<isNotEmpty property="msgExp">
+			  ,#msgExp#
+			</isNotEmpty>				
+			)
+	</insert>
+</sqlMap>

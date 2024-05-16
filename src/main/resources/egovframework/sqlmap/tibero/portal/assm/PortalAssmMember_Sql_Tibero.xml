@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="portalAssmMember" >
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+	
+	<!-- 국회 공통코드 -->
+	<select id="assmMemberDao.searchAssmCommCd" parameterClass="params" resultClass="record">
+		/* sql id : assmMemberDao.searchAssmCommCd */
+		SELECT CM_CD		AS "code"
+			 , UP_CM_CD		AS "upCode"
+		  	 , CM_NM		AS "name"
+		FROM   TV_ASSEM_CODE	
+		WHERE  USE_YN = 1
+		<isEmpty property="gCmCd">
+			AND    1=2
+		</isEmpty>
+		<isNotEmpty property="gCmCd">
+			AND    G_CM_CD = #gCmCd:NUMERIC#
+		</isNotEmpty>
+		ORDER BY SORT_NO
+	</select>
+	
+	<!-- MONA_CD(임시로 부여한 EMP_NO)로 EMP_NO를 조회한다. -->
+	<select id="assmMemberDao.selectAssmEmpNoByMonaCd" parameterClass="params" resultClass="string">
+		/* sql id : assmMemberDao.selectAssmEmpNoByMonaCd */
+		SELECT NVL(MAX(EMP_NO), '') AS MONA_CD FROM TV_THXPSN01 WHERE MONA_CD = #monaCd:VARCHAR#
+	</select>
+	
+	<!-- 국회의원 개인신상 상세정보를 조회한다. -->
+	<select id="assmMemberDao.selectAssmMemberDtl" parameterClass="params" resultClass="record">
+		/* sql id : assmMemberDao.selectAssmMemberDtl */
+		SELECT
+			A.EMP_NO			AS "empNo"
+			, A.HG_NM			AS "hgNm"
+			, A.HJ_NM			AS "hjNm"
+			, A.ENG_NM			AS "engNm"
+			, A.AGE           	AS "age"
+			, A.SEX_GBN_NM		AS "sexGbnNm"
+			, A.DEPT_IMG_URL  	AS "deptImgUrl"
+			, A.POLY_CD         AS "polyCd"
+			, A.POLY_NM       	AS "polyNm"
+			, A.ORIG_NM       	AS "origNm"
+			, A.ELECT_GBN_NM	AS "eleGbnNm"
+			, A.REELE_GBN_NM	AS "reeleGbnNm"
+			, A.UNITS			AS "units"
+			, A.CMIT_NM         AS "cmitNm"
+			, A.CMITS         	AS "cmits"
+			, A.TEL_NO        	AS "telNo"
+			, A.ASSEM_ADDR		AS "assemAddr"
+			, A.E_MAIL        	AS "eMail"
+			, A.HOMEPAGE      	AS "homepage"
+			, A.STAFF         	AS "staff"
+			, A.SECRETARY      	AS "secretary"
+			, A.SECRETARY2      AS "secretary2"
+			, A.BTH_DATE		AS "bthDate"
+		    , T_URL				AS "tUrl"
+			, F_URL 			AS "fUrl"
+			, I_URL 			AS "iUrl"
+			, Y_URL 			AS "yUrl"
+			, B_URL 			AS "bUrl"
+			, NVL(A.OPEN_NA_ID, REPLACE(A.ENG_NM, ' ', '')) AS "openNaId"
+		FROM  TV_THXPSN01 A
+			  LEFT OUTER JOIN TV_ASSEM_SNS B ON A.EMP_NO = B.EMP_NO
+		WHERE A.EMP_NO  = #empNo:VARCHAR#
+		AND   A.UNIT_CD = #unitCd:VARCHAR# 
+	</select>
+	
+	<!-- 국회의원 인적정보 조회 -->
+	<select id="assmMemberDao.selectAssmMemberInfo" parameterClass="params" resultClass="record">
+		/* sql id : assmMemberDao.selectAssmMemberInfo */
+		SELECT
+		    PROFILE_CD		AS "profileCd"
+		    , PROFILE_NM	AS "profileNm"
+		    , EMP_NO		AS "empNo"
+		    , FRTO_DATE		AS "frtoDate"
+		    , PROFILE_SJ	AS "profileSj"
+		    , SORT_NO		AS "sortNo"
+		FROM  TV_THXPSN00 A
+		WHERE EMP_NO = #empNo:VARCHAR#
+		<isNotEmpty property="profileCd" prepend=" AND ">
+			PROFILE_CD = #profileCd:VARCHAR#
+		</isNotEmpty>
+		ORDER BY SORT_NO DESC
+	</select>
+	
+	<!-- 국회의원의 최종 회차를 구한다. -->
+	<select id="assmMemberDao.selectAssmMaxUnit" parameterClass="params" resultClass="record">
+		/* sql id : assmMemberDao.selectAssmMaxUnit */
+		SELECT A.UNIT_CD 					AS "unitCd"
+		     , '제' || A.UNIT_CD || '대' 	AS "unitNm"
+		FROM   TV_THXPSN01_LAST A
+		WHERE  EMP_NO = #empNo:VARCHAR#
+	</select>
+	
+	<!-- 현재 국회대수를 조회한다. -->
+	<select id="assmMemberDao.selectCurrentAssmUnit" resultClass="record">
+		/* sql id : assmMemberDao.selectCurrentAssmUnit */
+		SELECT
+		    '1000' || VALUE_CD 			AS "unitCd",
+		    '제' || VALUE_CD || '대' 	AS "unitNm"
+		FROM
+		    TB_COMM_CODE
+		WHERE
+		    GRP_CD = 'A8000'
+		    AND DITC_CD = 'SVUNIT'
+		    AND USE_YN = 'Y'		
+	</select>
+	
+	<!-- 역대 국회의원 대수 코드목록을 조회한다. (현재 보유하고 있는 데이터 코드 기준) -->
+	<select id="assmMemberDao.selectAssmHistUnitCodeList" parameterClass="params" resultClass="record">
+		/* sql id : assmMemberDao.selectAssmHistUnitCodeList */
+		SELECT DITC_CD AS "unitCd"
+		     , DITC_NM AS "unitNm" 
+		FROM
+			 TB_COMM_CODE A
+		WHERE 
+			A.GRP_CD = 'A8014'
+		AND A.USE_YN = 'Y'
+		<![CDATA[
+		AND A.DITC_CD >= (SELECT '1000' || MAX(B.VALUE_CD) AS UNIT_CD
+		]]>
+		                  FROM   TB_COMM_CODE B
+		                  WHERE  B.GRP_CD  = 'A8000' 
+		                  <isNotEmpty property="ditcCd" prepend=" AND ">
+		                  	B.DITC_CD = #ditcCd:VARCHAR#
+		                  </isNotEmpty>
+		                  <isEmpty property="ditcCd" prepend=" AND ">
+		                  	B.DITC_CD = 'SLUNIT' 
+		                  </isEmpty>
+		                  AND    B.USE_YN  = 'Y')
+		ORDER BY A.DITC_CD DESC		                  
+	</select>
+	<!-- 선거이력을 조회한다. -->
+	<select id="assmMemberDao.selectElectedInfo" parameterClass="params" resultClass="record">
+		/* sql id : assmMemberDao.selectElectedInfo */
+		SELECT
+			'P98'			AS "profileCd" 
+			, EMP_NO		AS "empNo"
+			, UNIT_CD       AS "unitCd"
+			, NAME          AS "name"
+			, SGTYPENAME    AS "sgtypename"
+			, SDNAME        AS "sdname"
+			, WIWNAME       AS "wiwname"
+			, SGGNAME       AS "sggname"
+			, JDNAME        AS "jdname"
+			, JOB           AS "job"
+			, DUGYUL        AS "dugyul"
+		FROM
+			TV_ELECTED_INFO A
+		WHERE
+			A.EMP_NO = #empNo:VARCHAR#
+	</select>
+	
+	<!-- SNS 정보를 조회한다. -->
+	<select id="assmMemberDao.selectAssemSns" parameterClass="params" resultClass="record">
+		/* sql id : assmMemberDao.selectAssemSns */
+		SELECT
+			'P99'		AS "profileCd"  
+			, EMP_NO	AS "empNo"
+			, HG_NM		AS "hgNm"
+			, T_URL		AS "tUrl"
+			, F_URL		AS "fUrl"
+			, I_URL		AS "iUrl"
+			, Y_URL		AS "yUrl"
+			, B_URL		AS "bUrl"
+		FROM
+			TV_ASSEM_SNS A
+		WHERE
+			A.EMP_NO = #empNo:VARCHAR#
+	</select>
+	
+	<!-- URL 코드로 MONA_CD 조회 -->
+	<select id="assmMemberDao.selectAssmMemberUrlByMonaCd" parameterClass="params" resultClass="String">
+  		/* sql id : assmMemberDao.selectAssmMemberUrlByMonaCd */
+		SELECT NVL(MAX(MONA_CD), '') AS "monaCd"
+		FROM   TV_THXPSN01
+		WHERE  OPEN_NA_ID = #openNaId:VARCHAR#
+		<isNotEmpty property="unitCd" prepend=" AND ">
+			UNIT_CD = #unitCd:VARCHAR#
+		</isNotEmpty>
+		<isEmpty property="unitCd" prepend=" AND ">
+			STATUS_YN = 'Y' 
+		</isEmpty>
+  	</select>
+  	
+	<!-- URL 코드로 MONA_CD 조회(영문명으로.. 복수가 있을수 있으니 1개만 조회) -->
+	<select id="assmMemberDao.selectAssmMemberUrlByMonaCdChkEngnm" parameterClass="params" resultClass="String">
+  		/* sql id : assmMemberDao.selectAssmMemberUrlByMonaCdChkEngnm */
+		SELECT NVL(MAX(MONA_CD), '') AS "monaCd"
+		FROM   TV_THXPSN01
+		WHERE  REPLACE(ENG_NM, ' ', '') = #openNaId:VARCHAR#
+		<isNotEmpty property="unitCd" prepend=" AND ">
+			UNIT_CD = #unitCd:VARCHAR#
+		</isNotEmpty>
+		<isEmpty property="unitCd" prepend=" AND ">
+			STATUS_YN = 'Y' 
+		</isEmpty>
+        AND ROWNUM= 1
+  	</select>  	
+  	
+ 	<!-- 파일변환이 안되어 있는 국회의원 사진 이미지 정보를 조회 -->
+	<select id="assmMemberDao.selectAssmPicture" resultClass="record">
+		/* sql id : assmMemberDao.selectAssmPicture */
+		SELECT EMP_NO AS "empNo"
+				 , PIC AS "pic"
+		   FROM IOPEN_DATA.THXPSN02_BLOB
+		 WHERE PIC_CONV_YN = 'N'	
+	</select>
+	 	
+	<!-- 파일변환 후 상태값을 변경 -->
+	<update id="assmMemberDao.updateAssmPicture" parameterClass="params" >
+		/* sql id : assmMemberDao.updateAssmPicture */	
+		UPDATE IOPEN_DATA.THXPSN02_BLOB
+	       SET PIC_CONV_YN = 'Y'
+	     WHERE EMP_NO = #empNo:VARCHAR#
+	</update>
+
+	<!-- 메뉴정보를 로그에 담는다. -->
+	<insert id="assmMemberDao.insertLogMenu" parameterClass="params" >
+		/* sql id : assmMemberDao.insertLogMenu */	
+         INSERT INTO TB_LOG_COMM_MENU
+                (   SEQCE_NO, SYS_TAG, 	MENU_ID, USER_CD, USER_IP, REG_DTTM, MENU_URL, MENU_PARAM ) 
+               VALUES ( 
+               		  SQ_LOG_COMM_MENU_SEQ.NEXTVAL
+               		, #sysTag:VARCHAR#
+                    , #menuId#
+                    , #userCd:VARCHAR#
+                    , #userIp:VARCHAR#
+                    , SYSDATE
+                    , #menuUrl:VARCHAR#
+                    , #menuParam:VARCHAR#
+                )
+	</insert>
+	
+</sqlMap>

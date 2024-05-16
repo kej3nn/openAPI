@@ -1,0 +1,104 @@
+@charset "utf-8";
+
+/************************************************************************
+ - FILE NAME : intro.css
+ - SUMMARY   : intro layout (소개 관련 layout)
+ - DATE      : 2015.06.26
+************************************************************************/
+
+/* 사이트 소개 */
+.section_gyeonggiDataDream p,
+.section_gyeonggiDataDream_info p {margin:8px 0 27px 0;}
+.section_gyeonggiDataDream, 
+.section_gyeonggiDataDream_info {text-align:center;}
+.section_gyeonggiDataDream p, 
+.section_gyeonggiDataDream_info p, 
+.section_gyeonggiDataDream h4, 
+.section_gyeonggiDataDream_info h4 {text-align:left;}
+.data_guide {padding:16px 12px 17px 20px;}
+.area_data_law_B {padding-bottom:35%;}
+@media all and (max-width:767px) {
+.section_gyeonggiDataDream div.mq_mobile,
+.section_gyeonggiDataDream_info div.mq_mobile {background:#f9f9f9; border:1px solid #e4e4e4;}
+.section_gyeonggiDataDream div.mq_mobile p,
+.section_gyeonggiDataDream_info div.mq_mobile p {margin:0px; padding:6px 5px 7px 10px;}
+.data_guide {padding:6px 5px 7px 10px; font-size:11px; line-height:18px;}
+.area_data_law_B {padding-bottom:70%;}
+}
+/* 사이트 소개 E */
+ 
+/* 공공데이터 제공신청 */
+.data_law {padding:16px 0 17px 20px;}
+.data_law a {display:block; margin:3px 0 0px 0px;}
+.data_offerApplication_step {margin:11px 0 26px 0;}
+.data_offerApplication_step:after {display:block; content:''; clear:both;}
+.data_offerApplication_step li {float:left; position:relative; overflow:hidden; width:25%; height:0px; padding-bottom:25%; background:url('../../img/ggportal/desktop/intro/arrow_data_offerApplication_step.png') no-repeat left 50%; text-align:center;}
+.data_offerApplication_step li:first-child {background:none;}
+.data_offerApplication_step li span {position:absolute; top:0; left:0; width:100%; height:100%; background-repeat:no-repeat; background-position:50% 50%;}
+.data_offerApplication_step li span.step_1 {background-image:url('../../img/ggportal/desktop/intro/data_offerApplication_step_1.png')}
+.data_offerApplication_step li span.step_2 {background-image:url('../../img/ggportal/desktop/intro/data_offerApplication_step_2.png')}
+.data_offerApplication_step li span.step_3 {background-image:url('../../img/ggportal/desktop/intro/data_offerApplication_step_3.png')}
+.data_offerApplication_step li span.step_4 {background-image:url('../../img/ggportal/desktop/intro/data_offerApplication_step_4.png')}
+.data_offerApplication_step li span strong {position:absolute; left:-10000px;}
+.list_data_offerApplication {margin-left:14px;}
+.list_data_offerApplication li {padding:0 0 13px 0; text-indent:-14px;}
+.section_data_offerApplication_step {padding:0 0 61px 0; background:url('../../img/ggportal/desktop/intro/bg_section_data_offerApplication_step.png') repeat-x 0 100%;}
+.section_data_offerApplication {padding:0 15px 30px 15px; background:#fffdf4; border-bottom:1px solid #dbdbd9;}
+.section_data_offerApplication .p_tyA {margin:4px 0 0 0;}
+@media all and (max-width:767px) {
+.data_law,
+.data_system {padding:6px 5px 7px 10px; font-size:11px; line-height:18px;}
+.section_data_offerApplication_step {padding:0 0 31px 0;}
+.section_data_offerApplication_step div.mq_mobile {padding:6px 5px 7px 10px; background:#fff; border:1px solid #e4e4e4;}
+.section_data_offerApplication {padding:0 15px 20px 15px;}
+.section_data_offerApplication .p_tyA {margin:6px 0 0 0;}
+.data_offerApplication_step li {background:none;}
+.data_offerApplication_step li span {background-size:95% 95%}
+}
+@media all and (min-width:768px) {
+.data_system {background:none; border:0px}
+}
+/* 공공데이터 제공신청 E */
+
+/* 홍보관 */
+.area_PublicInformationHall {position:relative; overflow:hidden; width:100%; height:0; margin:17px 0 0px 0; padding-bottom:50%;}
+.area_PublicInformationHall .PublicInformationHall {position:absolute; top:0; left:0; width:100%; height:100%;}
+.area_subtitles {position:relative; overflow:hidden; width:100%; height:0; padding-bottom:20%;}
+.area_subtitles .subtitles {overflow-y:auto; position:absolute; top:0; left:0; width:100%; height:100%; padding:16px 15px 12px 20px;  box-sizing:border-box;}
+.area_subtitles .subtitles pre {line-height:20px;}
+@media all and (max-width:767px) {
+.area_PublicInformationHall {margin:7px 0 0px 0;} 
+.area_subtitles {padding-bottom:67%;}
+}
+
+.section_webtoon .tab_B {position:relative; width:100%; margin:30px 0 30px 0; background:none;}
+.section_webtoon .tab_B a {float:none; position:absolute; top:0px; width:78px;box-sizing:border-box;border:1px solid #fff;border-bottom:none;}
+.section_webtoon .tab_B a.on,.section_webtoon .tab_B a:hover{border-color:#dbdbdb;border-bottom:1px solid #fff;}
+.section_webtoon .tab_B a#tab_B_1 {left:0%;}
+.section_webtoon .tab_B a.on#tab_B_1 {left:0%;margin-left:0;}
+.section_webtoon .tab_B a#tab_B_2 {left:78px;}
+.section_webtoon .tab_B a#tab_B_3 {left:156px;}
+.section_webtoon .tab_B a#tab_B_4 {left:234px;}
+.section_webtoon .tab_B a#tab_B_5 {left:312px}
+.section_webtoon .tab_B a#tab_B_6 {left:390px;}
+.section_webtoon .tab_B a#tab_B_7 {left:468px;}
+.section_webtoon .tab_B a#tab_B_8 {left:546px;}
+.section_webtoon .tab_B a#tab_B_9 {left:624px;}
+.section_webtoon .tab_B a#tab_B_10 {left:702px;}
+.section_webtoon .tab_B_cont {position:relative; top:29px; background:#fff; border:1px solid #dbdbdb;}
+@media all and (max-width:767px) {
+.section_webtoon .tab_B {margin:10px 0 0 0;}
+.section_webtoon .tab_B a {width:10%;border:1px solid #dbdbdb;top:0;border-left:none;}
+.section_webtoon .tab_B a#tab_B_1 {left:0%;border-left:1px solid #dbdbdb;}
+.section_webtoon .tab_B a#tab_B_2 {left:10%;}
+.section_webtoon .tab_B a#tab_B_3 {left:20%;}
+.section_webtoon .tab_B a#tab_B_4 {left:30%;}
+.section_webtoon .tab_B a#tab_B_5 {left:40%;}
+.section_webtoon .tab_B a#tab_B_6 {left:50%;}
+.section_webtoon .tab_B a#tab_B_7 {left:60%;}
+.section_webtoon .tab_B a#tab_B_8 {left:70%;}
+.section_webtoon .tab_B a#tab_B_9 {left:80%;}
+.section_webtoon .tab_B a#tab_B_10 {left:90%;}
+.section_webtoon .tab_B a:last-child strong {background:none;}
+}
+/* 홍보관 E */

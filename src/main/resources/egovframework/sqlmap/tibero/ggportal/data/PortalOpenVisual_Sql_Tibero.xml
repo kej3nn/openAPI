@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="PortalVisualDao">
+
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+
+	<!-- 데이터 시각화 목록 -->
+	<select id="PortalVisualDao.searchListVisual" parameterClass="params" resultClass="record">
+		SELECT
+			ROW_NUM "rowNum"
+			, VISTN_SRV_SEQ "vistnSrvSeq"
+			<!-- , TRN_SRV_CD "trnSrvCd" -->
+			, '' as "trnSrvCd"
+			, VISTN_NM "vistnNm"
+			, TMNL_IMG_FILE "tmnlImgFile"
+			, VIEW_CNT "viewCnt"
+			, PRD_NM "prdNm"
+			, VISTN_TY_NM "vistnTyNm"
+			, TO_CHAR(REG_DTTM, 'YYYY-MM-DD') AS "regDttm"
+			, VISTN_CD AS "vistnCd"
+		FROM (	
+			SELECT
+				ROWNUM ROW_NUM
+				, VISTN_SRV_SEQ
+				<!-- , TRN_SRV_CD -->
+				, VISTN_NM
+				, TMNL_IMG_FILE
+				, VIEW_CNT
+				, PRD_NM
+				, VISTN_TY_NM
+				, REG_DTTM
+				, VISTN_CD
+			FROM (	  
+				SELECT
+					VISTN_SEQ AS VISTN_SRV_SEQ
+					<!-- , TRN_SRV_CD -->
+					, VISTN_NM
+					, TMNL_IMG_FILE
+					, VIEW_CNT
+					, PRD_NM
+					, VISTN_TY_NM
+					, REG_DTTM
+					, VISTN_CD
+				FROM
+					TB_OPEN_VISUAL
+				WHERE
+					USE_YN = 'Y'
+					<isNotEmpty property="vistnCd">
+					AND VISTN_CD = #vistnCd:VARCHAR#
+					</isNotEmpty>
+				ORDER BY V_ORDER
+			) A
+			WHERE
+				ROWNUM <![CDATA[ <= ]]> #end:NUMERIC#
+		) A
+		WHERE
+			ROW_NUM <![CDATA[ >= ]]> #start:NUMERIC#			
+	</select>	
+	
+	<!-- 데이터 시각화 목록 전체 수 -->
+	<select id="PortalVisualDao.searchListVisualCount" parameterClass="params" resultClass="int">  
+		SELECT
+			COUNT(*)
+		FROM
+			TB_OPEN_VISUAL
+		WHERE
+			USE_YN = 'Y'	
+			<isNotEmpty property="vistnCd">
+			AND VISTN_CD = #vistnCd:VARCHAR#
+			</isNotEmpty>
+	</select>
+
+	<!-- 데이터 시각화 로그 -->
+	<insert id="PortalVisualDao.insertVisualLog" parameterClass="params">
+        <selectKey keyProperty="seq" resultClass="int">
+         SELECT SQ_LOG_SEQ.NEXTVAL FROM DUAL
+        </selectKey>
+		INSERT INTO TB_LOG_OPEN_VISUAL (
+			SEQCE_NO
+			, SYS_TAG
+			, USER_CD
+			, VISTN_SEQ
+			, USER_IP
+			, REG_DTTM
+		) VALUES (
+			#seq:NUMERIC#
+			, #sysTag:CHAR#
+			, #userCd:NUMERIC#
+			, #vistnSrvSeq:NUMERIC#
+			, #userIp:VARCHAR#
+			, sysdate
+		)
+	</insert>
+
+	<!-- 데이터 시각화 조회수 + -->
+	<update id="PortalVisualDao.updateVisualViewCnt" parameterClass="params">
+		UPDATE TB_OPEN_VISUAL
+		SET
+			VIEW_CNT = (SELECT NVL(VIEW_CNT, 0) + 1 FROM TB_OPEN_VISUAL WHERE VISTN_SEQ = #vistnSrvSeq#)
+		WHERE
+			VISTN_SEQ = #vistnSrvSeq:NUMERIC#			
+	</update>
+	
+	<!-- 2015.09.13 김은삼 [1] 메타정보 조회 SQL 추가 BEGIN -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 데이터 시각화 메타정보를 조회한다.                                  -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="PortalVisualDao.selectVisualMeta" parameterClass="params" resultClass="record">
+         SELECT A.VISTN_NM        AS "vistnNm",
+                A.VISTN_EXP  AS "vistnSrvDesc"
+           FROM TB_OPEN_VISUAL A
+          WHERE A.VISTN_SEQ    = #vistnSrvSeq:NUMERIC#
+    </select>
+    <!-- 2015.09.13 김은삼 [1] 메타정보 조회 SQL 추가 END -->
+
+	<!-- 데이터 시각화 상세정보 -->
+	<select id="PortalVisualDao.selectVisualData" parameterClass="params" resultClass="record">
+		SELECT
+			<!-- TRN_SRV_CD "trnSrvCd" -->
+			'' AS "trnSrvCd"
+			, INF_ID "infId"
+			, VISTN_NM "vistnNm"
+			, VISTN_EXP "vistnSrvDesc"
+			, VISTN_URL "vistnUrl"
+			, FILT_1_NM "filt1Nm"
+			, FILT_1_VAL "filt1Val"
+			, FILT_2_NM "filt2Nm"
+			, FILT_2_VAL "filt2Val"
+			, FILT_3_NM "filt3Nm"
+			, FILT_3_VAL "filt3Val"
+			, VIEW_CNT "viewCnt"
+			, PRD_NM "prdNm"
+			, VISTN_NM "vistnNm"
+			, VISTN_TY_NM "vistnTyNm"
+			, TO_CHAR(REG_DTTM, 'YYYY-MM-DD') AS "regDttm"
+		FROM
+			TB_OPEN_VISUAL
+		WHERE
+			VISTN_SEQ = #vistnSrvSeq:NUMERIC#
+	</select>
+		
+</sqlMap>

@@ -1,0 +1,1395 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- @(#)AdminStatsPresent_Sql_Tibero.xml 1.0 2019/07/29                       -->
+<!--                                                                         -->
+<!-- COPYRIGHT (C) 2013 WISEITECH CO., LTD. ALL RIGHTS RESERVED.             -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- 정보공개관리 > 통계/현황 SQL 파일이다.	                                    	 -->
+<!--                                                                         -->
+<!-- @author Softon                                                        	 -->
+<!-- @version 1.0 2019/08/12                                                 -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<sqlMap namespace="AdminStatsPresent">
+   	
+   	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Type Alias                                                          -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+    
+   	<!-- 청구서처리현황 -->
+    <select id="AdminStatsPresent.getStatAplDealList" parameterClass="params" resultClass="record">
+    	/* sql id : AdminStatsPresent.getStatAplDealList */
+		SELECT INST_CD AS "instCd", 
+		       FC_COMCODE(INST_CD, '') AS "instNm", 
+		       INST_ORD AS "instOrd", 
+		       SUM(NVL(OPB1, 0)) + SUM(NVL(OPB2, 0)) + SUM(NVL(OPB3, 0)) + SUM(NVL(OPB4, 0)) + SUM(NVL(OPB5, 0)) AS "totSum1", 
+		       SUM(NVL(OPB1, 0)) + SUM(NVL(OPB2, 0)) + SUM(NVL(OPB3, 0)) AS "totSum2", 
+		       SUM(NVL(OPB1, 0)) AS "sum1", 
+		       SUM(NVL(OPB2, 0)) AS "sum2", 
+		       SUM(NVL(OPB3, 0)) AS "sum3", 
+		       SUM(NVL(OPB4, 0)) AS "sum4", 
+		       SUM(NVL(OPB5, 0)) AS "sum5" 
+		  FROM
+		       (SELECT INST_CD, 
+		              INST_ORD,
+		              B.OPB1, 
+		              B.OPB2, 
+		              B.OPB3, 
+		              B.OPB4, 
+		              B.OPB5 
+		         FROM TV_OPNZ_INSTCD A 
+		          INNER JOIN 
+		              (SELECT B.APL_DEAL_INST_CD, 
+		                     COUNT(OPB_YN) AS OPB1, 
+		                     0 AS OPB2, 
+		                     0 AS OPB3, 
+		                     0 AS OPB4, 
+		                     0 AS OPB5 
+		                FROM TB_OPNZ_DCS A , 
+		                     TB_OPNZ_APL B 
+		               WHERE A.APL_NO(+) = B.APL_NO 
+		                     AND A.OPB_YN = '0' 
+		                     <isNotEmpty prepend="AND" property="aplDtFrom">
+							    B.APL_DT BETWEEN #aplDtFrom# AND #aplDtTo#
+							</isNotEmpty>
+		               GROUP BY B.APL_DEAL_INST_CD 
+		                  UNION ALL 
+		              SELECT B.APL_DEAL_INST_CD, 
+		                     0 AS OPB1, 
+		                     COUNT(OPB_YN) AS OPB2, 
+		                     0 AS OPB3, 
+		                     0 AS OPB4, 
+		                     0 AS OPB5 
+		                FROM TB_OPNZ_DCS A , 
+		                     TB_OPNZ_APL B 
+		               WHERE A.APL_NO(+) = B.APL_NO 
+		                     AND A.OPB_YN = '1' 
+		                    <isNotEmpty prepend="AND" property="aplDtFrom">
+							    B.APL_DT BETWEEN #aplDtFrom# AND #aplDtTo#
+							</isNotEmpty>
+		               GROUP BY B.APL_DEAL_INST_CD 
+		                  UNION ALL 
+		              SELECT B.APL_DEAL_INST_CD, 
+		                     0 AS OPB1, 
+		                     0 AS OPB1, 
+		                     COUNT(OPB_YN) AS OPB3, 
+		                     0 AS OPB4, 
+		                     0 AS OPB5 
+		                FROM TB_OPNZ_DCS A , 
+		                     TB_OPNZ_APL B 
+		               WHERE A.APL_NO(+) = B.APL_NO 
+		                     AND A.OPB_YN = '2' 
+		                     <isNotEmpty prepend="AND" property="aplDtFrom">
+							    B.APL_DT BETWEEN #aplDtFrom# AND #aplDtTo#
+							</isNotEmpty>
+		               GROUP BY B.APL_DEAL_INST_CD 
+		                  UNION ALL 
+		              SELECT B.APL_DEAL_INST_CD, 
+		                     0 AS OPB1, 
+		                     0 AS OPB2, 
+		                     0 AS OPB3, 
+		                     COUNT(B.PRG_STAT_CD) AS OPB4, 
+		                     0 AS OPB5 
+		                FROM TB_OPNZ_DCS A , 
+		                     TB_OPNZ_APL B 
+		               WHERE A.APL_NO(+) = B.APL_NO 
+		                     AND B.PRG_STAT_CD IN('01', '03', '05') 
+		                    <isNotEmpty prepend="AND" property="aplDtFrom">
+							    B.APL_DT BETWEEN #aplDtFrom# AND #aplDtTo#
+							</isNotEmpty>
+		               GROUP BY B.APL_DEAL_INST_CD 
+		                  UNION ALL 
+		              SELECT B.APL_DEAL_INST_CD, 
+		                     0 AS OPB1, 
+		                     0 AS OPB2, 
+		                     0 AS OPB3, 
+		                     0 AS OPB4, 
+		                     COUNT(B.PRG_STAT_CD) AS OPB5 
+		                FROM TB_OPNZ_DCS A , 
+		                     (SELECT A.APL_NO, 
+		                            A.APL_DT, 
+		                            CASE 
+		                                WHEN INST_TRSF_YN = '0' 
+		                                THEN '99' 
+		                                ELSE A.PRG_STAT_CD 
+		                            END PRG_STAT_CD, 
+		                            A.APL_DEAL_INST_CD 
+		                       FROM TB_OPNZ_APL A 
+		                        INNER JOIN 
+		                            (SELECT APL_NO, 
+		                                   '99' AS PRG_STAT_CD, 
+		                                   APL_DEAL_INST_CD, 
+		                                   INST_TRSF_YN 
+		                              FROM TB_OPNZ_RCP 
+		                             WHERE INST_TRSF_YN = '0'
+		                            ) B 
+		                            ON A.APL_NO = B.APL_NO(+)
+		                     )B 
+		               WHERE A.APL_NO(+) = B.APL_NO 
+		                     AND B.PRG_STAT_CD = '99' 
+		                    <isNotEmpty prepend="AND" property="aplDtFrom">
+							    B.APL_DT BETWEEN #aplDtFrom# AND #aplDtTo#
+							</isNotEmpty>
+		               GROUP BY B.APL_DEAL_INST_CD 
+		              ) B 
+		              ON A.INST_CD = B.APL_DEAL_INST_CD(+) 
+		       ) 
+		 <dynamic prepend="WHERE">
+		    <isEqual prepend="AND" compareValue="2" property="usrDiv">
+		        INST_CD = #usrInstCd#
+		    </isEqual>
+		    <isNotEmpty prepend="AND" property="instCd">
+				INST_CD = #instCd#
+			</isNotEmpty>
+		</dynamic>
+		 GROUP BY INST_CD, 
+		       INST_ORD 
+		ORDER BY INST_ORD  
+    </select>
+    
+    <!-- 청구방법별 현황 -->
+    <select id="AdminStatsPresent.getStatAplTakMthList" parameterClass="params" resultClass="record">
+    	/* sql id : AdminStatsPresent.getStatAplTakMthList */
+    	SELECT INST_CD AS "instCd", 
+		       INST_NM AS "instNm", 
+		       INST_ORD AS "instOrd", 
+		       SUM(NVL(SUM1, 0)) + SUM(NVL(SUM2, 0)) + SUM(NVL(SUM3, 0)) + SUM(NVL(SUM4, 0)) + SUM(NVL(SUM5, 0)) AS "totSum1", 
+		       SUM(NVL(SUM1, 0)) AS "sum1", 
+		       SUM(NVL(SUM2, 0)) AS "sum2", 
+		       SUM(NVL(SUM3, 0)) AS "sum3", 
+		       SUM(NVL(SUM4, 0)) AS "sum4", 
+		       SUM(NVL(SUM5, 0)) AS "sum5" 
+		  FROM TV_OPNZ_INSTCD A 
+		   INNER JOIN
+		       (SELECT APL_DEAL_INST_CD, 
+		              COUNT(APL_TAK_MTH) AS SUM1, 
+		              0 AS SUM2, 
+		              0 AS SUM3, 
+		              0 AS SUM4, 
+		              0 AS SUM5 
+		         FROM TB_OPNZ_APL A 
+		        WHERE APL_TAK_MTH = '01' 
+		        <isNotEmpty prepend="AND" property="aplDtFrom">
+					APL_DT BETWEEN #aplDtFrom# AND #aplDtTo#
+				</isNotEmpty>
+		        GROUP BY APL_DEAL_INST_CD 
+		           UNION ALL 
+		       SELECT APL_DEAL_INST_CD, 
+		              0 AS SUM1, 
+		              COUNT(APL_TAK_MTH) AS SUM2, 
+		              0 AS SUM3, 
+		              0 AS SUM4, 
+		              0 AS SUM5 
+		         FROM TB_OPNZ_APL A 
+		        WHERE APL_TAK_MTH = '02' 
+		              <isNotEmpty prepend="AND" property="aplDtFrom">
+							APL_DT BETWEEN #aplDtFrom# AND #aplDtTo#
+						</isNotEmpty>
+		        GROUP BY APL_DEAL_INST_CD 
+		           UNION ALL 
+		       SELECT APL_DEAL_INST_CD, 
+		              0 AS SUM1, 
+		              0 AS SUM2, 
+		              COUNT(APL_TAK_MTH) AS SUM3, 
+		              0 AS SUM4, 
+		              0 AS SUM5 
+		         FROM TB_OPNZ_APL A 
+		        WHERE APL_TAK_MTH = '03' 
+		              <isNotEmpty prepend="AND" property="aplDtFrom">
+						APL_DT BETWEEN #aplDtFrom# AND #aplDtTo#
+					</isNotEmpty>
+		        GROUP BY APL_DEAL_INST_CD 
+		           UNION ALL 
+		       SELECT APL_DEAL_INST_CD, 
+		              0 AS SUM1, 
+		              0 AS SUM2, 
+		              0 AS SUM3, 
+		              COUNT(APL_TAK_MTH) AS SUM4, 
+		              0 AS SUM5 
+		         FROM TB_OPNZ_APL A 
+		        WHERE APL_TAK_MTH = '04' 
+		            <isNotEmpty prepend="AND" property="aplDtFrom">
+						APL_DT BETWEEN #aplDtFrom# AND #aplDtTo#
+					</isNotEmpty>
+		        GROUP BY APL_DEAL_INST_CD 
+		           UNION ALL 
+		       SELECT APL_DEAL_INST_CD, 
+		              0 AS SUM1, 
+		              0 AS SUM2, 
+		              0 AS SUM3, 
+		              0 AS SUM4, 
+		              COUNT(APL_TAK_MTH) AS SUM5 
+		         FROM TB_OPNZ_APL A 
+		        WHERE APL_TAK_MTH = '05' 
+		            <isNotEmpty prepend="AND" property="aplDtFrom">
+						APL_DT BETWEEN #aplDtFrom# AND #aplDtTo#
+					</isNotEmpty>
+		        GROUP BY APL_DEAL_INST_CD 
+		       ) B 
+		       ON A.INST_CD = B.APL_DEAL_INST_CD(+) 
+		 <dynamic prepend="WHERE">
+		    <isEqual prepend="AND" compareValue="2" property="usrDiv">
+		        INST_CD = #usrInstCd#
+		    </isEqual>
+		    <isNotEmpty prepend="AND" property="instCd">
+				INST_CD = #instCd#
+			</isNotEmpty>
+		</dynamic>
+		 GROUP BY INST_CD, 
+		       INST_NM, 
+		       INST_ORD 
+		ORDER BY INST_ORD  	
+    </select>	
+    
+     <!-- 공개방법별 현황 -->
+    <select id="AdminStatsPresent.getStatAplOpbFomList" parameterClass="params" resultClass="record">
+    	/* sql id : AdminStatsPresent.getStatAplTakMthList */
+    	SELECT INST_CD AS "instCd", 
+		       INST_NM AS "instNm", 
+		       INST_ORD AS "instOrd", 
+		       SUM(NVL(SUM6, 0)) + SUM(NVL(SUM7, 0)) + SUM(NVL(SUM8, 0)) + SUM(NVL(SUM9, 0)) + SUM(NVL(SUM10, 0)) AS "totSum1", 
+		       SUM(NVL(SUM1, 0)) + SUM(NVL(SUM2, 0)) + SUM(NVL(SUM3, 0)) + SUM(NVL(SUM4, 0)) + SUM(NVL(SUM5, 0)) AS "totSum2", 
+		       SUM(NVL(SUM6, 0)) + SUM(NVL(SUM7, 0)) + SUM(NVL(SUM8, 0)) + SUM(NVL(SUM9, 0)) + SUM(NVL(SUM10, 0)) AS "totSum3", 
+		       SUM(NVL(SUM1, 0))  AS "sum1", 
+		       SUM(NVL(SUM2, 0))  AS "sum2", 
+		       SUM(NVL(SUM3, 0))  AS "sum3", 
+		       SUM(NVL(SUM4, 0))  AS "sum4", 
+		       SUM(NVL(SUM5, 0))  AS "sum5", 
+		       SUM(NVL(SUM6, 0))  AS "sum6", 
+		       SUM(NVL(SUM7, 0))  AS "sum7", 
+		       SUM(NVL(SUM8, 0))  AS "sum8", 
+		       SUM(NVL(SUM9, 0))  AS "sum9", 
+		       SUM(NVL(SUM10, 0)) AS "sum10" 
+		  FROM TV_OPNZ_INSTCD A 
+		   INNER JOIN
+		       (SELECT B.APL_DEAL_INST_CD, 
+		              COUNT(A.OPB_FOM_VAL) AS SUM1, 
+		              0 AS SUM2, 
+		              0 AS SUM3, 
+		              0 AS SUM4, 
+		              0 AS SUM5, 
+		              0 AS SUM6, 
+		              0 AS SUM7, 
+		              0 AS SUM8, 
+		              0 AS SUM9, 
+		              0 AS SUM10 
+		         FROM TB_OPNZ_DCS A, 
+		              TB_OPNZ_APL B 
+		        WHERE A.OPB_FOM_VAL = '01' 
+		              AND A.APL_NO = B.APL_NO 
+		              AND OPB_YN IN ('0', '1') 
+		             <isNotEmpty prepend="AND" property="aplDtFrom">
+						APL_DT BETWEEN #aplDtFrom# AND #aplDtTo#
+					 </isNotEmpty>
+		        GROUP BY B.APL_DEAL_INST_CD 
+		           UNION ALL 
+		       SELECT B.APL_DEAL_INST_CD, 
+		              0 AS SUM1, 
+		              COUNT(A.OPB_FOM_VAL) AS SUM2, 
+		              0 AS SUM3, 
+		              0 AS SUM4, 
+		              0 AS SUM5, 
+		              0 AS SUM6, 
+		              0 AS SUM7, 
+		              0 AS SUM8, 
+		              0 AS SUM9, 
+		              0 AS SUM10 
+		         FROM TB_OPNZ_DCS A, 
+		              TB_OPNZ_APL B 
+		        WHERE A.OPB_FOM_VAL = '02' 
+		              AND A.APL_NO = B.APL_NO 
+		              AND OPB_YN IN ('0', '1') 
+		              <isNotEmpty prepend="AND" property="aplDtFrom">
+						APL_DT BETWEEN #aplDtFrom# AND #aplDtTo#
+					 </isNotEmpty> 
+		        GROUP BY B.APL_DEAL_INST_CD 
+		           UNION ALL 
+		       SELECT B.APL_DEAL_INST_CD, 
+		              0 AS SUM1, 
+		              0 AS SUM2, 
+		              COUNT(A.OPB_FOM_VAL) AS SUM3, 
+		              0 AS SUM4, 
+		              0 AS SUM5, 
+		              0 AS SUM6, 
+		              0 AS SUM7, 
+		              0 AS SUM8, 
+		              0 AS SUM9, 
+		              0 AS SUM10 
+		         FROM TB_OPNZ_DCS A, 
+		              TB_OPNZ_APL B 
+		        WHERE A.OPB_FOM_VAL = '03' 
+		              AND A.APL_NO = B.APL_NO 
+		              AND OPB_YN IN ('0', '1') 
+		              <isNotEmpty prepend="AND" property="aplDtFrom">
+						APL_DT BETWEEN #aplDtFrom# AND #aplDtTo#
+					 </isNotEmpty>
+		        GROUP BY B.APL_DEAL_INST_CD 
+		           UNION ALL 
+		       SELECT B.APL_DEAL_INST_CD, 
+		              0 AS SUM1, 
+		              0 AS SUM2, 
+		              0 AS SUM3, 
+		              COUNT(A.OPB_FOM_VAL) AS SUM4, 
+		              0 AS SUM5, 
+		              0 AS SUM6, 
+		              0 AS SUM7, 
+		              0 AS SUM8, 
+		              0 AS SUM9, 
+		              0 AS SUM10 
+		         FROM TB_OPNZ_DCS A, 
+		              TB_OPNZ_APL B 
+		        WHERE A.OPB_FOM_VAL = '04' 
+		              AND A.APL_NO = B.APL_NO 
+		              AND OPB_YN IN ('0', '1') 
+		              <isNotEmpty prepend="AND" property="aplDtFrom">
+						APL_DT BETWEEN #aplDtFrom# AND #aplDtTo#
+					 </isNotEmpty>
+		        GROUP BY B.APL_DEAL_INST_CD 
+		           UNION ALL 
+		       SELECT B.APL_DEAL_INST_CD, 
+		              0 AS SUM1, 
+		              0 AS SUM2, 
+		              0 AS SUM3, 
+		              0 AS SUM4, 
+		              COUNT(A.OPB_FOM_VAL) AS SUM5, 
+		              0 AS SUM6, 
+		              0 AS SUM7, 
+		              0 AS SUM8, 
+		              0 AS SUM9, 
+		              0 AS SUM10 
+		         FROM TB_OPNZ_DCS A, 
+		              TB_OPNZ_APL B 
+		        WHERE A.OPB_FOM_VAL = '05' 
+		              AND A.APL_NO = B.APL_NO 
+		              AND OPB_YN IN ('0', '1') 
+		              <isNotEmpty prepend="AND" property="aplDtFrom">
+						APL_DT BETWEEN #aplDtFrom# AND #aplDtTo#
+					 </isNotEmpty>
+		        GROUP BY B.APL_DEAL_INST_CD 
+		           UNION ALL 
+		       SELECT B.APL_DEAL_INST_CD, 
+		              0 AS SUM1, 
+		              0 AS SUM2, 
+		              0 AS SUM3, 
+		              0 AS SUM4, 
+		              0 AS SUM5, 
+		              COUNT(A.GIVE_MTH) AS SUM6, 
+		              0 AS SUM7, 
+		              0 AS SUM8, 
+		              0 AS SUM9, 
+		              0 AS SUM10 
+		         FROM TB_OPNZ_DCS A, 
+		              TB_OPNZ_APL B 
+		        WHERE A.GIVE_MTH = '01' 
+		              AND A.APL_NO = B.APL_NO 
+		              AND OPB_YN IN ('0', '1') 
+		              <isNotEmpty prepend="AND" property="aplDtFrom">
+						APL_DT BETWEEN #aplDtFrom# AND #aplDtTo#
+					 </isNotEmpty>
+		        GROUP BY B.APL_DEAL_INST_CD 
+		           UNION ALL 
+		       SELECT B.APL_DEAL_INST_CD, 
+		              0 AS SUM1, 
+		              0 AS SUM2, 
+		              0 AS SUM3, 
+		              0 AS SUM4, 
+		              0 AS SUM5, 
+		              0 AS SUM6, 
+		              COUNT(A.GIVE_MTH) AS SUM7, 
+		              0 AS SUM8, 
+		              0 AS SUM9, 
+		              0 AS SUM10 
+		         FROM TB_OPNZ_DCS A, 
+		              TB_OPNZ_APL B 
+		        WHERE A.GIVE_MTH = '02' 
+		              AND A.APL_NO = B.APL_NO 
+		              AND OPB_YN IN ('0', '1') 
+		              <isNotEmpty prepend="AND" property="aplDtFrom">
+						APL_DT BETWEEN #aplDtFrom# AND #aplDtTo#
+					 </isNotEmpty>
+		        GROUP BY B.APL_DEAL_INST_CD 
+		           UNION ALL 
+		       SELECT B.APL_DEAL_INST_CD, 
+		              0 AS SUM1, 
+		              0 AS SUM2, 
+		              0 AS SUM3, 
+		              0 AS SUM4, 
+		              0 AS SUM5, 
+		              0 AS SUM6, 
+		              0 AS SUM7, 
+		              COUNT(A.GIVE_MTH) AS SUM8, 
+		              0 AS SUM9, 
+		              0 AS SUM10 
+		         FROM TB_OPNZ_DCS A, 
+		              TB_OPNZ_APL B 
+		        WHERE A.GIVE_MTH = '03' 
+		              AND A.APL_NO = B.APL_NO 
+		              AND OPB_YN IN ('0', '1') 
+		              <isNotEmpty prepend="AND" property="aplDtFrom">
+						APL_DT BETWEEN #aplDtFrom# AND #aplDtTo#
+					 </isNotEmpty> 
+		        GROUP BY B.APL_DEAL_INST_CD 
+		           UNION ALL 
+		       SELECT B.APL_DEAL_INST_CD, 
+		              0 AS SUM1, 
+		              0 AS SUM2, 
+		              0 AS SUM3, 
+		              0 AS SUM4, 
+		              0 AS SUM5, 
+		              0 AS SUM6, 
+		              0 AS SUM7, 
+		              0 AS SUM8, 
+		              COUNT(A.GIVE_MTH) AS SUM9, 
+		              0 AS SUM10 
+		         FROM TB_OPNZ_DCS A, 
+		              TB_OPNZ_APL B 
+		        WHERE A.GIVE_MTH = '04' 
+		              AND A.APL_NO = B.APL_NO 
+		              AND OPB_YN IN ('0', '1') 
+		             <isNotEmpty prepend="AND" property="aplDtFrom">
+						APL_DT BETWEEN #aplDtFrom# AND #aplDtTo#
+					 </isNotEmpty>
+		        GROUP BY B.APL_DEAL_INST_CD 
+		           UNION ALL 
+		       SELECT B.APL_DEAL_INST_CD, 
+		              0 AS SUM1, 
+		              0 AS SUM2, 
+		              0 AS SUM3, 
+		              0 AS SUM4, 
+		              0 AS SUM5, 
+		              0 AS SUM6, 
+		              0 AS SUM7, 
+		              0 AS SUM8, 
+		              0 AS SUM9, 
+		              COUNT(A.GIVE_MTH) AS SUM10 
+		         FROM TB_OPNZ_DCS A, 
+		              TB_OPNZ_APL B 
+		        WHERE A.GIVE_MTH = '05' 
+		              AND A.APL_NO = B.APL_NO 
+		              AND OPB_YN IN ('0', '1') 
+		              <isNotEmpty prepend="AND" property="aplDtFrom">
+						APL_DT BETWEEN #aplDtFrom# AND #aplDtTo#
+					 </isNotEmpty>
+		        GROUP BY B.APL_DEAL_INST_CD 
+		       ) B 
+		       ON A.INST_CD = B.APL_DEAL_INST_CD(+) 
+		 <dynamic prepend="WHERE">
+		    <isEqual prepend="AND" compareValue="2" property="usrDiv">
+		        INST_CD = #usrInstCd#
+		    </isEqual>
+		    <isNotEmpty prepend="AND" property="instCd">
+				INST_CD = #instCd#
+			</isNotEmpty>
+		</dynamic>
+		 GROUP BY INST_CD, 
+		       INST_NM, 
+		       INST_ORD 
+		ORDER BY INST_ORD  
+    </select>
+    
+    <!-- 비공개(부분공개)사유별현황 -->
+    <select id="AdminStatsPresent.getStatClsdRsonList" parameterClass="params" resultClass="record">
+    	/* sql id : AdminStatsPresent.getStatClsdRsonList */
+    	SELECT INST_CD AS "instCd", 
+		       FC_COMCODE(INST_CD, '') AS "instNm", 
+		       INST_ORD AS "instOrd", 
+		       SUM(NVL(OPB1, 0)) + SUM(NVL(OPB2, 0)) + SUM(NVL(OPB3, 0)) + SUM(NVL(OPB4, 0)) + SUM(NVL(OPB5, 0)) + SUM(NVL(OPB6, 0)) + SUM(NVL(OPB7, 0)) + SUM(NVL(OPB8, 0)) + SUM(NVL(OPB9, 0)) AS "totSum1", 
+		       SUM(NVL(OPB1, 0)) AS "sum1", 
+		       SUM(NVL(OPB2, 0)) AS "sum2", 
+		       SUM(NVL(OPB3, 0)) AS "sum3", 
+		       SUM(NVL(OPB4, 0)) AS "sum4", 
+		       SUM(NVL(OPB5, 0)) AS "sum5", 
+		       SUM(NVL(OPB6, 0)) AS "sum6", 
+		       SUM(NVL(OPB7, 0)) AS "sum7", 
+		       SUM(NVL(OPB8, 0)) AS "sum8", 
+		       SUM(NVL(OPB9, 0)) AS "sum9" 
+		  FROM
+		       (SELECT INST_CD, 
+		              INST_ORD,
+		              B.OPB1, 
+		              B.OPB2, 
+		              B.OPB3, 
+		              B.OPB4, 
+		              B.OPB5, 
+		              B.OPB6, 
+		              B.OPB7, 
+		              B.OPB8, 
+		              B.OPB9 
+		         FROM TV_OPNZ_INSTCD A 
+		          INNER JOIN 
+		              (SELECT B.APL_DEAL_INST_CD, 
+		                     COUNT(CLSD_RSON_CD) AS OPB1, 
+		                     0 AS OPB2, 
+		                     0 AS OPB3, 
+		                     0 AS OPB4, 
+		                     0 AS OPB5, 
+		                     0 AS OPB6, 
+		                     0 AS OPB7, 
+		                     0 AS OPB8, 
+		                     0 AS OPB9 
+		                FROM TB_OPNZ_DCS A , 
+		                     TB_OPNZ_RCP B, 
+		                     TB_OPNZ_APL C 
+		               WHERE A.APL_NO(+) = B.APL_NO 
+		                     AND B.APL_NO = C.APL_NO 
+		                     AND A.CLSD_RSON_CD = '01' 
+		                     <isNotEmpty prepend="AND" property="aplDtFrom">
+							 	C.APL_DT BETWEEN #aplDtFrom# AND #aplDtTo#
+							</isNotEmpty>
+		               GROUP BY B.APL_DEAL_INST_CD 
+		                  UNION ALL 
+		              SELECT B.APL_DEAL_INST_CD, 
+		                     0 AS OPB1, 
+		                     COUNT(CLSD_RSON_CD) AS OPB2, 
+		                     0 AS OPB3, 
+		                     0 AS OPB4, 
+		                     0 AS OPB5, 
+		                     0 AS OPB6, 
+		                     0 AS OPB7, 
+		                     0 AS OPB8, 
+		                     0 AS OPB9 
+		                FROM TB_OPNZ_DCS A , 
+		                     TB_OPNZ_RCP B, 
+		                     TB_OPNZ_APL C 
+		               WHERE A.APL_NO(+) = B.APL_NO 
+		                     AND B.APL_NO = C.APL_NO 
+		                     AND A.CLSD_RSON_CD = '02' 
+		                     <isNotEmpty prepend="AND" property="aplDtFrom">
+							 	C.APL_DT BETWEEN #aplDtFrom# AND #aplDtTo#
+							</isNotEmpty>
+		               GROUP BY B.APL_DEAL_INST_CD 
+		                  UNION ALL 
+		              SELECT B.APL_DEAL_INST_CD, 
+		                     0 AS OPB1, 
+		                     0 AS OPB1, 
+		                     COUNT(CLSD_RSON_CD) AS OPB3, 
+		                     0 AS OPB4, 
+		                     0 AS OPB5, 
+		                     0 AS OPB6, 
+		                     0 AS OPB7, 
+		                     0 AS OPB8, 
+		                     0 AS OPB9 
+		                FROM TB_OPNZ_DCS A , 
+		                     TB_OPNZ_RCP B, 
+		                     TB_OPNZ_APL C 
+		               WHERE A.APL_NO(+) = B.APL_NO 
+		                     AND B.APL_NO = C.APL_NO 
+		                     AND A.CLSD_RSON_CD = '03' 
+		                     <isNotEmpty prepend="AND" property="aplDtFrom">
+							 	C.APL_DT BETWEEN #aplDtFrom# AND #aplDtTo#
+							</isNotEmpty>
+		               GROUP BY B.APL_DEAL_INST_CD 
+		                  UNION ALL 
+		              SELECT B.APL_DEAL_INST_CD, 
+		                     0 AS OPB1, 
+		                     0 AS OPB2, 
+		                     0 AS OPB3, 
+		                     COUNT(CLSD_RSON_CD) AS OPB4, 
+		                     0 AS OPB5, 
+		                     0 AS OPB6, 
+		                     0 AS OPB7, 
+		                     0 AS OPB8, 
+		                     0 AS OPB9 
+		                FROM TB_OPNZ_DCS A , 
+		                     TB_OPNZ_RCP B, 
+		                     TB_OPNZ_APL C 
+		               WHERE A.APL_NO(+) = B.APL_NO 
+		                     AND B.APL_NO = C.APL_NO 
+		                     AND A.CLSD_RSON_CD = '04' 
+		                     <isNotEmpty prepend="AND" property="aplDtFrom">
+							 	C.APL_DT BETWEEN #aplDtFrom# AND #aplDtTo#
+							</isNotEmpty>
+		               GROUP BY B.APL_DEAL_INST_CD 
+		                  UNION ALL 
+		              SELECT B.APL_DEAL_INST_CD, 
+		                     0 AS OPB1, 
+		                     0 AS OPB2, 
+		                     0 AS OPB3, 
+		                     0 AS OPB4, 
+		                     COUNT(CLSD_RSON_CD) AS OPB5, 
+		                     0 AS OPB6, 
+		                     0 AS OPB7, 
+		                     0 AS OPB8, 
+		                     0 AS OPB9 
+		                FROM TB_OPNZ_DCS A , 
+		                     TB_OPNZ_RCP B, 
+		                     TB_OPNZ_APL C 
+		               WHERE A.APL_NO(+) = B.APL_NO 
+		                     AND B.APL_NO = C.APL_NO 
+		                     AND A.CLSD_RSON_CD = '05' 
+		                     <isNotEmpty prepend="AND" property="aplDtFrom">
+							 	C.APL_DT BETWEEN #aplDtFrom# AND #aplDtTo#
+							</isNotEmpty>
+		               GROUP BY B.APL_DEAL_INST_CD 
+		                  UNION ALL 
+		              SELECT B.APL_DEAL_INST_CD, 
+		                     0 AS OPB1, 
+		                     0 AS OPB2, 
+		                     0 AS OPB3, 
+		                     0 AS OPB4, 
+		                     0 AS OPB5, 
+		                     COUNT(CLSD_RSON_CD) AS OPB6, 
+		                     0 AS OPB7, 
+		                     0 AS OPB8, 
+		                     0 AS OPB9 
+		                FROM TB_OPNZ_DCS A , 
+		                     TB_OPNZ_RCP B, 
+		                     TB_OPNZ_APL C 
+		               WHERE A.APL_NO(+) = B.APL_NO 
+		                     AND B.APL_NO = C.APL_NO 
+		                     AND A.CLSD_RSON_CD = '06' 
+		                     <isNotEmpty prepend="AND" property="aplDtFrom">
+							 	C.APL_DT BETWEEN #aplDtFrom# AND #aplDtTo#
+							</isNotEmpty>
+		               GROUP BY B.APL_DEAL_INST_CD 
+		                  UNION ALL 
+		              SELECT B.APL_DEAL_INST_CD, 
+		                     0 AS OPB1, 
+		                     0 AS OPB2, 
+		                     0 AS OPB3, 
+		                     0 AS OPB4, 
+		                     0 AS OPB5, 
+		                     0 AS OPB6, 
+		                     COUNT(CLSD_RSON_CD) AS OPB7, 
+		                     0 AS OPB8, 
+		                     0 AS OPB9 
+		                FROM TB_OPNZ_DCS A , 
+		                     TB_OPNZ_RCP B, 
+		                     TB_OPNZ_APL C 
+		               WHERE A.APL_NO(+) = B.APL_NO 
+		                     AND B.APL_NO = C.APL_NO 
+		                     AND A.CLSD_RSON_CD = '07' 
+		                     <isNotEmpty prepend="AND" property="aplDtFrom">
+							 	C.APL_DT BETWEEN #aplDtFrom# AND #aplDtTo#
+							</isNotEmpty>
+		               GROUP BY B.APL_DEAL_INST_CD 
+		                  UNION ALL 
+		              SELECT B.APL_DEAL_INST_CD, 
+		                     0 AS OPB1, 
+		                     0 AS OPB2, 
+		                     0 AS OPB3, 
+		                     0 AS OPB4, 
+		                     0 AS OPB5, 
+		                     0 AS OPB6, 
+		                     0 AS OPB7, 
+		                     COUNT(CLSD_RSON_CD) AS OPB8, 
+		                     0 AS OPB9 
+		                FROM TB_OPNZ_DCS A , 
+		                     TB_OPNZ_RCP B, 
+		                     TB_OPNZ_APL C 
+		               WHERE A.APL_NO(+) = B.APL_NO 
+		                     AND B.APL_NO = C.APL_NO 
+		                     AND A.CLSD_RSON_CD = '08' 
+		                     <isNotEmpty prepend="AND" property="aplDtFrom">
+							 	C.APL_DT BETWEEN #aplDtFrom# AND #aplDtTo#
+							</isNotEmpty>
+		               GROUP BY B.APL_DEAL_INST_CD 
+		                  UNION ALL 
+		              SELECT B.APL_DEAL_INST_CD, 
+		                     0 AS OPB1, 
+		                     0 AS OPB2, 
+		                     0 AS OPB3, 
+		                     0 AS OPB4, 
+		                     0 AS OPB5, 
+		                     0 AS OPB6, 
+		                     0 AS OPB7, 
+		                     0 AS OPB8, 
+		                     COUNT(CLSD_RSON_CD) AS OPB9 
+		                FROM TB_OPNZ_DCS A , 
+		                     TB_OPNZ_RCP B, 
+		                     TB_OPNZ_APL C 
+		               WHERE A.APL_NO(+) = B.APL_NO 
+		                     AND B.APL_NO = C.APL_NO 
+		                     AND A.CLSD_RSON_CD = '09' 
+		                     <isNotEmpty prepend="AND" property="aplDtFrom">
+							 	C.APL_DT BETWEEN #aplDtFrom# AND #aplDtTo#
+							</isNotEmpty>
+		               GROUP BY B.APL_DEAL_INST_CD 
+		              ) B 
+		              ON A.INST_CD = B.APL_DEAL_INST_CD(+) 
+		       ) 
+		 <dynamic prepend="WHERE">
+		    <isEqual prepend="AND" compareValue="2" property="usrDiv">
+		        INST_CD = #usrInstCd#
+		    </isEqual>
+		    <isNotEmpty prepend="AND" property="instCd">
+				INST_CD = #instCd#
+			</isNotEmpty>
+		</dynamic>
+		 GROUP BY INST_CD, 
+		       INST_ORD 
+		ORDER BY INST_ORD  
+    </select>
+    <!-- 이의신청서처리 현황  -->
+    <select id="AdminStatsPresent.getStatObjtnDealList" parameterClass="params" resultClass="record">
+    	/* sql id : AdminStatsPresent.getStatObjtnDealList */
+    	SELECT INST_CD AS "instCd", 
+		       FC_COMCODE(INST_CD, '') AS "instNm", 
+		       INST_ORD AS "instOrd", 
+		       SUM(NVL(RSLT1, 0)) + SUM(NVL(RSLT2, 0)) + SUM(NVL(RSLT3, 0)) + SUM(NVL(RSLT4, 0)) + SUM(NVL(RSLT5, 0)) + SUM(NVL(RSLT6, 0)) AS "totSum1", 
+		       SUM(NVL(RSLT1, 0)) AS "sum1", 
+		       SUM(NVL(RSLT2, 0)) AS "sum2", 
+		       SUM(NVL(RSLT3, 0)) AS "sum3", 
+		       SUM(NVL(RSLT4, 0)) AS "sum4", 
+		       SUM(NVL(RSLT5, 0)) AS "sum5", 
+		       SUM(NVL(RSLT6, 0)) AS "sum6" 
+		  FROM 
+		       (SELECT A.INST_CD AS INST_CD, 
+		              A.INST_ORD AS INST_ORD, 
+		              B.RSLT1 AS RSLT1, 
+		              B.RSLT2 AS RSLT2, 
+		              B.RSLT3 AS RSLT3, 
+		              B.RSLT4 AS RSLT4, 
+		              B.RSLT5 AS RSLT5, 
+		              B.RSLT6 AS RSLT6 
+		         FROM TV_OPNZ_INSTCD A 
+		          INNER JOIN 
+		              (SELECT B.APL_DEAL_INST_CD AS APL_DEAL_INST_CD, 
+		                     COUNT(OBJTN_DEAL_RSLT_CD) AS RSLT1, 
+		                     0 AS RSLT2, 
+		                     0 AS RSLT3, 
+		                     0 AS RSLT4, 
+		                     0 AS RSLT5, 
+		                     0 AS RSLT6 
+		                FROM TB_OPNZ_OBJTN A, 
+		                     TB_OPNZ_RCP B 
+		               WHERE A.APL_NO = B.APL_NO 
+		                     AND OBJTN_DEAL_RSLT_CD = '99' 
+		                     <isNotEmpty prepend="AND" property="aplDtFrom">
+							    A.OBJTN_DT BETWEEN #aplDtFrom# AND #aplDtTo#
+							</isNotEmpty>
+		               GROUP BY B.APL_DEAL_INST_CD 
+		                  UNION ALL 
+		              SELECT B.APL_DEAL_INST_CD AS APL_DEAL_INST_CD, 
+		                     0 AS RSLT1, 
+		                     COUNT(OBJTN_DEAL_RSLT_CD) AS RSLT2, 
+		                     0 AS RSLT3, 
+		                     0 AS RSLT4, 
+		                     0 AS RSLT5, 
+		                     0 AS RSLT6 
+		                FROM TB_OPNZ_OBJTN A, 
+		                     TB_OPNZ_RCP B 
+		               WHERE A.APL_NO = B.APL_NO 
+		                     AND OBJTN_DEAL_RSLT_CD = '02' 
+		                     <isNotEmpty prepend="AND" property="aplDtFrom">
+							    A.OBJTN_DT BETWEEN #aplDtFrom# AND #aplDtTo#
+							</isNotEmpty>
+		               GROUP BY B.APL_DEAL_INST_CD 
+		                  UNION ALL 
+		              SELECT B.APL_DEAL_INST_CD AS APL_DEAL_INST_CD, 
+		                     0 AS RSLT1, 
+		                     0 AS RSLT2, 
+		                     COUNT(OBJTN_DEAL_RSLT_CD) AS RSLT3, 
+		                     0 AS RSLT4, 
+		                     0 AS RSLT5, 
+		                     0 AS RSLT6 
+		                FROM TB_OPNZ_OBJTN A, 
+		                     TB_OPNZ_RCP B 
+		               WHERE A.APL_NO = B.APL_NO 
+		                     AND OBJTN_DEAL_RSLT_CD = '03' 
+		                     <isNotEmpty prepend="AND" property="aplDtFrom">
+							    A.OBJTN_DT BETWEEN #aplDtFrom# AND #aplDtTo#
+							</isNotEmpty>
+		               GROUP BY B.APL_DEAL_INST_CD 
+		                  UNION ALL 
+		              SELECT B.APL_DEAL_INST_CD AS APL_DEAL_INST_CD, 
+		                     0 AS RSLT1, 
+		                     0 AS RSLT2, 
+		                     0 AS RSLT3, 
+		                     COUNT(OBJTN_DEAL_RSLT_CD) AS RSLT4, 
+		                     0 AS RSLT5, 
+		                     0 AS RSLT6 
+		                FROM TB_OPNZ_OBJTN A, 
+		                     TB_OPNZ_RCP B 
+		               WHERE A.APL_NO = B.APL_NO 
+		                     AND OBJTN_DEAL_RSLT_CD = '04' 
+		                     <isNotEmpty prepend="AND" property="aplDtFrom">
+							    A.OBJTN_DT BETWEEN #aplDtFrom# AND #aplDtTo#
+							</isNotEmpty>
+		               GROUP BY B.APL_DEAL_INST_CD 
+		                  UNION ALL 
+		              SELECT B.APL_DEAL_INST_CD AS APL_DEAL_INST_CD, 
+		                     0 AS RSLT1, 
+		                     0 AS RSLT2, 
+		                     0 AS RSLT3, 
+		                     0 AS RSLT4, 
+		                     COUNT(OBJTN_DEAL_RSLT_CD) AS RSLT5, 
+		                     0 AS RSLT6 
+		                FROM TB_OPNZ_OBJTN A, 
+		                     TB_OPNZ_RCP B 
+		               WHERE A.APL_NO = B.APL_NO 
+		                     AND OBJTN_DEAL_RSLT_CD = '05' 
+		                     <isNotEmpty prepend="AND" property="aplDtFrom">
+							    A.OBJTN_DT BETWEEN #aplDtFrom# AND #aplDtTo#
+							</isNotEmpty> 
+		               GROUP BY B.APL_DEAL_INST_CD 
+		                  UNION ALL 
+		              SELECT B.APL_DEAL_INST_CD AS APL_DEAL_INST_CD, 
+		                     0 AS RSLT1, 
+		                     0 AS RSLT2, 
+		                     0 AS RSLT3, 
+		                     0 AS RSLT4, 
+		                     0 AS RSLT5, 
+		                     COUNT(OBJTN_DEAL_RSLT_CD) AS RSLT6 
+		                FROM TB_OPNZ_OBJTN A, 
+		                     TB_OPNZ_RCP B 
+		               WHERE A.APL_NO = B.APL_NO 
+		                     AND OBJTN_DEAL_RSLT_CD = '01' 
+		                     <isNotEmpty prepend="AND" property="aplDtFrom">
+							    A.OBJTN_DT BETWEEN #aplDtFrom# AND #aplDtTo#
+							</isNotEmpty>
+		               GROUP BY B.APL_DEAL_INST_CD 
+		              ) B 
+		              ON A.INST_CD = B.APL_DEAL_INST_CD(+) 
+		       ) 
+		 <dynamic prepend="WHERE">
+		    <isEqual prepend="AND" compareValue="2" property="usrDiv">
+		        INST_CD = #usrInstCd#
+		    </isEqual>
+		    <isNotEmpty prepend="AND" property="instCd">
+				INST_CD = #instCd#
+			</isNotEmpty>
+		</dynamic>
+		 GROUP BY INST_CD, 
+		       INST_ORD 
+		ORDER BY INST_ORD  
+    </select>
+    
+    <!-- 정보공개 처리현황 목록 -->
+    <select id="AdminStatsPresent.statAplResultList" parameterClass="params" resultClass="java.util.HashMap">
+    	/* sql id : AdminStatsPresent.statAplResultList */
+    	<isEqual property="paging" compareValue="0">
+		SELECT AA.* 
+		FROM   (SELECT ROWNUM AS ROW_NUM, AA.*
+				FROM   (  
+		</isEqual>
+			    	SELECT A.APL_NO            AS "aplNo"
+						   , A.APL_MOD_SJ      AS "aplModSj"
+						   , A.OPB_FOM_NM      AS "opbFomNm"
+						   , A.INST_NM         AS "instNm"
+						   , A.OPB_YN          AS "opbYn"
+						   , A.OPB_CN          AS "opbCn"
+						   , A.CLSD_RSON_NM    AS "clsdRsonNm"
+						   , A.DCS_NTC_DT      AS "dcsNtcDt"
+						   , A.OPB_DTM         AS "opbDtm"
+						   , A.GIVE_MTH_NM     AS "giveMthNm"
+						   , A.NON_EXT         AS "nonExt"
+					  FROM 
+					       (SELECT A.APL_NO AS APL_NO, 
+					              B.APL_MOD_SJ AS APL_MOD_SJ, 
+					              FC_COMCODE(A.OPB_FOM_VAL, 'A') OPB_FOM_NM, 
+					              FC_COMCODE(B.APL_DEAL_INST_CD, '') INST_NM, 
+					              DECODE(A.OPB_YN, '0', '공개', '1', '부분공개', '2', '비공개','3','부존재 등') OPB_YN, 
+					              OPB_CN, 
+					              FC_COMCODE(A.CLSD_RSON_CD, 'F') CLSD_RSON_NM, 
+					              A.DCS_NTC_DT DCS_NTC_DT, 
+					              a.NON_EXT, 
+					              A.OPB_DTM OPB_DTM, 
+					              FC_COMCODE(A.GIVE_MTH, 'B') GIVE_MTH_NM 
+					         FROM TB_OPNZ_DCS A 
+					          INNER JOIN TB_OPNZ_RCP B 
+					              ON A.APL_NO = B.APL_NO 
+					        WHERE A.OPB_YN IN ('0', '1', '2','3') 
+					              <isNotEmpty prepend="and" property="instCd">
+			                    	B.APL_DEAL_INST_CD = #instCd# 
+			                	  </isNotEmpty>
+					     ORDER BY A.APL_NO desc 
+					       ) A 
+					   INNER JOIN TB_OPNZ_APL B 
+					       ON A.APL_NO = B.APL_NO 
+					  	<dynamic prepend="WHERE">
+				            <isNotEmpty property="aplDtFrom">
+				                B.APL_DT BETWEEN #aplDtFrom# AND #aplDtTo#       
+				            </isNotEmpty>
+				        </dynamic>
+	        <isEqual property="paging" compareValue="0">
+			<![CDATA[
+					) AA
+				WHERE ROWNUM <= #end:NUMERIC#
+				) AA
+			WHERE AA.ROW_NUM >= #start:NUMERIC#
+			]]>
+			</isEqual>
+    </select>	
+    
+    <select id="AdminStatsPresent.statAplResultListCount" parameterClass="params" resultClass="int">	
+    	/* sql id : AdminStatsPresent.statAplResultListCount */
+    	SELECT COUNT(*)
+		  FROM 
+		       (SELECT A.APL_NO AS APL_NO, 
+		              B.APL_MOD_SJ AS APL_MOD_SJ, 
+		              FC_COMCODE(A.OPB_FOM_VAL, 'A') OPB_FOM_NM, 
+		              FC_COMCODE(B.APL_DEAL_INST_CD, '') INST_NM, 
+		              DECODE(A.OPB_YN, '0', '공개', '1', '부분공개', '2', '비공개','3','부존재 등') OPB_YN, 
+		              CONCAT(SUBSTR(A.OPB_CN, 0, 10), '...') AS OPB_CN, 
+		              FC_COMCODE(A.CLSD_RSON_CD, 'F') CLSD_RSON_NM, 
+		              A.DCS_NTC_DT DCS_NTC_DT, 
+		              a.NON_EXT, 
+		              A.OPB_DTM OPB_DTM, 
+		              FC_COMCODE(A.GIVE_MTH, 'B') GIVE_MTH_NM 
+		         FROM TB_OPNZ_DCS A 
+		          INNER JOIN TB_OPNZ_RCP B 
+		              ON A.APL_NO = B.APL_NO 
+		        WHERE A.OPB_YN IN ('0', '1', '2','3') 
+		              <isNotEmpty prepend="and" property="instCd">
+                    	B.APL_DEAL_INST_CD = #instCd# 
+                	  </isNotEmpty>
+		     ORDER BY A.APL_NO desc 
+		       ) A 
+		   INNER JOIN TB_OPNZ_APL B 
+		       ON A.APL_NO = B.APL_NO 
+		  	<dynamic prepend="WHERE">
+	            <isNotEmpty property="aplDtFrom">
+	                B.APL_DT BETWEEN #aplDtFrom# AND #aplDtTo#       
+	            </isNotEmpty>
+	        </dynamic>
+    </select>
+    
+    <!-- 이의신청처리 현황 -->
+    <select id="AdminStatsPresent.statObjtnDealRsltList" parameterClass="params" resultClass="java.util.HashMap">
+    	/* sql id : AdminStatsPresent.statObjtnDealRsltList */
+    	<isEqual property="paging" compareValue="0">
+		SELECT AA.* 
+		FROM   (SELECT ROWNUM AS ROW_NUM, AA.*
+				FROM   (  
+		</isEqual>
+			    	SELECT OBJTN_SNO            AS "objtnSno"     
+					       , APL_NO             AS "aplNo"
+					       , RCP_NO             AS "rcpNo"
+					       , APL_SJ             AS "aplSj"
+					       , OBJTN_NTC_DT       AS "objtnNtcDt"
+					       , APL_PN             AS "aplPn"
+					       , APL_DEAL_INST_CD   AS "aplDealInstCd"
+					       , APL_DEAL_INST_NM   AS "aplDealInstNm"
+					       , OBJTN_DEAL_RSLT_CD AS "objtnDealRsltCd"
+					       , OBJTN_RSON         AS "objtnRson"
+					       , OBJTN_APL_RSLT_CN  AS "objtnAplRsltCn"
+					       , OBJTN_DT           AS "objtnDt"
+					  FROM 
+					       (SELECT A.APL_NO AS APL_NO, 
+					              C.RCP_NO AS RCP_NO, 
+					              A.OBJTN_DT AS OBJTN_DT, 
+					              A.OBJTN_SNO AS OBJTN_SNO, 
+					              B.APL_SJ AS APL_SJ, 
+					              DECODE(A.OBJTN_DEAL_RSLT_CD, '99', TO_CHAR(TO_DATE(A.OBJTN_CNC_DT, 'YYYYMMDD'), 'YYYY-MM-DD'), TO_CHAR(TO_DATE(A.OBJTN_NTC_DT, 'YYYYMMDD'), 'YYYY-MM-DD')) AS OBJTN_NTC_DT, 
+					              B.APL_PN AS APL_PN, 
+					              B.APL_DEAL_INST_CD AS APL_DEAL_INST_CD, 
+					              FC_COMCODE(B.APL_DEAL_INST_CD, '') APL_DEAL_INST_NM, 
+					              DECODE(A.OBJTN_DEAL_RSLT_CD, '01', '기간연장', '02', '각하', '03', '기각', '04', '인용', '05','부분인용','99', '취하') AS OBJTN_DEAL_RSLT_CD, 
+					              A.OBJTN_RSON OBJTN_RSON, 
+					              A.OBJTN_APL_RSLT_CN AS OBJTN_APL_RSLT_CN 
+					         FROM TB_OPNZ_OBJTN A, 
+					              TB_OPNZ_APL B, 
+					              TB_OPNZ_RCP C 
+					        WHERE A.APL_NO = B.APL_NO 
+					          AND B.APL_NO = C.APL_NO 
+					          AND (OBJTN_DEAL_RSLT_CD <![CDATA[<>]]> '00' OR OBJTN_DEAL_RSLT_CD <![CDATA[<>]]> '' OR OBJTN_DEAL_RSLT_CD IS NOT NULL)
+					        ORDER BY TO_NUMBER(OBJTN_SNO) DESC 
+					       )A 
+					 WHERE A.OBJTN_NTC_DT IS NOT NULL 
+					  <dynamic prepend="AND">
+			                <isEqual property="usrDiv" compareValue="1">
+			                     APL_DEAL_INST_CD = #instCd# 
+			                </isEqual>
+			            </dynamic>
+			            <isNotEmpty prepend="AND" property="aplDtFrom"> 
+			                OBJTN_DT BETWEEN #aplDtFrom# AND #aplDtTo#
+			            </isNotEmpty>
+			             <isNotEmpty prepend="AND" property="instCd">
+				        	APL_DEAL_INST_CD = #instCd#
+				        </isNotEmpty>
+	         <isEqual property="paging" compareValue="0">
+			<![CDATA[
+					) AA
+				WHERE ROWNUM <= #end:NUMERIC#
+				) AA
+			WHERE AA.ROW_NUM >= #start:NUMERIC#
+			]]>
+			</isEqual>
+    </select>
+    
+    <!-- 이의신청처리 현황(카운트) -->
+    <select id="AdminStatsPresent.statObjtnDealRsltListCount" parameterClass="params" resultClass="int">
+    	/* sql id : AdminStatsPresent.statObjtnDealRsltListCount */
+    	SELECT COUNT(*)
+		  FROM 
+		       (SELECT A.APL_NO AS APL_NO, 
+		              C.RCP_NO AS RCP_NO, 
+		              A.OBJTN_DT AS OBJTN_DT, 
+		              A.OBJTN_SNO AS OBJTN_SNO, 
+		              B.APL_SJ AS APL_SJ, 
+		              DECODE(A.OBJTN_DEAL_RSLT_CD, '99', TO_CHAR(TO_DATE(A.OBJTN_CNC_DT, 'YYYYMMDD'), 'YYYY-MM-DD'), TO_CHAR(TO_DATE(A.OBJTN_NTC_DT, 'YYYYMMDD'), 'YYYY-MM-DD')) AS OBJTN_NTC_DT, 
+		              B.APL_PN AS APL_PN, 
+		              B.APL_DEAL_INST_CD AS APL_DEAL_INST_CD, 
+		              FC_COMCODE(B.APL_DEAL_INST_CD, '') APL_DEAL_INST_NM, 
+		              DECODE(A.OBJTN_DEAL_RSLT_CD, '01', '기간연장', '02', '각하', '03', '기각', '04', '인용', '05','부분인용','99', '취하') AS OBJTN_DEAL_RSLT_CD, 
+		              A.OBJTN_RSON OBJTN_RSON, 
+		              A.OBJTN_APL_RSLT_CN AS OBJTN_APL_RSLT_CN 
+		         FROM TB_OPNZ_OBJTN A, 
+		              TB_OPNZ_APL B, 
+		              TB_OPNZ_RCP C 
+		        WHERE A.APL_NO = B.APL_NO 
+		          AND B.APL_NO = C.APL_NO 
+		          AND (OBJTN_DEAL_RSLT_CD <![CDATA[<>]]> '00' OR OBJTN_DEAL_RSLT_CD <![CDATA[<>]]> '' OR OBJTN_DEAL_RSLT_CD IS NOT NULL)
+		        ORDER BY TO_NUMBER(OBJTN_SNO) DESC 
+		       )A 
+		 WHERE A.OBJTN_NTC_DT IS NOT NULL 
+		  <dynamic prepend="AND">
+                <isEqual property="usrDiv" compareValue="1">
+                     APL_DEAL_INST_CD = #instCd# 
+                </isEqual>
+            </dynamic>
+            <isNotEmpty prepend="AND" property="aplDtFrom"> 
+                OBJTN_DT BETWEEN #aplDtFrom# AND #aplDtTo#
+            </isNotEmpty>
+             <isNotEmpty prepend="AND" property="instCd">
+	        	APL_DEAL_INST_CD = #instCd#
+	        </isNotEmpty>
+    </select>
+     
+    <!-- 공개여부 결정기간별 현황 -->
+    <select id="AdminStatsPresent.getStatAplDcsDtList" parameterClass="params" resultClass="record">
+    	/* sql id : AdminStatsPresent.getStatAplDcsDtList */
+    	 SELECT INST_CD  AS "instCd"
+		      , INST_NM  AS "instNm"
+		      , INST_ORD AS "instOrd"
+		     <!--  , COUNT(*) AS "totSum1" -->
+		      <![CDATA[
+		      , SUM(CASE WHEN PRCS_DAY_NUM > 0 THEN 1 ELSE 0 END )  AS "totSum1"
+		      , SUM(CASE WHEN PRCS_DAY_NUM = 1  THEN 1 ELSE 0 END )  AS "sum1"
+		      , SUM(CASE WHEN PRCS_DAY_NUM > 1  AND PRCS_DAY_NUM <= 3  THEN 1 ELSE 0 END )    AS "sum2"
+		      , SUM(CASE WHEN PRCS_DAY_NUM > 3  AND PRCS_DAY_NUM <= 5  THEN 1 ELSE 0 END )    AS "sum3"
+		      , SUM(CASE WHEN PRCS_DAY_NUM > 5  AND PRCS_DAY_NUM <= 10 THEN 1 ELSE 0 END )    AS "sum4"
+		      , SUM(CASE WHEN PRCS_DAY_NUM > 10 AND PRCS_DAY_NUM <= 20 THEN 1 ELSE 0 END )    AS "sum5"
+		      , SUM(CASE WHEN PRCS_DAY_NUM > 20 THEN 1 ELSE 0 END )  AS "sum6"
+		      ]]>
+		  FROM (
+		        SELECT A.APL_DEAL_INST_CD   AS INST_CD
+		             , FC_COMCODE(A.APL_DEAL_INST_CD,'')    AS INST_NM
+		             , CASE WHEN A.APL_DEAL_INST_CD = '9710000' THEN '01'
+		                    WHEN A.APL_DEAL_INST_CD = '9720000' THEN '02'
+		                    WHEN A.APL_DEAL_INST_CD = '9700209' THEN '03'
+		                    WHEN A.APL_DEAL_INST_CD = '9735000' THEN '04'
+		                    ELSE '05' END   AS INST_ORD             
+		             , A.APL_NO
+		             , TO_DATE(C.DCS_NTC_DT,'YYYYMMDD')
+		               - TO_DATE(B.RCP_DT,'YYYYMMDD')       
+		               - SUM(CASE WHEN T.DT IS NULL THEN 0 ELSE 1 END )+1   AS PRCS_DAY_NUM
+		          FROM TB_OPNZ_APL A
+		         INNER JOIN TB_OPNZ_RCP B
+		            ON A.APL_NO = B.APL_NO
+		         INNER JOIN TB_OPNZ_DCS C
+		            ON A.APL_NO = C.APL_NO
+		          LEFT OUTER JOIN (
+		                /*공휴일,일요일 목록*/
+		                SELECT A.DT
+		                     , A.D
+		                     , CASE WHEN B.DT IS NULL THEN 'NH'
+		                            ELSE 'H' END HOLI
+		                  FROM (
+		                    SELECT TO_CHAR(SDT + LEVEL - 1, 'YYYYMMDD') DT
+		                         , TO_CHAR(SDT + LEVEL - 1, 'D') D 
+		                      FROM (
+		                            SELECT TO_DATE(NVL(#aplDtFrom:VARCHAR#,'20050101'), 'YYYYMMDD') SDT 
+		                              FROM DUAL
+		                      ) CONNECT BY LEVEL <![CDATA[<=]]>SYSDATE - SDT + 1
+		                  ) A
+		                  LEFT OUTER JOIN TB_OPNZ_HOLIDAY B
+		                    ON A.DT = B.DT
+		                 WHERE A.D IN ('1','7')
+		                    OR B.DT IS NOT NULL
+		          ) T
+		            ON DT BETWEEN B.RCP_DT AND C.DCS_NTC_DT 
+		         WHERE A.PRG_STAT_CD <![CDATA[<>]]> '99'
+		         <isNotEmpty prepend="AND" property="aplDtFrom">
+					 A.APL_DT BETWEEN #aplDtFrom# AND #aplDtTo#
+				  </isNotEmpty>
+				  <isEmpty property="aplDtFrom">
+					AND A.APL_DT<![CDATA[>]]> NVL(#aplDtFrom:VARCHAR#,'20050101')
+				  </isEmpty> 
+		           <isEqual prepend="AND" compareValue="1" property="usrDiv">
+						A.APL_DEAL_INST_CD = #instCd#
+		           </isEqual>
+			        <isNotEqual prepend="AND" compareValue="1" property="usrDiv">
+			         	<isNotEmpty property="instCd">
+							A.APL_DEAL_INST_CD = #instCd#
+						</isNotEmpty>
+		         	</isNotEqual>   
+		           AND C.DCS_NTC_DT IS NOT NULL
+		         GROUP BY A.APL_DEAL_INST_CD
+		             , FC_COMCODE(A.APL_DEAL_INST_CD,'')
+		             , A.APL_NO
+		             , TO_DATE(C.DCS_NTC_DT,'YYYYMMDD')
+		               - TO_DATE(B.RCP_DT,'YYYYMMDD')
+		         )
+		 GROUP BY INST_CD
+		      , INST_NM
+		      , INST_ORD
+		 ORDER BY INST_ORD
+    </select>
+    
+    <!-- 공개여부 결정기간별 현황(청구서 조회) -->
+    <select id="AdminStatsPresent.selectAplDcsdtList" parameterClass="params" resultClass="java.util.HashMap">
+    	/* sql id : AdminStatsPresent.selectAplDcsdtList */
+    	<isEqual property="paging" compareValue="0">
+			SELECT AA.* 
+			FROM   (SELECT ROWNUM AS ROW_NUM, AA.*
+					FROM   (  
+			</isEqual>
+							SELECT A.APL_NO                     AS "aplNo"
+							     , A.APL_DT                     AS "aplDt"
+							     , NVL(B.APL_SJ, A.APL_SJ)      AS "aplSj"
+							     , A.APL_INST_CD                AS "aplInstCd"
+							     , NVL(B.APL_DEAL_INST_CD, A.APL_DEAL_INST_CD)       AS "aplDealInstCd"
+							     , NVL(B.PRG_STAT_CD,A.PRG_STAT_CD)                  AS "prgStatCd"
+     							 , FC_COMCODE(NVL(B.PRG_STAT_CD,A.PRG_STAT_CD), 'D') AS "prgStatNm"
+							     , FC_COMCODE(A.APL_INST_CD, '')  AS "aplInstNm"
+							     , FC_COMCODE(NVL(B.APL_DEAL_INST_CD, A.APL_DEAL_INST_CD) , '') AS "aplDealInstNm"
+							     , NVL(B.RCP_NO,'')         AS "rcpNo"
+							     , A.APL_PN                 AS "aplPn"
+							     , A.RG_DIV                 AS "rgDiv"
+							     , CASE WHEN OPB_YN = '0' THEN '공개'
+							            WHEN OPB_YN = '1' THEN '부분공개'
+							            WHEN OPB_YN = '2' THEN '비공개'
+							            WHEN OPB_YN = '3' THEN '부존재 등'
+							            WHEN OPB_YN = '' THEN ' '
+							            END                     AS "opbYnNm"
+							     , NVL(B.RCP_DTS_NO,'')         AS "rcpDtsNo"
+							     , NVL(B.INST_TRSF_YN,'')       AS "instTrsfYn"
+							     , A.APL_TAK_MTH                AS "aplTakMth"
+							     , NVL(C.OPB_FOM_VAL,'')        AS "opbFomVal"
+							     , NVL(C.GIVE_MTH,'')           AS "giveMth"
+							     , NVL(C.DCS_NTC_DT,'')         AS "dcsNtcDt"
+							     , NVL(C.CLSD_RSON_CD,'')       AS "clsdRsonCd"
+							     , NVL(D.OBJTN_DEAL_RSLT_CD,'') AS "objtnDealRsltCd"
+							     , NVL(C.IMD_DEAL_DIV,'')       AS "imdDealDiv"
+							  FROM TB_OPNZ_APL              A
+							  LEFT OUTER JOIN TB_OPNZ_RCP   B
+							    ON A.APL_NO = B.APL_NO
+							  LEFT OUTER JOIN TB_OPNZ_DCS   C
+							    ON A.APL_NO = C.APL_NO
+							  LEFT OUTER JOIN TB_OPNZ_OBJTN D 
+							    ON A.APL_NO = D.APL_NO
+							 WHERE A.APL_NO IN (
+							             SELECT A.APL_NO
+							              FROM TB_OPNZ_APL A
+							             INNER JOIN TB_OPNZ_RCP B
+							                ON A.APL_NO = B.APL_NO
+							             INNER JOIN TB_OPNZ_DCS C
+							                ON A.APL_NO = C.APL_NO
+							              LEFT OUTER JOIN (
+							                    /*공휴일,일요일 목록*/
+							                    SELECT A.DT
+							                         , A.D
+							                         , CASE WHEN B.DT IS NULL THEN 'NH'
+							                                ELSE 'H' END HOLI
+							                      FROM (
+							                        SELECT TO_CHAR(SDT + LEVEL - 1, 'YYYYMMDD') DT
+							                             , TO_CHAR(SDT + LEVEL - 1, 'D') D 
+							                          FROM (
+							                                SELECT TO_DATE(NVL(#aplDtFrom:VARCHAR#,'20050101'), 'YYYYMMDD') SDT 
+							                                  FROM DUAL
+							                          ) CONNECT BY LEVEL <![CDATA[<=]]> SYSDATE - SDT + 1
+							                      ) A
+							                      LEFT OUTER JOIN TB_OPNZ_HOLIDAY B
+							                        ON A.DT = B.DT
+							                     WHERE A.D IN ('1','7')
+							                        OR B.DT IS NOT NULL
+							              ) T
+							                ON DT BETWEEN B.RCP_DT AND C.DCS_NTC_DT 
+							             WHERE A.APL_DT > NVL(#aplDtFrom:VARCHAR#,'20050101') 
+							               AND A.PRG_STAT_CD <![CDATA[<>]]> '99' 
+							               AND C.DCS_NTC_DT IS NOT NULL
+							             GROUP BY A.APL_NO
+							                 , TO_DATE(C.DCS_NTC_DT,'YYYYMMDD')
+							                   - TO_DATE(B.RCP_DT,'YYYYMMDD')
+							            HAVING TO_DATE(C.DCS_NTC_DT,'YYYYMMDD')
+							                   - TO_DATE(B.RCP_DT,'YYYYMMDD')       
+							                   - SUM(CASE WHEN T.DT IS NULL THEN 0 ELSE 1 END )+1
+							            BETWEEN #fromDt:VARCHAR# and #toDt:VARCHAR#  
+							 ) 
+							  AND A.PRG_STAT_CD <![CDATA[<>]]>  '99'                    
+							 <isNotEmpty property="aplDtFrom">
+								AND A.APL_DT BETWEEN #aplDtFrom# AND #aplDtTo#
+							  </isNotEmpty>
+							  <isNotEmpty property="aplDealInstCd">
+								AND A.APL_DEAL_INST_CD = #aplDealInstCd#
+							  </isNotEmpty>
+							 ORDER BY A.APL_DT DESC
+							     , A.APL_NO DESC
+			<isEqual property="paging" compareValue="0">
+			<![CDATA[
+					) AA
+				WHERE ROWNUM <= #end:NUMERIC#
+				) AA
+			WHERE AA.ROW_NUM >= #start:NUMERIC#
+			]]>
+			</isEqual>	
+	</select>
+	
+	<!-- 공개여부 결정기간별 현황(청구서 조회 )카운트 -->
+	<select id="AdminStatsPresent.selectAplDcsdtListCount" parameterClass="params" resultClass="int">
+		/* sql id : AdminStatsPresent.selectAplDcsdtListCount */
+		SELECT COUNT(*)
+		  FROM TB_OPNZ_APL              A
+		  LEFT OUTER JOIN TB_OPNZ_RCP   B
+		    ON A.APL_NO = B.APL_NO
+		  LEFT OUTER JOIN TB_OPNZ_DCS   C
+		    ON A.APL_NO = C.APL_NO
+		  LEFT OUTER JOIN TB_OPNZ_OBJTN D 
+		    ON A.APL_NO = D.APL_NO
+		 WHERE A.APL_NO IN (
+		             SELECT A.APL_NO
+		              FROM TB_OPNZ_APL A
+		             INNER JOIN TB_OPNZ_RCP B
+		                ON A.APL_NO = B.APL_NO
+		             INNER JOIN TB_OPNZ_DCS C
+		                ON A.APL_NO = C.APL_NO
+		              LEFT OUTER JOIN (
+		                    /*공휴일,일요일 목록*/
+		                    SELECT A.DT
+		                         , A.D
+		                         , CASE WHEN B.DT IS NULL THEN 'NH'
+		                                ELSE 'H' END HOLI
+		                      FROM (
+		                        SELECT TO_CHAR(SDT + LEVEL - 1, 'YYYYMMDD') DT
+		                             , TO_CHAR(SDT + LEVEL - 1, 'D') D 
+		                          FROM (
+		                                SELECT TO_DATE(NVL(#aplDtFrom:VARCHAR#,'20050101'), 'YYYYMMDD') SDT 
+		                                  FROM DUAL
+		                          ) CONNECT BY LEVEL <![CDATA[<=]]> SYSDATE - SDT + 1
+		                      ) A
+		                      LEFT OUTER JOIN TB_OPNZ_HOLIDAY B
+		                        ON A.DT = B.DT
+		                     WHERE A.D IN ('1','7')
+		                        OR B.DT IS NOT NULL
+		              ) T
+		                ON DT BETWEEN B.RCP_DT AND C.DCS_NTC_DT 
+		             WHERE A.APL_DT > NVL(#aplDtFrom:VARCHAR#,'20050101') 
+		               AND A.PRG_STAT_CD <![CDATA[<>]]> '99' 
+		               AND C.DCS_NTC_DT IS NOT NULL
+		             GROUP BY A.APL_NO
+		                 , TO_DATE(C.DCS_NTC_DT,'YYYYMMDD')
+		                   - TO_DATE(B.RCP_DT,'YYYYMMDD')
+		            HAVING TO_DATE(C.DCS_NTC_DT,'YYYYMMDD')
+		                   - TO_DATE(B.RCP_DT,'YYYYMMDD')       
+		                   - SUM(CASE WHEN T.DT IS NULL THEN 0 ELSE 1 END )+1
+		            BETWEEN #fromDt:VARCHAR# and #toDt:VARCHAR#  
+		 ) 
+		  AND A.PRG_STAT_CD <![CDATA[<>]]>  '99'                    
+		 <isNotEmpty property="aplDtFrom">
+			AND A.APL_DT BETWEEN #aplDtFrom# AND #aplDtTo#
+		  </isNotEmpty>
+		  <isNotEmpty property="aplDealInstCd">
+			AND A.APL_DEAL_INST_CD = #aplDealInstCd#
+		  </isNotEmpty>
+		 ORDER BY A.APL_DT DESC, A.APL_NO DESC
+	</select>	
+	
+	<sql id="AdminStatsPresent.selectAcsOpnzAplListWhere">
+		<isNotEmpty property="aplDtFrom" prepend="AND">
+		   L.REG_DTTM <![CDATA[ >= ]]> TO_DATE(#aplDtFrom:VARCHAR#, 'YYYY-MM-DD') + 0	   	 
+	   	</isNotEmpty>
+	   	<isNotEmpty property="aplDtTo" prepend="AND">
+		   L.REG_DTTM <![CDATA[ < ]]> TO_DATE(#aplDtTo:VARCHAR#, 'YYYY-MM-DD') + 1
+	   	</isNotEmpty> 
+	   	<isNotEmpty prepend="AND" property="prgStatCd">
+		   NVL(B.PRG_STAT_CD, A.PRG_STAT_CD) = #prgStatCd#
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="userNm">
+			U.USR_NM LIKE '%'||#userNm#||'%'
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="aplDealInstCd">
+    	   A.APL_DEAL_INST_CD = #aplDealInstCd# 
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="aplPn">
+			A.APL_PN LIKE '%'||#aplPn#||'%'
+		</isNotEmpty> 
+		<isNotEmpty prepend="AND" property="aplSj">
+			A.APL_SJ LIKE '%'||#aplSj#||'%'
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="acsPrssCd">
+			L.ACS_PRSS_CD = #acsPrssCd#
+		</isNotEmpty>   
+	</sql>
+	
+	<!-- 정보공개청구서 접근기록 목록 -->
+    <select id="AdminStatsPresent.selectAcsOpnzAplList" parameterClass="params" resultClass="java.util.HashMap">
+    	/* sql id : AdminStatsPresent.selectAcsOpnzAplList*/
+    	<isEqual property="paging" compareValue="0">
+		SELECT AA.* 
+		FROM   (SELECT ROWNUM AS ROW_NUM, AA.*
+				FROM   (  
+		</isEqual>
+			    	 SELECT 
+					       L.SEQCE_NO AS "seqceNo"
+					       , L.APL_NO AS "aplNo"
+					       , A.APL_DT AS  "aplDt"
+					       , A.APL_SJ AS "aplSj"
+					       , A.APL_PN AS "aplPn"
+					       , A.APL_DEAL_INST_CD AS  "aplDealInstCd"
+					       , FC_COMCODE(A.APL_DEAL_INST_CD, '') AS "aplDealInstNm"
+					       , NVL(B.PRG_STAT_CD, A.PRG_STAT_CD) AS "prgStatCd" 
+					       , CASE 
+					           WHEN C.IMD_DEAL_DIV = '1' 
+					           THEN '즉시처리' 
+					           WHEN A.PRG_STAT_CD = '08' 
+					           THEN SUBSTR(FC_COMCODE(NVL(B.PRG_STAT_CD, A.PRG_STAT_CD), 'D'),1,(INSTR(FC_COMCODE(NVL(B.PRG_STAT_CD, A.PRG_STAT_CD), 'D'),'(')-1)) 
+					           ELSE FC_COMCODE(NVL(B.PRG_STAT_CD, A.PRG_STAT_CD), 'D') 
+					       END AS "prgStatNm" 
+					       , L.USR_ID AS "usrId"
+					       , U.USR_NM AS  "usrNm"
+					       , L.USR_IP AS "usrIp"
+					       , L.ACS_CD AS "acsCd"
+					       , (SELECT DITC_NM FROM TB_COMM_CODE WHERE GRP_CD = 'B201S' AND USE_YN = 'Y' AND DITC_CD = L.ACS_CD ) AS "acsNm"
+					       , L.ACS_PRSS_CD AS "acsPrssCd"
+					       , (SELECT DITC_NM FROM TB_COMM_CODE WHERE GRP_CD = 'B201P' AND USE_YN = 'Y' AND DITC_CD = L.ACS_PRSS_CD ) AS "acsPrssNm"
+					       , TO_CHAR(L.REG_DTTM, 'YYYY/MM/DD HH24:MI:SS') AS "regDttm"
+					  FROM TB_LOG_ACS_OPNZ_APL L  
+					 INNER JOIN TB_OPNZ_APL A
+					    ON L.APL_NO = A.APL_NO 
+					  LEFT OUTER JOIN TB_OPNZ_RCP B 
+					    ON A.APL_NO = B.APL_NO 
+					   LEFT OUTER JOIN TB_OPNZ_DCS C 
+					     ON A.APL_NO = C.APL_NO 
+					   LEFT OUTER JOIN TB_OPNZ_OBJTN D 
+						 ON A.APL_NO = D.APL_NO 
+					   INNER JOIN TB_COMM_USR U
+					      ON L.USR_ID = U.USR_ID 
+					  WHERE 1=1
+					  <include refid="AdminStatsPresent.selectAcsOpnzAplListWhere" />
+					  ORDER BY  L.REG_DTTM DESC	
+        <isEqual property="paging" compareValue="0">
+		<![CDATA[
+				) AA
+			WHERE ROWNUM <= #end:NUMERIC#
+			) AA
+		WHERE AA.ROW_NUM >= #start:NUMERIC#
+		]]>
+		</isEqual>
+    </select>	
+    
+    <select id="AdminStatsPresent.selectAcsOpnzAplListCount" parameterClass="params" resultClass="int">	
+    	/* sql id : AdminStatsPresent.selectAcsOpnzAplListCount */
+    	SELECT COUNT(*)
+    	  FROM TB_LOG_ACS_OPNZ_APL L  
+		 INNER JOIN TB_OPNZ_APL A
+		    ON L.APL_NO = A.APL_NO 
+		  LEFT OUTER JOIN TB_OPNZ_RCP B 
+		    ON A.APL_NO = B.APL_NO 
+		   LEFT OUTER JOIN TB_OPNZ_DCS C 
+		     ON A.APL_NO = C.APL_NO 
+		   LEFT OUTER JOIN TB_OPNZ_OBJTN D 
+			 ON A.APL_NO = D.APL_NO 
+		   INNER JOIN TB_COMM_USR U
+		      ON L.USR_ID = U.USR_ID 
+		 WHERE 1=1	
+		<include refid="AdminStatsPresent.selectAcsOpnzAplListWhere" />
+    </select>
+    			
+</sqlMap>

@@ -1,0 +1,1194 @@
+@charset "utf-8";
+
+html,body {
+	height: 100%;
+	-webkit-tap-highlight: rgba(0,0,0,0);
+	-webkit-tap-highlight-color: rgba(0,0,0,0);
+	-webkit-tap-highlight-color: transparent;
+	-webkit-focus-ring-color: rgba(0,0,0,0);
+	-webkit-print-color-adjust: exact; 
+}
+* {
+	margin: 0;
+	padding: 0;
+	/*
+	outline-style: none;
+	*/
+}
+
+body {
+	/* min-width: 320px; */
+	font-size: 81.3%;
+	font-family: "notoKrR",sans-serif;
+	font-weight: 300;
+	color: #666667;
+	list-style: none;
+	line-height: 1em;
+	letter-spacing: -0.03em;
+	word-spacing: 0.1em;
+	outline: 0;
+	-webkit-text-size-adjust: none;
+	overflow-y:scroll;
+}
+
+body.wide .contents {
+	padding-bottom: 10px;
+}
+
+body.fixed-body {
+	height: 100%;
+	overflow: hidden;
+}
+
+
+
+
+
+/* 스킵네비게이션 
+.skip-navigation a {
+	display: block; 
+	height: 1px; 
+	width: 1px; 
+	margin: 0 -1px -1px 0; 
+	padding: 0; 
+	overflow: hidden; 
+	font-size:0; line-height:0;
+}
+
+.skip-navigation a:hover,
+.skip-navigation a:active,
+.skip-navigation a:focus {
+	position: fixed; 
+	top: 0; 
+	left: 0; 
+
+	width: 100%; 
+	height: 20px; 
+	line-height: 20px; 
+	vertical-align: middle; 
+	font-size: 75%;
+	font-weight: bold; 
+	text-align: center; 
+	background: #000; 
+	color: #fff;
+	z-index: 10;
+	border: 0px solid red;
+}
+*/
+
+/* 스킵네비게이션 */
+.skip-navigation{
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%
+}
+.skip-navigation a {
+	position: absolute; 
+	display: block; 
+	width: 100%; 
+	left: 0; 
+	text-align: center;
+	top: -500000px;
+	left: 0; 
+	z-index: 1000000;
+}
+
+.skip-navigation a:active,
+.skip-navigation a:focus {
+	position: absolute; 
+	top: 0;
+	left:0; 
+	padding: 15px 0; 
+	font-weight: bold; 
+	color: #fff; 
+	background: #000;
+	width:100%
+}
+
+
+.line-none {
+	background: transparent !important;
+}
+
+.break-all {
+	word-break: break-all !important;
+	word-wrap:break-word !important;
+}
+
+a.break-all {
+	display: inline-block;
+}
+
+.span-br01 {
+	display: block;
+}
+
+.span-br-mobile01 {
+	display: inline;
+}
+
+/* 폰트 선명도 */
+.wrapper .contents.on,
+.wrapper .contents.on ul,
+.wrapper .contents.on ul li, 
+.wrapper .contents.on ul li ol, 
+.wrapper .contents.on ul li ol li, 
+.wrapper .contents.on ul li ol, 
+.wrapper .contents.on p,
+.wrapper .contents.on span,
+.wrapper .contents.on div,
+.wrapper .contents.on table,
+.wrapper .contents.on thead,
+.wrapper .contents.on tbody,
+.wrapper .contents.on table thead th,
+.wrapper .contents.on table tbody th,
+.wrapper .contents.on table tbody td,
+.wrapper .contents.on table tbody td a {
+	color: #000 !important;
+}
+
+
+
+
+
+.left {
+	text-align: left !important;
+}
+
+.center {
+	text-align: center !important;
+}
+
+.right {
+	text-align: right !important;
+}
+
+.fl {
+	float: left;
+}
+
+.fr {
+	float: right;
+}
+
+/* total */
+.wrapper {
+	position: relative;
+	margin: 0;
+	padding: 0;
+	font-size: 1em;
+}
+
+/* header */
+.header {
+	position: relative;
+	height: 124px;
+}
+
+/* gnb */
+.gnb-area {
+	height: 35px;
+	background: transparent url(../../images/soportal/common/bg_gnb_line01.gif);
+	background: -webkit-linear-gradient(transparent,transparent),url(../../images/soportal/common/bg_gnb_line01@2x.gif);
+	background: linear-gradient(transparent,transparent),url(../../images/soportal/common/bg_gnb_line01@2x.gif);
+	background-repeat: repeat-x; 
+	background-position: left bottom;
+	background-size: 1px 1px;
+}
+
+.gnb-box {
+	max-width: 1000px;
+	height: 35px;
+	margin: 0 auto;
+}
+
+.gnb-box .left {
+	float: left;
+}
+
+.gnb-box .left li {
+	float: left;
+}
+.gnb-box .left li:first-child a{
+	padding-left:46px;
+}
+.gnb-box .left li:first-child a:before{
+	position:absolute;
+	top:4px;
+	left:20px;
+	content:url(/images/soportal/common/icon_top_logo.png);	
+}
+
+.gnb-box .left li a {
+	font-size:16px;
+	display: block;
+	padding: 0 20px;
+	height: 34px;
+	line-height: 34px;
+	color: #414141;
+	font-family: "notoKrB", sans-serif;
+	font-weight: 700;
+	border-left: 1px solid #fff;
+	border-right: 1px solid #fff;
+	border-bottom: 1px solid #d8dadb;
+	margin-right: -1px;
+	background: transparent url(../../images/soportal/icon/icon_gnb_bar01.gif);
+	background: -webkit-linear-gradient(transparent,transparent),url(../../images/soportal/icon/icon_gnb_bar01@2x.gif);
+	background: linear-gradient(transparent,transparent),url(../../images/soportal/icon/icon_gnb_bar01@2x.gif);
+	background-repeat: no-repeat; 
+	background-position: right center;
+	background-size: 1px 11px;
+}
+
+.gnb-box .left li:last-child a {
+	background: transparent !important;
+}
+
+
+.gnb-box .left li a:hover,
+.gnb-box .left li a.on{
+	position: relative;
+	color: #333333;
+	border-left: 1px solid #d8dadb;
+	border-right: 1px solid #d8dadb;
+	border-bottom: 1px solid #fff;
+	background: transparent;
+	z-index: 3;
+}
+
+
+.gnb-box .right {
+	float: right;
+}
+
+.gnb-box .right li {
+	float: left;
+	height: 34px;
+	line-height: 34px;
+	padding-left: 15px;
+	margin-left: 14px;
+	background: transparent url(../../images/soportal/icon/icon_gnb_bar01.gif);
+	background: -webkit-linear-gradient(transparent,transparent),url(../../images/soportal/icon/icon_gnb_bar01@2x.gif);
+	background: linear-gradient(transparent,transparent),url(../../images/soportal/icon/icon_gnb_bar01.gif);
+	background-repeat: no-repeat;
+	background-position: left center;
+	background-size: 1px 11px;	
+}
+
+
+.gnb-box .right li a {
+	display: inline-block;
+	vertical-align: middle;
+	color: #7b7b7b;
+	font-size: 0.923em;
+	line-height: 34px;
+	font-family: "notoKrM", sans-serif;
+	font-weight: 500;
+}
+
+/* 상단 메뉴 */
+.header-area {
+	position: absolute;
+	top: 35px;
+	left: 0;
+	width: 100%;
+	height: 89px;
+}
+
+.header-area .header-box {
+	max-width: 1000px;
+	height: 63px;
+	padding-top: 21px;
+	margin: 0 auto;
+}
+
+.header-area .header-box:after {
+	content: "";
+	clear: both;
+	display: block;
+}
+
+.header-area .header-box h1 {
+	float: left;
+	margin-right: 87px;
+}
+
+.header-area .header-box h1 a {
+	display: block;
+}
+
+.header-area .header-box h1 a img {
+	display: inline-block;
+	vertical-align: middle;
+	/*width:163px;*/
+}
+
+.header-area .header-box .top-menu {
+	float: left;
+	margin-top: 15px;
+}
+
+.header-area .header-box .top-menu > li {
+	float: left;
+	padding-right: 28px;
+	margin-right: 27px;
+	background: transparent url(../../images/soportal/icon/icon_topmenu_bar01.gif);
+	background: -webkit-linear-gradient(transparent,transparent),url(../../images/soportal/icon/icon_topmenu_bar01@2x.gif);
+	background: linear-gradient(transparent,transparent),url(../../images/soportal/icon/icon_topmenu_bar01@2x.gif);
+	background-repeat:  no-repeat;
+	background-position: right center;
+	background-size: 1px 15px;	
+}
+
+.header-area .header-box .top-menu > li:last-child {
+	padding-right: 0;
+	margin-right: 0;
+}
+
+.header-area .header-box .top-menu > li > a {
+	display: block;
+	font-size: 1.385em;
+	line-height: 1.111em;
+	color: #111111;
+	font-family: "notoKrM", sans-serif;
+}
+
+
+
+.header-area .header-box .top-menu > li > a:hover,
+.header-area .header-box .top-menu > li > a:focus,
+.header-area .header-box .top-menu > li > a.selected,
+.header-area .header-box .top-menu > li > a.on {
+	color: #126bc2;
+}
+
+.header-area .header-box .search-totalmenu {
+	float: right;
+	margin-top: 17px;
+}
+
+.header-area .header-box .search-totalmenu .btn-search {
+	float: left;
+	width: 16px;
+	height: 17px;
+	background: transparent url(../../images/soportal/icon/icon_search.png);
+	background: -webkit-linear-gradient(transparent,transparent),url(../../images/soportal/icon/icon_search@2x.png);
+	background: linear-gradient(transparent,transparent),url(../../images/soportal/icon/icon_search@2x.png);
+	background-position: 0 0;
+	background-repeat: no-repeat;
+	background-size: 16px 17px;	
+	text-indent: -5000em;
+}
+
+.header-area .header-box .search-totalmenu .icon-bar01 {
+	float: left;
+	width: 1px;
+	height: 18px;
+	background: #e1e1e1;
+	margin: 0 20px;
+}
+
+
+.header-area .header-box .search-totalmenu .btn-totalmenu {
+	float: left;
+	width: 17px;
+	height: 17px;
+	background: transparent url(../../images/soportal/icon/icon_allmenu.gif);
+	background: -webkit-linear-gradient(transparent,transparent),url(../../images/soportal/icon/icon_allmenu@2x.gif);
+	background: linear-gradient(transparent,transparent),url(../../images/soportal/icon/icon_allmenu@2x.gif);
+	background-position: 0 0;
+	background-repeat: no-repeat;
+	background-size: 17px 17px;	
+	text-indent: -5000em;
+}
+
+.header-area .header-box .search-totalmenu .btn-totalmenu.on {
+	background: transparent url(../../images/soportal/icon/icon_allmenu_close.png);
+	background: -webkit-linear-gradient(transparent,transparent),url(../../images/soportal/icon/icon_allmenu_close@2x.png);
+	background: linear-gradient(transparent,transparent),url(../../images/soportal/icon/icon_allmenu_close@2x.png);
+	background-position: 0 0;
+	background-repeat: no-repeat;
+	background-size: 17px 17px;	
+}
+
+
+.header-area .header-box .search-totalmenu .btn-totalmenu-mobile {
+	display: none;
+}
+
+
+/* 전체메뉴 */
+.totalmenu {
+	display: none;
+	position: absolute;
+	top: 89px;
+	left: 0;
+	width: 100%;
+	background-color: #f8f8f8;
+	border-top: 1px solid #dbdfe5;
+	border-bottom: 2px solid #9abcd9;
+	-webkit-box-shadow: 1px 5px 10px 0px rgba(0,0,0,0.2);
+	-moz-box-shadow: 1px 5px 10px 0px rgba(0,0,0,0.2);
+	box-shadow: 1px 5px 10px 0px rgba(0,0,0,0.2);
+	/* background-image:url(/images/soportal/common/bg_menu_art.png); 
+	background-position:center 70%;
+	background-repeat:no-repeat; */
+	z-index: 100000;
+}
+
+
+.totalmenu-wrapper {
+	max-width: 999px;
+	margin: 0 auto;
+	border-left: 1px solid #ebedf0;
+}	
+
+.totalmenu-wrapper:after {
+	content: "";
+	clear: both;
+	display: block;
+}
+
+
+
+.totalmenu-area {
+	float: left;
+	width: 16.89%;
+	height: 140px;
+	padding: 25px 15px;
+	border-right: 1px solid #ebedf0;
+	border-top: 3px solid #f8f8f8
+}
+
+.totalmenu-area:hover,
+.totalmenu-area.on,
+.totalmenu-area.selected {
+	background: #fff;
+	border-top: 3px solid #126bc2;
+}
+
+.totalmenu-area > h2 {
+	padding-bottom: 5px;
+}
+
+.totalmenu-area > h2 a {
+	color: #4b65a2;
+	font-size: 1.231em;
+	line-height: 1em;
+	font-family: "notoKrM", sans-serif;
+	font-weight: 500;
+}
+
+.totalmenu-area > ul {
+	margin: 0;
+	padding: 0;
+}
+
+.totalmenu-area > ul > li {
+	margin-top: 7px;
+}
+
+.totalmenu-area > ul > li > a {
+	display: inline-block;
+	vertical-align: middle;
+	padding-left: 10px;
+	color: #666666;
+	font-size: 1.154em;
+	line-height: 1.200em;
+	font-family: "notoKrL", notoKrL, sans-serif;
+	font-weight: 100;
+	letter-spacing: -1px;
+
+	background: transparent url(../../images/soportal/common/icon_top_submenu.gif);
+	background: -webkit-linear-gradient(transparent,transparent),url(../../images/soportal/common/icon_top_submenu@2x.gif);
+	background: linear-gradient(transparent,transparent),url(../../images/soportal/common/icon_top_submenu@2x.gif);
+	background-position: 0 50%;
+	background-repeat: no-repeat;
+	background-size: 3px 5px;	
+}
+.totalmenu-area > ul > li > a.menu3depth{
+	font-size:14px;
+	padding-left:13px;
+	background:none;
+	line-height:1.2;
+}
+.totalmenu-area > ul > li > a.menu3depth:before{
+	content:"- ";
+}
+	
+
+.totalmenu-area > ul > li > a:hover, 
+.totalmenu-area > ul > li > a.on,
+.totalmenu-area > ul > li > a.selected {
+	color: #0a66b8
+}
+
+
+
+.totalmenu-mobile {
+	display: none;
+}
+
+.mask {
+	display: none;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: url(../../images/soportal/bg/bg_opacity60.png) repeat;
+	z-index: 11;
+}
+
+
+/* 통합검색 */
+.layerpopup-totalsearch-wrapper {
+	display: none;
+	position: fixed;
+	top: 250px;
+	left: 50%;
+	width: 560px;
+	z-index: 20;
+	margin-left: -280px;
+}
+
+.layerpopup-totalsearch-wrapper .layerpopup-totalsearch-area {
+	position: relative;
+	display: block;
+	width: 100%;
+	max-width: 450px;
+	padding: 25px 55px;
+	background: #fff;
+	margin: 0 auto;
+	font-family: "notoKrL", sans-serif;
+	font-weight: 100;
+}
+
+.layerpopup-totalsearch-wrapper .layerpopup-totalsearch-area h2 {
+	text-align: center;
+	font-size: 1.385em;
+	line-height: 1.333em;
+	color: #444449;
+	padding-bottom: 9px;
+	margin-bottom: 20px;
+	border-bottom: 1px solid #e5e5e5;
+}
+
+.layerpopup-totalsearch-wrapper .layerpopup-totalsearch-area .layerpopup-totalsearch-box {
+	position: relative;
+	padding-right: 84px;
+	height: 45px;
+}
+
+.layerpopup-totalsearch-wrapper .layerpopup-totalsearch-area .layerpopup-totalsearch-box input[type="text"] {
+	display: block;
+	padding: 0 10px;
+	height: 45px;
+	width: 100%;
+	max-width: 430px;
+	background: #e9e9e9;
+	border: 0;
+	border-radius: 0;
+	font-size: 1.385em;
+	color: #999;
+	-webkit-appearance: none;
+	appearance: none;
+}
+
+.layerpopup-totalsearch-wrapper .layerpopup-totalsearch-area .layerpopup-totalsearch-box input[type="submit"] {
+	position: absolute;
+	top: 0;
+	right: 0;
+	width: 80px;
+	height: 45px;
+	line-height: 45px;
+	text-align: center;
+	color: #ffffff;
+	font-size: 1.385em;
+	background: #4586de;
+	border: 0;
+	border-radius: 0;
+	cursor: pointer;
+	-webkit-appearance: none;
+	appearance: none;
+}
+
+.layerpopup-totalsearch-wrapper .layerpopup-totalsearch-area .btn-totalsearch-close {
+	position: absolute;
+	top: 15px;
+	right: 15px;
+	height: 15px;
+	width: 15px;
+	text-indent: -5000em;
+	background: transparent url(../../images/soportal/btn/btn_document_close.gif) no-repeat 0 0;
+	background: -webkit-linear-gradient(transparent,transparent),url(../../images/soportal/btn/btn_document_close@2x.gif) no-repeat 0 0;
+	background: linear-gradient(transparent,transparent),url(../../images/soportal/btn/btn_document_close@2x.gif) no-repeat 0 0;
+	background-size: 15px 15px;	
+}
+
+/* 고정 상단 메뉴 */
+.header-area.fixed {
+	position: fixed;
+	top: 0;
+	height: 60px;
+	margin-top: -60px;
+	background: #1b6dbd;
+	z-index: 12;
+	-webkit-box-shadow: 1px 5px 10px 0px rgba(0,0,0,0.2);
+	-moz-box-shadow: 1px 5px 10px 0px rgba(0,0,0,0.2);
+	box-shadow: 1px 5px 10px 0px rgba(0,0,0,0.2);
+}
+
+.header-area.fixed .header-box {
+	height: 46px;
+	padding-top: 7px;
+}
+
+.header-area.fixed .header-box h1 {
+	margin-top: 1px;
+}
+
+.header-area.fixed .header-box .top-menu {
+	margin-top: 14px;
+}
+
+.header-area.fixed .header-box .top-menu > li {
+	background: transparent url(../../images/soportal/icon/icon_topmenu_bar01_fixed.gif);
+	background: -webkit-linear-gradient(transparent,transparent),url(../../images/soportal/icon/icon_topmenu_bar01_fixed@2x.gif);
+	background: linear-gradient(transparent,transparent),url(../../images/soportal/icon/icon_topmenu_bar01_fixed@2x.gif);
+	background-repeat:  no-repeat;
+	background-position: right center;
+	background-size: 1px 15px;	
+}
+
+.header-area.fixed .header-box .top-menu > li .top-menu-depth1 {
+	color: #fff;
+}
+
+.header-area.fixed .header-box .top-menu > li .top-menu-depth1:hover,
+.header-area.fixed .header-box .top-menu > li .top-menu-depth1.selected,
+.header-area.fixed .header-box .top-menu > li .top-menu-depth1.on {
+	color: #c4e4ff
+}
+
+.header-area.fixed .header-box .search-totalmenu .btn-search {
+	background: transparent url(../../images/soportal/icon/icon_search_white.png);
+	background: -webkit-linear-gradient(transparent,transparent),url(../../images/soportal/icon/icon_search_white@2x.png);
+	background: linear-gradient(transparent,transparent),url(../../images/soportal/icon/icon_search_white@2x.png);
+	background-position: 0 0;
+	background-repeat: no-repeat;
+	background-size: 16px 17px;	
+	text-indent: -5000em;
+}
+
+.header-area.fixed .header-box .search-totalmenu .btn-totalmenu {
+	background: transparent url(../../images/soportal/icon/icon_allmenu_white.gif);
+	background: -webkit-linear-gradient(transparent,transparent),url(../../images/soportal/icon/icon_allmenu_white@2x.gif);
+	background: linear-gradient(transparent,transparent),url(../../images/soportal/icon/icon_allmenu_white@2x.gif);
+	background-position: 0 0;
+	background-repeat: no-repeat;
+	background-size: 17px 17px;	
+	text-indent: -5000em;
+}
+
+.header-area.fixed .header-box .search-totalmenu .btn-totalmenu.on {
+	background: transparent url(../../images/soportal/icon/icon_allmenu_close_white.png);
+	background: -webkit-linear-gradient(transparent,transparent),url(../../images/soportal/icon/icon_allmenu_close_white@2x.png);
+	background: linear-gradient(transparent,transparent),url(../../images/soportal/icon/icon_allmenu_close_white@2x.png);
+	background-position: 0 0;
+	background-repeat: no-repeat;
+	background-size: 17px 17px;	
+	text-indent: -5000em;
+}
+
+.header-area.fixed .totalmenu {
+	top: 60px;
+	border-top: 0;
+}
+
+.header-area.fixed .top-menu ol{top:39px;}
+
+/* 메뉴 수정 */
+.header-area .header-box .top-menu > li{background-position:right 3px;}
+
+.top-menu{position:relative;padding-right:40px;}
+.top-menu > li{padding-bottom:33px;}
+.top-menu li ol{display:none;}
+.top-menu li:hover ol{display:block;}
+.top-menu li:focus ol{display:block;}
+
+.top-menu li ol{position:absolute;top:52px;left:0;background:#f8f8f8;padding:0 0 0 15px;z-index:9999;border-top:1px solid #dbdfe5;border-bottom:2px solid #06365b;
+	-webkit-box-shadow: 1px 5px 10px 0px rgba(0,0,0,0.2);
+	-moz-box-shadow: 1px 5px 10px 0px rgba(0,0,0,0.2);
+	box-shadow: 1px 5px 10px 0px rgba(0,0,0,0.2);
+}
+.top-menu li .tm01{left:-36px;width:157px;}
+.top-menu li .tm02{left:120px;width:162px;}
+.top-menu li .tm03{left:287px;width:146px;}
+.top-menu li .tm04{left:422px;width:158px;padding-left:12px;}
+.top-menu li .tm05{left:575px;width:95px;padding-left:12px;}
+.top-menu li ol li{margin:15px 0;}
+.top-menu li ol li a{color:#666666;font-size:15px;letter-spacing:-1px;display:inline-block;padding-left:10px;
+	background: transparent url(../../images/soportal/common/icon_top_submenu.gif);
+	background: -webkit-linear-gradient(transparent,transparent),url(../../images/soportal/common/icon_top_submenu@2x.gif);
+	background: linear-gradient(transparent,transparent),url(../../images/soportal/common/icon_top_submenu@2x.gif);
+	background-position: 0 50%;
+	background-repeat: no-repeat;
+	background-size: 3px 5px;	
+}
+.top-menu li ol li a:hover{color:#0a66b8;}
+
+
+/* contents navigation */
+.contents-navigation-area {
+	clear: both;
+	display: block;
+	width: 100%;
+	margin-bottom: 25px;
+	background: #06365b;
+}
+
+.contents-navigation-area .contents-navigation-box {
+	max-width: 1000px;
+	height: 45px;
+	line-height: 45px;
+	margin: 0 auto;
+}
+
+.contents-navigation-area .contents-navigation-box:after {
+	content: "";
+	clear: both;
+	display: block;
+}
+
+.contents-navigation-area .contents-navigation-box .contents-navigation {
+	float: left;
+}
+
+.contents-navigation-area .contents-navigation-box .contents-navigation .icon-home {
+	display: inline-block;
+	vertical-align: middle;
+	width: 15px;
+	height: 15px;
+	text-indent: -5000em;
+	background: transparent url(../../images/soportal/icon/icon_home.gif);
+	background: -webkit-linear-gradient(transparent,transparent),url(../../images/soportal/icon/icon_home@2x.gif);
+	background: linear-gradient(transparent,transparent),url(../../images/soportal/icon/icon_home@2x.gif);
+	background-repeat: no-repeat;
+	background-position: 0 0;
+	background-size: 15px 15px;	
+}
+
+.contents-navigation-area .contents-navigation-box .contents-navigation .icon-gt {
+	display: inline-block;
+	vertical-align: middle;
+	width: 6px;
+	height: 10px;
+	margin: 0 13px;
+	text-indent: -5000em;
+	background: transparent url(../../images/soportal/icon/icon_gt.png);
+	background: -webkit-linear-gradient(transparent,transparent),url(../../images/soportal/icon/icon_gt@2x.png);
+	background: linear-gradient(transparent,transparent),url(../../images/soportal/icon/icon_gt@2x.png);
+	background-repeat: no-repeat;
+	background-position: 0 0;
+	background-size: 6px 10px;	
+}
+
+.contents-navigation-area .contents-navigation-box .contents-navigation .location,
+.contents-navigation-area .contents-navigation-box .contents-navigation strong {
+	display: inline-block;
+	vertical-align: middle;
+	font-size: 1.077em;
+	line-height: 1em;
+	color: #ffffff;
+}
+
+
+.contents-navigation-area .contents-navigation-box .sub-function-list {
+	float: right;
+	height: 45px;
+	border-left: 1px solid #415d80;
+}
+
+.contents-navigation-area .contents-navigation-box .sub-function-list button,
+.contents-navigation-area .contents-navigation-box .sub-function-list a {
+	float: left;
+	width: 45px;
+	height: 45px;
+	cursor: pointer;
+	background: transparent;
+	border-right: 1px solid #415d80;
+}
+
+.contents-navigation-area .contents-navigation-box .sub-function-list .btn-print {
+	text-indent: -5000em;
+	background: transparent url(../../images/soportal/icon/icon_print.png);
+	background: -webkit-linear-gradient(transparent,transparent),url(../../images/soportal/icon/icon_print@2x.png);
+	background: linear-gradient(transparent,transparent),url(../../images/soportal/icon/icon_print@2x.png);
+	background-repeat: no-repeat;
+	background-position: 0 0;
+	background-size: 45px 45px;	
+}
+
+.contents-navigation-area .contents-navigation-box .sub-function-list .btn-print:hover,
+.contents-navigation-area .contents-navigation-box .sub-function-list .btn-print:focus{
+	text-indent: -5000em;
+	background: transparent url(../../images/soportal/icon/icon_print_white.png);
+	background: -webkit-linear-gradient(transparent,transparent),url(../../images/soportal/icon/icon_print_white@2x.png);
+	background: linear-gradient(transparent,transparent),url(../../images/soportal/icon/icon_print_white@2x.png);
+	background-repeat: no-repeat;
+ 	background-position: center center;
+ 	background-size: 60px 60px; 
+}
+
+.contents-navigation-area .contents-navigation-box .sub-function-list .btn-font-viewer {
+	text-indent: -5000em;
+	background: transparent url(../../images/soportal/icon/icon_view.png);
+	background: -webkit-linear-gradient(transparent,transparent),url(../../images/soportal/icon/icon_view@2x.png);
+	background: linear-gradient(transparent,transparent),url(../../images/soportal/icon/icon_view@2x.png);
+	background-repeat: no-repeat;
+	background-position: 0 0;
+	background-size: 45px 45px;
+}
+
+.contents-navigation-area .contents-navigation-box .sub-function-list .btn-font-viewer:hover,
+.contents-navigation-area .contents-navigation-box .sub-function-list .btn-font-viewer:focus {
+	text-indent: -5000em;
+	background: transparent url(../../images/soportal/icon/icon_view_white.png);
+	background: -webkit-linear-gradient(transparent,transparent),url(../../images/soportal/icon/icon_view_white@2x.png);
+	background: linear-gradient(transparent,transparent),url(../../images/soportal/icon/icon_view_white@2x.png);
+	background-repeat: no-repeat;
+ 	background-position: center center;
+ 	background-size: 60px 60px;  
+}
+
+.contents-navigation-area .contents-navigation-box .sub-function-list button.btn-font-viewer.on {
+	background: transparent url(../../images/soportal/icon/icon_view_white.png);
+	background: -webkit-linear-gradient(transparent,transparent),url(../../images/soportal/icon/icon_view_white@2x.png);
+	background: linear-gradient(transparent,transparent),url(../../images/soportal/icon/icon_view_white@2x.png);
+	background-repeat: no-repeat;
+ 	background-position: center center;
+ 	background-color: #1680e8;
+ 	background-size: 60px 60px;
+}
+
+
+.contents-navigation-area .contents-navigation-box .sub-function-list button.btn-font-bigger {
+	text-indent: -5000em;
+	background: transparent url(../../images/soportal/icon/icon_plus.png);
+	background: -webkit-linear-gradient(transparent,transparent),url(../../images/soportal/icon/icon_plus@2x.png);
+	background: linear-gradient(transparent,transparent),url(../../images/soportal/icon/icon_plus@2x.png);
+	background-repeat: no-repeat;
+	background-position: center center;
+	background-size: 45px 45px;
+}
+
+.contents-navigation-area .contents-navigation-box .sub-function-list .btn-font-bigger:hover,
+.contents-navigation-area .contents-navigation-box .sub-function-list .btn-font-bigger:focus {
+	text-indent: -5000em;
+	background: transparent url(../../images/soportal/icon/icon_plus_white.png);
+	background: -webkit-linear-gradient(transparent,transparent),url(../../images/soportal/icon/icon_plus_white@2x.png);
+	background: linear-gradient(transparent,transparent),url(../../images/soportal/icon/icon_plus_white@2x.png);
+	background-repeat: no-repeat;
+ 	background-position: center center;
+ 	background-size: 60px 60px; 
+}
+
+
+.contents-navigation-area .contents-navigation-box .sub-function-list button.btn-font-reset {
+	text-indent: -5000em;
+	background: transparent url(../../images/soportal/icon/icon_font_reset.png);
+	background: -webkit-linear-gradient(transparent,transparent),url(../../images/soportal/icon/icon_font_reset@2x.png);
+	background: linear-gradient(transparent,transparent),url(../../images/soportal/icon/icon_font_reset@2x.png);
+	background-repeat: no-repeat;
+	background-position: center center;
+	background-size: 45px 45px;
+}
+
+.contents-navigation-area .contents-navigation-box .sub-function-list .btn-font-reset:hover,
+.contents-navigation-area .contents-navigation-box .sub-function-list .btn-font-reset:focus {
+	text-indent: -5000em;
+	background: transparent url(../../images/soportal/icon/icon_font_reset_white.png);
+	background: -webkit-linear-gradient(transparent,transparent),url(../../images/soportal/icon/icon_font_reset_white@2x.png);
+	background: linear-gradient(transparent,transparent),url(../../images/soportal/icon/icon_font_reset_white@2x.png);
+	background-repeat: no-repeat;
+ 	background-position: center center;
+ 	background-size: 60px 60px; 
+}
+
+.contents-navigation-area .contents-navigation-box .sub-function-list button.btn-font-small {
+	text-indent: -5000em;
+	background: transparent url(../../images/soportal/icon/icon_minus.png);
+	background: -webkit-linear-gradient(transparent,transparent),url(../../images/soportal/icon/icon_minus@2x.png);
+	background: linear-gradient(transparent,transparent),url(../../images/soportal/icon/icon_minus@2x.png);
+	background-repeat: no-repeat;
+	background-position: center center;
+	background-size: 45px 45px;
+}
+
+.contents-navigation-area .contents-navigation-box .sub-function-list .btn-font-small:hover,
+.contents-navigation-area .contents-navigation-box .sub-function-list .btn-font-small:focus {
+	text-indent: -5000em;
+	background: transparent url(../../images/soportal/icon/icon_minus_white.png);
+	background: -webkit-linear-gradient(transparent,transparent),url(../../images/soportal/icon/icon_minus_white@2x.png);
+	background: linear-gradient(transparent,transparent),url(../../images/soportal/icon/icon_minus_white@2x.png);
+	background-repeat: no-repeat;
+ 	background-position: center center;
+ 	background-size: 60px 60px; 
+}
+
+/* container */
+.container {
+	position: relative;
+	padding-left: 220px;
+	width: 780px;
+	margin: 0 auto;
+}
+
+.container.hide-pc-lnb {
+	padding-left: 0;
+	width: 100%;
+	max-width: 1000px;
+}
+
+.container:after {
+	content: "";
+	clear: both;
+	display: block;
+}
+
+.container.total-search {
+	max-width: 1000px;
+	padding: 0 20px 80px 20px;
+}
+
+.container.hide-pc-lnb .lnb {
+	display: none;
+}
+
+.lnb {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 185px;
+}
+
+.lnb > h2 {
+	color: #202020;
+	font-size: 2.154em;
+	line-height: 1em;
+	margin-bottom: 20px;
+	text-align: center;
+	font-family: "notoKrM", notoKrM, sans-serif;
+	font-weight: 500;
+
+}
+.lnb ul {
+	margin: 0;
+	padding: 0;
+	background: #fff;
+	border-top: 4px solid #494b4d;
+}
+
+.lnb ul > li {
+	display: block;
+	border-bottom: 1px solid #cccdce
+}
+
+.lnb ul > li > a {
+	display: block;
+	min-height: 18px;
+	padding: 12px 18px 10px 18px;
+	color: #555555;
+	font-size: 	1.385em;
+	line-height: 1.333em;
+	letter-spacing: -1px;
+	word-break: keep-all;
+	-webkit-transition: all 0.3s ease-in-out;
+	transition: all 0.3s ease-in-out;
+
+}
+
+.lnb ul > li > a.on,
+.lnb ul > li > a:hover,
+.lnb ul > li > a.selected {
+	color: #0a66b8;
+	background-color: #f0f0f0;
+}
+
+
+
+/* contents */
+.contents {
+	min-height: 500px;
+	padding-bottom: 50px;
+}
+
+.contents .contents-title-wrapper {
+	margin-bottom: 15px;
+	border-bottom: 1px solid #e5e5e5;
+}
+
+.contents .contents-title-wrapper:after {
+	content: "";
+	clear: both;
+	display: block;
+}
+
+.contents .contents-title-wrapper h3  {
+	float: left;
+	height: 48px;
+	margin-bottom: -1px;
+	font-size: 2.154em;
+	line-height: 1em;
+	color: #126bc2;
+	font-family: "notoKrM", notoKrM, sans-serif;
+	font-weight: 500;
+	border-bottom: 4px solid #126bc2;
+}
+
+/* footer */
+.footer {
+	background:#575e6b;
+	padding-bottom:15px;
+}
+
+.footer-menulist {
+	padding: 20px;
+}
+
+.footer-menulist ul {
+	width: 1000px;
+	margin: 0 auto;
+}
+
+.footer-menulist ul > li {
+	float: left;
+	padding-right: 14px;
+	margin-right: 9px;
+	background: transparent url(../../images/soportal/icon/icon_footer_dotted01.png);
+	background: -webkit-linear-gradient(transparent,transparent),url(../../images/soportal/icon/icon_footer_dotted01@2x.png);
+	background: linear-gradient(transparent,transparent),url(../../images/soportal/icon/icon_footer_dotted01@2x.png);
+	background-repeat: no-repeat;
+	background-position: right center;
+	background-size: 3px 3px;
+}
+
+.footer-menulist ul > li > a {
+	color: #ffffff;
+	font-family: "notoKrB", notoKrB, sans-serif;
+	font-weight: 700;
+}
+
+.footer-menulist ul > li > a:hover {
+	text-decoration: underline;
+}
+
+.footer-menulist ul > li > a.point-privacy {
+	color: #A5D2FF;
+}
+
+.footer-information {
+	position:relative;
+	width: 1000px;
+	margin: 0 auto;
+}
+
+.footer-information address,
+.footer-information .callcenter-information {
+	display: inline-block;
+	vertical-align: middle;
+	color: #c7c9cc;
+	font-size: 1.077em;
+	line-height: 1.286em
+}
+
+.footer-information .copyrigyht {
+	padding-top: 5px;
+	color: #c7c9cc;
+	font-family: "notoKrB", notoKrB, sans-serif;
+	font-weight: 700;
+}
+
+.btn-top-go {
+	display: none;
+	position: fixed;
+	bottom: 50%;
+	right: 0;
+	width: 50px;
+	height: 50px;
+	line-height: 50px;
+	text-align: center;
+	color: #fff;
+	font-family: "notoKrM", sans-serif;
+	font-weight: 500;
+	background: #173b65;
+	opacity: 0.8;
+	border-radius: 2px;
+	z-index:200;
+}
+
+.btn-mobile-back {
+	display: none;
+	position: fixed;
+	bottom: 50%;
+	right: 0;
+	width: 50px;
+	height: 50px;
+	line-height: 50px;
+	margin-bottom: -52px;
+	text-align: center;
+	color: #fff;
+	font-family: "notoKrM", sans-serif;
+	font-weight: 500;
+	background: #173b65;
+	opacity: 0.8;
+	border-radius: 2px;
+}
+
+.new-window-header {
+	margin-bottom: 15px;
+	height: 63px;
+	background: #24476d;
+	-webkit-box-shadow: 1px 5px 10px 0px rgba(0,0,0,0.2);
+	-moz-box-shadow: 1px 5px 10px 0px rgba(0,0,0,0.2);
+	box-shadow: 1px 5px 10px 0px rgba(0,0,0,0.2);	
+}
+
+.new-window-header-area {
+	max-width: 1000px;
+	height: 63px;
+	margin: 0 auto;
+}
+
+.new-window-header-area h1 {
+	display: block;
+	padding-top: 10px;
+}
+
+.new-window-header-area h1 > a {
+	float: left;
+	margin-right: 11px;
+}
+
+.new-window-header-area h1 > a > img {
+	display: inline-block;
+	vertical-align: middle;
+	height: 41px;
+}
+
+.new-window-header-area h1 > span {
+	float: left;
+	margin-top: 22px;
+	color: #91a7ba;
+	font-size: 1.231em;
+	font-family: "notoKrM", notoKrM, sans-serif;
+	font-weight: 500;
+}
+
+.text-red {color:#ff0000;vertical-align:top;}
+.stat-click {background:#c7eaff;}
+
+.wa{position:absolute;top:-33px;right:0;}
+.wa img{-ms-interpolation-mode:nearest-neighbor;}

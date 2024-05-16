@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- @(#)PortalHomeMng_Sql_Tibero.xml 1.0 2015/06/15                         -->
+<!--                                                                         -->
+<!-- COPYRIGHT (C) 2013 WISEITECH CO., LTD. ALL RIGHTS RESERVED.             -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- 홈페이지 설정을 관리하는 SQL 파일이다.                                  -->
+<!--                                                                         -->
+<!-- @author 김은삼                                                          -->
+<!-- @version 1.0 2015/06/15                                                 -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<sqlMap namespace="PortalHomeMngDao">
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Type Alias                                                          -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 홈페이지 설정을 검색한다.                                           -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="PortalHomeMngDao.searchHomeMng" parameterClass="params" resultClass="record">
+         SELECT A.HOME_SEQ         AS "seqceNo",
+                A.HOME_TAG_CD      AS "homeTagCd",
+                A.SRV_NM           AS "srvTit",
+                A.LINK_URL         AS "linkUrl",
+                A.SAVE_FILE_NM     AS "saveFileNm",
+                A.SUB_SAVE_FILE_NM AS "subSaveFileNm",
+                A.POPUP_YN         AS "popupYn"
+           FROM TB_COMM_HOME         A
+        <![CDATA[
+          WHERE NVL(A.START_DTTM, TRUNC(SYSDATE)) <= TRUNC(SYSDATE)
+            AND NVL(A.END_DTTM,  TRUNC(SYSDATE)) >= TRUNC(SYSDATE)
+        ]]>
+            AND A.USE_YN            = 'Y'
+            <isNotEmpty property="homeTagCd">
+            AND A.HOME_TAG_CD       = #homeTagCd:VARCHAR#
+            </isNotEmpty>
+          ORDER BY
+                A.V_ORDER ASC
+    </select>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 홈페이지 설정을 조회한다.                                           -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="PortalHomeMngDao.selectHomeMng" parameterClass="params" resultClass="record">
+         SELECT A.HOME_SEQ         AS "seqceNo",
+                A.HOME_TAG_CD      AS "homeTagCd",
+                A.SAVE_FILE_NM     AS "saveFileNm",
+                A.SUB_SAVE_FILE_NM AS "subSaveFileNm"
+           FROM TB_COMM_HOME         A
+          WHERE A.HOME_SEQ          = #seqceNo:NUMERIC#
+    </select>
+
+</sqlMap>

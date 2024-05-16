@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- @(#)PortalLogBbsFile_Sql_Tibero.xml 1.0 2015/06/15                      -->
+<!--                                                                         -->
+<!-- COPYRIGHT (C) 2013 WISEITECH CO., LTD. ALL RIGHTS RESERVED.             -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- 게시판 첨부파일 다운로드 이력을 관리하는 SQL 파일이다.                  -->
+<!--                                                                         -->
+<!-- @author 김은삼                                                          -->
+<!-- @version 1.0 2015/06/15                                                 -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<sqlMap namespace="PortalLogBbsFileDao">
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Type Alias                                                          -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 게시판 첨부파일 다운로드 이력을 등록한다.                           -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <insert id="PortalLogBbsFileDao.insertLogBbsFile" parameterClass="params">
+    	<selectKey keyProperty="seqceNo" resultClass="integer">
+			SELECT SQ_LOG_SEQ.NEXTVAL FROM DUAL
+		</selectKey>
+         INSERT INTO TB_LOG_BBS_FILE
+                (
+                    SEQCE_NO,
+                    BBS_CD,
+                    SEQ,
+                    FILE_SEQ,
+                    FILE_SIZE,
+                    SYS_TAG,
+                    USER_CD,
+                    USER_IP,
+                    REG_DTTM
+                )
+         SELECT #seqceNo:NUMERIC#,
+         		A.BBS_CD    AS "bbsCd",
+                A.SEQ       AS "seq",
+                A.FILE_SEQ  AS "fileSeq",
+                A.FILE_SIZE AS "fileSize",
+                #sysTag:CHAR#    AS "sysTag",
+                #userCd:NUMERIC#    AS "usercd",
+                #userIp:VARCHAR#    AS "userIp",
+                SYSDATE     AS "regDttm"
+           FROM TB_BBS_FILE A
+          WHERE A.FILE_SEQ  = #fileSeq#
+    </insert>
+    
+</sqlMap>

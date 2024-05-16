@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- @(#)AdminNaAssmMemberUrl_Sql_Tibero.xml 1.0 2020/11/11                  -->
+<!--                                                                         -->
+<!-- COPYRIGHT (C) 2013 WISEITECH CO., LTD. ALL RIGHTS RESERVED.             -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- 관리자 - 국회의원 URL 관리 SQL 파일이다.	                                  -->
+<!--                                                                         -->
+<!-- @author                                                        		-->
+<!-- @version 1.0 2020/11/11                                                -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<sqlMap namespace="NaAssmMemberUrl">
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Type Alias                                                          -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+     <!-- 메인리스트 쿼리 -->
+    <sql id="naAssmMemberUrlDao.col">
+	       A.EMP_NO AS "empNo" 
+	     , A.MONA_CD AS "monaCd" 
+	     , A.HG_NM   AS "hgNm" 
+	     , A.HJ_NM   AS "hjNm" 
+	     , A.ENG_NM  AS "engNm" 
+	     , A.AGE     AS "age" 
+	     , A.SEX_GBN_NM AS "sexGbnNm" 
+	     , A.DEPT_IMG_URL AS "deptImgUrl" 
+	     , A.POLY_CD      AS "polyCd" 
+	     , A.POLY_NM      AS "polyNm" 
+	     , A.ORIG_NM      AS "origNm" 
+	     , A.ELECT_GBN_NM AS "eleGbnNm" 
+	     , A.REELE_GBN_NM AS "reeleGbnNm" 
+	     , A.UNIT_CD      AS "unitCd" 
+	     , A.UNITS        AS "units" 
+	     , A.CMIT_NM      AS "cmitNm" 
+	     , A.CMITS        AS "cmits" 
+	     , A.TEL_NO       AS "telNo" 
+	     , A.E_MAIL       AS "eMail" 
+	     , A.HOMEPAGE     AS "homepage" 
+	     , A.STAFF        AS "staff" 
+	     , A.SECRETARY    AS "secretary" 
+	     , A.SECRETARY2   AS "secretary2" 
+	     , A.BTH_DATE     AS "bthDate" 
+	     , A.UNIT_NM      AS "unitNm" 
+	     , NVL(A.OPEN_NA_ID, REPLACE(A.ENG_NM, ' ', ''))   	  AS "openNaId"	
+	     , '바로가기'      AS "btnLink"
+	     , A.DEFAULT_URL  AS "defaultUrl"
+    </sql>
+   
+    <sql id="naAssmMemberUrlDao.where">
+		WHERE A.STATUS_YN = 'Y'
+		<isNotEmpty property="searchGubun">
+			<isEqual property="searchGubun" compareValue="A">
+				<isNotEmpty property="searchVal">
+					AND A.HG_NM LIKE '%'|| #searchVal:VARCHAR# ||'%'
+				</isNotEmpty>
+			</isEqual>
+		</isNotEmpty>
+    </sql>
+  
+ 	<!-- 리스트 조회 -->
+  	<select id="naAssmMemberUrlDao.searchNaAssmMemberUrl" parameterClass="params" resultClass="record">
+  		/* sql id : naAssmMemberUrlDao.searchNaAssmMemberUrl */
+  		<isEqual property="paging" compareValue="0">
+		SELECT AA.* 
+		FROM   (SELECT ROWNUM AS ROW_NUM, AA.*
+				FROM   (  
+		</isEqual>
+			SELECT
+				<include refid="naAssmMemberUrlDao.col"></include>
+			FROM   TV_THXPSN01 A
+			<include refid="naAssmMemberUrlDao.where"></include>
+			ORDER BY
+			    A.HG_NM
+		<isEqual property="paging" compareValue="0">
+		<![CDATA[
+				) AA
+			WHERE ROWNUM <= #end:NUMERIC#
+			) AA
+		WHERE AA.ROW_NUM >= #start:NUMERIC#
+		]]>
+		</isEqual> 
+  	</select>
+  	<select id="naAssmMemberUrlDao.searchNaAssmMemberUrlCount" parameterClass="params" resultClass="int">
+  		/* sql id : naAssmMemberUrlDao.searchNaAssmMemberUrlCount */
+		SELECT COUNT(*)
+		FROM   TV_THXPSN01 A
+		<include refid="naAssmMemberUrlDao.where"></include>
+  	</select>
+  	
+  	<!-- 데이터 수정 -->
+	<update id="naAssmMemberUrlDao.saveNaAssmMemberUrl" parameterClass="params">
+		/* sql id : naAssmMemberUrlDao.saveNaAssmMemberUrl */
+		UPDATE IOPEN_DATA.THXPSN01 A
+		SET    OPEN_NA_ID = #openNaId:VARCHAR#
+		<isEmpty property="empNo">
+			WHERE  1=2
+		</isEmpty>
+		<isNotEmpty property="empNo">
+			WHERE  EMP_NO = #empNo:VARCHAR#
+		</isNotEmpty>
+	</update>
+	
+	<!-- URL 코드 중복체크 -->
+	<select id="naAssmMemberUrlDao.selectDuplicateNaAssmMemberUrl" parameterClass="params" resultClass="int">
+  		/* sql id : naAssmMemberUrlDao.selectDuplicateNaAssmMemberUrl */
+		SELECT COUNT(*)
+		FROM   IOPEN_DATA.THXPSN01 A
+		WHERE  OPEN_NA_ID = #openNaId:VARCHAR#
+  	</select>
+</sqlMap>

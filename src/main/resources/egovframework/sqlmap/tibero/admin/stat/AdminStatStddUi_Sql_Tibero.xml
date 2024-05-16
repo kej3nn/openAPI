@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- @(#)AdminStatStddUi_Sql_Tibero.xml 1.0 2017/06/28                       -->
+<!--                                                                         -->
+<!-- COPYRIGHT (C) 2013 WISEITECH CO., LTD. ALL RIGHTS RESERVED.             -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- 표준단위정보 관리 SQL 파일이다.	                                  -->
+<!--                                                                         -->
+<!-- @author 김정호                                                        	-->
+<!-- @version 1.0 2017/06/28                                                -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<sqlMap namespace="StatStddUi">
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Type Alias                                                          -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+    
+    <!-- 표준단위정보 메인 리스트 조회 -->
+    <select id="StatStddUiDao.selectStatStddUiList" parameterClass="params" resultClass="record">
+		SELECT 
+			UI_ID			AS "uiId"
+			, GRP_UI_ID		AS "grpUiId"
+			, UI_NM			AS "uiNm"
+			, ENG_UI_NM		AS "engUiNm"
+			, LEVEL			AS "level"
+			, UI_CVSN_VAL	AS "uiCvsnVal"
+			, UI_CVSN_YN	AS "uiCvsnYn"
+			, V_ORDER		AS "vOrder"
+			, USE_YN		AS "useYn"
+			, FN_GET_COMM_CODE_NM('S1003', UITY_CD) 		AS "uityNm"
+			, LTRIM(SYS_CONNECT_BY_PATH(A.UI_NM, '>'), '>') AS "uiFullNm"
+			, DECODE(CONNECT_BY_ISLEAF, 0, 1, 0) 			AS "HaveChild"
+		FROM
+			TB_STTS_STDDUI A
+		WHERE
+			1=1
+		<isNotEmpty property="useYn">
+			AND USE_YN = #useYn#
+		</isNotEmpty>
+		START WITH 
+			GRP_UI_ID = 'UICTLG'
+			AND UI_ID IN (
+				SELECT UI_ID FROM TB_STTS_STDDUI B
+				WHERE  GRP_UI_ID = 'UICTLG'
+			<dynamic prepend="START WITH">
+				<isNotEmpty property="searchVal" prepend="AND">
+					<isEqual property="searchVal" compareValue="%">
+						<isEqual property="searchGubun" compareValue="UI_NM" >
+							B.UI_NM LIKE '%%' ESCAPE '%'
+						</isEqual>
+						<isEqual property="searchGubun" compareValue="ENG_UI_NM" >
+							B.ENG_UI_NM LIKE '%%' ESCAPE '%'
+						</isEqual>
+						<isEqual property="searchGubun" compareValue="UI_ID" >
+							B.UI_ID LIKE '%%' ESCAPE '%'
+						</isEqual>
+					</isEqual>
+					<isNotEqual property="searchVal" compareValue="%">
+						<isEqual property="searchGubun" compareValue="UI_NM" >
+							B.UI_NM LIKE '%'||#searchVal#||'%'
+						</isEqual>
+						<isEqual property="searchGubun" compareValue="ENG_UI_NM" >
+							B.ENG_UI_NM LIKE '%'||#searchVal#||'%'
+						</isEqual>
+						<isEqual property="searchGubun" compareValue="UI_ID" >
+							B.UI_ID LIKE '%'||#searchVal#||'%'
+						</isEqual>
+					</isNotEqual>
+				</isNotEmpty>
+				<isNotEmpty property="searchUityCd" prepend="AND">
+					UITY_CD = #searchUityCd#
+				</isNotEmpty>
+			</dynamic>
+				CONNECT BY 
+					UI_ID = PRIOR GRP_UI_ID
+				<isNotEmpty property="useYn">
+					AND USE_YN = #useYn#
+				</isNotEmpty>
+			)
+		CONNECT BY 
+			PRIOR UI_ID = GRP_UI_ID
+			<isNotEmpty property="useYn">
+				AND USE_YN = #useYn#
+			</isNotEmpty>
+		ORDER SIBLINGS BY V_ORDER    
+	</select>
+
+	<!-- 표준단위정보 상세조회 -->
+	<select id="StatStddUiDao.selectStatStddUiDtl" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		SELECT 
+			UI_ID			AS "uiId"
+			, GRP_UI_ID		AS "grpUiId"
+			, UI_NM			AS "uiNm"
+			, ENG_UI_NM		AS "engUiNm"
+			, NVL((SELECT B.UI_NM FROM TB_STTS_STDDUI B 
+				   WHERE  A.GRP_UI_ID = B.UI_ID), '최상위'
+			) AS "grpUiNm"
+			, UI_CVSN_VAL	AS "uiCvsnVal"
+			, UI_CVSN_YN	AS "uiCvsnYn"
+			, UITY_CD		AS "uityCd"
+			, UI_EXP		AS "uiExp"
+			, V_ORDER		AS "vOrder"
+			, USE_YN		AS "useYn"
+		FROM
+			TB_STTS_STDDUI A
+		WHERE
+			UI_ID = #uiId:VARCHAR#
+	</select>
+	
+	<!-- 표준단위정보 등록 -->
+	<insert id="StatStddUiDao.insertStatStddUi" parameterClass="params">
+		INSERT INTO TB_STTS_STDDUI
+			(
+				UI_ID
+				, UI_NM
+				, ENG_UI_NM
+				, GRP_UI_ID
+				, UITY_CD
+				, UI_CVSN_VAL
+				, UI_CVSN_YN
+				, UI_EXP
+				, USE_YN
+				, V_ORDER
+				, REG_ID
+				, REG_DTTM
+				, UPD_ID
+				, UPD_DTTM
+			)
+			VALUES (
+				#uiId:VARCHAR#
+				, #uiNm:VARCHAR#
+				, #engUiNm:VARCHAR#
+				, #grpUiId:VARCHAR#
+				, #uityCd:VARCHAR#
+				, #uiCvsnVal:NUMERIC#
+				, NVL(#uiCvsnYn:CHAR#, 'N')
+				, #uiExp:VARCHAR#
+				, #useYn:CHAR#
+				, #vOrder:NUMERIC#
+				, #regId:VARCHAR#
+				, SYSDATE
+				, #updId:VARCHAR#
+				, SYSDATE
+			)
+	</insert>
+	
+	<!-- 표준단위정보 저장 -->
+	<update id="StatStddUiDao.updateStatStddUi" parameterClass="params" >
+		UPDATE TB_STTS_STDDUI
+		SET
+			UI_NM 			= #uiNm:VARCHAR#
+			, ENG_UI_NM		= #engUiNm:VARCHAR#
+			, GRP_UI_ID 	= #grpUiId:VARCHAR#
+			, UITY_CD 		= #uityCd:VARCHAR#
+			, UI_EXP 		= #uiExp:VARCHAR#
+			, UI_CVSN_VAL 	= #uiCvsnVal:NUMERIC#
+			, UI_CVSN_YN 	= NVL(#uiCvsnYn:CHAR#, 'N')
+			, V_ORDER 		= #vOrder:NUMERIC#
+			, USE_YN 		= #useYn:CHAR#
+			, UPD_ID 		= #updId:VARCHAR#
+			, UPD_DTTM 		= SYSDATE
+		WHERE
+			UI_ID = #uiId:VARCHAR#
+	</update>
+	
+	<!-- 표준단위정보 삭제 -->
+	<delete id="StatStddUiDao.deleteStatStddUi" parameterClass="params" >
+		DELETE FROM TB_STTS_STDDUI
+		WHERE  UI_ID = #uiId:VARCHAR#
+	</delete>
+	
+	<!-- 표준단위정보 중복체크(등록시) -->
+	<select id="StatStddUiDao.selectStatStddUiDupChk" parameterClass="params" resultClass="java.util.HashMap">
+		SELECT COUNT(*) AS "dupCnt"
+		FROM   TB_STTS_STDDUI
+		WHERE  UI_ID = #uiId#
+	</select>
+	
+	<!-- 상위 항목구분 변경 및 삭제시 자식레벨이 있는지 확인(0일경우 자식이 있음) -->
+	<select id="StatStddUiDao.selectStatStddUiIsLeaf" parameterClass="String" resultClass="String">
+		SELECT 	NVL(MAX(DECODE(CONNECT_BY_ISLEAF, 0, 'Y', 'N')), 'N') AS "isLeaf"
+		FROM 	TB_STTS_STDDUI
+		WHERE   UI_ID = #id:VARCHAR#
+		START WITH UI_ID = #id:VARCHAR#
+		CONNECT BY PRIOR UI_ID = GRP_UI_ID
+	</select>
+	
+	<!-- 표준단위정보 순서저장 -->
+	<update id="StatStddUiDao.saveStatStddUiOrder" parameterClass="params">
+		UPDATE TB_STTS_STDDUI
+		SET    V_ORDER = #vOrder:NUMERIC#
+		WHERE  UI_ID = #uiId:VARCHAR#
+	</update>
+	
+	<!-- 표준단위정보 단위 그룹 조회 -->
+    <select id="StatStddUiDao.selectStatStddGrpUiList" parameterClass="params" resultClass="record">
+		SELECT 
+			UI_ID			AS "uiId"
+			, GRP_UI_ID		AS "grpUiId"
+			, UI_NM			AS "uiNm"
+			, ENG_UI_NM		AS "engUiNm"
+			, UI_CVSN_VAL	AS "uiCvsnVal"
+			, UI_CVSN_YN	AS "uiCvsnYn"
+			, V_ORDER		AS "vOrder"
+			, USE_YN		AS "useYn"
+			, FN_GET_COMM_CODE_NM('S1003', UITY_CD) 		AS "uityNm"
+		FROM
+			TB_STTS_STDDUI A
+		WHERE
+			GRP_UI_ID = 'UICTLG'
+			<isNotEmpty property="searchVal" prepend="AND">
+				<isEqual property="searchGubun" compareValue="UI_NM" >
+					A.UI_NM LIKE '%'||#searchVal#||'%'
+				</isEqual>
+				<isEqual property="searchGubun" compareValue="ENG_UI_NM" >
+					A.ENG_UI_NM LIKE '%'||#searchVal#||'%'
+				</isEqual>
+			</isNotEmpty>
+		ORDER BY V_ORDER    
+	</select>	
+	
+	<!-- 표준단위정보 팝업 리스트 조회
+		검색어 조회시
+		메인 리스트 표준단위 정보 팝업 조회는 검색어에 연관된 상위레벨이면 하위 레벨항목이 모두 나오지만,
+		팝업 리스트 조회는 검색어에 조회된 항목만 조회됨  
+	-->
+	<select id="StatStddUiDao.selectStatStddUiPopList" parameterClass="params" resultClass="record">
+		SELECT 
+			UI_ID			AS "uiId"
+			, GRP_UI_ID		AS "grpUiId"
+			, UI_NM			AS "uiNm"
+			, ENG_UI_NM		AS "engUiNm"
+			, LEVEL			AS "level"
+			, UI_CVSN_VAL	AS "uiCvsnVal"
+			, UI_CVSN_YN	AS "uiCvsnYn"
+			, V_ORDER		AS "vOrder"
+			, USE_YN		AS "useYn"
+			, FN_GET_COMM_CODE_NM('S1003', UITY_CD) 		AS "uityNm"
+			, LTRIM(SYS_CONNECT_BY_PATH(A.UI_NM, '>'), '>') AS "uiFullNm"
+			, DECODE(CONNECT_BY_ISLEAF, 0, 1, 0) 			AS "HaveChild"
+		FROM
+			TB_STTS_STDDUI A
+		WHERE
+			UI_ID IN (
+				SELECT UI_ID FROM TB_STTS_STDDUI B
+			<dynamic prepend="START WITH">
+				<isNotEmpty property="searchVal" prepend="AND">
+					<isEqual property="searchVal" compareValue="%">
+						<isEqual property="searchGubun" compareValue="UI_NM" >
+							B.UI_NM LIKE '%%' ESCAPE '%'
+						</isEqual>
+						<isEqual property="searchGubun" compareValue="ENG_UI_NM" >
+							B.ENG_UI_NM LIKE '%%' ESCAPE '%'
+						</isEqual>
+					</isEqual>
+					<isNotEqual property="searchVal" compareValue="%">
+						<isEqual property="searchGubun" compareValue="UI_NM" >
+							B.UI_NM LIKE '%'||#searchVal#||'%'
+						</isEqual>
+						<isEqual property="searchGubun" compareValue="ENG_UI_NM" >
+							B.ENG_UI_NM LIKE '%'||#searchVal#||'%'
+						</isEqual>
+					</isNotEqual>
+				</isNotEmpty>
+				<isNotEmpty property="searchUityCd" prepend="AND">
+					UITY_CD = #searchUityCd#
+				</isNotEmpty>
+			</dynamic>
+				CONNECT BY 
+					UI_ID = PRIOR GRP_UI_ID
+					AND USE_YN = 'Y'
+			)
+		START WITH GRP_UI_ID = 'UICTLG'
+		CONNECT BY 
+			PRIOR UI_ID = GRP_UI_ID
+			AND USE_YN = 'Y'
+		ORDER SIBLINGS BY V_ORDER
+	</select>
+	
+</sqlMap>

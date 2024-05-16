@@ -1,0 +1,628 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!--
+        수정일          수성자                          수정내용
+       ===========     ========      =================================================
+       2011.09.26		이기하			library 정리
+       2012.11.14		이기하			jsp-api 라이브러리 추가
+       2012.11.19		이기하			cubrid 라이브러리 추가
+       2013.05.30		이기하			표준프레임워크 실행환경 버전업그레이드(2.0.0 -> 2.6.0)
+       2013.11.07		이기하			표준프레임워크 실행환경 idgnr 업그레이드(2.6.0 -> 2.6.1)
+                                           JBOSS validation 오류 해결방안 주석으로 제시
+       2013.12.12		이기하			sms 라이브러리 system Scope 방식으로 변경
+       2013.12.19		이기하			표준프레임워크 실행환경 버전업그레이드(2.6.0 -> 2.7.0)
+    -->
+
+    <groupId>nasna</groupId>
+    <artifactId>nasna</artifactId>
+    <packaging>war</packaging>
+    <version>2.2.0</version>
+    <name>nasna</name>
+    <url>https://open.assembly.go.kr</url>
+
+    <properties>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <spring.maven.artifact.version>4.0.9.RELEASE</spring.maven.artifact.version>
+        <egovframework.rte.version>3.5.0</egovframework.rte.version>
+    </properties>
+
+    <dependencies>
+        <!-- spring 라이브러리 -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-aop</artifactId>
+            <version>${spring.maven.artifact.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-beans</artifactId>
+            <version>${spring.maven.artifact.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>${spring.maven.artifact.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context-support</artifactId>
+            <version>${spring.maven.artifact.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+            <version>${spring.maven.artifact.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jdbc</artifactId>
+            <version>${spring.maven.artifact.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-orm</artifactId>
+            <version>${spring.maven.artifact.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <version>${spring.maven.artifact.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-tx</artifactId>
+            <version>${spring.maven.artifact.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+            <version>${spring.maven.artifact.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+            <version>${spring.maven.artifact.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.webflow</groupId>
+            <artifactId>org.springframework.webflow</artifactId>
+            <version>2.0.0.RELEASE</version>
+        </dependency>
+        <!-- spring 라이브러리 끝 -->
+
+        <!-- spring security 라이브러리 시작 -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-core</artifactId>
+            <version>2.0.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-taglibs</artifactId>
+            <version>2.0.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-acl</artifactId>
+            <version>2.0.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-core-tiger</artifactId>
+            <version>2.0.4</version>
+        </dependency>
+        <!-- spring security 라이브러리 끝 -->
+
+        <!-- 실행환경 라이브러리 -->
+        <dependency>
+            <groupId>egovframework.rte</groupId>
+            <artifactId>egovframework.rte.fdl.cmmn</artifactId>
+            <version>${egovframework.rte.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>egovframework.rte</groupId>
+            <artifactId>egovframework.rte.fdl.idgnr</artifactId>
+            <version>${egovframework.rte.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>egovframework.rte</groupId>
+            <artifactId>egovframework.rte.psl.dataaccess</artifactId>
+            <version>${egovframework.rte.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>egovframework.rte</groupId>
+            <artifactId>egovframework.rte.ptl.mvc</artifactId>
+            <version>${egovframework.rte.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>egovframework.rte</groupId>
+            <artifactId>egovframework.rte.fdl.property</artifactId>
+            <version>${egovframework.rte.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>egovframework.rte</groupId>
+            <artifactId>egovframework.rte.fdl.security</artifactId>
+            <version>${egovframework.rte.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>egovframework.rte</groupId>
+            <artifactId>egovframework.rte.fdl.string</artifactId>
+            <version>${egovframework.rte.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>egovframework.rte</groupId>
+            <artifactId>egovframework.rte.fdl.excel</artifactId>
+            <version>${egovframework.rte.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>egovframework.rte</groupId>
+            <artifactId>egovframework.rte.fdl.crypto</artifactId>
+            <version>${egovframework.rte.version}</version>
+        </dependency>
+        <!-- 실행환경 라이브러리 끝 -->
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.28</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+            <version>2.6</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-beanutils</groupId>
+            <artifactId>commons-beanutils</artifactId>
+            <version>1.9.4</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/commons-collections/commons-collections -->
+        <dependency>
+            <groupId>commons-collections</groupId>
+            <artifactId>commons-collections</artifactId>
+            <version>3.2.2</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/commons-codec/commons-codec -->
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.16.1</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-dbcp</groupId>
+            <artifactId>commons-dbcp</artifactId>
+            <version>1.4</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-digester</groupId>
+            <artifactId>commons-digester</artifactId>
+            <version>2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-configuration</groupId>
+            <artifactId>commons-configuration</artifactId>
+            <version>1.8</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/commons-fileupload/commons-fileupload -->
+        <dependency>
+            <groupId>commons-fileupload</groupId>
+            <artifactId>commons-fileupload</artifactId>
+            <version>1.5</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.13.0</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+            <version>1.2</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-pool</groupId>
+            <artifactId>commons-pool</artifactId>
+            <version>1.5.6</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-compress -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-compress</artifactId>
+            <version>1.26.0</version>
+        </dependency>
+
+        <!-- AOP -->
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjrt</artifactId>
+            <version>1.9.5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjweaver</artifactId>
+            <version>1.9.5</version>
+        </dependency>
+        <dependency>
+            <groupId>aopalliance</groupId>
+            <artifactId>aopalliance</artifactId>
+            <version>1.0</version>
+        </dependency>
+
+        <!-- ibatis -->
+        <dependency>
+            <groupId>org.apache.ibatis</groupId>
+            <artifactId>ibatis-sqlmap</artifactId>
+            <version>2.3.4.726</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.googlecode.json-simple</groupId>
+            <artifactId>json-simple</artifactId>
+            <version>1.1.1</version>
+        </dependency>
+		<dependency>
+			<groupId>org.codehaus.jackson</groupId>
+			<artifactId>jackson-core-asl</artifactId>
+			<version>1.9.9</version>
+		</dependency>
+		<dependency>
+			<groupId>org.codehaus.jackson</groupId>
+			<artifactId>jackson-mapper-asl</artifactId>
+			<version>1.9.9</version>
+					</dependency>
+
+        <!-- 2015.07.10 김은삼 [1] 설정 추가 BEGIN -->
+        <!-- OAuth2 Client -->
+        <dependency>
+            <groupId>org.apache.oltu.oauth2</groupId>
+            <artifactId>org.apache.oltu.oauth2.client</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <!-- Twitter4J -->
+        <dependency>
+            <groupId>org.twitter4j</groupId>
+            <artifactId>twitter4j-core</artifactId>
+            <version>4.0.7</version>
+        </dependency>
+        <!-- Simple Captcha -->
+        <!--
+		<dependency>
+		    <groupId>com.liferay</groupId>
+		    <artifactId>nl.captcha.simplecaptcha</artifactId>
+		    <version>1.1.1</version>
+		</dependency>-->
+        <!-- java-image-scalling 중복되는 클래스가 있어서 주석..
+        <dependency>
+            <groupId>com.liferay</groupId>
+            <artifactId>nl.captcha.simplecaptcha</artifactId>
+            <version>1.2.1</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/simplecaptcha-1.2.1.jar</systemPath>
+        </dependency> -->
+
+        <!-- 2015.07.10 김은삼 [1] 설정 추가 END -->
+
+        <!-- mybatis -->
+        <!--
+		<dependency>
+		    <groupId>org.mybatis</groupId>
+		    <artifactId>mybatis</artifactId>
+		    <version>3.2.1</version>
+		</dependency>
+		<dependency>
+		    <groupId>org.mybatis</groupId>
+		    <artifactId>mybatis-spring</artifactId>
+		    <version>1.2.0</version>
+		</dependency> -->
+
+        <dependency>
+            <groupId>org.lazyluke</groupId>
+            <artifactId>log4jdbc-remix</artifactId>
+            <version>0.2.7</version>
+        </dependency>
+
+        <!-- ibsheet -->
+        <dependency>
+            <groupId>org.ibreaders</groupId>
+            <artifactId>ibsheet7</artifactId>
+            <version>1.1.69</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/ibsheet7-1.1.69.jar</systemPath>
+        </dependency>
+
+        <!-- 국회사무처 GPKI -->
+        <dependency>
+            <groupId>kr.go.gpki</groupId>
+            <artifactId>libgpkiapi_jni</artifactId>
+            <version>1.4.2.06</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/libgpkiapi_jni.jar</systemPath>
+        </dependency>
+  <!-- 
+        <dependency>
+            <groupId>ojdbc</groupId>
+            <artifactId>ojdbc</artifactId>
+            <version>6</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/ojdbc6.jar</systemPath>
+        </dependency>
+      
+       -->
+        <dependency>
+            <groupId>ojdbc</groupId>
+            <artifactId>ojdbc</artifactId>
+            <version>8</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/ojdbc8-12.2.0.1.jar</systemPath>
+        </dependency>
+
+        <!-- 키보드보안 -->
+        <dependency>
+            <groupId>com.nprotect</groupId>
+            <artifactId>pluginfree</artifactId>
+            <version>1.5.0.20190702</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/com.nprotect.pluginfree.v1.5.0.20190702.jar</systemPath>
+        </dependency>
+
+        <!-- Image Resizing -->
+        <dependency>
+            <groupId>com.mortennobel</groupId>
+            <artifactId>java-image-scaling</artifactId>
+            <version>0.8.6</version>
+        </dependency>
+
+        <!-- 통합검색(와이즈넛) -->
+        <dependency>
+            <groupId>com.wisenut</groupId>
+            <artifactId>queryapi</artifactId>
+            <version>530</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/queryapi530.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>com.wisenut</groupId>
+            <artifactId>sfconapi</artifactId>
+            <version>530</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/sfconapi530.jar</systemPath>
+        </dependency>
+
+        <!-- xss servlet filter -->
+        <dependency>
+            <groupId>com.navercorp.lucy</groupId>
+            <artifactId>lucy-xss-servlet</artifactId>
+            <version>2.0.1</version>
+        </dependency>
+
+        <!-- 외부 라이브러리 - ezPDF(PDF 변환) -->
+        <dependency>
+            <groupId>com.ezpdf</groupId>
+            <artifactId>WF3JavaClient</artifactId>
+            <version>3.0.36</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/WF3JavaClient-3.0.36.jar</systemPath>
+        </dependency>
+
+        <!-- 외부 라이브러리 - TIMESTAMP(PDF에 진본확인) -->
+        <dependency>
+            <groupId>com.amano</groupId>
+            <artifactId>apl3161</artifactId>
+            <version>ob</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/apl3161ob.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>com.amano</groupId>
+            <artifactId>apl3161</artifactId>
+            <version>ob2</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/apl3161ob.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>com.amano</groupId>
+            <artifactId>astdts_imprt</artifactId>
+            <version>1</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/astdts_imprt.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>com.amano</groupId>
+            <artifactId>bcprov-jdk14</artifactId>
+            <version>145</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/bcprov-jdk14-145.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>com.amano</groupId>
+            <artifactId>ldapjdk</artifactId>
+            <version>1</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/ldapjdk.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>com.amano</groupId>
+            <artifactId>smlold</artifactId>
+            <version>1</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/smlold.jar</systemPath>
+        </dependency>
+
+        <!-- google api -->
+        <dependency>
+            <groupId>com.google.oauth-client</groupId>
+            <artifactId>google-oauth-client-jetty</artifactId>
+            <version>1.26.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.api-client</groupId>
+            <artifactId>google-api-client-gson</artifactId>
+            <version>1.26.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.apis</groupId>
+            <artifactId>google-api-services-analyticsreporting</artifactId>
+            <version>v4-rev20190318-1.27.0</version>
+        </dependency>
+
+        <!-- 외부 라이브러리 - KCB(실명인증관련) -->
+        <dependency>
+            <groupId>kcb</groupId>
+            <artifactId>OkCert3</artifactId>
+            <version>1.5</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/OkCert3-java1.5-2.2.3.jar</systemPath>
+        </dependency>
+        <!-- KMC 본인인증 암호화 모듈 -->
+        <dependency>
+            <groupId>com.kmcert</groupId>
+            <artifactId>ICERTSecu</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/ICERTSecu_JDK16.jar</systemPath>
+        </dependency>
+        <!-- NICE 본인인증 암호화 모듈 -->
+        <dependency>
+            <groupId>com.nice</groupId>
+            <artifactId>NiceID</artifactId>
+            <version>1.1</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/NiceID_v1.1.jar</systemPath>
+        </dependency>
+        <!-- 3rd party 라이브러리로 별도의 설치 필요 -->
+        <!-- oracle 10g driver -->
+        <!--
+        <dependency>
+            <groupId>ojdbc</groupId>
+            <artifactId>ojdbc</artifactId>
+            <version>14</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/ojdbc-14.jar</systemPath>
+        </dependency>
+        -->
+        <!-- altibase driver -->
+        <!--
+        <dependency>
+            <groupId>altibase</groupId>
+            <artifactId>altibase-jdbc-driver</artifactId>
+            <version>5.1.3.18</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/altibase-jdbc-driver-5.1.3.18.jar</systemPath>
+        </dependency>
+        -->
+
+        <!-- tibero driver -->
+        <!--
+        <dependency>
+            <groupId>com.tmax.tibero</groupId>
+            <artifactId>tibero-jdbc</artifactId>
+            <version>3.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/tibero-jdbc-3.0.jar</systemPath>
+        </dependency>
+        -->
+
+        <!-- cubrid driver -->
+        <!--
+        <dependency>
+            <groupId>cubrid</groupId>
+            <artifactId>cubrid-jdbc</artifactId>
+            <version>8.4</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/cubrid-jdbc-8.4.jar</systemPath>
+        </dependency>
+        -->
+
+        <!-- GPKI인증서 로그인처리 라이브러리 -->
+        <!-- 필요시 담당 공무원이 신청 -->
+        <!--
+        <dependency>
+            <groupId>kr.go.gpki</groupId>
+            <artifactId>gpkisecureweb</artifactId>
+            <version>1.0.4.9</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/gpkisecureweb-1.0.4.9.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>kr.go.gpki</groupId>
+            <artifactId>libgpkiapi_jni</artifactId>
+            <version>1.4.0.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/libgpkiapi_jni-1.4.0.0.jar</systemPath>
+        </dependency>
+
+        -->
+        <!-- 3rd party 라이브러리로 별도의 설치 필요 끝 -->
+        <!-- 22.04.22/jhKim - Wise Access(SSO) 모듈 추가 -->
+        <dependency>
+            <groupId>com.wiseitech</groupId>
+            <artifactId>WAJavaAPI_v1.2.3</artifactId>
+            <version>1.2.3</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/WAJavaAPI_v1.2.3.20131205_jdk1.6.jar</systemPath>
+        </dependency>
+        <!-- 공통컴포넌트 끝 -->
+
+        <dependency>
+            <groupId>com.sun.mail</groupId>
+            <artifactId>javax.mail</artifactId>
+            <version>1.6.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.ibm.icu</groupId>
+            <artifactId>icu4j</artifactId>
+            <version>64.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.jcraft</groupId>
+            <artifactId>jsch</artifactId>
+            <version>0.1.53</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.dom4j/dom4j -->
+        <dependency>
+            <groupId>org.dom4j</groupId>
+            <artifactId>dom4j</artifactId>
+            <version>2.1.4</version>
+        </dependency>
+
+    </dependencies>
+
+    <repositories>
+        <repository>
+            <id>mvn2</id>
+            <url>https://repo1.maven.org/maven2/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>egovframe</id>
+            <url>https://www.egovframe.go.kr/maven/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>egovframe2</id>
+            <url>https://maven.egovframe.kr:8080/maven/</url>
+            <!--            <releases>-->
+            <!--                <enabled>true</enabled>-->
+            <!--            </releases>-->
+            <!--            <snapshots>-->
+            <!--                <enabled>false</enabled>-->
+            <!--            </snapshots>-->
+        </repository>
+    </repositories>
+</project>

@@ -1,0 +1,537 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--   
+* id 		: 고유 ID
+* parId		: 부모 ID
+* topId		: 최상위 부모 ID
+* viewYn	: 메뉴에는 있지만 표시하지 않음
+* viewId	: 화면에는 보여주지 않지만 메뉴가 선택되게 할 경우(EX. 공지사항상세는 공지사항목록에 포함)
+* title		: 메뉴명
+* url		: 링크 URL(중복되는게 없어야함. 중복되었을경우 LEFT MENU 표출되지 않음)
+ -->
+<menus>
+	<!-- ======================= [국회의원] =======================  -->
+	<menu id="NA10000" parId="T">
+		<title>국회의원</title>
+		<url>/portal/infs/cont/infsContPage.do?cateId=NA10000</url>
+	</menu>
+		<menu id="NA19000" parId="NA10000" topId="NA10000">
+			<title>제21대 국회의원 검색</title>
+			<url>/portal/assm/search/memberSchPage.do</url>
+		</menu>
+		<menu id="NA19001" parId="NA10000" topId="NA10000">
+			<title>정당 및 교섭단체 현황</title>
+			<url>/portal/assm/assmPartyNegotiationPage.do</url>
+		</menu>
+		<menu id="NA11000" parId="NA10000" topId="NA10000">
+			<title>국회의원 현황 정보</title>
+			<url>/portal/infs/cont/infsContPage.do?cateId=NA11000</url>
+		</menu>
+		<menu id="NA12000" parId="NA10000" topId="NA10000">
+			<title>역대 국회 정보</title>
+			<url>/portal/infs/cont/infsContPage.do?cateId=NA13000</url>
+		</menu>
+		
+	<!-- ======================= [의정활동별 공개] =======================  -->
+	<menu id="NA40000" parId="T">
+		<title>의정활동별 공개</title>
+		<url>/portal/infs/cont/infsContPage.do?cateId=NA41000</url>
+	</menu>
+		<menu id="NA49000" parId="NA40000" topId="NA40000">
+			<title>의정활동 통합현황</title>
+			<url>/portal/bpm/prc/prcMstPage.do</url>
+		</menu>
+		<menu id="NA41000" parId="NA40000" topId="NA40000">
+			<title>본회의 정보</title>
+			<url>/portal/infs/cont/infsContPage.do?cateId=NA40000&amp;infsId=INT002128FH10228</url>
+		</menu>
+		<menu id="NA42000" parId="NA40000" topId="NA40000">
+			<title>위원회 정보</title>
+			<url>/portal/infs/cont/infsContPage.do?cateId=NA40000&amp;infsId=IW2002121H113037</url>
+		</menu>
+		<menu id="NA43000" parId="NA40000" topId="NA40000">
+			<title>날짜별 의정활동</title>
+			<url>/portal/infs/cont/infsContPage.do?cateId=NA40000&amp;infsId=IDP002153ML33415</url>
+		</menu>
+		<!-- 
+		<menu id="NA44000" parId="NA40000" topId="NA40000">
+			<title>인사청문회</title>
+			<url>/portal/infs/cont/infsContPage.do?cateId=NA40000&amp;infsId=I7M002042T098793</url>
+		</menu>
+		 -->
+		<menu id="NA45000" parId="NA40000" topId="NA40000">
+			<title>청원</title>
+			<url>/portal/infs/cont/infsContPage.do?cateId=NA40000&amp;infsId=I0B002087YA25174</url>
+		</menu>	
+	
+	<!-- ======================= [주제별 공개] =======================  -->
+	<menu id="NA20000" parId="T">
+		<title>주제별 공개</title>
+		<url>/portal/infs/cont/infsContPage.do?cateId=NA21000</url>
+	</menu>
+		<menu id="NA29000" parId="NA20000" topId="NA20000">
+			<title>주제별 공개 개요</title>
+			<url>/portal/infs/cont/infsContPage.do?infsId=IWA0021747D35167</url>
+		</menu>
+		<menu id="NA21000" parId="NA20000" topId="NA20000">
+			<title>정책</title>
+			<url>/portal/infs/cont/infsContPage.do?cateId=NA21000</url>
+		</menu>
+		<menu id="NA22000" parId="NA20000" topId="NA20000">
+			<title>의회외교</title>
+			<url>/portal/infs/cont/infsContPage.do?cateId=NA22000&amp;infsId=IFX002041LY14370</url>
+		</menu>
+		<menu id="NA23000" parId="NA20000" topId="NA20000">
+			<title>재정</title>
+			<url>/portal/infs/cont/infsContPage.do?cateId=NA23000</url>
+		</menu>
+		<menu id="NA24000" parId="NA20000" topId="NA20000">
+			<title>행정</title>
+			<url>/portal/infs/cont/infsContPage.do?cateId=NA24000</url>
+		</menu>
+		<menu id="NA25000" parId="NA20000" topId="NA20000">
+			<title>국민참여</title>
+			<url>/portal/infs/cont/infsContPage.do?cateId=NA25000</url>
+		</menu>
+		<menu id="NA26000" parId="NA20000" topId="NA20000">
+			<title>언론·미디어·국회일정</title>
+			<url>/portal/infs/cont/infsContPage.do?cateId=NA26000</url>
+		</menu>
+		
+	<!-- ======================= [지원조직별 공개] =======================  -->
+	<!-- 사용안함-2020.01.08
+	<menu id="NA30000" parId="T">
+		<title>지원조직별 공개</title>
+		<url>#</url>
+	</menu>
+		<menu id="NA39000" parId="NA30000" topId="NA30000">
+			<title>지원조직별 공개 개요</title>
+			<url>/portal/infs/cont/infsContPage.do?infsId=IQ60021753Q12716</url>
+		</menu>
+		<menu id="NA31000" parId="NA30000" topId="NA30000">
+			<title>국회사무처</title>
+			<url>/portal/infs/cont/infsContPage.do?cateId=NA31010</url>
+		</menu>
+		<menu id="NA32000" parId="NA30000" topId="NA30000">
+			<title>국회도서관</title>
+			<url>/portal/infs/cont/infsContPage.do?cateId=NA32000</url>
+		</menu>
+		<menu id="NA33000" parId="NA30000" topId="NA30000">
+			<title>국회예산정책처</title>
+			<url>/portal/infs/cont/infsContPage.do?cateId=NA33000</url>
+		</menu>
+		<menu id="NA34000" parId="NA30000" topId="NA30000">
+			<title>국회입법조사처</title>
+			<url>/portal/infs/cont/infsContPage.do?cateId=NA34000</url>
+		</menu>
+	 -->	
+	<!-- ======================= [보고서 발간물] =======================  -->
+	<menu id="NA50000" parId="T">
+		<title>보고서ㆍ발간물</title>
+		<url>/portal/infs/cont/infsContPage.do?cateId=NA51000</url>
+	</menu>
+		<menu id="NA59000" parId="NA50000" topId="NA50000">
+			<title>국회 전체</title>
+			<url>/portal/nadata/catalog/naDataCommPage.do</url>
+		</menu>	
+		<menu id="NA51000" parId="NA50000" topId="NA50000">
+			<title>국회사무처</title>
+			<url>/portal/infs/cont/infsContPage.do?cateId=NA50000&amp;infsId=IF5002144Q137969</url>
+		</menu>
+		<menu id="NA52000" parId="NA50000" topId="NA50000">
+			<title>국회도서관</title>
+			<url>/portal/infs/cont/infsContPage.do?cateId=NA50000&amp;infsId=I4Z002145VT86650</url>
+		</menu>
+		<menu id="NA53000" parId="NA50000" topId="NA50000">
+			<title>국회예산정책처</title>
+			<url>/portal/infs/cont/infsContPage.do?cateId=NA50000&amp;infsId=IH9002148D262584</url>
+		</menu>
+		<menu id="NA54000" parId="NA50000" topId="NA50000">
+			<title>국회입법조사처</title>
+			<url>/portal/infs/cont/infsContPage.do?cateId=NA50000&amp;infsId=IW1002147NX25455</url>
+		</menu>	
+		<menu id="NA55000" parId="NA50000" topId="NA50000">
+			<title>국회미래연구원</title>
+			<url>/portal/infs/cont/infsContPage.do?cateId=NA50000&amp;infsId=IGD002197FL13907</url>
+		</menu>	
+	
+	<!-- ======================= [정보공개 청구] =======================  -->
+	<menu id="EX10000" parId="T">
+		<title>정보공개청구</title>
+		<url>#</url>
+	</menu>
+		<menu id="EX11000" parId="EX10000" topId="EX10000">
+			<title>정보공개청구 안내</title>
+			<url>/portal/exposeInfo/guideOpnInfoPage.do</url>
+		</menu>
+		<menu id="EX13000" parId="EX10000" topId="EX10000">
+			<title>청구서 작성</title>
+			<url>/portal/expose/writeAccountPage.do</url>
+		</menu>
+		<menu id="EX14000" parId="EX10000" topId="EX10000">
+			<title>청구서 처리현황</title>
+			<url>/portal/expose/searchAccountPage.do</url>
+		</menu>
+			<menu id="EX14100" parId="EX14000" topId="EX10000" viewYn="N" viewId="EX14000">
+				<title>청구서 처리현황상세</title>
+				<url>/portal/expose/selectAccountPage.do</url>
+			</menu>
+		<menu id="EX15000" parId="EX10000" topId="EX10000">
+			<title>이의신청서 작성</title>
+			<url>/portal/expose/targetObjectionPage.do</url>
+		</menu>
+			<menu id="EX15100" parId="EX15000" topId="EX10000" viewYn="N" viewId="EX15000">
+				<title>이의신청서 작성상세</title>
+				<url>/portal/expose/writeObjectionPage.do</url>
+			</menu>
+			<menu id="EX15300" parId="EX15000" topId="EX10000" viewYn="N" viewId="EX15000">
+				<title>이의신청서 수정</title>
+				<url>/portal/expose/updateObjectionPage.do</url>
+			</menu>
+		<menu id="EX16000" parId="EX10000" topId="EX10000">
+			<title>이의신청서 처리현황</title>
+			<url>/portal/expose/searchObjectionPage.do</url>
+		</menu>
+			<menu id="EX16100" parId="EX16000" topId="EX10000" viewYn="N" viewId="EX16000">
+				<title>이의신청서 처리현황</title>
+				<url>/portal/expose/selectObjectionPage.do</url>
+			</menu>
+<!-- 		<menu id="EX17000" parId="EX10000" topId="EX10000">
+			<title>업무추진비</title>
+			<url>/portal/expose/searchWorkPayPage.do</url>
+		</menu>
+		<menu id="EX18000" parId="EX10000" topId="EX10000">
+			<title>세입·세출예산운용</title>
+			<url>/portal/expose/searchBudgetFundPage.do</url>
+		</menu> -->
+				
+		
+	<!-- ======================= [마인드맵] =======================  -->
+	<menu id="NO10000" parId="T">
+		<title>마인드맵</title>
+		<url>#</url>
+	</menu>
+	
+	<!-- ======================= [국회 정보나침반] ======================= -->
+	<menu id="NO20000" parId="T">
+		<title>국회 정보나침반</title>
+		<url>#</url>
+	</menu>
+		<menu id="NO22000" parId="NO20000" topId="NO20000">
+			<title>정보서비스 사이트맵</title>
+			<url>/infonavi</url>
+		</menu>
+		<menu id="NO21000" parId="NO20000" topId="NO20000">
+			<title>정보서비스 카탈로그</title>
+			<url>/portal/nadata/catalog/naDataCatalogPage.do</url>
+		</menu>
+	
+	<!-- ======================= [테마 정보공개] ======================= -->
+	<menu id="NO30000" parId="T">
+		<title>테마 정보공개</title>
+		<url>#</url>
+	</menu>	
+		<menu id="NO31000" parId="NO30000" topId="NO30000">
+			<title>국회의원 통계</title>
+			<url>/portal/theme/visual/searchVisualPage.do</url>
+		</menu>
+		<menu id="NO32000" parId="NO30000" topId="NO30000">
+			<title>정당 및 교섭단체 정보</title>
+			<url>/portal/theme/visual/partyNegotiationInfoPage.do</url>
+		</menu>
+		<!-- 
+		<menu id="NO32000" parId="NO30000" topId="NO30000">
+			<title>시각화2</title>
+			<url>#</url>
+		</menu>
+		<menu id="NO33000" parId="NO30000" topId="NO30000">
+			<title>시각화3</title>
+			<url>#</url>
+		</menu>
+		<menu id="NO34000" parId="NO30000" topId="NO30000">
+			<title>시각화4</title>
+			<url>#</url>
+		</menu> -->
+	
+	<!-- ======================= [알림마당] ======================= -->
+	<menu id="NO40000" parId="T">
+		<title>알림마당</title>
+		<url>#</url>
+	</menu>
+		<menu id="NO41000" parId="NO40000" topId="NO40000">
+			<title>공지사항</title>
+			<url>/portal/bbs/notice/searchBulletinPage.do</url>
+		</menu>
+			<menu id="NO41100" parId="NO41000" topId="NO40000" viewYn="N" viewId="NO41000">
+				<title>공지사항 상세</title>
+				<url>/portal/bbs/notice/selectBulletinPage.do</url>
+			</menu>
+			
+		<menu id="NO42000" parId="NO40000" topId="NO40000">
+			<title>FAQ</title>
+			<url>/portal/bbs/faq01/searchBulletinPage.do</url>
+		</menu>
+		<menu id="NO43000" parId="NO40000" topId="NO40000">
+			<title>Q&amp;A</title>
+			<url>/portal/bbs/qna01/searchBulletinPage.do</url>
+		</menu>
+			<menu id="NO43100" parId="NO43000" topId="NO40000" viewYn="N" viewId="NO43000">
+				<title>Q&amp;A 상세</title>
+				<url>/portal/bbs/qna01/selectBulletinPage.do</url>
+			</menu>
+			<menu id="NO43200" parId="NO43000" topId="NO40000" viewYn="N" viewId="NO43000">
+				<title>Q&amp;A 등록</title>
+				<url>/portal/bbs/qna01/insertBulletinPage.do</url>
+			</menu>
+			<menu id="NO43300" parId="NO43000" topId="NO40000" viewYn="N" viewId="NO43000">
+				<title>Q&amp;A 수정</title>
+				<url>/portal/bbs/qna01/updateBulletinPage.do</url>
+			</menu>
+			
+		<!-- <menu id="NO44000" parId="NO40000" topId="NO40000" viewYn="N">
+			<title>SNS 공유 게시판</title>
+			<url>/portal/bbs/sns/searchBulletinPage.do</url>
+		</menu>
+			<menu id="NO44100" parId="NO44000" topId="NO40000" viewYn="N" viewId="NO44000">
+				<title>SNS 공유 게시판 상세</title>
+				<url>/portal/bbs/sns/selectBulletinPage.do</url>
+			</menu> -->
+
+	<!-- ======================= [서비스소개] ======================= -->
+	<menu id="NO50000" parId="T">
+		<title>서비스 소개</title>
+		<url>#</url>
+	</menu>
+		<menu id="NO51000" parId="NO50000" topId="NO50000">
+			<title>서비스 소개</title>
+			<url>/portal/intro/serviceIntroPage.do</url>
+		</menu>
+		<menu id="NO52000" parId="NO50000" topId="NO50000">
+			<title>서비스 이용안내</title>
+			<url>/portal/intro/useServiceIntroPage.do</url>
+		</menu>
+		
+	<!-- ======================= [마이페이지] ======================= -->
+	<menu id="NO60000" parId="T">
+		<title>마이페이지</title>
+		<url>#</url>
+	</menu>
+		<menu id="NO61000" parId="NO60000" topId="NO60000">
+			<title>나의 질문내역</title>
+			<url>/portal/myPage/myQnaPage.do</url>
+		</menu>
+			<menu id="NO61100" parId="NO61000" topId="NO60000" viewYn="N" viewId="NO61000">
+				<title>나의질문내역 상세</title> 
+				<url>/portal/myPage/selectMyQnaPage.do</url>
+			</menu>
+			<menu id="NO61200" parId="NO61000" topId="NO60000" viewYn="N" viewId="NO61000">
+				<title>나의질문내역 등록</title>
+				<url>/portal/myPage/insertMyQnaPage.do</url>
+			</menu>
+			<menu id="NO61300" parId="NO61000" topId="NO60000" viewYn="N" viewId="NO61000">
+				<title>나의질문내역 수정</title>
+				<url>/portal/myPage/updateMyQnaPage.do</url>
+			</menu>
+		<menu id="NO62000" parId="NO60000" topId="NO60000">
+			<title>검색연혁 및 추천정보</title>
+			<url>/portal/myPage/searchHisRcmdPage.do</url>
+		</menu>
+		<menu id="NO63000" parId="NO60000" topId="NO60000">
+			<title>청구기본정보수정</title>
+			<url>/portal/myPage/exposeDefaultUpdPage.do</url>
+		</menu>
+		<!-- 
+		<menu id="NO64000" parId="NO60000" topId="NO60000">
+			<title>뉴스레터 수신동의</title>
+			<url>/portal/myPage/newsletterAgreePage.do</url>
+		</menu> -->
+		<menu id="NO65000" parId="NO60000" topId="NO60000">
+			<title>회원정보수정</title>
+			<!--<url>https://www.assembly.go.kr/assm/assmember/asslogin/login/login.do</url>-->
+			<url>https://member.assembly.go.kr/data/member/pwdConfirmPage.do</url>
+		</menu>
+		<menu id="NO66000" parId="NO60000" topId="NO60000">
+			<title>회원탈퇴</title>
+			<!--<url>https://www.assembly.go.kr/assm/assmember/asslogin/login/login.do</url>-->
+			<url>https://member.assembly.go.kr/data/member/pwdConfirmPage.do</url>
+		</menu>
+	
+	<!-- ======================= [Open API] ======================= -->
+	<menu id="OP10000" parId="T">
+		<title>Open API 소개</title>
+		<url>#</url>
+	</menu>
+		<menu id="OP11000" parId="OP10000" topId="OP10000">
+			<title>Open API 소개</title>
+			<url>/portal/openapi/openApiIntroPage.do</url>
+		</menu>
+		<menu id="OP12000" parId="OP10000" topId="OP10000">
+			<title>Open API 특징</title>
+			<url>/portal/openapi/openApiFeaturePage.do</url>
+		</menu>
+		<menu id="OP13000" parId="OP10000" topId="OP10000">
+			<title>Open API 이용약관</title>
+			<url>/portal/policy/openUserAgreementPage.do</url>
+		</menu>
+		
+	<menu id="OP20000" parId="T">
+		<title>Open API 목록</title>
+		<url>/portal/openapi/openApiNaListPage.do</url>
+	</menu>
+		<menu id="OP21000" parId="OP20000" topId="OP20000">
+			<title>Open API 목록</title>
+			<url>/portal/openapi/openApiNaListPage.do</url>
+		</menu>
+	
+	<menu id="OP30000" parId="T">
+		<title>개발가이드</title>
+		<url>#</url>
+	</menu>
+		<menu id="OP31000" parId="OP30000" topId="OP30000">
+			<title>Open API 사용방법</title>
+			<url>/portal/openapi/openApiDevPage.do</url>
+		</menu>
+		<menu id="OP32000" parId="OP30000" topId="OP30000">
+			<title>개발소스예제</title>
+			<url>/portal/openapi/openApiDevLangPage.do</url>
+		</menu>
+		<menu id="OP33000" parId="OP30000" topId="OP30000">
+			<title>언어별 개발가이드</title>
+			<url>/portal/openapi/openApiDevSrcPage.do</url>
+		</menu>
+			
+	<menu id="OP60000" parId="T">
+		<title>참여형 플랫폼</title>
+		<url>#</url>
+	</menu>
+		<menu id="OP61000" parId="OP60000" topId="OP60000">
+			<title>활용 가이드</title>
+			<url>/portal/bbs/guide/searchBulletinPage.do</url>
+		</menu>
+			<menu id="OP61100" parId="OP61000" topId="OP60000" viewYn="N" viewId="OP61000">
+				<title>활용 가이드 상세</title>
+				<url>/portal/bbs/guide/selectBulletinPage.do</url>
+			</menu>		
+		<menu id="OP67000" parId="OP60000" topId="OP60000">
+			<title>개발자 공간</title>
+			<url>#</url>
+		</menu>		
+		<menu id="OP62000" parId="OP67000" topId="OP60000">
+			<title>개발자 커뮤니티</title>
+			<url>/portal/bbs/develop/searchBulletinPage.do</url>
+		</menu>
+			<menu id="OP62100" parId="OP67000" topId="OP60000" viewYn="N" viewId="OP62000">
+				<title>개발자 커뮤니티 상세</title> 
+				<url>/portal/bbs/develop/selectBulletinPage.do</url>
+			</menu>
+			<menu id="OP62200" parId="OP67000" topId="OP60000" viewYn="N" viewId="OP62000">
+				<title>개발자 커뮤니티 등록</title>
+				<url>/portal/bbs/develop/insertBulletinPage.do</url>
+			</menu>
+			<menu id="OP62300" parId="OP67000" topId="OP60000" viewYn="N" viewId="OP62000">
+				<title>개발자 커뮤니티 수정</title>
+				<url>/portal/bbs/develop/updateBulletinPage.do</url>
+			</menu>
+		<menu id="OP63000" parId="OP67000" topId="OP60000">
+			<title>관리자 문의</title>
+			<url>/portal/bbs/qnaapi/searchBulletinPage.do</url>
+		</menu>
+			<menu id="OP63100" parId="OP67000" topId="OP60000" viewYn="N" viewId="OP63000">
+				<title>관리자 문의 상세</title>
+				<url>/portal/bbs/qnaapi/selectBulletinPage.do</url>
+			</menu>
+			<menu id="OP63200" parId="OP67000" topId="OP60000" viewYn="N" viewId="OP63000">
+				<title>관리자 문의 등록</title>
+				<url>/portal/bbs/qnaapi/insertBulletinPage.do</url>
+			</menu>
+			<menu id="OP63300" parId="OP67000" topId="OP60000" viewYn="N" viewId="OP63000">
+				<title>관리자 문의 수정</title>
+				<url>/portal/bbs/qnaapi/updateBulletinPage.do</url>
+			</menu>	
+		<menu id="OP65000" parId="OP67000" topId="OP60000">
+			<title>FAQ</title>
+			<url>/portal/bbs/faqapi/searchBulletinPage.do</url>
+		</menu>		
+		<!-- <menu id="OP66000" parId="OP67000" topId="OP60000">
+			<title>활용 사례</title>
+			<url>/portal/bbs/gallery/searchBulletinPage.do</url>
+		</menu>
+			<menu id="OP66100" parId="OP67000" topId="OP60000" viewYn="N" viewId="OP66000">
+				<title>활용 사례 상세</title>
+				<url>/portal/bbs/gallery/selectBulletinPage.do</url>
+			</menu>	 -->
+			
+			
+	<menu id="OP40000" parId="T">
+		<title>마이페이지</title>
+		<url>#</url>
+	</menu>
+		<menu id="OP41000" parId="OP40000" topId="OP40000">
+			<title>인증키 발급내역</title>
+			<url>/portal/openapi/openApiActKeyPage.do</url>
+		</menu>
+		<menu id="OP42000" parId="OP40000" topId="OP40000">
+			<title>인증키 이용내역</title>
+			<url>/portal/openapi/openApiActKeyUsePage.do</url>
+		</menu>
+		<menu id="OP43000" parId="OP40000" topId="OP40000">
+			<title>인증키 발급</title>
+			<url>/portal/openapi/openApiActKeyIssPage.do</url>
+		</menu>
+		<menu id="OP45000" parId="OP40000" topId="OP40000">
+			<title>Open API 테스트</title>
+			<url>/portal/openapi/openApiActKeyTestPage.do</url>
+		</menu>
+		<!-- <menu id="OP46000" parId="OP40000" topId="OP40000">
+			<title>활용 사례</title>
+			<url>/portal/myPage/utilGalleryPage.do</url>
+		</menu>
+			<menu id="OP46100" parId="OP46000" topId="OP40000" viewYn="N" viewId="OP46000">
+				<title>활용 사례 상세</title>
+				<url>/portal/myPage/selectUtilGalleryPage.do</url>
+			</menu>	
+			<menu id="OP46200" parId="OP46000" topId="OP40000" viewYn="N" viewId="OP46000">
+				<title>활용 사례 수정</title>
+				<url>/portal/myPage/updateUtilGalleryPage.do</url>
+			</menu>	
+			<menu id="NOP46300" parId="OP46000" topId="OP40000" viewYn="N" viewId="OP46000">
+				<title>활용 사례 등록</title>
+				<url>/portal/myPage/insertUtilGalleryPage.do</url>
+			</menu> -->
+		
+	<menu id="OP50000" parId="T">
+		<title>알림마당</title>
+		<url>#</url>
+	</menu>
+		<menu id="OP51000" parId="OP50000" topId="OP50000">
+			<title>공지사항</title>
+			<url>/portal/bbs/noticeapi/searchBulletinPage.do</url>
+		</menu>
+			<menu id="OP51100" parId="OP51000" topId="OP50000" viewYn="N" viewId="OP51000">
+				<title>공지사항 상세</title>
+				<url>/portal/bbs/noticeapi/selectBulletinPage.do</url>
+			</menu>
+			
+	<menu id="MB10000" parId="T">
+		<title>회원관련</title>
+		<url>#</url>
+	</menu>
+		<menu id="MB11000" parId="MB10000" topId="MB10000">
+			<title>로그인</title>
+			<url>/portal/user/loginPage.do</url>
+		</menu>
+		<menu id="MB12000" parId="MB10000" topId="MB10000">
+			<title>회원가입</title>
+			<!--<url>https://www.assembly.go.kr/assm/assmember/assjoin/join/joinAgree.do</url>-->
+			<url>https://member.assembly.go.kr/member/join/joinSelectPage.do</url>
+		</menu>
+		<menu id="MB13000" parId="MB10000" topId="MB10000">
+			<title>아이디찾기</title>
+			<!--<url>https://www.assembly.go.kr/assm/assmember/assfindid/login/findIdForm.do</url>-->
+			<url>https://member.assembly.go.kr/member/id/findIdPage.do</url>
+		</menu>
+		<menu id="MB14000" parId="MB10000" topId="MB10000">
+			<title>비밀번호 찾기</title>
+			<!--<url>https://www.assembly.go.kr/assm/assmember/assfindpw/login/findPasswordForm.do</url>-->
+			<url>https://member.assembly.go.kr/member/pwd/findPwPage.do</url>
+		</menu>
+</menus>

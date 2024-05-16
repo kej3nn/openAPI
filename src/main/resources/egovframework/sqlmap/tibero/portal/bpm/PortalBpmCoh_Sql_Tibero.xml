@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="portalBpmCoh" >
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+	
+	<sql id="bpmCoh.col">
+		BILL_ID				AS "billId"
+		, BILL_NO           AS "billNo"
+		, AGE               AS "age"
+		, UNIT_CD           AS "unitCd"
+		, APPOINT_GRADE     AS "appointGrade"
+		, APPOINT_NAME      AS "appointName"
+		, BILL_NAME         AS "billName"
+		, CURR_COMMITTEE    AS "currCommiittee"
+		, PROC_RESULT       AS "procResult"
+		, LINK_URL          AS "linkUrl"
+		, MP_BOOK_ID        AS "mpBookId"
+		, MP_BOOK_URL       AS "mpBookUrl"
+		, MS_BOOK_ID        AS "msBookId"
+		, MS_BOOK_URL       AS "msBookUrl"
+		, MG_BOOK_ID        AS "mgBookId"
+		, MG_BOOK_URL       AS "mgBookUrl"
+		, PROPOSE_DT		AS "proposeDt"  
+		, COMMITTEE_DT      AS "committeeDt"
+		, SUBMIT_DT         AS "submitDt"   
+		, PRESENT_DT        AS "presentDt"  
+		, PROC_DT	        AS "procDt"     
+		, M_PROC_DT         AS "mProcDt"    
+	</sql>
+	<sql id="bpmCoh.where">
+		<dynamic prepend=" WHERE ">
+			<isNotEmpty property="schAppointName" prepend=" AND ">
+				APPOINT_NAME LIKE '%'|| #schAppointName# || '%'
+			</isNotEmpty>
+			<isNotEmpty property="schAppointGrade" prepend=" AND ">
+				APPOINT_GRADE LIKE '%'|| #schAppointGrade# || '%'
+			</isNotEmpty>
+			<isNotEmpty property="schCurrCommiittee" prepend=" AND ">
+				CURR_COMMITTEE LIKE '%'|| #schCurrCommiittee# || '%'
+			</isNotEmpty>
+		</dynamic>
+	</sql>
+	
+	<select id="bpmCohDao.searchCoh" remapResults="true" parameterClass="params" resultClass="record">
+		/* sql id : bpmCohDao.searchCoh */
+		<isEqual property="paging" compareValue="0">
+		SELECT AA.* 
+		FROM   (SELECT ROWNUM AS ROW_NUM, AA.*
+				FROM   (
+		</isEqual>
+		
+			SELECT
+			    <include refid="bpmCoh.col"/>
+			FROM
+				TV_BPM_APPOINT
+			<include refid="bpmCoh.where"/>
+		<isEqual property="paging" compareValue="0">
+		<![CDATA[
+				) AA
+			WHERE ROWNUM <= #end:NUMERIC#
+			) AA
+		WHERE AA.ROW_NUM >= #start:NUMERIC#
+		]]>
+		</isEqual>
+	</select>
+	<select id="bpmCohDao.searchCohCount" parameterClass="params" resultClass="int">
+		/* sql id : bpmCohDao.searchCohCount */
+		SELECT
+		    COUNT(*)
+		FROM
+		    TV_BPM_APPOINT A
+		<include refid="bpmCoh.where"/>
+	</select>
+	
+</sqlMap>

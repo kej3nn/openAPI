@@ -1,0 +1,346 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- @(#)AdminOpenDsUsrDefInput_Sql_Tibero.xml 1.0 2019/09/26                -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- 데이터셋 사용자정의 입력 SQL 파일이다.  	                             -->
+<!--                                                                         -->
+<!-- @author 김정호                                                        	-->
+<!-- @version 1.0 2019/09/26                                                 -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<sqlMap namespace="OpenDsUsrDefInput">
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Type Alias                                                          -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+    
+    <select id="openDsUsrDefInputDao.selectOpenDsUsrDefExist" parameterClass="string" resultClass="integer">
+    	/* sql id : openDsUsrDefInputDao.selectOpenDsUsrDefExist */
+    	SELECT COUNT(*) FROM TB_OPEN_DS WHERE DS_ID = #dsId:VARCHAR# AND USE_YN = 'Y' AND CONNTY_CD = 'UC'
+    </select>
+    
+  	<select id="openDsUsrDefInputDao.selectOpenDsUsrDefHeaderData" parameterClass="params" resultClass="record" remapResults="true">
+  		/* sql id : openDsUsrDefInputDao.selectOpenDsUsrDefHeaderData */
+  		<![CDATA[
+         SELECT A.COL_NM     AS "Header",
+                A.SRC_COL_ID AS "SaveName",
+                CASE WHEN COL_REF_CD IS NOT NULL    THEN 'Combo'
+                    WHEN  SRC_COL_TYPE = 'NUMBER' 	THEN 'Int'
+                	WHEN  SRC_COL_TYPE = 'VARCHAR'	THEN 'Text'
+                	WHEN  SRC_COL_TYPE = 'DATE'		THEN 'Date'
+                	ELSE  'Html'
+                END   AS "Type",
+                VIEW_SIZE AS "Width",
+                CASE WHEN ALIGN_TAG = 'C' THEN 'Center' 
+                    WHEN  ALIGN_TAG = 'R' THEN 'Right'
+                	WHEN  ALIGN_TAG = 'L' THEN 'Left'
+                	ELSE  'Center'
+                END          AS "Align",
+                DECODE(SRC_COL_TYPE, 'DATE', 'Ymd', '') AS "Format",
+                DECODE(SRC_COL_TYPE, 'VARCHAR', 1, 0) AS "Ellipsis",
+                A.SORT       AS "Sort",
+                0            AS "Edit",
+                CASE WHEN (A.HIDDEN = 0 AND VIEW_SIZE <= 0) THEN 1 ELSE A.HIDDEN END AS "Hidden",
+                A.COL_REF_CD AS "colRefCd"
+           FROM (
+           		SELECT '고유번호'   AS COL_NM, 	'DATA_SEQCE_NO' 			AS SRC_COL_ID, 	'NUMBER'  AS SRC_COL_TYPE, 10 AS SRC_COL_SIZE, 10 AS VIEW_SIZE, '' AS COL_REF_CD, 1 AS SORT, 1 AS V_ORDER, 1 AS HIDDEN, 'C' AS ALIGN_TAG FROM DUAL UNION ALL
+           		SELECT '등록자코드' AS COL_NM, 	'DATA_COLT_REG_USR_CD' 		AS SRC_COL_ID, 	'VARCHAR' AS SRC_COL_TYPE, 10 AS SRC_COL_SIZE, 10 AS VIEW_SIZE, '' AS COL_REF_CD, 1 AS SORT, 2 AS V_ORDER, 1 AS HIDDEN, 'C' AS ALIGN_TAG FROM DUAL UNION ALL
+           		SELECT '등록자'   	AS COL_NM, 	'DATA_COLT_REG_USR_CD_NM' 	AS SRC_COL_ID, 	'VARCHAR' AS SRC_COL_TYPE, 10 AS SRC_COL_SIZE, 80 AS VIEW_SIZE, '' AS COL_REF_CD, 1 AS SORT, 2 AS V_ORDER, 0 AS HIDDEN, 'C' AS ALIGN_TAG FROM DUAL UNION ALL
+           		SELECT '등록일시' 	AS COL_NM,	'DATA_COLT_REG_DTTM'		AS SRC_COL_ID,  'DATE'    AS SRC_COL_TYPE, 10 AS SRC_COL_SIZE, 80 AS VIEW_SIZE, '' AS COL_REF_CD, 1 AS SORT, 3 AS V_ORDER, 0 AS HIDDEN, 'C' AS ALIGN_TAG FROM DUAL UNION ALL
+           		SELECT '수정자'   	AS COL_NM, 	'DATA_COLT_UPD_USR_CD' 		AS SRC_COL_ID, 	'VARCHAR' AS SRC_COL_TYPE, 10 AS SRC_COL_SIZE, 10 AS VIEW_SIZE, '' AS COL_REF_CD, 1 AS SORT, 4 AS V_ORDER, 1 AS HIDDEN, 'C' AS ALIGN_TAG FROM DUAL UNION ALL
+           		SELECT '수정일시' 	AS COL_NM,	'DATA_COLT_UPD_DTTM'		AS SRC_COL_ID,  'DATE'    AS SRC_COL_TYPE, 10 AS SRC_COL_SIZE, 10 AS VIEW_SIZE, '' AS COL_REF_CD, 1 AS SORT, 5 AS V_ORDER, 1 AS HIDDEN, 'C' AS ALIGN_TAG FROM DUAL
+           		UNION ALL
+				SELECT
+				    A.COL_NM AS COL_NM,
+				    A.SRC_COL_ID AS SRC_COL_ID,
+				    A.SRC_COL_TYPE AS SRC_COL_TYPE,
+				    A.SRC_COL_SIZE,
+				    A.VIEW_SIZE,
+				    A.COL_REF_CD,
+				    0 AS SORT,
+				    A.V_ORDER,
+				    0 AS HIDDEN,
+				    A.ALIGN_TAG
+				FROM
+				    TB_OPEN_DSCOL A
+				WHERE
+				    A.DS_ID = #dsId:VARCHAR#
+				    AND A.USE_YN = 'Y'
+				    AND SRC_COL_ID NOT IN ('DATA_SEQCE_NO', 'DATA_ORG_CD', 'DATA_ORG_NM')
+				ORDER BY
+				    V_ORDER
+                ) A
+          ORDER BY
+                A.SORT ASC, V_ORDER 
+    	]]>
+  	</select>
+  	
+  	<select id="openDsUsrDefInputDao.selectOpenDsUsrDefColList" parameterClass="params" resultClass="record" remapResults="true">
+  		/* sql id : openDsUsrDefInputDao.selectOpenDsUsrDefColList */
+	  	SELECT
+		    A.COL_NM 		AS "colNm",
+		    A.COL_SEQ		AS "colSeq",
+		    A.SRC_COL_ID 	AS "srcColId",
+		    A.SRC_COL_TYPE 	AS "srcColType",
+		    A.SRC_COL_SIZE	AS "srcColSize",
+		    A.COL_REF_CD    AS "colRefCd",
+		    A.NEED_YN		AS "needYn",
+		    A.V_ORDER		AS "vOrder"
+		FROM
+		    TB_OPEN_DSCOL A
+		WHERE
+		    A.DS_ID = #dsId:VARCHAR#
+		    AND A.USE_YN = 'Y'
+		<isNotEmpty property="searchGubun">
+			AND COL_SEQ = #searchGubun:NUMERIC#
+		</isNotEmpty>
+			AND A.SRC_COL_ID NOT IN ('DATA_SEQCE_NO', 'DATA_ORG_CD', 'DATA_ORG_NM')
+		ORDER BY
+		    V_ORDER
+	    </select>
+  	
+  	<select id="openDsUsrDefInputDao.selectOpenDsUsrOwnerCd" parameterClass="params" resultClass="String">
+  		/* sql id : openDsUsrDefInputDao.selectOpenDsUsrOwnerCd */
+  		SELECT OWNER_CD FROM TB_OPEN_DS WHERE DS_ID = #dsId:VARCHAR# AND USE_YN = 'Y'
+  	</select>
+  	
+  	<select id="openDsUsrDefInputDao.selectOpenDsUsrTableName" parameterClass="params" resultClass="String">
+  		/* sql id : openDsUsrDefInputDao.selectOpenDsUsrTableName */
+  		SELECT DS_ID FROM TB_OPEN_DS WHERE DS_ID = #dsId:VARCHAR# AND USE_YN = 'Y'
+  	</select>
+  	
+  	<select id="openDsUsrDefInputDao.selectOpenDsUsrColumnNames" parameterClass="params" resultClass="Record" remapResults="true">
+  		/* sql id : openDsUsrDefInputDao.selectOpenDsUsrColumnNames */
+		SELECT SRC_COL_ID AS "columnName"
+		FROM (
+			<isNotEmpty property="defDataCol">
+				<isEqual property="defDataCol" compareValue="Y">
+					SELECT 'DATA_SEQCE_NO' 		AS SRC_COL_ID 	FROM DUAL UNION ALL
+					SELECT 'DATA_COLT_REG_USR_CD' 				FROM DUAL UNION ALL
+					SELECT 'DATA_COLT_REG_DTTM' 				FROM DUAL UNION ALL
+					SELECT 'DATA_COLT_UPD_USR_CD' 				FROM DUAL UNION ALL
+					SELECT 'DATA_COLT_UPD_DTTM' 				FROM DUAL
+					UNION ALL
+				</isEqual>
+			</isNotEmpty>
+				SELECT A.SRC_COL_ID AS SRC_COL_ID 
+				FROM   TB_OPEN_DSCOL A
+				WHERE  A.DS_ID = #dsId:VARCHAR# 
+				AND    A.USE_YN = 'Y'
+				AND SRC_COL_ID NOT IN ('DATA_SEQCE_NO', 'DATA_ORG_CD', 'DATA_ORG_NM')
+			)		  	
+  	</select>
+  	
+  	
+  	<select id="openDsUsrDefInputDao.selectOpenDsUsrDefData" parameterClass="params" resultClass="record" remapResults="true">
+  		/* sql id : openDsUsrDefInputDao.selectOpenDsUsrDefData */
+  		<isEqual property="paging" compareValue="0">
+		SELECT AA.* 
+		FROM   (SELECT ROWNUM AS ROW_NUM, AA.*
+				FROM   (  
+		</isEqual>
+			SELECT
+				<iterate property="columnNames" conjunction=",">A.$columnNames[]$</iterate>
+				   , U.USR_NM AS DATA_COLT_REG_USR_CD_NM
+			FROM   $ownerCd$.$tableName$ A
+				   LEFT OUTER JOIN TB_COMM_USR U ON A.DATA_COLT_REG_USR_CD = U.USR_CD
+		    WHERE  1=1
+		    <isNotEmpty property="accCd">
+				<isNotEqual property="accCd" compareValue="SYS">
+					AND A.DATA_ORG_CD = #inpOrgCd:VARCHAR#
+				</isNotEqual>
+			</isNotEmpty>
+		    <isNotEmpty property="searchVal">
+		    	AND $searchGubun$ LIKE '%' || #searchVal:VARCHAR# || '%'
+		    </isNotEmpty>   
+		    ORDER BY A.DATA_SEQCE_NO DESC
+		<isEqual property="paging" compareValue="0">
+		<![CDATA[
+				) AA
+			WHERE ROWNUM <= #end:NUMERIC#
+			) AA
+		WHERE AA.ROW_NUM >= #start:NUMERIC#
+		]]>
+		</isEqual>	
+  	</select>
+  	
+  	<select id="openDsUsrDefInputDao.selectOpenDsUsrDefDataCount" parameterClass="params" resultClass="int">
+  		/* sql id : openDsUsrDefInputDao.selectOpenDsUsrDefDataCount */
+			SELECT COUNT(*)
+			FROM   $ownerCd$.$tableName$ A
+			WHERE  1=1
+			<isNotEmpty property="accCd">
+				<isNotEqual property="accCd" compareValue="SYS">
+					AND A.DATA_ORG_CD = #inpOrgCd:VARCHAR#
+				</isNotEqual>
+			</isNotEmpty>
+  	</select>
+  	
+  	<insert id="openDsUsrDefInputDao.insertOpenDsUsrDef" parameterClass="params">
+  		<selectKey keyProperty="dataSeqceNo" resultClass="integer">
+  			SELECT SQ_OPEN_UDATA_SEQ.NEXTVAL FROM DUAL
+  		</selectKey>
+  		
+  		INSERT INTO $ownerCd$.$tableName$ A (
+			DATA_SEQCE_NO,
+			DATA_ORG_CD,
+			DATA_ORG_NM,
+			DATA_COLT_REG_USR_CD,
+			DATA_COLT_REG_DTTM,
+  			<iterate property="columnNames" conjunction=",">A.$columnNames[]$</iterate>
+  		)
+  		VALUES (
+  			#dataSeqceNo:NUMERIC#,
+  			#inpOrgCd:VARCHAR#,
+  			(SELECT ORG_NM FROM TB_COMM_ORG WHERE ORG_CD = #inpOrgCd:VARCHAR# AND USE_YN = 'Y'),
+  			#regId:NUMERIC#,
+  			SYSDATE,
+  			<iterate property="dataValues" conjunction=", ">
+	  			<isEqual property="dataValues[].isDate" compareValue="Y">
+	  				TO_DATE(#dataValues[].value:VARCHAR#, 'YYYY-MM-DD')
+	  			</isEqual>
+	  			<isEqual property="dataValues[].isDate" compareValue="N">
+	  				#dataValues[].value:VARCHAR#
+	  			</isEqual>
+	  		</iterate>
+  		)
+  	</insert>
+  	
+  	<update id="openDsUsrDefInputDao.updateOpenDsUsrDef" parameterClass="params">
+  		/* sql id : openDsUsrDefInputDao.updateOpenDsUsrDef */
+  		UPDATE $ownerCd$.$tableName$ A
+  		SET
+  			DATA_COLT_UPD_USR_CD = #regId:NUMERIC#,
+			DATA_COLT_UPD_DTTM   = SYSDATE,
+  		<iterate property="updList" conjunction=", ">
+  			<isEqual property="updList[].isDate" compareValue="Y">
+  				$updList[].colNm$ = TO_DATE(#updList[].value:VARCHAR#, 'YYYY-MM-DD')
+  			</isEqual>
+  			<isEqual property="updList[].isDate" compareValue="N">
+  				$updList[].colNm$ = #updList[].value:VARCHAR#
+  			</isEqual>
+  		</iterate>
+  		WHERE  A.DATA_SEQCE_NO = #dataSeqceNo#
+  	</update>
+  	
+  	<insert id="openDsUsrDefInputDao.insertOpenDsUsrDefFile" parameterClass="record">
+  		/* sql id : openDsUsrDefInputDao.insertOpenDsUsrDefFile */
+  		INSERT INTO $ownerCd$.TB_OPEN_USR_FILE (
+  			DATA_SEQCE_NO,
+  			FILE_SEQ,
+  			DS_ID,
+  			SRC_FILE_NM,
+  			SAVE_FILE_NM,
+  			VIEW_FILE_NM,
+  			FILE_SIZE,
+  			FILE_EXT,
+  			FT_CR_DTTM,
+  			LT_CR_DTTM,
+  			VIEW_CNT,
+  			DATA_COLT_REG_USR_CD,
+  			DATA_COLT_REG_DTTM
+  		)
+  		VALUES (
+  			#dataSeqceNo:NUMERIC#,
+  			#fileSeq:NUMERIC#,
+  			#dsId:VARCHAR#,
+  			#srcFileNm:VARCHAR#,
+  			#saveFileNm:VARCHAR#,
+  			#viewFileNm:VARCHAR#,
+  			#fileSize:NUMERIC#,
+  			#fileExt:VARCHAR#,
+  			SYSDATE,
+  			SYSDATE,
+  			0,
+  			#regId:NUMERIC#,
+  			SYSDATE
+  		)
+  	</insert>
+  	
+  	<update id="openDsUsrDefInputDao.updateOpenDsUsrDefFile" parameterClass="record">
+  		/* sql id : openDsUsrDefInputDao.updateOpenDsUsrDefFile */
+  		UPDATE $ownerCd$.TB_OPEN_USR_FILE
+  		SET	   VIEW_FILE_NM  = #viewFileNm:VARCHAR#,
+  			   DATA_COLT_UPD_USR_CD = #regId:NUMERIC#,
+  			   DATA_COLT_UPD_DTTM = SYSDATE
+  		WHERE  DATA_SEQCE_NO = #dataSeqceNo:NUMERIC#
+  		AND    FILE_SEQ 	 = #fileSeq:NUMERIC#
+  	</update>
+  	
+  	<delete id="openDsUsrDefInputDao.deleteOpenDsUsrDefFile" parameterClass="record">
+  		/* sql id : openDsUsrDefInputDao.deleteOpenDsUsrDefFile */
+  		DELETE FROM $ownerCd$.TB_OPEN_USR_FILE
+  		WHERE  DATA_SEQCE_NO = #dataSeqceNo:NUMERIC#
+  		AND    FILE_SEQ 	 = #fileSeq:NUMERIC#
+  	</delete>
+  	
+  	<select id="openDsUsrDefInputDao.selectOpenDsUsrDefFile" parameterClass="params" resultClass="record">
+  		/* sql id : openDsUsrDefInputDao.selectOpenDsUsrDefFile */
+  		SELECT
+  			DATA_SEQCE_NO	AS "dataSeqceNo",
+  			FILE_SEQ		AS "fileSeq",
+  			DS_ID			AS "dsId",
+  			SRC_FILE_NM		AS "srcFileNm",
+  			SAVE_FILE_NM	AS "saveFileNm",
+  			VIEW_FILE_NM	AS "viewFileNm",
+  			FILE_SIZE		AS "fileSize",
+  			FILE_EXT		AS "fileExt",
+  			V_ORDER			AS "vOrder",
+  			FT_CR_DTTM 		AS "ftCrDttm"
+  		FROM
+  			$ownerCd$.TB_OPEN_USR_FILE
+  		WHERE
+  			DATA_SEQCE_NO = #dataSeqceNo:NUMERIC#
+  			<isNotEmpty property="fileSeq">
+  				AND FILE_SEQ = #fileSeq#
+  			</isNotEmpty>
+  		ORDER BY V_ORDER
+  	</select>
+  	
+  	<delete id="openDsUsrDefInputDao.deleteOpenDsUsrDef" parameterClass="params">
+  		DELETE FROM $ownerCd$.$tableName$
+  		WHERE  DATA_SEQCE_NO = #dataSeqceNo:NUMERIC#
+  	</delete>
+  	
+  	<delete id="openDsUsrDefInputDao.deleteOpenDsUsrDefFileAll" parameterClass="params">
+  		DELETE FROM $ownerCd$.TB_OPEN_USR_FILE
+  		WHERE  DATA_SEQCE_NO = #dataSeqceNo:NUMERIC#
+  	</delete>
+  	
+  	<select id="openDsUsrDefInputDao.selectOpenDsUsrDefFileSeq" parameterClass="params" resultClass="int">
+  		/* sql id : openDsUsrDefInputDao.selectOpenDsUsrDefFileSeq */
+  		SELECT NVL(MAX(FILE_SEQ), 0)+1 FROM $ownerCd$.TB_OPEN_USR_FILE WHERE DATA_SEQCE_NO = #dataSeqceNo:NUMERIC#
+  	</select>
+  	
+  	
+  	<select id="openDsUsrDefInputDao.selectOpenDsUsrOwnerCdByCommCd" parameterClass="params" resultClass="String">
+  		/* sql id : openDsUsrDefInputDao.selectOpenDsUsrOwnerCdByCommCd */
+  		SELECT DITC_CD AS OWNER_CD FROM TB_COMM_CODE WHERE GRP_CD = 'D2001' AND VALUE_CD = #valueCd#
+  	</select>
+  	
+  	<select id="openDsUsrDefInputDao.selectOpenDsDateCol" parameterClass="params" resultClass="Record" remapResults="true">
+  		/* sql id : openDsUsrDefInputDao.selectOpenDsDateCol */
+		SELECT A.SRC_COL_ID AS "srcColId" 
+		FROM   TB_OPEN_DSCOL A
+		WHERE  A.DS_ID = #dsId:VARCHAR# 
+		AND    A.USE_YN = 'Y'
+		AND    A.SRC_COL_TYPE = 'DATE'
+		AND    A.SRC_COL_ID NOT IN ('DATA_SEQCE_NO', 'DATA_ORG_CD', 'DATA_ORG_NM')
+  	</select>  	
+	
+	<!-- 파일서비스 순서 저장 -->
+	<update id="openDsUsrDefInputDao.saveOpenUsrDefFileOrder" parameterClass="params">
+		/* sql id : OpenInfFile.saveOpenUsrDefFileOrder */
+		UPDATE $ownerCd$.TB_OPEN_USR_FILE
+		SET    V_ORDER              = #vOrder#
+			 , DATA_COLT_UPD_USR_CD = #regId#
+			 , DATA_COLT_UPD_DTTM 	= SYSDATE
+		WHERE  DATA_SEQCE_NO        = #dataSeqceNo#
+		AND    FILE_SEQ = #fileSeq#
+	</update>
+</sqlMap>

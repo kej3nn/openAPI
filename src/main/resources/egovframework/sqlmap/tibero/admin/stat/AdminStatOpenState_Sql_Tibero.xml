@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- @(#)AdminStatOpenState_Sql_Tibero.xml 1.0 2018/01/26                     -->
+<!--                                                                         -->
+<!-- COPYRIGHT (C) 2013 WISEITECH CO., LTD. ALL RIGHTS RESERVED.             -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- 통계 공개현황 관리 SQL 파일이다.	                                  -->
+<!--                                                                         -->
+<!-- @author 김정호                                                        	-->
+<!-- @version 1.0 2018/01/26                                                -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<sqlMap namespace="StatOpenState">
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Type Alias                                                          -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+    
+	<!-- 통계표 현황 -->    
+    <select id="statOpenStateDao.selectStatTblState" parameterClass="params" resultClass="record">
+		SELECT COUNT(*) AS "statblCnt"
+			,  COUNT(DISTINCT A.STAT_ID) AS "statCnt"
+			,  NVL((SELECT SUM(USE_CNT+DOWN_CNT)  FROM TB_STTS_USE 
+			    WHERE  YYYYMMDD=TO_CHAR(SYSDATE-1,  'YYYYMMDD')), 0) AS "useCnt"
+		FROM   TV_STTS_TBL A
+		WHERE  A.OPEN_STATE = 'Y'
+		AND    A.OPEN_DTTM <![CDATA[<]]> TRUNC(SYSDATE+1)    
+    </select>
+    
+    <!-- 통계표 누적 공계현황 -->
+    <select id="statOpenStateDao.selectStatOpenState" parameterClass="params" resultClass="record">		
+		SELECT A.TOP_ORG_CD 							AS "orgCd",
+		       MAX(O.ORG_NM) 							AS "orgNm",
+		       COUNT(STATBL_ID) 						AS "openTot",
+		       SUM(DECODE(A.OPEN_STATE, 'N', 1, 0) ) 	AS "openN",
+		       SUM(DECODE(A.OPEN_STATE, 'Y', 1, 0) ) 	AS "openY",
+		       SUM(DECODE(A.OPEN_STATE, 'X', 1, 0) ) 	AS "openX",
+		       SUM(DECODE(A.OPEN_STATE, 'C', 1, 0) ) 	AS "openC"
+		  FROM TV_STTS_TBL A 
+		  	INNER JOIN TB_STTS_CATE B 
+		  		ON A.CATE_ID = B.CATE_ID 
+		  		AND B.USE_YN = 'Y'
+		  	LEFT OUTER JOIN TB_COMM_ORG O 
+		  		ON A.TOP_ORG_CD = O.ORG_CD
+		 WHERE 
+		 	A.USE_YN = 'Y' 
+		 	AND A.OPEN_STATE = 'Y'  
+		 	AND A.OPEN_DTTM <![CDATA[<]]> TRUNC(SYSDATE+1)        
+		 GROUP BY A.TOP_ORG_CD		    
+    </select>
+</sqlMap>

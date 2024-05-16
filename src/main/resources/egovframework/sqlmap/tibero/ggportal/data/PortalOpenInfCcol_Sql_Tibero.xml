@@ -1,0 +1,491 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- @(#)PortalOpenInfCcol_Sql_Tibero.xml 1.0 2015/06/15                     -->
+<!--                                                                         -->
+<!-- COPYRIGHT (C) 2013 WISEITECH CO., LTD. ALL RIGHTS RESERVED.             -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- 공공데이터 차트 서비스를 관리하는 SQL 파일이다.                         -->
+<!--                                                                         -->
+<!-- @author 김은삼                                                          -->
+<!-- @version 1.0 2015/06/15                                                 -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<sqlMap namespace="PortalOpenInfCcolDao">
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Type Alias                                                          -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 공공데이터 차트 서비스 메타정보를 조회한다.                         -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="PortalOpenInfCcolDao.selectOpenInfCcolMeta" parameterClass="params" resultClass="record">
+        <![CDATA[
+         SELECT B.INF_NM       AS "infNm",
+                A.SRV_CD       AS "srvCd",
+                A.LYTIT_NM     AS "lytitNm",
+                A.RYTIT_NM     AS "rytitNm",
+                A.SGRP_CD 	   AS "sgrpCd",
+                CASE A.SERIES_POSX
+                WHEN 'R'
+                THEN 'right'
+                WHEN 'L'
+                THEN 'left'
+                ELSE 'center'
+                END            AS "seriesPosx",
+                CASE A.SERIES_POSY
+                WHEN 'T'
+                THEN 'top'
+                WHEN 'M'
+                THEN 'middle'
+                ELSE 'bottom'
+                END            AS "seriesPosy",
+                CASE A.SERIES_ORD
+                WHEN 'H'
+                THEN 'vertical'
+                ELSE 'horizontal'
+                END            AS "seriesOrd",
+                A.SERIES_FYN   AS "seriesFyn",
+                (
+                    SELECT D.VALUE_CD
+                      FROM TB_COMM_CODE D
+                     WHERE D.GRP_CD     = 'D1016'
+                       AND D.DITC_CD    = A.XLN_CD
+                       AND D.USE_YN     = 'Y'
+                )              AS "xlnCd",
+                (
+                    SELECT D.VALUE_CD
+                      FROM TB_COMM_CODE D
+                     WHERE D.GRP_CD     = 'D1017'
+                       AND D.DITC_CD    = A.YLN_CD
+                       AND D.USE_YN     = 'Y'
+                )              AS "ylnCd"
+           FROM TB_OPEN_INF_SRV A
+           JOIN TB_OPEN_INF     B
+             ON B.INF_ID        = A.INF_ID
+           JOIN TB_OPEN_DS      C
+             ON C.DS_ID         = B.DS_ID
+          WHERE A.INF_ID        = #infId:VARCHAR#
+            AND A.INF_SEQ       = #infSeq:NUMERIC#
+            AND A.SRV_YN        = 'Y'
+            AND A.SRV_CD        = 'C'
+            AND B.INF_STATE     = 'Y'
+            AND B.OPEN_DTTM    <= SYSDATE
+            AND C.USE_YN        = 'Y'
+        ]]>
+    </select>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 공공데이터 차트 서비스 차트유형을 검색한다.                         -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="PortalOpenInfCcolDao.searchOpenInfCcolType" parameterClass="params" resultClass="record">
+        <![CDATA[
+         SELECT C.VALUE_CD     AS "code",
+                C.DITC_NM      AS "name"
+           FROM TB_OPEN_INF_SRV A
+           JOIN TB_COMM_CODE    B
+             ON B.GRP_CD        = 'D1018'
+            AND B.DITC_CD       = A.SGRP_CD
+           JOIN TB_COMM_CODE    C
+             ON C.GRP_CD        = 'D1020'
+            AND C.VALUE2_CD     = B.DITC_CD
+          WHERE A.INF_ID        = #infId:VARCHAR#
+            AND A.INF_SEQ       = #infSeq:NUMERIC#
+            AND B.USE_YN        = 'Y'
+            AND C.USE_YN        = 'Y'
+          ORDER BY
+                C.V_ORDER ASC
+        ]]>
+    </select>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 공공데이터 차트 서비스 X-축컬럼을 검색한다.                         -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="PortalOpenInfCcolDao.searchOpenInfCcolXcol" parameterClass="params" resultClass="record">
+        <![CDATA[
+         SELECT E.SRC_COL_ID    AS "srcColId",
+                E.COL_NM        AS "colNm"
+           FROM TB_OPEN_INF_CCOL A
+           JOIN TB_OPEN_INF_SRV  B
+             ON B.INF_ID         = A.INF_ID
+            AND B.INF_SEQ        = A.INF_SEQ
+           JOIN TB_OPEN_INF      C
+             ON C.INF_ID         = B.INF_ID
+           JOIN TB_OPEN_DS       D
+             ON D.DS_ID          = C.DS_ID
+           JOIN TB_OPEN_DSCOL    E
+             ON E.DS_ID          = D.DS_ID
+            AND E.COL_SEQ        = A.COL_SEQ
+          WHERE A.INF_ID         = #infId:VARCHAR#
+            AND A.INF_SEQ        = #infSeq:VARCHAR#
+            AND A.USE_YN         = 'Y'
+            AND A.VIEW_YN        = 'Y'
+            AND A.XAXIS_YN       = 'Y'
+            AND B.SRV_YN         = 'Y'
+            AND B.SRV_CD         = 'C'
+            AND C.INF_STATE      = 'Y'
+            AND C.OPEN_DTTM     <= SYSDATE
+            AND D.USE_YN         = 'Y'
+            AND E.USE_YN         = 'Y'
+          ORDER BY
+                A.V_ORDER ASC
+        ]]>
+    </select>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 공공데이터 차트 서비스 Y-축컬럼을 검색한다.                         -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="PortalOpenInfCcolDao.searchOpenInfCcolYcol" parameterClass="params" resultClass="record">
+        <![CDATA[
+         SELECT E.COL_NM        AS "colNm",
+                E.SRC_COL_ID    AS "srcColId",
+                A.YAXIS_POS     AS "yaxisPos",
+                (
+                    SELECT F.VALUE_CD
+                      FROM TB_COMM_CODE F
+                     WHERE F.GRP_CD     = 'D1020'
+                       AND F.DITC_CD    = A.SERIES_CD
+                       AND F.USE_YN     = 'Y'
+                )               AS "seriesCd",
+                NVL(E.UNIT_CD, 'NONE') AS "unitCd",
+                NVL((
+                	SELECT F.DITC_NM
+                	  FROM TB_COMM_CODE F
+                	 WHERE F.GRP_CD = 'D1013'
+                	   AND F.DITC_CD = E.UNIT_CD
+                	   AND F.USE_YN = 'Y'
+                ), 'N/A') AS "unitNm"
+           FROM TB_OPEN_INF_CCOL A
+           JOIN TB_OPEN_INF_SRV  B
+             ON B.INF_ID         = A.INF_ID
+            AND B.INF_SEQ        = A.INF_SEQ
+           JOIN TB_OPEN_INF      C
+             ON C.INF_ID         = B.INF_ID
+           JOIN TB_OPEN_DS       D
+             ON D.DS_ID          = C.DS_ID
+           JOIN TB_OPEN_DSCOL    E
+             ON E.DS_ID          = D.DS_ID
+            AND E.COL_SEQ        = A.COL_SEQ
+          WHERE A.INF_ID         = #infId:VARCHAR#
+            AND A.INF_SEQ        = #infSeq:VARCHAR#
+            AND A.USE_YN         = 'Y'
+            AND A.VIEW_YN        = 'Y'
+            AND A.XAXIS_YN       = 'N'
+            AND B.SRV_YN         = 'Y'
+            AND B.SRV_CD         = 'C'
+            AND C.INF_STATE      = 'Y'
+            AND C.OPEN_DTTM     <= SYSDATE
+            AND D.USE_YN         = 'Y'
+            AND E.USE_YN         = 'Y'
+          ORDER BY
+                A.YAXIS_POS ASC,
+                A.V_ORDER   ASC,
+                A.COL_SEQ   ASC
+        ]]>
+    </select>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 공공데이터 차트 서비스 조회필터를 검색한다.                         -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="PortalOpenInfCcolDao.searchOpenInfCcolFilt" parameterClass="params" resultClass="record">
+        <![CDATA[
+         SELECT E.COL_NM          AS "colNm",
+                E.SRC_COL_ID      AS "srcColId",
+                A.FILT_CD         AS "filtCd",
+                A.FILT_NEED       AS "filtNeed",
+                A.FILT_CODE       AS "filtCode",
+                A.FILT_DEFAULT    AS "filtDefault",
+                A.FILT_DEFAULT_NM AS "filtDefaultNm",
+                A.FILT_MAX_DAY    AS "filtMaxDay",
+                A.FILT_TBL_CD     AS "filtTblCd"
+           FROM TB_OPEN_INF_CCOL A
+           JOIN TB_OPEN_INF_SRV  B
+             ON B.INF_ID         = A.INF_ID
+            AND B.INF_SEQ        = A.INF_SEQ
+           JOIN TB_OPEN_INF      C
+             ON C.INF_ID         = B.INF_ID
+           JOIN TB_OPEN_DS       D
+             ON D.DS_ID          = C.DS_ID
+           JOIN TB_OPEN_DSCOL    E
+             ON E.DS_ID          = D.DS_ID
+            AND E.COL_SEQ        = A.COL_SEQ
+          WHERE A.INF_ID         = #infId:VARCHAR#
+            AND A.INF_SEQ        = #infSeq:VARCHAR#
+            AND A.USE_YN         = 'Y'
+            AND A.FILT_YN        = 'Y'
+            AND A.FILT_CD       IN ('CHECK', 'RADIO', 'COMBO', 'WORDS', 'FDATE', 'LDATE', 'PDATE', 'SDATE', 'CDATE')
+            AND B.SRV_YN         = 'Y'
+            AND B.SRV_CD         = 'C'
+            AND C.INF_STATE      = 'Y'
+            AND C.OPEN_DTTM     <= SYSDATE
+            AND D.USE_YN         = 'Y'
+            AND E.USE_YN         = 'Y'
+          ORDER BY
+                A.V_ORDER ASC
+        ]]>
+    </select>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 공공데이터 차트 서비스 테이블명을 조회한다.                         -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="PortalOpenInfCcolDao.selectOpenInfCcolTbNm" parameterClass="params" resultClass="record">
+        <![CDATA[
+         SELECT C.DS_ID        AS "dsId",
+                C.OWNER_CD     AS "ownerCd"
+           FROM TB_OPEN_INF_SRV A
+           JOIN TB_OPEN_INF     B
+             ON B.INF_ID        = A.INF_ID
+           JOIN TB_OPEN_DS      C
+             ON C.DS_ID         = B.DS_ID
+          WHERE A.INF_ID        = #infId:VARCHAR#
+            AND A.INF_SEQ       = #infSeq:VARCHAR#
+            AND A.SRV_YN        = 'Y'
+            AND A.SRV_CD        = 'C'
+            AND B.INF_STATE     = 'Y'
+            AND B.OPEN_DTTM    <= SYSDATE
+            AND C.USE_YN        = 'Y'
+        ]]>
+    </select>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 공공데이터 차트 서비스 조회컬럼을 검색한다.                         -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="PortalOpenInfCcolDao.searchOpenInfCcolCols" parameterClass="params" resultClass="string">
+        <![CDATA[
+         SELECT E.SRC_COL_ID    ||' AS '||
+                E.SRC_COL_ID    AS "columnName"
+           FROM TB_OPEN_INF_CCOL A
+           JOIN TB_OPEN_INF_SRV  B
+             ON B.INF_ID         = A.INF_ID
+            AND B.INF_SEQ        = A.INF_SEQ
+           JOIN TB_OPEN_INF      C
+             ON C.INF_ID         = B.INF_ID
+           JOIN TB_OPEN_DS       D
+             ON D.DS_ID          = C.DS_ID
+           JOIN TB_OPEN_DSCOL    E
+             ON E.DS_ID          = D.DS_ID
+            AND E.COL_SEQ        = A.COL_SEQ
+          WHERE A.INF_ID         = #infId:VARCHAR#
+            AND A.INF_SEQ        = #infSeq:VARCHAR#
+            AND A.USE_YN         = 'Y'
+            AND A.VIEW_YN        = 'Y'
+            AND B.SRV_YN         = 'Y'
+            AND B.SRV_CD         = 'C'
+            AND C.INF_STATE      = 'Y'
+            AND C.OPEN_DTTM     <= SYSDATE
+            AND D.USE_YN         = 'Y'
+            AND E.USE_YN         = 'Y'
+          ORDER BY
+                A.V_ORDER ASC
+        ]]>
+    </select>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 공공데이터 차트 서비스 조회조건을 검색한다.                         -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="PortalOpenInfCcolDao.searchOpenInfCcolCond" parameterClass="params" resultClass="string">
+        <![CDATA[
+         SELECT E.SRC_COL_ID    ||' '||
+                A.COND_OP       ||' '||
+                CASE A.COND_OP
+                WHEN 'IN'
+                THEN '('
+                END             ||' '||
+                A.COND_VAR      ||' '||
+                CASE A.COND_OP
+                WHEN 'IN'
+                THEN ')'
+                END             AS "searchCondition"
+           FROM TB_OPEN_INF_CCOL A
+           JOIN TB_OPEN_INF_SRV  B
+             ON B.INF_ID         = A.INF_ID
+            AND B.INF_SEQ        = A.INF_SEQ
+           JOIN TB_OPEN_INF      C
+             ON C.INF_ID         = B.INF_ID
+           JOIN TB_OPEN_DS       D
+             ON D.DS_ID          = C.DS_ID
+           JOIN TB_OPEN_DSCOL    E
+             ON E.DS_ID          = D.DS_ID
+            AND E.COL_SEQ        = A.COL_SEQ
+          WHERE A.INF_ID         = #infId:VARCHAR#
+            AND A.INF_SEQ        = #infSeq:VARCHAR#
+            AND A.USE_YN         = 'Y'
+            AND A.COND_YN        = 'Y'
+            AND B.SRV_YN         = 'Y'
+            AND B.SRV_CD         = 'C'
+            AND C.INF_STATE      = 'Y'
+            AND C.OPEN_DTTM     <= SYSDATE
+            AND D.USE_YN         = 'Y'
+            AND E.USE_YN         = 'Y'
+          ORDER BY
+                A.V_ORDER ASC
+        ]]>
+    </select>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 공공데이터 차트 서비스 정렬조건을 검색한다.                         -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="PortalOpenInfCcolDao.searchOpenInfCcolSort" parameterClass="params" resultClass="string">
+        <![CDATA[
+         SELECT E.SRC_COL_ID    ||' '||
+                CASE A.SORT_TAG
+                WHEN 'A'
+                THEN 'ASC'
+                WHEN 'D'
+                THEN 'DESC'
+                END             AS "sortCondition"
+           FROM TB_OPEN_INF_CCOL A
+           JOIN TB_OPEN_INF_SRV  B
+             ON B.INF_ID         = A.INF_ID
+            AND B.INF_SEQ        = A.INF_SEQ
+           JOIN TB_OPEN_INF      C
+             ON C.INF_ID         = B.INF_ID
+           JOIN TB_OPEN_DS       D
+             ON D.DS_ID          = C.DS_ID
+           JOIN TB_OPEN_DSCOL    E
+             ON E.DS_ID          = D.DS_ID
+            AND E.COL_SEQ        = A.COL_SEQ
+          WHERE A.INF_ID         = #infId:VARCHAR#
+            AND A.INF_SEQ        = #infSeq:VARCHAR#
+            AND A.USE_YN         = 'Y'
+            AND A.SORT_TAG      IS NOT NULL
+            AND B.SRV_YN         = 'Y'
+            AND B.SRV_CD         = 'C'
+            AND C.INF_STATE      = 'Y'
+            AND C.OPEN_DTTM     <= SYSDATE
+            AND D.USE_YN         = 'Y'
+            AND E.USE_YN         = 'Y'
+          ORDER BY
+                A.V_ORDER ASC
+        ]]>
+    </select>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 공공데이터 차트 서비스 다운컬럼을 검색한다.                         -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="PortalOpenInfCcolDao.searchOpenInfCcolDown" parameterClass="params" resultClass="record">
+        <![CDATA[
+         SELECT E.SRC_COL_ID    AS "srcColId",
+                E.COL_NM        AS "colNm",
+                A.SORT_TAG      AS "sortTag"
+           FROM TB_OPEN_INF_CCOL A
+           JOIN TB_OPEN_INF_SRV  B
+             ON B.INF_ID         = A.INF_ID
+            AND B.INF_SEQ        = A.INF_SEQ
+           JOIN TB_OPEN_INF      C
+             ON C.INF_ID         = B.INF_ID
+           JOIN TB_OPEN_DS       D
+             ON D.DS_ID          = C.DS_ID
+           JOIN TB_OPEN_DSCOL    E
+             ON E.DS_ID          = D.DS_ID
+            AND E.COL_SEQ        = A.COL_SEQ
+          WHERE A.INF_ID         = #infId:VARCHAR#
+            AND A.INF_SEQ        = #infSeq:NUMERIC#
+            AND A.USE_YN         = 'Y'
+            AND A.VIEW_YN        = 'Y'
+            AND B.SRV_YN         = 'Y'
+            AND B.SRV_CD         = 'C'
+            AND C.INF_STATE      = 'Y'
+            AND C.OPEN_DTTM     <= SYSDATE
+            AND D.USE_YN         = 'Y'
+            AND E.USE_YN         = 'Y'
+          ORDER BY
+                A.V_ORDER ASC
+        ]]>
+    </select>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 공공데이터 차트 서비스 데이터를 검색한다.                           -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 검색 데이터 -->
+    <!-- TB_META_ORG_DS_REL 테이블 없음 -->
+    <select id="PortalOpenInfCcolDao.searchOpenInfCcolData" parameterClass="params" resultClass="record" remapResults="true">
+        <isEqual property="paging" compareValue="0">
+         SELECT <iterate property="columnNames" conjunction=",">A.$columnNames[]$</iterate>
+           FROM (
+                     SELECT ROWNUM AS ROW_NUM,
+                            <iterate property="columnNames" conjunction=",">A.$columnNames[]$</iterate>
+                       FROM (
+        </isEqual>
+                                 SELECT <iterate property="columnNames" conjunction=",">$columnNames[]$</iterate>
+                                   FROM $ownerName$.$tableName$
+                                        <dynamic prepend="WHERE">
+						                    <isEqual property="aprvProcYn" compareValue="Y" prepend="AND">
+						                        APRV_YN = 'Y'
+						                    </isEqual>
+                                            <isNotEmpty property="searchConditions" prepend="AND">
+                                                <iterate property="searchConditions" conjunction=" AND ">$searchConditions[]$</iterate>
+                                            </isNotEmpty>
+                                            <isNotEmpty property="searchFilters" prepend="AND">
+                                                <iterate property="searchFilters" conjunction=" AND ">$searchFilters[]$</iterate>
+                                            </isNotEmpty>
+                                            <isNotEmpty property="sigunFlag" prepend="AND">
+                                            	<isEqual property="sigunCdYn" compareValue="Y">
+			                                   		<!-- 2016.07.29 -->
+			                                   		<!-- SIGUN_CD = (SELECT TYPE_CD FROM TB_COMM_ORG WHERE ORG_CD = #sigunFlag#) -->
+			                                   		SIGUN_CD = #sigunFlag#
+                                            	</isEqual>
+                                            	<isNotEqual property="sigunCdYn" compareValue="Y">
+                                            		<!-- 2016.07.29 이 조건은 필요없어 보인는데???-->
+                                            		<!--  EXISTS (SELECT ORG_CD FROM TB_META_ORG_DS_REL WHERE INF_ID = #infId# AND  ORG_CD = #sigunFlag#) -->
+                                            		EXISTS ( SELECT ORG_CD 
+                                            				 FROM TB_META_ORG_DS_REL 
+                                            				 WHERE INF_ID = #infId#   
+                                            				 		AND ORG_CD  in (SELECT ORG_CD FROM TB_COMM_ORG WHERE TYPE_CD = #sigunFlag# )
+                                            				)                                            		 
+                                            	</isNotEqual>
+                                            </isNotEmpty>
+                                        </dynamic>
+                                        <dynamic prepend="ORDER BY">
+                                            <isNotEmpty property="sortOrders">
+                                                <iterate property="sortOrders" conjunction=",">$sortOrders[]$</iterate>
+                                            </isNotEmpty>
+                                        </dynamic>
+        <isEqual property="paging" compareValue="0">
+        <![CDATA[
+                            )       A
+                      WHERE ROWNUM <= #end:NUMERIC#
+                )          A
+          WHERE A.ROW_NUM >= #start:NUMERIC#
+        ]]>
+        </isEqual>
+    </select>
+    <!-- 검색 카운트 -->
+    <select id="PortalOpenInfCcolDao.searchOpenInfCcolDataCount" parameterClass="params" resultClass="int">
+         SELECT COUNT(*)
+           FROM $ownerName$.$tableName$
+                <dynamic prepend="WHERE">
+                    <isEqual property="aprvProcYn" compareValue="Y" prepend="AND">
+                        APRV_YN = 'Y'
+                    </isEqual>
+                    <isNotEmpty property="searchConditions" prepend="AND">
+                        <iterate property="searchConditions" conjunction=" AND ">$searchConditions[]$</iterate>
+                    </isNotEmpty>
+                    <isNotEmpty property="searchFilters" prepend="AND">
+                        <iterate property="searchFilters" conjunction=" AND ">$searchFilters[]$</iterate>
+                    </isNotEmpty>
+					<isNotEmpty property="sigunFlag" prepend="AND">
+	                    <isEqual property="sigunCdYn" compareValue="Y">
+                        		<!-- 2016.07.29 -->
+                        		<!-- SIGUN_CD = (SELECT TYPE_CD FROM TB_COMM_ORG WHERE ORG_CD = #sigunFlag#) -->
+                        		SIGUN_CD = #sigunFlag#
+	                    </isEqual>
+	                    <isNotEqual property="sigunCdYn" compareValue="Y">
+                           		<!-- 2016.07.29 이 조건은 필요없어 보인는데???-->
+                           		<!--  EXISTS (SELECT ORG_CD FROM TB_META_ORG_DS_REL WHERE INF_ID = #infId# AND  ORG_CD = #sigunFlag#) -->
+                           		EXISTS ( SELECT ORG_CD 
+                           				 FROM TB_META_ORG_DS_REL 
+                           				 WHERE INF_ID = #infId#   
+                           				 		AND ORG_CD  in (SELECT ORG_CD FROM TB_COMM_ORG WHERE TYPE_CD = #sigunFlag# )
+                           				)                                            		 
+	                    </isNotEqual>
+					</isNotEmpty>
+                </dynamic>
+    </select>
+    
+</sqlMap>

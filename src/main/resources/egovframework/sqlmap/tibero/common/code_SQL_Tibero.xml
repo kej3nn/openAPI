@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="code">
+	<typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+	<resultMap id="CommCodeListDtl" class="egovframework.admin.basicinf.service.CommCode">
+		<result property="grpCd" column="GRP_CD" />
+		<result property="ditcCd" column="DITC_CD" />
+		<result property="ditcNm" column="DITC_NM" />
+		<result property="ditcNmEng" column="ENG_DITC_NM" />
+<!-- 		<result property="refCd" column="REF_CD"/> -->
+		<result property="useYn" column="USE_YN" />
+		<result property="valueCd" column="VALUE_CD" />
+		<result property="valueCd2" column="VALUE_CD2" />
+	</resultMap>
+	
+	<resultMap id="CommCodeGrpList" class="egovframework.admin.basicinf.service.CommCode">
+		<result property="grpCd" column="GRP_CD" />
+		<result property="ditcCd" column="DITC_CD" />
+		<result property="ditcNm" column="DITC_NM" />
+		<result property="ditcNmEng" column="ENG_DITC_NM" />
+<!-- 		<result property="refCd" column="REF_CD"/> -->
+		<result property="useYn" column="USE_YN" />
+		<result property="valueCd" column="VALUE_CD" />
+		<result property="vOrder" column="V_ORDER" />
+	</resultMap>
+	
+	<resultMap id="CommCodeList" class="egovframework.admin.basicinf.service.CommCode" extends="CommCodeListDtl">
+		<result property="commCodeLists" column="DITC_CD" select="CodeDAO.selectCodeDtlList" />
+	</resultMap>
+	
+	<resultMap id="OpenCateDitcList" class="egovframework.admin.basicinf.service.CommCode">
+		<result property="ditcCd" column="DITC_CD" />
+		<result property="ditcNm" column="DITC_NM" />
+		<result property="ditcNmEng" column="ENG_DITC_NM" />
+		<result property="useYn" column="USE_YN" />
+	</resultMap>
+ 
+	<select id="CodeDAO.selectCodeList" resultMap="CommCodeList" >
+		<![CDATA[
+			SELECT GRP_CD
+			      ,DITC_CD
+			      ,DITC_NM
+			      ,ENG_DITC_NM
+			      ,USE_YN
+			      ,VALUE_CD
+			      ,VALUE2_CD AS VALUE_CD2
+			  FROM TB_COMM_CODE
+			  WHERE  GRP_CD = '00000'
+			    AND USE_YN ='Y'
+			  ORDER BY  DITC_CD DESC 
+		]]>				
+	</select> 
+ 
+	
+	<select id="CodeDAO.selectCodeDtlList" parameterClass="java.lang.String" resultMap="CommCodeListDtl" >
+	<![CDATA[
+			SELECT GRP_CD
+			      ,DITC_CD
+			      ,DITC_NM
+			      ,ENG_DITC_NM
+			      ,USE_YN
+			      ,VALUE_CD
+			      ,VALUE2_CD AS VALUE_CD2
+			      , V_ORDER
+			  FROM TB_COMM_CODE
+			 WHERE GRP_CD != '00000'
+			   AND USE_YN ='Y'
+		]]>		
+		  <isNotEmpty prepend="AND">
+			  GRP_CD = #grpCd#	
+		  </isNotEmpty>	
+		<![CDATA[
+			ORDER BY V_ORDER  
+		]]>	    
+	</select>
+	
+	<select id="CodeDAO.selectEntityOrgCodeList" resultMap="CommCodeListDtl" >
+		<![CDATA[
+			SELECT '' 		AS GRP_CD
+			      ,ORG_CD	AS DITC_CD
+			      ,ORG_NM	AS DITC_NM  
+			      ,ENG_ORG_NM	AS ENG_DITC_NM  
+			      ,'Y'		AS USE_YN
+			      ,'' AS VALUE_CD
+			      ,'' AS VALUE_CD2 
+  			  FROM TB_COMM_ORG
+  			 WHERE USE_YN = 'Y'
+		]]>				
+	</select>  
+	
+	<select id="CodeDAO.selectEntityFiltCodeList" resultMap="CommCodeListDtl" parameterClass="String">
+		<![CDATA[
+			SELECT '' 		AS GRP_CD
+			      ,DITC_CD	AS DITC_CD
+			      ,DITC_NM	AS DITC_NM  
+			      ,ENG_DITC_NM	AS ENG_DITC_NM  
+			      ,'Y'		AS USE_YN
+			      ,'' AS VALUE_CD
+			      ,'' AS VALUE_CD2
+  			  FROM TV_DATA_CODE
+  			 WHERE GRP_CD=#value:VARCHAR#
+		]]>				
+	</select> 
+	
+	<select id="CodeDAO.selectEntityCateNmCodeList" resultMap="CommCodeListDtl" >
+		<![CDATA[
+			SELECT '' 		AS GRP_CD
+			      ,CATE_ID	AS DITC_CD
+			      ,CATE_NM	AS DITC_NM  
+			      ,ENG_CATE_NM	AS ENG_DITC_NM 
+			      ,'Y'		AS USE_YN
+			      ,'' AS VALUE_CD
+			      , '' AS VALUE_CD2
+  			    FROM TB_OPEN_CATE
+				 WHERE USE_YN ='Y'
+				   AND CATE_LVL ='2'
+				 ORDER BY V_ORDER
+		]]>				
+	</select>  
+	
+	<select id="CodeDAO.selectEntityItemCdCodeList" resultMap="CommCodeListDtl"  parameterClass="String">
+		<![CDATA[
+			SELECT '' 		AS GRP_CD
+			      ,ITEM_CD	AS DITC_CD
+			      ,ITEM_NM	AS DITC_NM  
+			      ,ENG_ITEM_NM	AS ENG_DITC_NM  
+			      ,'Y'		AS USE_YN
+			      ,'' AS VALUE_CD
+			      , '' AS VALUE_CD2
+  			    FROM TB_OPEN_INF_TCOL_ITEM
+				 WHERE USE_YN ='Y'
+				   AND PAR_ITEM_CD IS NULL
+				 ORDER BY V_ORDER
+		]]>				
+	</select>  
+	
+	<select id="CommCodeDAO.selectOpenCateDitcList" parameterClass="egovframework.admin.basicinf.service.CommCode" resultMap="OpenCateDitcList" >
+			SELECT DITC_CD
+			      ,DITC_NM
+			      ,ENG_DITC_NM
+			      ,USE_YN
+			  FROM TB_COMM_CODE
+			  WHERE  GRP_CD = 'D1025'
+			    AND USE_YN ='Y'
+			    <isNotEmpty property="serVal" >
+					<isEqual property="serSel" compareValue="0" >
+						AND DITC_NM LIKE '%'||#serVal#||'%'
+					</isEqual>
+					<isEqual property="serSel" compareValue="1" >
+						AND DITC_NM LIKE '%'||#serVal#||'%'
+					</isEqual>
+					</isNotEmpty>
+			  ORDER BY  DITC_CD DESC 
+	</select> 
+	
+	<select id="CommCodeDAO.selectOpenCateDitcListCnt" parameterClass="egovframework.admin.basicinf.service.CommCode" resultClass="java.lang.Integer">
+				SELECT    COUNT(1) AS CNT
+			  FROM TB_COMM_CODE
+			  WHERE  GRP_CD = 'D1025'
+			    AND USE_YN ='Y'
+			    <isNotEmpty property="serVal" >
+			   		<isEqual property="serSel" compareValue="0" >
+						AND DITC_NM LIKE '%'||#serVal#||'%'
+					</isEqual>
+					<isEqual property="serSel" compareValue="1" >
+						AND DITC_NM LIKE '%'||#serVal#||'%'
+					</isEqual>
+					</isNotEmpty>
+			  ORDER BY  DITC_CD DESC
+	</select>
+	
+	<select id="CodeDAO.selectEntityGrpCdCodeList" parameterClass="egovframework.admin.basicinf.service.CommCode" resultMap="CommCodeGrpList" >
+			SELECT GRP_CD
+			      ,DITC_CD
+			      ,DITC_NM
+			      ,ENG_DITC_NM
+			      ,VALUE_CD
+			      ,USE_YN
+			      ,V_ORDER
+			  FROM TB_COMM_CODE
+			 WHERE 
+				GRP_CD = '00000'
+			  ORDER BY DITC_CD, V_ORDER
+	</select> 
+	<select id="CodeDAO.selectSeriesCdBarList" parameterClass="egovframework.admin.basicinf.service.CommCode" resultMap="CommCodeGrpList" >
+			SELECT GRP_CD
+			      ,DITC_CD
+			      ,DITC_NM
+			      ,ENG_DITC_NM
+			      ,VALUE_CD
+			      ,USE_YN
+			      ,V_ORDER
+			  FROM TB_COMM_CODE
+			 WHERE 
+				GRP_CD = 'D1020'
+				AND VALUE2_CD = 'BAR'
+				AND USE_YN = 'Y'
+			  ORDER BY V_ORDER
+	</select> 
+	<select id="CodeDAO.selectSeriesCdPieList" parameterClass="egovframework.admin.basicinf.service.CommCode" resultMap="CommCodeGrpList" >
+			SELECT GRP_CD
+			      ,DITC_CD
+			      ,DITC_NM
+			      ,ENG_DITC_NM
+			      ,VALUE_CD
+			      ,USE_YN
+			      ,V_ORDER
+			  FROM TB_COMM_CODE
+			 WHERE 
+				GRP_CD = 'D1020'
+				AND VALUE2_CD = 'PIE'
+				AND USE_YN = 'Y'
+			  ORDER BY V_ORDER
+	</select> 
+	
+	<select id="CodeDAO.selectUnitSubCdCodeList"  resultMap="CommCodeListDtl"  parameterClass="String">
+				SELECT '' 		AS GRP_CD
+			      ,B.DITC_CD	AS DITC_CD
+			      ,B.DITC_NM	AS DITC_NM 
+			      ,B.ENG_DITC_NM AS ENG_DITC_NM 
+			      ,'Y'		AS USE_YN
+			      ,'' AS VALUE_CD
+			      ,'' AS VALUE_CD2
+  			  FROM TB_COMM_CODE A
+  			 INNER JOIN TB_COMM_CODE B
+  			    ON A.VALUE_CD = B.GRP_CD
+  			 WHERE A.GRP_CD='D1031'
+  			   AND A.DITC_CD=#value:VARCHAR#
+  			 ORDER BY B.V_ORDER
+	</select>
+	
+	<select id="CodeDAO.selectEntityTblCdCdCodeList" parameterClass="egovframework.admin.basicinf.service.CommCode" resultMap="CommCodeList" >     
+				SELECT '' 		AS GRP_CD
+					   ,TBL_ID	AS DITC_CD
+					   ,TBL_NM AS DITC_NM 
+					   ,'' AS ENG_DITC_NM 
+				       ,''		AS USE_YN
+				       ,''		AS VALUE_CD
+				       ,'' AS VALUE_CD2
+				FROM TV_POPUP_CODE
+	</select>
+	
+	<!-- 통계 기준정보 조회 -->
+	<select id="CodeDAO.selectSTTSCodeList" resultMap="CommCodeList" parameterClass="String">
+		SELECT 
+			GRP_CD
+			, DITC_CD
+			, DITC_NM
+			, ENG_DITC_NM
+			, '' AS USE_YN
+			, '' AS VALUE_CD
+			, '' AS VALUE_CD2
+		FROM 
+			TV_STTS_CODE
+		WHERE  
+			GRP_CD = #value:VARCHAR#
+		ORDER BY V_ORDER 
+	</select> 
+	
+	<select id="CodeDAO.selectDownCntList" resultMap="CommCodeList" >
+		<![CDATA[
+			SELECT GRP_CD
+			      ,DITC_CD
+			      ,DITC_NM
+			      ,ENG_DITC_NM
+			      ,USE_YN
+			      ,VALUE_CD
+			      ,VALUE2_CD AS VALUE_CD2
+			 FROM TB_COMM_CODE 
+			WHERE GRP_CD = 'A8000' 
+			  AND DITC_CD='ONDNC' 
+			  AND USE_YN='Y'
+			ORDER BY  DITC_CD DESC 
+		]]>				
+	</select> 
+
+</sqlMap>

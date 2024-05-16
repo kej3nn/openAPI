@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="CommUsrSearch">
+	<typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+	
+	<resultMap id="orgList" class="egovframework.admin.basicinf.service.CommUsrSearch">
+		<result property="orgCd"      column="ORG_CD"       />
+		<result property="orgNm"      column="ORG_NM"       />
+		<result property="orgNmEng"   column="ENG_ORG_NM"       />
+		<result property="orgFullNm"   column="ORG_FULLNM"       />
+		<result property="orgCdTop"   column="TOP_ORG_CD"       />
+		<result property="orgCdPar"   column="PAR_ORG_CD"       />
+		<result property="orgLvl"	  column="ORG_LVL"       />
+		<result property="Level"	  column="ORG_LVL"       />
+	</resultMap>
+	
+	<resultMap id="usrList" class="egovframework.admin.basicinf.service.CommUsrSearch">
+		<result property="usrCd"   			column="USR_CD"   />
+		<result property="orgCd"      		column="ORG_CD"       />
+		<result property="orgNm"      		column="ORG_NM"       />
+		<result property="usrNm"   			column="USR_NM"   />
+		<result property="usrNmEng"   		column="ENG_USR_NM"   />
+	</resultMap>
+	
+	<!-- 조직 조회 -->
+	<select id="CommUsrSearchDAO.orgList" parameterClass="egovframework.admin.basicinf.service.CommUsrSearch" resultMap="orgList" >
+		<![CDATA[
+		SELECT   A.ORG_CD
+		        ,A.ORG_NM
+		        ,A.ORG_FULLNM
+		        ,A.ENG_ORG_NM         
+		        ,A.TOP_ORG_CD
+		        ,A.PAR_ORG_CD
+		        ,A.ORG_LVL
+		 FROM   TB_COMM_ORG A
+		WHERE   1=1
+		  AND   A.USE_YN ='Y'
+		]]>
+		<isNotEmpty property="orgSearchWd" prepend="AND">
+			A.ORG_NM LIKE '%'||#orgSearchWd#||'%'
+		</isNotEmpty>
+		<![CDATA[
+         START WITH 1=1
+	   CONNECT BY PRIOR ORG_CD = PAR_ORG_CD
+		 ORDER SIBLINGS BY   ORG_LVL
+		]]>
+	</select> 
+	
+	<!-- 직원 조회 -->
+	<select id="CommUsrSearchDAO.usrList" parameterClass="egovframework.admin.basicinf.service.CommUsrSearch" resultMap="usrList" >
+		SELECT   USR_CD
+		       , US.ORG_CD
+		       , ORG.ORG_NM
+		       , USR_NM
+		       , ENG_USR_NM	
+		  FROM   TB_COMM_USR US LEFT JOIN TB_COMM_CODE C1
+		                         ON US.ACC_CD = C1.DITC_CD
+		                        AND C1.GRP_CD = 'C1002'
+		                        INNER JOIN TB_COMM_ORG ORG
+		                         ON US.ORG_CD = ORG.ORG_CD
+		                        AND ORG.USE_YN = 'Y'
+		 WHERE   1=1
+		   AND   US.USE_YN = 'Y'
+			<isNotEmpty property="usrSearchWd" prepend="AND">
+				US.USR_NM LIKE '%'||#usrSearchWd#||'%'
+			</isNotEmpty>
+		   		 <isNotEmpty property="orgCd">
+			         START WITH ORG.ORG_CD = #orgCd#
+					 CONNECT BY PRIOR ORG.ORG_CD = ORG.PAR_ORG_CD
+					 ORDER SIBLINGS BY ORG_NM
+		   		 </isNotEmpty>
+		   		 <isEmpty property="orgCd">
+			         ORDER BY ORG_NM
+		   		 </isEmpty>
+			
+	</select>
+	
+	
+	
+</sqlMap>

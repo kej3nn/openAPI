@@ -1,0 +1,313 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- @(#)PortalUser_Sql_Tibero.xml 1.0 2015/06/15                            -->
+<!--                                                                         -->
+<!-- COPYRIGHT (C) 2013 WISEITECH CO., LTD. ALL RIGHTS RESERVED.             -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- 사용자 정보를 관리하는 SQL 파일이다.                                    -->
+<!--                                                                         -->
+<!-- @author 김은삼                                                          -->
+<!-- @version 1.0 2015/06/15                                                 -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<sqlMap namespace="PortalUserDao">
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Type Alias                                                          -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 사용자 정보를 조회한다.                                             -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="PortalUserDao.selectUser" parameterClass="params" resultClass="record">
+         SELECT
+         		MEMBER_ID	AS "memberId"
+         	  , NUM			AS "num"
+         	  , NAME		AS "name"
+           	  , DEPT_CODE   AS "deptCode"
+           	  , DEPT_NM     AS "deptNm"
+           	  , ORG_CD      AS "orgCd"
+           	  , ORG_NM      AS "orgNm"
+           	  , ACC_IP		AS "accIp"
+         FROM   TV_MEMBER
+         WHERE  MEMBER_ID 	= #memberId:VARCHAR#
+         AND    PWD 		= #memberPw:VARCHAR#
+    </select>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 회원 ID로 사용자 정보를 조회한다.                                         -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="PortalUserDao.selectUserInputId" parameterClass="params" resultClass="record">
+         SELECT
+         		MEMBER_ID	AS "memberId"
+         	  , NUM			AS "num"
+         	  , NAME		AS "name"
+           	  , DEPT_CODE   AS "deptCode"
+           	  , DEPT_NM     AS "deptNm"
+           	  , ORG_CD      AS "orgCd"
+           	  , ORG_NM      AS "orgNm"
+           	  , ACC_IP		AS "accIp"
+         FROM   TV_MEMBER
+         WHERE  MEMBER_ID 	= #memberId:VARCHAR#
+    </select>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- SSO로 접근시 사용자 정보를 조회한다.                                -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="PortalUserDao.selectSSOUser" parameterClass="record" resultClass="record">
+         SELECT
+         		MEMBER_ID	AS "memberId"
+         	  , NUM			AS "num"
+         	  , NAME		AS "name"
+           	  , DEPT_CODE   AS "deptCode"
+           	  , DEPT_NM     AS "deptNm"
+           	  , ORG_CD      AS "orgCd"
+           	  , ORG_NM      AS "orgNm"
+           	  , LAST_LOGIN_YMDHMSF AS "lastLoginYmdhmsf"
+           	  , ACC_IP		AS "accIp"
+         FROM   TV_MEMBER
+         WHERE  MEM_DUP_INFO = #id:VARCHAR#
+    </select>
+    
+    <!-- 포털 유저 재조회(시퀀스 때문에..) -->
+    <select id="PortalUserDao.selectSeqUser" parameterClass="record" resultClass="record">
+    	SELECT
+    		USER_CD		AS "userCd", 
+    		USER_ID		AS "userId", 
+    		USER_NM		AS "userNm"
+    	FROM  TB_USER
+    	WHERE USER_ID = #memberId:VARCHAR#
+    </select>
+
+    <!-- 국회홈페이지 유저 조회 -->
+    <select id="PortalUserDao.selectNahomeUser" parameterClass="record" resultClass="record">
+        /* sql id : PortalUserDao.selectNahomeUser */
+        SELECT USER_ID, USER_CD
+        FROM (SELECT USER_ID, USER_CD, ROWNUM
+            FROM   IOPEN.TB_USER
+            WHERE  USER_ID IN (SELECT MEMBER_ID FROM TV_MEMBER_CMP_NA WHERE TRNS_MBR_UID = #memberId:VARCHAR#)
+            AND   NA_USER_NO IS NULL
+            ORDER BY NVL(UPD_DTTM, REG_DTTM) DESC)
+        WHERE ROWNUM = 1 <!-- 유저가 2명 있을수도 있음. -->
+    </select>
+
+    <!-- 전환된 통합회원 id로 기존회원 id를 변경한다. -->
+    <update id="PortalUserDao.updateNahomeUser" parameterClass="record">
+        /* sql id : PortalUserDao.updateNahomeUser */
+        UPDATE IOPEN.TB_USER
+        SET    USER_ID    = #memberId:VARCHAR#
+             , NA_USER_NO = #num:NUMERIC#
+             , USER_SEQ   = #num:NUMERIC#
+             , UPD_DTTM = SYSDATE
+        WHERE  USER_ID = #checkUserId:VARCHAR#
+        AND NA_USER_NO IS NULL
+    </update>
+
+    <!-- 직원일 경우 id 변경 -->
+    <update id="PortalUserDao.updateCommUser" parameterClass="record">
+        /* sql id : PortalUserDao.updateCommUser */
+        UPDATE IOPEN.TB_COMM_USER
+        SET    USR_ID    = #memberId:VARCHAR#
+                , UPD_ID = #memberId:VARCHAR#
+                , UPD_DTTM = SYSDATE
+                , NA_USER_NO = #num:NUMERIC#
+        WHERE  USER_CD = #checkUserCd:VARCHAR#
+        AND NA_USER_NO IS NULL
+    </update>
+
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 포털 사용자정보를 등록한다.							 			-->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<update id="PortalUserDao.mergeUser" parameterClass="record">
+		/* sql id : PortalUserDao.mergeUser */
+		MERGE INTO TB_USER A
+		USING (
+			SELECT
+				#num:NUMERIC#					AS USER_SEQ
+				, #memberId:VARCHAR#			AS USER_ID
+				, #name:VARCHAR#				AS USER_NM
+				, #lastLoginYmdhmsf:VARCHAR# 	AS LAST_LOGIN_YMDHMSF
+			FROM DUAL
+		) B
+		ON (
+			A.USER_ID = B.USER_ID
+		)
+		WHEN NOT MATCHED THEN
+		INSERT (
+			A.USER_CD
+			, A.USER_ID
+			, A.USER_NM
+			, A.USER_SEQ
+			, A.REG_DTTM
+			, LAST_LOGIN_YMDHMSF
+		)
+		VALUES (
+			SQ_USER_CD_SEQ.NEXTVAL
+			, B.USER_ID
+			, B.USER_NM
+			, B.USER_SEQ
+			, SYSDATE
+			, SUBSTR(TO_CHAR(SYSTIMESTAMP, 'YYYYMMddHH24MISSFF'), 1, 17)
+		)	
+		WHEN MATCHED THEN
+		UPDATE SET
+			A.LAST_LOGIN_YMDHMSF = NVL(B.LAST_LOGIN_YMDHMSF, SUBSTR(TO_CHAR(SYSTIMESTAMP, 'YYYYMMddHH24MISSFF'), 1, 17))
+	</update>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 사용자 정보를 등록한다.                                             -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <insert id="PortalUserDao.insertUser" parameterClass="params">
+        <selectKey keyProperty="userCd" resultClass="int">
+         SELECT SQ_USER_CD_SEQ.NEXTVAL FROM DUAL
+        </selectKey>
+         INSERT INTO TB_USER
+                (
+                    USER_CD,
+                    CONT_SITE_CD,
+                    USER_ID,
+                    USER_NM,
+                    USER_PW,
+                    USER_EMAIL,
+                    EMAIL_YN,
+                    EMAIL_DTTM,
+                    USER_TEL,
+                    USER_HP,
+                    HP_YN,
+                    HP_DTTM,
+                    AGREE1_YN,
+                    AGREE2_YN,
+                    AGREE_YN,
+                    AGREE_DTTM,
+                    AREA_CD,
+                    MEMBER_CD,
+                    SYS_TAG,
+                    REG_DTTM
+                )
+         VALUES (
+                    #userCd:NUMERIC#,
+                    #contSiteCd:VARCHAR#,
+                    #userId:VARCHAR#,
+                    #userNm:VARCHAR#,
+                    DBMS_RANDOM.STRING('X', 10),
+                    CASE
+                    WHEN #userEmail1:VARCHAR# IS NOT NULL
+                     AND #userEmail2:VARCHAR# IS NOT NULL
+                    THEN #userEmail1:VARCHAR# || '@' ||
+                         #userEmail2:VARCHAR#
+                    END,
+                    NVL(#emailYn:CHAR#,  'N'),
+                    CASE #emailYn:CHAR#
+                    WHEN 'Y'
+                    THEN SYSDATE
+                    END,
+                    CASE
+                    WHEN #userTel1:VARCHAR#   IS NOT NULL
+                     AND #userTel2:VARCHAR#   IS NOT NULL
+                     AND #userTel3:VARCHAR#   IS NOT NULL
+                    THEN #userTel1:VARCHAR#   || '-' ||
+                         #userTel2:VARCHAR#   || '-' ||
+                         #userTel3:VARCHAR#
+                    END,
+                    CASE
+                    WHEN #userHp1:VARCHAR#    IS NOT NULL
+                     AND #userHp2:VARCHAR#    IS NOT NULL
+                     AND #userHp3:VARCHAR#    IS NOT NULL
+                    THEN #userHp1:VARCHAR#    || '-' ||
+                         #userHp2:VARCHAR#    || '-' ||
+                         #userHp3:VARCHAR#
+                    END,
+                    NVL(#hpYn:CHAR#,     'N'),
+                    CASE #hpYn:CHAR#
+                    WHEN 'Y'
+                    THEN SYSDATE
+                    END,
+                    NVL(#agree1Yn:CHAR#, 'N'),
+                    NVL(#agree2Yn:CHAR#, 'N'),
+                    CASE
+                    WHEN #agree1Yn:CHAR# = 'Y'
+                     AND #agree2Yn:CHAR# = 'Y'
+                    THEN 'Y'
+                    ELSE 'N'
+                    END,
+                    CASE
+                    WHEN #agree1Yn:CHAR# = 'Y'
+                     AND #agree2Yn:CHAR# = 'Y'
+                    THEN SYSDATE
+                    END,
+                    #areaCd:VARCHAR#,
+                    #memberCd:VARCHAR#,
+                    #sysTag:CHAR#,
+                    SYSDATE
+                )
+    </insert>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 사용자 정보를 수정한다.                                             -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <update id="PortalUserDao.updateUser" parameterClass="params">
+         UPDATE TB_USER        A
+            SET A.USER_NM      = #userNm:VARCHAR#,
+                A.USER_EMAIL   = CASE
+                                 WHEN #userEmail1:VARCHAR# IS NOT NULL
+                                  AND #userEmail2:VARCHAR# IS NOT NULL
+                                 THEN #userEmail1:VARCHAR# || '@' ||
+                                      #userEmail2:VARCHAR#
+                                 END,
+                A.EMAIL_YN     = NVL(#emailYn:CHAR#,  'N'),
+                A.EMAIL_DTTM   = CASE #emailYn:CHAR#
+                                 WHEN 'Y'
+                                 THEN SYSDATE
+                                 END,
+                A.USER_TEL     = CASE
+                                 WHEN #userTel1:VARCHAR#   IS NOT NULL
+                                  AND #userTel2:VARCHAR#   IS NOT NULL
+                                  AND #userTel3:VARCHAR#   IS NOT NULL
+                                 THEN #userTel1:VARCHAR#   || '-' ||
+                                      #userTel2:VARCHAR#   || '-' ||
+                                      #userTel3:VARCHAR#
+                                 END,
+                A.USER_HP      = CASE
+                                 WHEN #userHp1:VARCHAR#    IS NOT NULL
+                                  AND #userHp2:VARCHAR#    IS NOT NULL
+                                  AND #userHp3:VARCHAR#    IS NOT NULL
+                                 THEN #userHp1:VARCHAR#    || '-' ||
+                                      #userHp2:VARCHAR#    || '-' ||
+                                      #userHp3:VARCHAR#
+                                 END,
+                A.HP_YN        = NVL(#hpYn:CHAR#,     'N'),
+                A.HP_DTTM      = CASE #hpYn:CHAR#
+                                 WHEN 'Y'
+                                 THEN SYSDATE
+                                 END,
+                A.AGREE1_YN    = NVL(#agree1Yn:CHAR#, 'N'),
+                A.AGREE2_YN    = NVL(#agree2Yn:CHAR#, 'N'),
+                A.AGREE_YN     = CASE
+                                 WHEN #agree1Yn:CHAR# = 'Y'
+                                  AND #agree2Yn:CHAR# = 'Y'
+                                 THEN 'Y'
+                                 ELSE 'N'
+                                 END,
+                A.AGREE_DTTM   = CASE
+                                 WHEN #agree1Yn:CHAR# = 'Y'
+                                  AND #agree2Yn:CHAR# = 'Y'
+                                 THEN SYSDATE
+                                 END,
+                A.UPD_DTTM     = SYSDATE
+        <isEmpty property="userCd">
+          WHERE A.CONT_SITE_CD = #contSiteCd:VARCHAR#
+            AND A.USER_ID      = #userId:VARCHAR#
+        </isEmpty>
+        <isNotEmpty property="userCd">
+          WHERE A.USER_CD      = #userCd:NUMERIC#
+        </isNotEmpty>
+    </update>
+    
+	
+    
+</sqlMap>

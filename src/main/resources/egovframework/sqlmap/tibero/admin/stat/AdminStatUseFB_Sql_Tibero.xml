@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="StatUseFB" >
+  <typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+	<resultMap id="StatUseFB" class="egovframework.admin.stat.service.StatUseFB" >
+		<result column="YYYYMMDD"        property="yyyyMmDd"                />
+		<result column="USER_CNT"        property="userCnt"                />
+		<result column="KEY_CNT"        property="keyCnt"                />
+		<result column="RE_CNT"        property="reCnt"                />
+		<result column="QA_CNT"        property="qaCnt"                />
+		<result column="GA_CNT"        property="gaCnt"                />
+    </resultMap>
+    
+    <resultMap id="seriesUseFBResult" class="egovframework.admin.stat.service.StatUseFB" >
+		<result column="COLUMN_NM"        property="columnNm"                />
+		<!-- <result column="ENG_COLUMN_NM"        property="columnNmEng"                /> -->
+    </resultMap> 
+    
+    
+    
+    <!-- 활용피드백 현황 Chart형 자료에서 시리즈 목록 조회 ==> 대표적으로 TB_STAT_USE_CATE에서 뽑음(어차피 다른 테이블도 컬럼명은 같음) -->
+	<select id="StatUseFBDao.getUseFBSeriesResult" parameterClass="egovframework.admin.stat.service.StatUseFB"  resultMap="seriesUseFBResult" remapResults="true">
+	<!-- COLUMN_NM만 조회 -->
+	SELECT B.COMMENTS COLUMN_NM
+		FROM DBA_TAB_COLUMNS A, DBA_COL_COMMENTS B
+		WHERE A.OWNER = B.OWNER
+		AND A.TABLE_NAME = B.TABLE_NAME
+		AND A.COLUMN_NAME = B.COLUMN_NAME
+		AND A.TABLE_NAME = 'TB_STAT_USE_ACT' AND B.TABLE_NAME = 'TB_STAT_USE_ACT'
+		AND A.COLUMN_NAME LIKE '%CNT'
+	
+	<!-- ENG_COLUMN_NM만 조회 -->
+	<!-- 	SELECT 
+	A.COLUMN_NAME ENG_COLUMN_NM
+	FROM DBA_TAB_COLUMNS A, DBA_COL_COMMENTS B
+	WHERE A.OWNER = B.OWNER
+	AND A.TABLE_NAME = B.TABLE_NAME
+	AND A.COLUMN_NAME = B.COLUMN_NAME
+	AND A.TABLE_NAME = 'TB_STAT_USE_CATE' AND B.TABLE_NAME = 'TB_STAT_USE_CATE'
+	AND A.COLUMN_NAME LIKE '%CNT' -->
+		
+	<!-- 컬럼명,컬럼 코멘트 함께 조회 -->
+	<!--SELECT B.COMMENTS COLUMN_NM,
+	A.COLUMN_NAME ENG_COLUMN_NM
+	FROM DBA_TAB_COLUMNS A, DBA_COL_COMMENTS B
+	WHERE A.OWNER = B.OWNER
+	AND A.TABLE_NAME = B.TABLE_NAME
+	AND A.COLUMN_NAME = B.COLUMN_NAME
+	AND A.TABLE_NAME = 'TB_STAT_USE_CATE' AND B.TABLE_NAME = 'TB_STAT_USE_CATE'
+	AND A.COLUMN_NAME LIKE '%CNT' -->
+	</select>
+    
+    
+    <!-- 활용피드백 현황에서 Sheet형 데이터 조회 -->
+	<select id="StatUseFBDao.getUseFBStatSheetAll" parameterClass="egovframework.admin.stat.service.StatUseFB" resultMap="StatUseFB">
+		SELECT	SUBSTR(YYYYMMDD,1,4)||'-'||SUBSTR(YYYYMMDD,5,2)||'-'||SUBSTR(YYYYMMDD,7,2)
+				AS YYYYMMDD
+			  ,SUM(USER_CNT) AS USER_CNT
+			  ,SUM(KEY_CNT) AS KEY_CNT
+			  ,SUM(RE_CNT) AS RE_CNT
+			  ,SUM(QA_CNT) AS QA_CNT
+			  ,SUM(GA_CNT) AS GA_CNT 
+		FROM TB_STAT_USE_ACT
+		WHERE 
+			YYYYMMDD BETWEEN #pubDttmFrom:VARCHAR# AND #pubDttmTo:VARCHAR#
+		GROUP BY 
+		(SUBSTR(YYYYMMDD,1,4)||'-'||SUBSTR(YYYYMMDD,5,2)||'-'||SUBSTR(YYYYMMDD,7,2))
+		ORDER BY YYYYMMDD DESC
+	</select>
+	
+
+	<!-- 활용피드백 현황 Chart형 자료에서 X축 데이터 조회 -->
+	<select id="StatUseFBDao.getChartDataX" parameterClass="egovframework.admin.stat.service.StatUseFB"  resultClass="java.util.LinkedHashMap" remapResults="true">
+		SELECT SUBSTR(YYYYMMDD,1,4)||'-'||SUBSTR(YYYYMMDD,5,2)||'-'||SUBSTR(YYYYMMDD,7,2)
+				AS YYYYMMDD
+		FROM TB_STAT_USE_ACT
+		WHERE 
+			YYYYMMDD BETWEEN #pubDttmFrom:VARCHAR# AND #pubDttmTo:VARCHAR#
+		GROUP BY 
+		SUBSTR(YYYYMMDD,1,4)||'-'||SUBSTR(YYYYMMDD,5,2)||'-'||SUBSTR(YYYYMMDD,7,2)
+		
+		ORDER BY YYYYMMDD
+	</select>
+	
+	
+	<!-- 활용피드백 현황 Chart형 자료에서 Y축 데이터 조회 -->
+	<select id="StatUseFBDao.getChartDataY" parameterClass="egovframework.admin.stat.service.StatUseFB"  resultClass="java.util.LinkedHashMap" remapResults="true">
+	SELECT 	USER_CNT ,KEY_CNT ,QA_CNT ,RE_CNT ,GA_CNT 
+		FROM TB_STAT_USE_ACT
+		WHERE 
+			YYYYMMDD BETWEEN #pubDttmFrom:VARCHAR# AND #pubDttmTo:VARCHAR#
+		ORDER BY YYYYMMDD
+		
+	</select>
+	
+</sqlMap>

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="portalAssmNoti" >
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+	
+	<!-- 의원실 알림 -->
+	<sql id="noti.col">
+		BBS_CD_N		AS "bbsCdN"
+		, BBS_NM		AS "bbsNm"
+		, BBS_SEQ_N		AS "bbsSeqN"
+		, TITLE_V		AS "titleV"
+		, NOTICE_YN_C	AS "noticeYnC"
+		, READ_CNT_N	AS "readCntN"
+		, START_DT_V	AS "startDtV"
+		, END_DT_V		AS "endDtV"
+		, USE_YN		AS "useYn"
+		, FILE_CNT_N	AS "fileCntN"
+		, REG_DT_D		AS "regDtD" 
+		, LINK_URL		AS "linkUrl"
+		, COMMITTEE_ID  AS "committeeId"
+		, PERSON		AS "person"
+		, UNIT_NM       AS "unitNm"	
+	</sql>
+	<sql id="noti.where">
+		WHERE EMP_NO LIKE '%' || #empNo:VARCHAR# || '%'
+		<isNotEmpty property="unitCd" prepend=" AND ">
+			UNIT_CD = #unitCd:VARCHAR#
+		</isNotEmpty>
+		<isNotEmpty property="titleV" prepend=" AND ">
+			TITLE_V LIKE '%' || #titleV:VARCHAR# || '%'
+		</isNotEmpty>
+		<isNotEmpty property="bbsCdN" prepend=" AND ">
+			BBS_CD_N = #bbsCdN:VARCHAR#
+		</isNotEmpty>
+		<isNotEmpty property="regDtD" prepend=" AND ">
+			REG_DT_D = #regDtD:VARCHAR#
+		</isNotEmpty>
+	</sql>
+	
+	<!-- 의원실 알림 조회 -->
+	<select id="assmNotiDao.searchAssmNoti" remapResults="true" parameterClass="params" resultClass="record">
+		/* sql id : assmNotiDao.searchAssmNoti */
+		<isEqual property="paging" compareValue="0">
+		SELECT AA.* 
+		FROM   (SELECT ROWNUM AS ROW_NUM, AA.*
+				FROM   (
+		</isEqual>
+		
+			SELECT
+			    <include refid="noti.col"/>
+			FROM
+			    TV_BBS_BASIC A
+			<include refid="noti.where"/>
+			ORDER BY SORT_NO DESC
+		<isEqual property="paging" compareValue="0">
+		<![CDATA[
+				) AA
+			WHERE ROWNUM <= #end:NUMERIC#
+			) AA
+		WHERE AA.ROW_NUM >= #start:NUMERIC#
+		]]>
+		</isEqual>
+	</select>
+	<select id="assmNotiDao.searchAssmNotiCount" parameterClass="params" resultClass="int">
+		/* sql id : assmNotiDao.searchAssmNotiCount */
+		SELECT
+		    COUNT(*)
+		FROM
+		    TV_BBS_BASIC A
+		<include refid="noti.where"/>
+	</select>
+	
+</sqlMap>

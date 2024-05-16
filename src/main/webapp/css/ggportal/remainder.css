@@ -1,0 +1,121 @@
+@charset "utf-8";
+
+/******************************************************************************
+ - FILE NAME : remainder.css
+ - SUMMARY   : 기타 layout (통합검색, 이메일무단수집거부, 사이트맵, 오류메세지, 이벤트)
+ - DATE      : 2015.06.26
+*******************************************************************************/
+
+/* 통합검색 */
+.searchResult {border:0 none;}
+@media all and (max-width:1023px) {
+.searchResult {display:none;}
+}
+/* 통합검색 E */
+
+/* 이메일무단수집거부 */
+.area_email_agreement .email_agreement:after {display:block; content:''; clear:both;}
+.email_agreement .icon_email_agreement {float:left; width:42%;}
+.email_agreement div {float:left;  width:58%; padding:70px 0 0 0;}
+.email_agreement .txt_email_agreement {padding:25px 0 0 0; color:#777; line-height:20px;}
+@media all and (max-width:1023px) {
+.area_email_agreement .email_agreement {padding:20px 10px 10px 10px;}
+.email_agreement .icon_email_agreement {width:100%; height:40px; text-align:center;}
+.email_agreement  div {width:100%;}
+.email_agreement .icon_email_agreement.mq_tablet,
+.email_agreement .tit_email_agreement.mq_tablet,
+.email_agreement .txt_email_agreement.mq_tablet {display:none;}
+}
+@media all and (min-width:1024px) {
+.area_email_agreement {position:relative; overflow:hidden; width:100%; height:0; padding-bottom:39%;}
+.area_email_agreement .email_agreement {position:absolute; top:0; left:0; width:100%; height:100%; padding:48px 120px 48px 53px;  box-sizing:border-box;}
+.email_agreement .icon_email_agreement.mq_mobile,
+.email_agreement .txt_email_agreement.mq_mobile {display:none;}
+}
+@media all and (min-width:768px) and (max-width:979px) {
+.area_email_agreement {padding-bottom:35%;}
+.area_email_agreement .email_agreement {padding:38px 50px 38px 33px;}
+.email_agreement .icon_email_agreement {width:28%;}
+.email_agreement div {width:72%; padding:25px 0 0 20px; box-sizing:border-box;}
+}
+/* 이메일무단수집거부 E */
+
+/* 사이트맵 */
+@media all and (max-width:1023px) {
+.table_sitemap {width:100%; margin:0px 0 0 0; background:#fff;}
+.table_sitemap th {display:none;}
+.table_sitemap td {display:block; width:100%; padding:10px 0 10px 10px;  box-sizing:border-box; border-bottom:1px solid #ddd;}
+.table_sitemap td .tit {display:block; margin:0 0 6px 0;font-size:16px;}
+.table_sitemap td:first-child {border-top:1px solid #26baf1;}
+.table_sitemap li {padding:0 0 1px 0px;}
+.table_sitemap a:hover {font-weight:bold; color:#26baf1; text-decoration:underline;}
+}
+@media all and (min-width:1024px) {
+.table_sitemap {width:100%; height:350px; margin:15px 0 0 0; background:#fff; }
+.table_sitemap th {width:16.6666%; padding:0 0 30px 20px; box-sizing:border-box; text-align:left; border-left:1px solid #ddd; vertical-align:top;font-size:18px;}
+.table_sitemap td {width:16.6666%; padding:0 0 0px 20px; box-sizing:border-box; border-left:1px solid #ddd; vertical-align:top;}
+.table_sitemap li {width:100%; padding:0 0 10px 0px;}
+.table_sitemap li a:hover {font-weight:bold; color:#26baf1; text-decoration:underline;}
+.table_sitemap .tit.mq_mobile {display:none;}
+}
+/* 사이트맵 E */
+
+/* 오류 메세지 */
+.error {background:#fff; border:1px solid #78d4f6; margin:10px 0 0 0; padding:50px 0 44px 47px;}
+.tit_error {display:block;}
+.tit_error_english {display:block; color:#26baf1; text-decoration:underline;}
+.error p.txt_error {margin:31px 0 18px 0; color:#777; line-height:20px;}
+.error p.txt_error_english {margin:3px 0 33px 0; color:#777; line-height:19px;}
+.error .logo a {display:inline-block;}
+@media all and (max-width:1023px) {
+.area_error {width:95%; margin:0 auto; padding:20px 0 0 0;}
+.error {padding:20px 10px 14px 10px;}
+.error p.txt_error.mq_tablet {display:none;}
+}
+@media all and (min-width:1024px) {
+.area_error {width:540px; margin:0 auto; padding:39px 0 0 0;}
+.error p.txt_error.mq_mobile {display:none;}
+}
+/* 오류 메세지 E */
+
+.denined p.txt_error{font-size:15px;font-weight:bold;line-height:22px;}
+.denined p.txt_error > em{color:#009bff;font-size:15px;font-weight:bold;}
+
+@media all and (max-width:480px) {
+	.txt_error.mq_mobile > br{display:none;}
+}
+
+/* 이벤트 */
+.layout_event {width:620px;margin:0 auto;padding:0 20px 100px 20px;background:#ffffff;}
+.layout_event .area_logo {height:85px;background:#ffffff;text-align:center;}
+.layout_event .area_logo:after { content:''; clear:both;}
+.layout_event .area_logo .logo {margin:39px 0 0 0;display:inline-block;}
+.layout_event .area_logo h1 {float:right; margin:15px 0 0 0;}
+.layout_event .txt_event {text-align:center;}
+.layout_event .info {margin:0 0 20px 0; padding:40px 7% 40px 7%; background:#f8f6f7;}
+.layout_event .info table th {width:17%; padding:1px 0 1px 0; text-align:left; vertical-align:top; font-weight:normal; font-size:14px; color:#3f3f54;}
+.layout_event .info table td {padding:0 0 0 10px; background:url('../../img/ggportal/desktop/event/table_event_info_td.png') no-repeat 0% 6px; vertical-align:top; font-size:14px; color:#3f3f54;}
+.layout_event .info table td strong {font-size:14px;}
+.layout_event .info p {padding:18px 0 0 0; font-size:13px; color:#3f3f54;}
+.layout_event .table_datail_AB.w_1 th {width:21%;}
+.layout_event .table_datail_AB.w_1 td.ty_AB {width:79%;}
+.layout_event .area_event .p_tyC {margin:16px 0 0 0; color:#888; line-height:18px;}
+@media all and (max-width:1023px) {
+.layout_event {width:auto;}
+.layout_event .area_event {margin:0 10px;}
+.layout_event .area_logo{padding:0 15px;}
+.layout_event .area_logo .logo {margin:29px 0 0 0;}
+.layout_event .area_logo h1 {margin:5px 0 0 0;}
+.layout_event .txt_event.mq_tablet {display:none;}
+.layout_event .info {margin:20px 0 20px 0; padding:10px 10px 20px 10px; border:1px solid #e9e9e9;}
+.layout_event .info table th {width:24%; font-size:12px;}
+.layout_event .info table td, 
+.layout_event .info table td strong {font-size:12px;}
+.layout_event .info p {padding:10px 0 0 0; font-size:12px;}
+.layout_event .table_datail_AB.w_1 th {width:24%;}
+.layout_event .table_datail_AB.w_1 td.ty_AB {width:75%;}
+.layout_event .area_event .p_tyC {margin:4px 0 0 0;}
+}
+/* 이벤트 E  */
+
+

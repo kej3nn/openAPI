@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- @(#)AdminStatSttsDscn_Sql_Tibero.xml 1.0 2017/09/07                     -->
+<!--                                                                         -->
+<!-- COPYRIGHT (C) 2013 WISEITECH CO., LTD. ALL RIGHTS RESERVED.             -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- 관리자 연계설정정보 SQL 파일이다.	                                  -->
+<!--                                                                         -->
+<!-- @author 김정호                                                        	-->
+<!-- @version 1.0 2017/09/07                                                -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<sqlMap namespace="StatSttsDscn">
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Type Alias                                                          -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+  
+  	<!-- 연계설정정보 리스트 조회 -->
+  	<select id="StatSttsDscnDao.selectSttsDscnList" parameterClass="params" resultClass="record">
+		SELECT 
+			DSCN_ID			AS "dscnId"
+			, DSCN_NM		AS "dscnNm"
+			, DSCNTY_CD		AS "dscntyCd"
+			, OWNER_CD		AS "ownerCd"
+			, DS_ID			AS "dsId"
+			, SRC_OWNER_CD	AS "srcOwnerCd"
+			, SRC_DS_ID		AS "srcDsId"
+			, USE_YN		AS "useYn"
+			, FN_GET_COMM_CODE_NM('D2002', DSCNTY_CD) 	AS "dscntyNm"
+			, FN_GET_COMM_CODE_NM('D2001', OWNER_CD) 	AS "ownerNm"
+			, FN_GET_COMM_CODE_NM('D2001', SRC_OWNER_CD) AS "srcOwnerNm"
+		FROM
+			TB_STTS_DSCN A
+		<dynamic prepend="WHERE">
+			<isNotEmpty property="useYn" prepend="AND">
+				USE_YN = #useYn:CHAR# 
+			</isNotEmpty>
+			<isNotEmpty property="searchVal" prepend="AND">
+				<isEqual property="searchGubun" compareValue="DSCN_NM" >
+					A.DSCN_NM LIKE '%' || #searchVal# || '%'
+				</isEqual>
+		   	</isNotEmpty>
+		</dynamic> 	
+  	</select>
+  	
+  	<!-- 연계설정정보 데이터 입력/수정 -->
+  	<update id="StatSttsDscnDao.saveSttsDscn" parameterClass="java.util.List">
+		MERGE INTO TB_STTS_DSCN A
+		USING (
+			<dynamic>
+				<iterate conjunction="UNION ALL ">
+				SELECT
+					TO_NUMBER(#[].dscnId:NUMERIC#)	AS DSCN_ID
+					, #[].dscnNm:VARCHAR#		AS DSCN_NM
+					, #[].dscntyCd:VARCHAR# 	AS DSCNTY_CD
+					, #[].ownerCd:VARCHAR# 		AS OWNER_CD
+					, #[].dsId:VARCHAR# 		AS DS_ID
+					, #[].srcOwnerCd:VARCHAR# 	AS SRC_OWNER_CD
+					, #[].srcDsId:VARCHAR# 		AS SRC_DS_ID
+					, #[].useYn:CHAR# 			AS USE_YN
+					, #[].regId:VARCHAR# 		AS REG_ID
+					, #[].updId:VARCHAR# 		AS UPD_ID
+				FROM DUAL
+				</iterate>
+			</dynamic>
+		) B
+		ON (
+			A.DSCN_ID = B.DSCN_ID
+		)
+		WHEN MATCHED THEN
+		UPDATE SET
+			A.DSCN_NM 			= B.DSCN_NM
+			, A.DSCNTY_CD 		= B.DSCNTY_CD
+			, A.OWNER_CD 		= B.OWNER_CD
+			, A.DS_ID 			= B.DS_ID
+			, A.SRC_OWNER_CD	= B.SRC_OWNER_CD
+			, A.SRC_DS_ID 		= B.SRC_DS_ID
+			, A.USE_YN 			= B.USE_YN
+			, A.UPD_ID 			= B.UPD_ID
+			, A.UPD_DTTM		= SYSDATE
+		WHEN NOT MATCHED THEN
+		INSERT (
+			A.DSCN_ID
+			, A.DSCN_NM
+			, A.DSCNTY_CD
+			, A.OWNER_CD
+			, A.DS_ID
+			, A.SRC_OWNER_CD
+			, A.SRC_DS_ID
+			, A.USE_YN
+			, A.REG_ID
+			, A.REG_DTTM
+			, A.UPD_ID
+			, A.UPD_DTTM
+		)
+		VALUES (
+			SQ_STTS_DSCN_ID.NEXTVAL
+			, B.DSCN_NM
+			, B.DSCNTY_CD
+			, B.OWNER_CD
+			, B.DS_ID
+			, B.SRC_OWNER_CD
+			, B.SRC_DS_ID
+			, B.USE_YN
+			, B.REG_ID
+			, SYSDATE
+			, B.UPD_ID
+			, SYSDATE
+		)
+	</update>
+	
+	<!-- 연계설정정보 데이터 삭제 -->
+	<delete id="StatSttsDscnDao.deleteSttsDscn" parameterClass="java.util.List">
+		DELETE TB_STTS_DSCN
+		WHERE  DSCN_ID IN
+		<iterate open="(" close=")" conjunction=", ">
+				#[].dscnId:NUMERIC#
+		</iterate>
+	</delete>
+	
+</sqlMap>

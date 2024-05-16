@@ -1,0 +1,485 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="OpenInfScol" >
+  <typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+  
+   <resultMap id="OpenInfCol" class="egovframework.admin.service.service.OpenInfTcol" >
+     <result column="STATUS"        property="status"                />
+    <result column="INF_ID"        property="infId"                />
+	<result column="INF_SEQ"       property="infSeq"               />
+	<result column="COL_SEQ"       property="colSeq"               />
+	<result column="COL_ID"        property="colId"               />
+	<result column="COL_NM"        property="colNm"            />
+	<result column="VIEW_YN"       property="viewYn"               />
+	<result column="USE_YN"        property="useYn"                />
+	<result column="V_ORDER"        property="vOrder"                />
+</resultMap>
+
+<resultMap id="OpenInfColOptPop" class="egovframework.admin.service.service.OpenInfTcol" >
+		<result column="INF_NM"          property="infNm"        />            
+		<result column="INF_ID"        property="infId"                />
+		<result column="INF_SEQ"       property="infSeq"               />
+		<result column="SRV_CD"       property="srvCd"               />
+		<result column="OWNER_CD"        property="ownerCd"      />
+		<result column="DS_ID"           property="dsId"         />
+		<result column="DS_NM"           property="dsNm"         />
+		<result column="COL_ID"        property="colId"               />
+		<result column="COL_NM"        property="colNm"            />
+		<result column="COL_SEQ"       property="colSeq"               />
+		<result column="COND_YN"         property="condYn"       />           
+		<result column="COND_OP"         property="condOp"       />
+		<result column="COND_VAR"        property="condVar"      />
+		<result column="ITEM_CD"        property="itemCd"      />
+		<result column="STAT_YN"        property="statYn"                />
+		<result column="DT_ID"        property="dtId"                />
+	</resultMap>
+	
+<resultMap id="OpenInfSrvView" class="egovframework.admin.service.service.OpenInfSrv" >
+     <result column="INF_NM"   property="infNm" />
+     <result column="INF_ID"   property="infId" />
+     <result column="SRV_CD"   property="srvCd" />
+     <result column="INF_SEQ"   property="infSeq" />
+     <result column="TABLE_NM" property="tableNm" />
+     <result column="ITEM_CNT" property="itemCnt" />
+     <result column="INF_EXP" property="infExp" />
+  </resultMap>
+  
+  <resultMap id="selectCol" class="egovframework.admin.service.service.OpenInfTcol" >
+     <result column="SRC_COL_ID" property="srcColId" />
+     <result column="COL_NM" property="colNm" />
+  </resultMap>
+  
+  <resultMap id="whereCol" class="egovframework.admin.service.service.OpenInfTcol" >
+		<result column="SRC_COL_ID"        property="srcColId"            />
+		<result column="COND_OP"       property="condOp"     />
+		<result column="COND_VAR"       property="condVar"     />
+	</resultMap>
+  
+  
+  <resultMap id="metaStartEndDateYy" class="egovframework.admin.service.service.OpenInfTcol" >
+     <result column="YY_ST_YY" property="yyStYy" />
+     <result column="YY_EN_YY" property="yyEnYy" />
+  </resultMap>
+  
+  <resultMap id="metaStartEndDateMm" class="egovframework.admin.service.service.OpenInfTcol" >
+     <result column="MM_ST_YY" property="mmStYy" />
+     <result column="MM_ST_MQ" property="mmStMq" />
+     <result column="MM_EN_YY" property="mmEnYy" />
+     <result column="MM_EN_MQ" property="mmEnMq" />
+  </resultMap>
+  
+  <resultMap id="metaStartEndDateQq" class="egovframework.admin.service.service.OpenInfTcol" >
+     <result column="QQ_ST_YY" property="qqStYy" />
+     <result column="QQ_ST_MQ" property="qqStMq" />
+     <result column="QQ_EN_YY" property="qqEnYy" />
+     <result column="QQ_EN_MQ" property="qqEnMq" />
+  </resultMap>
+	  
+	<select id="OpenInfTcolDAO.selectOpenInfColList" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultMap="OpenInfCol" >
+			SELECT 
+						CASE WHEN C.COL_SEQ IS NOT NULL THEN ''
+						ELSE 'I' END AS STATUS,
+		                 A.INF_ID,
+		                 A.INF_SEQ,
+		                 B.COL_SEQ,
+		                 B.COL_ID,
+		                 B.COL_NM,
+			             NVL(C.VIEW_YN,'Y') AS VIEW_YN,
+			       		 NVL(C.USE_YN,'Y') AS USE_YN,
+			       		 CASE C.V_ORDER WHEN 0 THEN B.COL_SEQ
+			       		 					  WHEN NULL THEN B.COL_SEQ
+		                 ELSE C.V_ORDER END AS V_ORDER,
+		                 B.STAT_YN
+		           FROM TV_MNG_INF_SRV A
+		         INNER JOIN TB_OPEN_DSCOL B
+		            ON A.DS_ID = B.DS_ID
+		          AND B.USE_YN ='Y'
+		         LEFT OUTER JOIN TB_OPEN_INF_TCOL C
+		           ON A.INF_ID = C.INF_ID
+		          AND A.INF_SEQ = C.INF_SEQ
+		          AND B.COL_SEQ = C.COL_SEQ
+		        WHERE A.INF_ID= #infId:VARCHAR#
+			      AND A.SRV_CD ='T'
+			      AND A.DS_USE_YN ='Y'
+		          ORDER BY V_ORDER  
+	</select>
+	
+	<!-- TB_OPEN_INF_TCOL 테이블 없음 -->
+	<update id="OpenInfTcolDAO.mergeIntoCol" parameterClass="egovframework.admin.service.service.OpenInfTcol" >
+		<![CDATA[
+		MERGE INTO TB_OPEN_INF_TCOL A
+		USING(
+				SELECT #infId#         	AS INF_ID
+					  ,#infSeq#	       	AS INF_SEQ
+					  ,#colSeq#        	AS COL_SEQ
+					  ,#viewYn#			AS VIEW_YN
+					  ,#vOrder#			AS V_ORDER
+					  ,#useYn#			AS USE_YN
+					  ,#sessionUsrId#  	AS REG_ID 
+					  ,SYSDATE         	AS REG_DTTM
+					  ,#sessionUsrId#  	AS UPD_ID
+					  ,SYSDATE         	AS UPD_DTTM  
+				  FROM DUAL
+			)B
+		ON ( A.INF_ID = B.INF_ID AND A.INF_SEQ = B.INF_SEQ AND A.COL_SEQ =B.COL_SEQ)
+		WHEN MATCHED THEN
+		UPDATE SET
+				 A.VIEW_YN = B.VIEW_YN
+				,A.V_ORDER = B.V_ORDER
+				,A.USE_YN = B.USE_YN
+				,A.UPD_ID = B.UPD_ID
+				,A.UPD_DTTM = B.UPD_DTTM
+		WHEN NOT MATCHED THEN
+		INSERT 
+		(
+			A.INF_ID
+			,A.INF_SEQ
+			,A.COL_SEQ
+			,A.VIEW_YN
+			,A.V_ORDER
+			,A.USE_YN
+			,A.REG_ID 
+			,A.REG_DTTM
+			,A.UPD_ID
+			,A.UPD_DTTM  
+				
+		)VALUES
+		(
+			 B.INF_ID
+			,B.INF_SEQ
+			,B.COL_SEQ
+			,B.VIEW_YN
+			,B.V_ORDER
+			,B.USE_YN
+			,B.REG_ID 
+			,B.REG_DTTM
+			,B.UPD_ID
+			,B.UPD_DTTM  	
+		)
+		]]>
+	</update>
+	
+	<select id="OpenInfTcolDAO.selectOpenInfColInfo" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultMap="OpenInfColOptPop" >
+			SELECT 
+					   A.INF_ID
+					  ,A.INF_SEQ 
+					  ,A.INF_NM
+					  ,A.SRV_CD
+		              ,A.OWNER_CD
+		              ,A.DS_ID
+		              ,A.DS_NM
+		              ,B.COL_ID
+		              ,B.COL_NM
+		              ,B.COL_SEQ
+		              ,COND_YN
+		              ,COND_OP
+		              ,COND_VAR
+		              ,ITEM_CD
+		              ,B.STAT_YN
+		              ,A.DT_ID
+		         FROM TV_MNG_INF_SRV A
+		         INNER JOIN TB_OPEN_DSCOL B
+		            ON A.DS_ID = B.DS_ID
+		           AND B.USE_YN ='Y'   
+		         INNER JOIN TB_OPEN_INF_TCOL C
+		           ON A.INF_ID = C.INF_ID
+		          AND A.INF_SEQ = C.INF_SEQ
+		          AND B.COL_SEQ = C.COL_SEQ
+		         WHERE C.INF_ID=#infId:VARCHAR#
+		           AND C.INF_SEQ=#infSeq:NUMERIC#
+		           AND C.COL_SEQ=#colSeq:NUMERIC# 
+	</select>
+	<!-- TB_OPEN_INF_TCOL 테이블 없음 -->
+	<update id="OpenInfTcolDAO.updateOpt" parameterClass="egovframework.admin.service.service.OpenInfTcol" >
+		<![CDATA[
+		UPDATE TB_OPEN_INF_TCOL SET
+				COND_YN = #condYn#
+				,COND_OP = #condOp#
+				,COND_VAR =  #condVar#
+				,ITEM_CD =#itemCd#
+				,UPD_ID = #sessionUsrId#
+				,UPD_DTTM = SYSDATE
+		WHERE INF_ID=#infId#
+		   AND INF_SEQ=#infSeq#
+		   AND COL_SEQ=#colSeq# 
+		]]>
+	</update>
+	
+	<!-- TB_OPEN_INF_TCOL 테이블 없음 -->
+	<select id="OpenInfTcolDAO.selectOpenInfColViewPopInfo" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultMap="OpenInfSrvView" >
+			SELECT		<isEmpty property="viewLang"> 
+							,B.INF_NM AS INF_NM
+							,B.INF_EXP AS INF_EXP
+						</isEmpty>
+						<isNotEmpty property="viewLang">
+							,B.ENG_INF_NM AS INF_NM
+							,B.ENG_INF_EXP AS INF_EXP
+						</isNotEmpty>
+						,A.INF_SEQ AS INF_SEQ
+						,B.INF_ID  AS INF_ID
+						,A.SRV_CD
+						,C.OWNER_CD||'.'||C.DS_ID AS TABLE_NM
+						,(SELECT COUNT(*) 
+							FROM TB_OPEN_INF_TCOL COL 
+							INNER JOIN TB_OPEN_DSCOL B
+							     ON COL.COL_SEQ = B.COL_SEQ
+							  INNER JOIN TB_OPEN_DS C
+							     ON B.DS_ID = C.DS_ID
+							  INNER JOIN TB_OPEN_INF D
+							     ON C.DS_ID = D.DS_ID
+							    AND COL.INF_ID = D.INF_ID
+							WHERE COL.INF_ID =#infId# 
+							AND COL.ITEM_CD IS NOT NULL 
+							AND COL.USE_YN='Y' 
+							AND COL.VIEW_YN='Y'
+							AND B.USE_YN ='Y'
+              				AND B.SRC_COL_ID IN('ITEM_CD1','ITEM_CD2')
+							) AS ITEM_CNT
+				 FROM TB_OPEN_INF_SRV A
+				 INNER JOIN TB_OPEN_INF B
+					 ON A.INF_ID = B.INF_ID
+				 INNER JOIN TB_OPEN_DS C
+					 ON B.DS_ID = C.DS_ID
+				   AND C.USE_YN ='Y'
+		         WHERE A.INF_ID=#infId#
+		           AND A.SRV_CD='T'
+	</select>
+	
+	
+	<select id="OpenInfTcolDAO.selectSelectCol" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultMap="selectCol" >
+			SELECT 
+				  B.SRC_COL_ID,
+				  <isEmpty property="viewLang"> 
+					 B.COL_NM
+				</isEmpty>
+				<isNotEmpty property="viewLang">
+					B.ENG_COL_NM AS COL_NM
+				</isNotEmpty>
+		    FROM TV_MNG_INF_SRV A
+		    INNER JOIN TB_OPEN_DSCOL B
+		        ON A.DS_ID = B.DS_ID
+		      AND B.USE_YN ='Y'
+		    INNER JOIN TB_OPEN_INF_TCOL C
+		       ON A.INF_ID = C.INF_ID
+		     AND A.INF_SEQ = C.INF_SEQ
+		     AND B.COL_SEQ = C.COL_SEQ
+		  WHERE A.INF_ID=#infId:VARCHAR#
+		     AND A.SRV_CD='T'
+		     AND C.USE_YN ='Y'
+		     AND A.DS_USE_YN ='Y'
+		     AND C.VIEW_YN ='Y'        
+		     AND B.SRC_COL_ID NOT IN('YMQ','YYYY','MQ','YMQ_TAG','AMT','REG_DTTM','UPD_DTTM')
+		 ORDER BY C.V_ORDER
+	</select>
+	
+	<select id="OpenInfTcolDAO.selectWhereCol" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultMap="whereCol" >
+			SELECT 
+				  B.SRC_COL_ID
+                 ,C.COND_OP
+                 ,C.COND_VAR
+		    FROM TV_MNG_INF_SRV A
+		    INNER JOIN TB_OPEN_DSCOL B
+		        ON A.DS_ID = B.DS_ID
+		      AND B.USE_YN ='Y'
+		    INNER JOIN TB_OPEN_INF_TCOL C
+		       ON A.INF_ID = C.INF_ID
+		     AND A.INF_SEQ = C.INF_SEQ
+		     AND B.COL_SEQ = C.COL_SEQ
+		  WHERE A.INF_ID=#infId:VARCHAR#
+		     AND A.SRV_CD='T'
+		     AND C.USE_YN ='Y'
+		     AND A.DS_USE_YN ='Y'
+		     AND C.COND_YN ='Y'
+		 ORDER BY C.V_ORDER
+	</select>
+	
+	<select id="OpenInfTcolDAO.selectMetaStartEndDateYy" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultMap="metaStartEndDateYy" remapResults="true">
+				SELECT  NVL(MIN(YMQ),'2') AS YY_ST_YY
+					      ,NVL(MAX(YMQ),'1') AS YY_EN_YY
+					FROM $tableNm$
+					WHERE YMQ_TAG ='Y'
+					   $whereQuery$        
+	</select>
+	
+	<select id="OpenInfTcolDAO.selectMetaStartEndDateMm" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultMap="metaStartEndDateMm" remapResults="true">
+			SELECT NVL(SUBSTR(MIN(YMQ),0,4),'2')  AS MM_ST_YY
+					      ,NVL(SUBSTR(MAX(YMQ),0,4),'1')  AS MM_EN_YY
+					      ,NVL(SUBSTR(MIN(YMQ),5,2),'2')  AS MM_ST_MQ
+					      ,NVL(SUBSTR(MAX(YMQ),5,2),'1')  AS MM_EN_MQ
+			 FROM $tableNm$
+			WHERE YMQ_TAG ='M'
+				$whereQuery$
+	</select>
+	
+	<select id="OpenInfTcolDAO.selectMetaStartEndDateQq" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultMap="metaStartEndDateQq" remapResults="true">
+			SELECT NVL(SUBSTR(MIN(YMQ),0,4),'2')  AS QQ_ST_YY
+					      ,NVL(SUBSTR(MAX(YMQ),0,4),'1')  AS QQ_EN_YY
+					      ,NVL(SUBSTR(MIN(YMQ),5,2),'2')  AS QQ_ST_MQ
+					      ,NVL(SUBSTR(MAX(YMQ),5,2),'1')  AS QQ_EN_MQ
+			 FROM $tableNm$
+			WHERE YMQ_TAG ='Q'
+				$whereQuery$
+	</select>
+	
+	<select id="OpenInfTcolDAO.selectMetaListAllCnt" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultClass="java.lang.Integer" remapResults="true">
+			SELECT COUNT(1) AS CNT
+			FROM(
+				$tsQuery$
+			)TB
+	</select>
+	
+	<select id="OpenInfTcolDAO.selectMetaListAll" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultClass="java.util.LinkedHashMap" remapResults="true">
+		SELECT *
+		FROM(
+			SELECT ROWNUM AS RN, TB.*
+			FROM(
+				$tsQuery$
+			)TB
+		)
+		<isNotEqual property="startPage" compareValue="0">
+		WHERE RN BETWEEN #startPage:NUMERIC# AND #endPage:NUMERIC#
+	</isNotEqual>
+	</select>
+	
+	<!-- TB_OPEN_INF_TCOL 테이블 없음 -->
+	<select id="OpenInfTcolDAO.selectItemDtl"  parameterClass="egovframework.admin.service.service.OpenInfSrv" resultClass="java.util.LinkedHashMap" >
+		SELECT  ITEM_CD
+				   <isEmpty property="viewLang"> 
+					,ITEM_NM
+				</isEmpty>
+				<isNotEmpty property="viewLang">
+					,ENG_ITEM_NM AS ITEM_NM
+				</isNotEmpty>
+			      ,LEVEL||'' AS ITEM_LEVEL
+			      ,DECODE(A.DEFAULT_CHECK_YN,'Y','true','false') AS DEFAULT_CHECK_YN                     
+			  FROM TB_OPEN_INF_TCOL_ITEM A
+			WHERE USE_YN = 'Y'
+			START WITH ITEM_CD IN(
+				SELECT ITEM_CD
+				  FROM TB_OPEN_INF_TCOL
+				 WHERE INF_ID = #infId#
+				   AND ITEM_CD IS NOT NULL
+				   AND USE_YN ='Y'
+				   AND VIEW_YN='Y'
+			)
+			CONNECT BY PRIOR ITEM_CD = PAR_ITEM_CD
+			ORDER SIBLINGS BY V_ORDER
+	</select>
+	<!-- TB_OPEN_INF_TCOL_ITEM 테이블 없음 -->
+	<select id="OpenInfTcolDAO.selectItemUnitCd"  parameterClass="egovframework.admin.service.service.OpenInfSrv" resultClass="java.util.LinkedHashMap" remapResults="true">
+		
+		
+		
+		SELECT 
+				 UNIT_CD
+ 	  			 ,UNIT_SUB_CD
+			FROM(
+			  SELECT  FN_GET_COMM_VALUE_CD('D1031',UNIT_CD) AS UNIT_CD
+						      ,UNIT_SUB_CD
+						  FROM TB_OPEN_INF_TCOL_ITEM A
+						WHERE USE_YN = 'Y'
+							<isNotEmpty property="arrTreeData">
+								AND A.ITEM_CD IN
+								<iterate open="(" close=")" property="arrTreeData" conjunction=",">
+									  #arrTreeData[]#
+								</iterate>	
+							</isNotEmpty>
+							AND A.UNIT_CD IS NOT NULL
+						START WITH ITEM_CD IN(
+							SELECT COL.ITEM_CD
+							  FROM TB_OPEN_INF_TCOL COL 
+							  INNER JOIN TB_OPEN_DSCOL B
+								  ON COL.COL_SEQ = B.COL_SEQ
+							   INNER JOIN TB_OPEN_DS C
+								  ON B.DS_ID = C.DS_ID
+								INNER JOIN TB_OPEN_INF D
+								  ON C.DS_ID = D.DS_ID
+								  AND COL.INF_ID = D.INF_ID
+								WHERE COL.INF_ID = #infId#
+								  AND COL.ITEM_CD IS NOT NULL 
+								  AND COL.USE_YN='Y' 
+								  AND COL.VIEW_YN='Y'
+								  AND B.USE_YN ='Y'
+			              		AND B.SRC_COL_ID ='ITEM_CD1'
+						)
+						CONNECT BY PRIOR ITEM_CD = PAR_ITEM_CD
+				UNION ALL
+				SELECT 'A' AS UNIT_CD,
+			       'A' AS UNIT_SUB_CD
+			  FROM TB_COMM_CODE
+			 WHERE GRP_CD ='S1002'
+			   AND DITC_CD NOT IN('DCYEAR','DLYEAR','DQUART','RAW')
+			   
+				<isNotEmpty property="arrConvCd">
+						AND DITC_CD IN
+					<iterate open="(" close=")" property="arrConvCd" conjunction=",">
+						 #arrConvCd[]#
+					</iterate>	
+			  </isNotEmpty>
+				<isEmpty property="arrConvCd">
+					AND DITC_CD =''
+				</isEmpty>			
+			  
+			   AND ROWNUM = 1
+			)
+			GROUP BY UNIT_CD,UNIT_SUB_CD
+	</select>
+	
+	<!-- TB_OPEN_INF_TCOL_ITEM 테이블 없음 -->
+	<select id="OpenInfTcolDAO.selectItemUnitCd2"  parameterClass="egovframework.admin.service.service.OpenInfSrv" resultClass="java.util.LinkedHashMap" remapResults="true">
+		SELECT 
+				 UNIT_CD
+ 	  			 ,UNIT_SUB_CD
+			FROM(
+				  SELECT  FN_GET_COMM_VALUE_CD('D1031',UNIT_CD) AS UNIT_CD
+						      ,UNIT_SUB_CD
+						  FROM TB_OPEN_INF_TCOL_ITEM A
+						WHERE USE_YN = 'Y'
+							<isNotEmpty property="arrTreeData2">
+								AND A.ITEM_CD IN
+								<iterate open="(" close=")" property="arrTreeData2" conjunction=",">
+									  #arrTreeData2[]#
+								</iterate>	
+							</isNotEmpty>
+						  AND A.UNIT_CD IS NOT NULL
+						START WITH ITEM_CD IN(
+							SELECT COL.ITEM_CD
+							  FROM TB_OPEN_INF_TCOL COL 
+							  INNER JOIN TB_OPEN_DSCOL B
+								  ON COL.COL_SEQ = B.COL_SEQ
+							   INNER JOIN TB_OPEN_DS C
+								  ON B.DS_ID = C.DS_ID
+								INNER JOIN TB_OPEN_INF D
+								  ON C.DS_ID = D.DS_ID
+								  AND COL.INF_ID = D.INF_ID
+								WHERE COL.INF_ID = #infId# 
+								  AND COL.ITEM_CD IS NOT NULL 
+								  AND COL.USE_YN='Y' 
+								  AND COL.VIEW_YN='Y'
+								  AND B.USE_YN ='Y'
+			              		AND B.SRC_COL_ID ='ITEM_CD2'
+						)
+						CONNECT BY PRIOR ITEM_CD = PAR_ITEM_CD
+						
+				UNION ALL
+				SELECT 'A' AS UNIT_CD,
+			       'A' AS UNIT_SUB_CD
+			  FROM TB_COMM_CODE
+			 WHERE GRP_CD ='S1002'
+			   AND DITC_CD NOT IN('DCYEAR','DLYEAR','DQUART','RAW')
+			   
+			   <isNotEmpty property="arrConvCd">
+						AND DITC_CD IN
+					<iterate open="(" close=")" property="arrConvCd" conjunction=",">
+						 #arrConvCd[]#
+					</iterate>	
+			  </isNotEmpty>
+				<isEmpty property="arrConvCd">
+					AND DITC_CD =''
+				</isEmpty>			
+			  
+			   AND ROWNUM = 1
+			)
+			GROUP BY UNIT_CD,UNIT_SUB_CD
+	</select>
+</sqlMap>

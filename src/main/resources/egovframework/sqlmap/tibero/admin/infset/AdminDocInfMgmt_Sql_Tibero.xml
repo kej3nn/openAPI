@@ -1,0 +1,655 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- @(#)AdminDocInfMgmt_Sql_Tibero.xml 1.0 2019/08/05                     -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- 정보공개 문서를 관리하는 SQL 파일이다.	                                     -->
+<!--                                                                         -->
+<!-- @author JHKIM                                                         	-->
+<!-- @version 1.0 2019/08/05                                                -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<sqlMap namespace="DocInfMgmt">
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Type Alias                                                          -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+    
+    <!-- 메인리스트 쿼리 -->
+    <sql id="docInfMgmtDao.main">
+		SELECT
+		    A.DOC_ID		AS "docId",
+		    A.SEQ			AS "seq",
+		    A.DOC_NM		AS "docNm",
+		    A.CATE_NM		AS "cateNm",
+		    A.ORG_NM		AS "orgNm",
+		    A.CCL_CD		AS "cclCd",
+		    A.OPEN_STATE	AS "openState",
+		    A.OPEN_DTTM		AS "openDttm"
+		FROM
+		    TV_DOC_INF A
+	</sql>
+		    	
+    <sql id="docInfMgmtDao.main.where">
+    	WHERE 1=1
+		      AND A.USE_YN = 'Y' 
+			<isNotEmpty property="openState" prepend="AND">
+				A.OPEN_STATE = #openState:VARCHAR#	   	 
+	   		</isNotEmpty>
+			<isNotEmpty property="searchVal" prepend="AND">
+				<isEqual property="searchGubun" compareValue="DOC_NM" >
+					A.DOC_NM LIKE '%' || #searchVal# || '%'
+				</isEqual>
+				<isEqual property="searchGubun" compareValue="DOC_ID" >
+					A.DOC_ID LIKE '%' || #searchVal# || '%'
+				</isEqual>
+		   	</isNotEmpty>
+		   	<isNotEmpty property="iterCateId" prepend="AND">
+		   	  A.CATE_ID IN
+		   	<iterate property="iterCateId" open="(" close=")" conjunction=", ">
+           		#iterCateId[]:VARCHAR#
+           	</iterate>
+           	</isNotEmpty>
+   		<isNotEmpty property="orgCd" prepend="AND">
+				A.ORG_CD = #orgCd:VARCHAR#	   	 
+	   	</isNotEmpty>
+		<isNotEmpty property="beginOpenDttm" prepend="AND">
+		   A.OPEN_DTTM <![CDATA[ >= ]]> TO_DATE(#beginOpenDttm:VARCHAR#, 'YYYY-MM-DD') + 0	   	 
+	   	</isNotEmpty>
+	   	<isNotEmpty property="endOpenDttm" prepend="AND">
+		   A.OPEN_DTTM <![CDATA[ < ]]> TO_DATE(#endOpenDttm:VARCHAR#, 'YYYY-MM-DD') + 1
+	   	</isNotEmpty>	   	
+	   	<isNotEmpty property="openState">
+			AND   A.OPEN_STATE = #openState#	   	 
+	   	</isNotEmpty>
+	   	<isNotEmpty property="fvtDataOrder">
+	   		<isEqual property="fvtDataOrder" compareValue="Y">
+			AND   A.FVT_DATA_ORDER IN (SELECT DITC_CD FROM TB_COMM_CODE WHERE GRP_CD = 'C1018' AND USE_YN = 'Y' AND DITC_CD != 0)
+			</isEqual>   	 
+	   	</isNotEmpty>
+	   	<isNotEmpty property="schCclCd">
+			AND   A.CCL_CD = #schCclCd#	   	 
+	   	</isNotEmpty>
+	   	
+    </sql>
+  
+  	<!-- 메인 리스트 조회 -->
+  	<select id="docInfMgmtDao.selectMainList" parameterClass="params" resultClass="record">
+  		/* sql id : docInfMgmtDao.selectMainList */
+  		<isEqual property="paging" compareValue="0">
+		SELECT AA.* 
+		FROM   (SELECT ROWNUM AS ROW_NUM, AA.*
+				FROM   (  
+		</isEqual>
+			<include refid="docInfMgmtDao.main"></include>
+			<include refid="docInfMgmtDao.main.where"></include>
+			ORDER BY
+			    A.V_ORDER
+		<isEqual property="paging" compareValue="0">
+		<![CDATA[
+				) AA
+			WHERE ROWNUM <= #end:NUMERIC#
+			) AA
+		WHERE AA.ROW_NUM >= #start:NUMERIC#
+		]]>
+		</isEqual>
+  	</select>
+  	<select id="docInfMgmtDao.selectMainListCount" parameterClass="params" resultClass="int">
+  		/* sql id : docInfMgmtDao.selectMainListCount */
+		SELECT COUNT(*)
+		FROM   TV_DOC_INF A
+		<include refid="docInfMgmtDao.main.where"></include>
+  	</select>
+  	
+  	<!-- 정보공개 문서관리 탭 내의 상세정보 조회 -->
+  	<select id="docInfMgmtDao.selectDtl" parameterClass="params" resultClass="record">
+  		/* sql id : docInfMgmtDao.selectDtl */
+		SELECT
+		    A.DOC_ID			AS "docId",
+		    A.SEQ				AS "seq",
+		    A.DT_ID				AS "dtId",
+		    A.DT_NM				AS "dtNm",
+		    A.DOC_NM			AS "docNm",
+		    A.CATE_ID			AS "cateId",
+		    A.FVT_DATA_ORDER	AS "fvtDataOrder",
+		    A.CAUSE_CD			AS "causeCd",
+		    A.CAUSE_INFO		AS "causeInfo",
+		    A.CCL_CD			AS "cclCd",
+		    A.DOC_EXP			AS "docExp",
+		    A.SCHW_TAG_CONT		AS "schwTagCont",
+		    A.USE_YN			AS "useYn",
+		    A.OPEN_CD			AS "openCd",
+		    A.OPEN_STATE		AS "openState",
+		    A.LOAD_CD			AS "loadCd",
+		    A.LOAD_NM			AS "loadNm",
+		    TO_CHAR(A.OPEN_DTTM, 'YYYY-MM-DD')				AS "openDttm",
+		    DECODE(NVL(A.FVT_DATA_ORDER, 0), 0, 'N', 'Y')	AS "fvtDataOrderYn",
+		    A.DATA_DTTM_CONT	AS "dataDttmCont"
+		FROM
+		    TV_DOC_INF A
+		WHERE
+		    A.DOC_ID = #docId:VARCHAR#  	
+  	</select>
+  		
+  	<!-- 문서관리 신규 시퀀스를 조회 -->
+  	<select id="docInfMgmtDao.getSqDocInfSeq" resultClass="int">
+  		SELECT SQ_DOC_INF_SEQ.NEXTVAL FROM DUAL
+  	</select>
+  	
+  	<!-- 문서ID 생성 -->
+  	<select id="docInfMgmtDao.getDocId" resultClass="string" parameterClass="params">
+  		SELECT FN_CREATE_DOC_ID(#seq:NUMERIC#) FROM DUAL
+  	</select>
+  		
+  	<!-- 문서관리 마스터 데이터 저장 -->
+  	<insert id="docInfMgmtDao.insertDocInfMst" parameterClass="params">
+  		/* sql id : docInfMgmtDao.insertDocInfMst */
+		INSERT INTO TB_DOC_INF(
+			DOC_ID           ,
+		    SEQ              ,
+		    DOC_NM           ,
+		    TAG_DOC_NM       ,
+		    CATE_ID          ,
+		    SCHW_TAG_CONT    ,
+		    DOC_EXP    		 ,
+		    ORG_CD           ,
+		    USR_CD           ,
+		    OPEN_DTTM        ,
+		    FVT_DATA_ORDER   ,
+		    DT_ID			 ,
+		    OPEN_CD			 ,
+		    CCL_CD			 ,
+		    CAUSE_CD		 ,
+		    CAUSE_INFO		 ,
+		    USE_YN           ,
+		    DATA_DTTM_CONT	 , 
+		    REG_ID           ,
+		    REG_DTTM         ,
+		    UPD_ID           ,
+		    LOAD_CD           ,
+		    UPD_DTTM         
+		)
+		VALUES(
+			#docId:VARCHAR#,
+			#seq:NUMERIC#,
+			#docNm:VARCHAR#,
+			UPPER(REPLACE(#docNm:VARCHAR#, ' ', '')),
+			'dummyCate',
+			#schwTagCont:VARCHAR#,
+			#docExp:VARCHAR#,
+			'dummyOrgcd',
+			0,
+			'',	
+			#fvtDataOrder:NUMERIC#,
+			#dtId:NUMERIC#,
+			#openCd:VARCHAR#,
+			#cclCd:VARCHAR#,
+			DECODE(#openCd:VARCHAR#, 'DT002', '99', #causeCd:VARCHAR#),	<!-- 전체공개일때는 값 입력하지 않음 -->
+			DECODE(#openCd:VARCHAR#, 'DT002', ''  , #causeInfo:VARCHAR#),
+		    #useYn:VARCHAR#,
+		    #dataDttmCont:VARCHAR#,
+		    #regId:VARCHAR#,
+		    SYSDATE,
+		    #updId:VARCHAR#,
+		    #loadCd:VARCHAR#,
+		    SYSDATE         		
+		)		
+	</insert>	
+	
+	<!-- 대표자정보 마스터 테이블로 업데이트 -->
+	<update id="docInfMgmtDao.updateDocInfMstRpst" parameterClass="params">
+		/* sql id : docInfMgmtDao.updateDocInfMstRpst */
+		UPDATE TB_DOC_INF
+		SET 
+			CATE_ID = (SELECT CATE_ID FROM TB_DOC_INF_CATE  WHERE DOC_ID = #docId:VARCHAR# AND RPST_YN = 'Y' AND USE_YN = 'Y'),
+			ORG_CD =  (SELECT ORG_CD  FROM TB_DOC_INF_USR   WHERE DOC_ID = #docId:VARCHAR# AND RPST_YN = 'Y' AND USE_YN = 'Y'),
+			USR_CD =  (SELECT USR_CD  FROM TB_DOC_INF_USR   WHERE DOC_ID = #docId:VARCHAR# AND RPST_YN = 'Y' AND USE_YN = 'Y')
+		WHERE DOC_ID = #docId:VARCHAR# 
+	</update>
+	
+	<!-- 문서관리 데이터 업데이트 -->
+	<update id="docInfMgmtDao.updateDocInfMst" parameterClass="params">
+		/* sql id : docInfMgmtDao.updateDocInfMst */
+		UPDATE TB_DOC_INF
+		SET 
+			DOC_NM 			= #docNm:VARCHAR#,
+			TAG_DOC_NM 		= UPPER(REPLACE(#docNm:VARCHAR#, ' ', '')),
+			DT_ID			= #dtId:NUMERIC#,
+			OPEN_CD			= #openCd:VARCHAR#,
+			CCL_CD			= #cclCd:VARCHAR#,
+			LOAD_CD			= #loadCd:VARCHAR#,
+			CAUSE_CD		= DECODE(#openCd:VARCHAR#, 'DT002', '99', #causeCd:VARCHAR#),
+			CAUSE_INFO  	= DECODE(#openCd:VARCHAR#, 'DT002', ''  , #causeInfo:VARCHAR#),
+			DOC_EXP 		= #docExp:VARCHAR#,
+			SCHW_TAG_CONT	= #schwTagCont:VARCHAR#,
+			OPEN_DTTM 		= DECODE(OPEN_STATE, 'Y', TO_DATE(#openDttm:VARCHAR#, 'YYYY-MM-DD'), 'N', ''),
+			FVT_DATA_ORDER	= #fvtDataOrder:VARCHAR#,
+			DATA_DTTM_CONT  = #dataDttmCont:VARCHAR#
+		WHERE 
+			DOC_ID = #docId:VARCHAR# 
+	</update>
+	
+	<!-- 정보셋 백업(STATUS=D 일경우 데이터 삭제) -->
+	<procedure id="docInfMgmtDao.execSpBcupDocInf" parameterClass="params" resultClass="record" >
+	    <![CDATA[
+	      { CALL SP_BCUP_DOC_INF(#docId:VARCHAR#, #Status:VARCHAR#, #updId:VARCHAR#)}
+	      ]]>
+	</procedure>
+	
+	<!-- 정보공개 문서관리 분류체계 팝업 리스트 조회 -->
+	<select id="docInfMgmtDao.selectDocInfCatePop" parameterClass="params" resultClass="record">
+		/* sql id : docInfMgmtDao.selectDocInfCatePop */
+		SELECT
+			A.CATE_ID					AS "cateId"
+			, A.CATE_NM					AS "cateNm"
+			, A.CATE_FULLNM 			AS "cateFullnm"
+			, A.CATE_LVL				AS "Level"
+			, A.USE_YN					AS "useYn"
+			, NVL2(B.CATE_ID, '1', '0') AS "chk"
+		FROM
+			TB_DOC_CATE A
+		LEFT JOIN TB_DOC_INF_CATE B 
+			ON  B.DOC_ID = #docId:VARCHAR#
+		    AND A.CATE_ID = B.CATE_ID 			
+		WHERE 
+			A.CATE_ID IN 
+			(
+			SELECT CATE_ID FROM TB_DOC_CATE B
+		<isNotEmpty property="searchVal">
+				<isEqual property="searchGubun" compareValue="CATE_NM" >
+					START WITH B.CATE_NM LIKE '%' || #searchVal# || '%'
+				</isEqual>
+				<isEqual property="searchGubun" compareValue="ENG_CATE_NM" >
+					START WITH B.ENG_CATE_NM LIKE '%' || #searchVal# || '%'
+				</isEqual>
+	   	</isNotEmpty> 
+			CONNECT BY 
+				CATE_ID = PRIOR PAR_CATE_ID 
+				AND B.USE_YN = 'Y'
+			)
+		START WITH PAR_CATE_ID = 'T'
+		CONNECT BY 
+			PRIOR A.CATE_ID = PAR_CATE_ID 
+			AND A.USE_YN = 'Y'
+		ORDER SIBLINGS BY A.V_ORDER	
+	</select>	
+	
+	<!-- 정보공개 문서관리 관련 분류 조회 -->
+	<select id="docInfMgmtDao.selectDocInfCate" parameterClass="params" resultClass="record">
+		/* sql id : docInfMgmtDao.selectDocInfCate */
+		SELECT
+		    A.DOC_ID		AS "docId",
+		    A.CATE_ID		AS "cateId",
+		    A.RPST_YN		AS "rpstYn",
+		    A.USE_YN		AS "useYn",
+		    B.CATE_NM		AS "cateNm",
+		    B.CATE_FULLNM	AS "cateFullNm"
+		FROM
+		    TB_DOC_INF_CATE A
+		    	INNER JOIN TB_DOC_CATE B ON A.CATE_ID = B.CATE_ID
+		    	AND B.USE_YN = 'Y'
+		WHERE
+		    DOC_ID = #docId:VARCHAR#
+		ORDER BY A.V_ORDER
+	</select>
+	
+	<!-- 정보공개 문서관리 관련 분류 머지 -->
+	<update id="docInfMgmtDao.mergeDocInfCate" parameterClass="record">
+		/* sql id : docInfMgmtDao.mergeDocInfCate */
+		MERGE INTO TB_DOC_INF_CATE A
+		USING (
+			SELECT 
+				#docId:VARCHAR#		AS DOC_ID
+				, #cateId:VARCHAR#	AS CATE_ID
+				, #rpstYn:VARCHAR#	AS RPST_YN
+				, #useYn:CHAR#		AS USE_YN
+				, #regId:VARCHAR#	AS REG_ID
+				, #updId:VARCHAR#	AS UPD_ID
+			FROM DUAL
+		) B
+		ON (
+			A.DOC_ID 	  = B.DOC_ID
+			AND A.CATE_ID = B.CATE_ID
+		)
+		WHEN MATCHED THEN 
+		UPDATE SET
+			A.RPST_YN 		= B.RPST_YN
+			, A.USE_YN 		= B.USE_YN
+			, A.UPD_ID 		= B.UPD_ID
+			, A.UPD_DTTM 	= SYSDATE
+		WHEN NOT MATCHED THEN
+		INSERT (
+			A.DOC_ID
+			, A.CATE_ID
+			, A.RPST_YN
+			, A.USE_YN
+			, A.REG_ID
+			, A.REG_DTTM
+			, A.UPD_ID
+			, A.UPD_DTTM
+		)
+		VALUES (
+			B.DOC_ID
+			, B.CATE_ID
+			, B.RPST_YN
+			, B.USE_YN
+			, B.REG_ID
+			, SYSDATE
+			, B.UPD_ID
+			, SYSDATE
+		)	
+	</update>
+	
+	<!-- 정보공개 문서관리 관련 분류 삭제 -->
+	<delete id="docInfMgmtDao.deleteDocInfCate" parameterClass="record">
+		/* sql id : docInfMgmtDao.deleteDocInfCate */
+		DELETE FROM TB_DOC_INF_CATE
+		WHERE  DOC_ID  = #docId:VARCHAR#
+		AND    CATE_ID = #cateId:VARCHAR#
+	</delete>
+	
+	<!-- 정보공개 문서관리 관련 유저 조회 -->
+	<select id="docInfMgmtDao.selectDocInfUsr" parameterClass="params" resultClass="record">
+		/* sql id : docInfMgmtDao.selectDocInfUsr */
+		SELECT
+			SEQCE_NO		AS "seqceNo" 
+			, A.DOC_ID 		AS "docId"
+			, A.USR_CD		AS "usrCd"
+			, A.ORG_CD		AS "orgCd"
+			, A.RPST_YN		AS "rpstYn"
+			, A.PRSS_ACC_CD	AS "prssAccCd"
+			, A.SRC_VIEW_YN	AS "srcViewYn"
+			, A.USE_YN		AS "useYn"
+			, (SELECT USR_NM FROM TB_COMM_USR WHERE USR_CD = A.USR_CD) AS "usrNm"
+			, (SELECT ORG_NM FROM TB_COMM_ORG WHERE ORG_CD = A.ORG_CD) AS "orgNm"
+		FROM
+			TB_DOC_INF_USR A
+		WHERE
+			A.DOC_ID = #docId:VARCHAR#
+	</select>
+	
+	<!-- 정보공개 문서관리 관련유저 삭제 -->
+	<delete id="docInfMgmtDao.deleteDocInfUsr" parameterClass="record">
+		/* sql id : docInfMgmtDao.deleteDocInfUsr */
+		DELETE FROM TB_DOC_INF_USR
+		WHERE  DOC_ID 	= #docId:VARCHAR#
+		AND    SEQCE_NO = #seqceNo:VARCHAR#
+	</delete>
+	
+	<!-- 정보공개 문서관리 관련유저 등록, 수정 -->
+	<update id="docInfMgmtDao.mergeDocInfUsr" parameterClass="record">
+		/* sql id : docInfMgmtDao.mergeDocInfUsr */
+		MERGE INTO TB_DOC_INF_USR A
+		USING (
+			SELECT 
+				#docId:VARCHAR# 		AS DOC_ID
+				, #usrCd:NUMERIC#		AS USR_CD
+				, #orgCd:VARCHAR#		AS ORG_CD
+				, #rpstYn:CHAR#			AS RPST_YN
+				, #prssAccCd:VARCHAR#	AS PRSS_ACC_CD
+				, #srcViewYn:CHAR#		AS SRC_VIEW_YN
+				, #useYn:CHAR#			AS USE_YN
+				, #regId:VARCHAR#		AS REG_ID
+				, #updId:VARCHAR#		AS UPD_ID
+			, SYSDATE
+			FROM DUAL
+		) B
+		ON (
+			A.DOC_ID 	 = B.DOC_ID
+			AND A.USR_CD = B.USR_CD
+			AND A.ORG_CD = B.ORG_CD
+		)
+		WHEN MATCHED THEN 
+		UPDATE SET
+			A.RPST_YN 		= B.RPST_YN
+			, A.PRSS_ACC_CD = B.PRSS_ACC_CD
+			, A.SRC_VIEW_YN = B.SRC_VIEW_YN
+			, A.USE_YN 		= B.USE_YN
+			, A.UPD_ID 		= B.UPD_ID
+			, A.UPD_DTTM 	= SYSDATE
+		WHEN NOT MATCHED THEN
+		INSERT (
+			A.SEQCE_NO
+			, A.DOC_ID
+			, A.USR_CD
+			, A.ORG_CD
+			, A.RPST_YN
+			, A.PRSS_ACC_CD
+			, A.SRC_VIEW_YN
+			, A.USE_YN
+			, A.REG_ID
+			, A.REG_DTTM
+			, A.UPD_ID
+			, A.UPD_DTTM
+		)
+		VALUES (
+			SQ_DOC_INF_USR_SEQ.NEXTVAL
+			, B.DOC_ID
+			, B.USR_CD
+			, B.ORG_CD
+			, B.RPST_YN
+			, B.PRSS_ACC_CD
+			, B.SRC_VIEW_YN
+			, B.USE_YN
+			, B.REG_ID
+			, SYSDATE
+			, B.UPD_ID
+			, SYSDATE
+		)	
+	</update>
+	
+	<!-- 정보공개 문서관리 공개/공개취소 처리 -->
+	<update id="docInfMgmtDao.updateDocInfOpenState" parameterClass="params">
+		/* sql id : docInfMgmtDao.updateDocInfOpenState */
+		UPDATE TB_DOC_INF
+		SET    OPEN_STATE = #openState:VARCHAR#
+			<isEqual property="openState" compareValue="Y">
+			 , OPEN_DTTM = TO_DATE(#openDttm:VARCHAR#, 'YYYY-MM-DD')
+			</isEqual>
+			<isNotEqual property="openState" compareValue="Y">
+			, OPEN_DTTM = ''
+			</isNotEqual>
+		WHERE  DOC_ID = #docId:VARCHAR#
+	</update>
+	
+	
+	<!-- 정보공개 문서관리 태그 일괄 삭제(해당 ID) -->
+	<delete id="docInfMgmtDao.deleteDocInfTag" parameterClass="params">
+		/* sql id : docInfMgmtDao.deleteDocInfTag */
+		DELETE FROM TB_DOC_INF_TAG
+		WHERE  DOC_ID = #docId:VARCHAR#
+	</delete>
+	
+	<!-- 정보공개 문서관리 태그 등록 -->
+	<insert id="docInfMgmtDao.insertDocInfTag" parameterClass="record">
+		/* sql id : docInfMgmtDao.insertDocInfTag */
+		INSERT INTO TB_DOC_INF_TAG(
+			DOC_ID
+			, SYS_TAG
+			, TAG_NM
+			, USE_YN
+			, REG_DTTM
+		)
+		VALUES(
+			#docId:VARCHAR#
+			, 'K'
+			, #tagNm:VARCHAR#
+			, 'Y'
+			, SYSDATE
+		)
+	</insert>
+	
+	<!-- 정보공개 문서 파일을 등록한다.  -->
+	<insert id="docInfMgmtDao.insertDocInfFile" parameterClass="params">
+		/* sql id : docInfMgmtDao.insertDocInfFile */
+		INSERT INTO TB_DOC_INF_FILE(
+			DOC_ID
+			, FILE_SEQ
+			<isNotEmpty property="srcFileSeq">	
+				, FILE_VER_NO
+			</isNotEmpty>
+			, SRC_FILE_NM
+			, SAVE_FILE_NM
+			, VIEW_FILE_NM
+			, FILE_SIZE
+			, FILE_EXT
+			, TMNL_IMG_FILE
+			, SRC_FILE_SEQ
+			, SRC_FILE_DOC_ID
+			, PRDC_YMD
+			, DOC_KP_DDAY_CD
+			, FT_CR_DTTM
+			, LT_CR_DTTM
+			, FILE_DTL_CONT
+			, USE_YN
+			, V_ORDER
+			, REG_ID
+			, REG_DTTM
+			, UPD_ID
+			, UPD_DTTM
+		)
+		VALUES (
+			#docId:VARCHAR#
+			, (SELECT NVL(MAX(FILE_SEQ), 0)+1 FROM TB_DOC_INF_FILE WHERE DOC_ID = #docId:VARCHAR#)
+			<isNotEmpty property="srcFileSeq">	<!-- 기준문서가 있는경우 파일 버전 증가 -->
+				, (SELECT MAX(FILE_VER_NO)+1 FROM TB_DOC_INF_FILE WHERE DOC_ID = #docId:VARCHAR# AND FILE_SEQ = #srcFileSeq:NUMERIC# )
+			</isNotEmpty>
+			, #srcFileNm:VARCHAR#
+			, #saveFileNm:VARCHAR#
+			, #viewFileNm:VARCHAR#
+			, #fileSize:NUMERIC#
+			, #fileExt:VARCHAR#
+			, #tmnlImgFile:VARCHAR#
+			, #srcFileSeq:NUMERIC#
+			, #srcFileDocId:VARCHAR#
+			, REGEXP_REPLACE(#prdcYmd:VARCHAR#, '-', '')
+			, #docKpDdayCd:VARCHAR#
+			, SYSDATE
+			, SYSDATE
+			, #fileDtlCont:CLOB#
+			, #fileUseYn:VARCHAR#
+			, (SELECT NVL(MAX(V_ORDER), 0)+1 FROM TB_DOC_INF_FILE WHERE DOC_ID = #docId:VARCHAR#)
+			, #regId:VARCHAR#
+			, SYSDATE
+			, #updId:VARCHAR#
+			, SYSDATE
+		)
+	</insert>
+	
+	<!-- 정보공개 문서 파일을 수정한다.  -->
+	<update id="docInfMgmtDao.updateDocInfFile" parameterClass="params">
+		/* sql id : docInfMgmtDao.updateDocInfFile */
+		UPDATE  TB_DOC_INF_FILE
+		SET     
+			VIEW_FILE_NM		= #viewFileNm:VARCHAR#
+			, USE_YN			= #fileUseYn:VARCHAR#
+			, PRDC_YMD			= REGEXP_REPLACE(#prdcYmd:VARCHAR#, '-', '')
+			, DOC_KP_DDAY_CD	= #docKpDdayCd:VARCHAR#
+			, SRC_FILE_DOC_ID	= #srcFileDocId:VARCHAR#
+			, FILE_DTL_CONT		= #fileDtlCont:CLOB#
+			, UPD_ID			= #updId:VARCHAR#
+			, UPD_DTTM		    = SYSDATE
+			<isEmpty property="srcFileSeq">
+				, FILE_VER_NO  = 1
+				, SRC_FILE_SEQ = ''
+			</isEmpty>
+			<isNotEmpty property="srcFileSeq">
+			, (FILE_VER_NO, SRC_FILE_SEQ) = 
+				(SELECT CASE WHEN NVL(SRC_FILE_SEQ, 0) != TO_NUMBER(#srcFileSeq:NUMERIC#) 
+							 THEN (SELECT NVL(MAX(FILE_VER_NO), 1)+1 FROM TB_DOC_INF_FILE WHERE DOC_ID = #docId:VARCHAR# AND SRC_FILE_SEQ = #srcFileSeq:NUMERIC#) 
+							 ELSE FILE_VER_NO 
+					 	END, 
+						CASE WHEN NVL(SRC_FILE_SEQ, 0) != TO_NUMBER(#srcFileSeq:NUMERIC#) THEN TO_NUMBER(#srcFileSeq:NUMERIC#) ELSE SRC_FILE_SEQ END
+				 FROM   TB_DOC_INF_FILE
+				 WHERE  DOC_ID   = #docId:VARCHAR#
+				 AND    FILE_SEQ = #fileSeq:NUMERIC#
+			 )
+			</isNotEmpty>
+			<isNotEmpty property="tmnlImgFile">
+				, TMNL_IMG_FILE = #tmnlImgFile:VARCHAR#
+			</isNotEmpty>
+			<isNotEmpty property="srcFileNm">
+				, SRC_FILE_NM = #srcFileNm:VARCHAR#
+			</isNotEmpty>
+			<isNotEmpty property="saveFileNm">
+				, SAVE_FILE_NM = #saveFileNm:VARCHAR#
+			</isNotEmpty>
+			<isNotEmpty property="fileExt">
+				, FILE_EXT = #fileExt:VARCHAR#
+			</isNotEmpty>
+			<isNotEmpty property="fileSize">
+				, FILE_SIZE = #fileSize:NUMERIC#
+			</isNotEmpty>
+		WHERE   DOC_ID   = #docId:VARCHAR#
+		AND     FILE_SEQ = #fileSeq:NUMERIC#
+	</update>
+	
+	<!-- 정보공개 문서 파일을 조회한다.  -->
+	<select id="docInfMgmtDao.selectDocInfFile" parameterClass="params" resultClass="record">
+		/* sql id : docInfMgmtDao.selectDocInfFile */
+		SELECT 
+			DOC_ID				AS "docId"
+			, FILE_SEQ			AS "fileSeq"
+			, FILE_VER_NO		AS "fileVerNo"
+			, FILE_CD			AS "fileCd"
+			, FILE_EXT			AS "fileExt"
+			, PRDC_YMD			AS "prdcYmd"
+			, DOC_KP_DDAY_CD	AS "docKpDdayCd"
+			, SRC_FILE_SEQ		AS "srcFileSeq"
+			, SRC_FILE_DOC_ID	AS "srcFileDocId"
+			, FILE_DTL_CONT		AS "fileDtlCont"
+			, USE_YN			AS "useYn"
+			, V_ORDER			AS "vOrder"
+			, TMNL_IMG_FILE		AS "tmnlImgFile"
+			, SUBSTR(SRC_FILE_NM, 0, INSTR(SRC_FILE_NM, '.', -1)-1)			  AS "srcFileNm"
+			, SUBSTR(SAVE_FILE_NM, 0, INSTR(SAVE_FILE_NM, '.', -1)-1)		  AS "saveFileNm"
+			, SUBSTR(VIEW_FILE_NM, 0, INSTR(VIEW_FILE_NM, '.', -1)-1)		  AS "viewFileNm"
+			, FN_GET_DMPOINT(FN_GET_BYTE2UC(FILE_SIZE,  'KB' ), '0') || ' KB' AS "fileSize"
+		FROM
+			TB_DOC_INF_FILE	
+		WHERE
+			DOC_ID = #docId:VARCHAR#
+		<isNotEmpty property="fileSeq">
+			AND FILE_SEQ = #fileSeq:NUMERIC#
+		</isNotEmpty>
+		ORDER BY V_ORDER
+	</select>
+	
+	<!-- 정보공개 문서 파일을 삭제한다.  -->
+	<delete id="docInfMgmtDao.deleteDocInfFile" parameterClass="params">
+		/* sql id : docInfMgmtDao.deleteDocInfFile */
+		DELETE FROM TB_DOC_INF_FILE
+		WHERE  DOC_ID = #docId:VARCHAR#
+		AND    FILE_SEQ = #fileSeq:NUMERIC#
+	</delete>
+	
+	<!-- 문서공개 원본 파일 고유번호를 조회 -->
+	<select id="docInfMgmtDao.selectDocInfFileSrcFileSeq" parameterClass="params" resultClass="record">
+		/* sql id : docInfMgmtDao.selectDocInfFileSrcFileSeq */
+		SELECT
+		    A.FILE_SEQ	AS "fileSeq",
+		    SUBSTR(A.VIEW_FILE_NM, 0, INSTR(A.VIEW_FILE_NM, '.') - 1) AS "viewFileNm"
+		FROM
+		    TB_DOC_INF_FILE A
+		WHERE
+		    DOC_ID = #docId:VARCHAR#
+		    AND FILE_VER_NO = 1	
+		<isNotEmpty property="fileSeq">
+		    AND FILE_SEQ != #fileSeq:NUMERIC#
+		</isNotEmpty>
+	</select>
+	
+	<!-- 정보공개 첨부파일 순서를 조정한다.  -->
+	<update id="docInfMgmtDao.saveDocInfFileOrder" parameterClass="params">
+		/* sql id : docInfMgmtDao.saveDocInfFileOrder */
+		UPDATE TB_DOC_INF_FILE
+		SET    V_ORDER 	= #vOrder:NUMERIC#
+		WHERE  DOC_ID 	= #docId:VARCHAR#
+		AND    FILE_SEQ = #fileSeq:NUMERIC#
+	</update>
+	
+</sqlMap>

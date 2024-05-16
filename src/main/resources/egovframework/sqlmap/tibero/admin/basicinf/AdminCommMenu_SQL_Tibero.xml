@@ -1,0 +1,377 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="CommMenu">
+	<typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+	<resultMap id="CommMenuList" class="egovframework.admin.basicinf.service.CommMenu">
+		<result property="menuId"    column="MENU_ID"     />
+		<result property="menuIdPar"    column="PAR_MENU_ID"     />
+		<result property="level"   	 column="LEVEL"    />
+		<result property="menuTitle"   	 column="MEMU_TITLE"    />
+		<result property="reCnt"    column="RE_CNT"     />
+		<result property="menuNm"    column="MENU_NM"     />
+		<result property="menuUrl"   column="MENU_URL"    />
+		<result property="menuAcc"   column="MENU_ACC"    />
+		<result property="menuNav"   column="MENU_NAV"    />
+		<result property="menuParam"   column="MENU_PARAM"    />
+	</resultMap>
+	
+	<resultMap id="CommMenuGridList" class="egovframework.admin.basicinf.service.CommMenu">
+		<result property="menuId"    	column="MENU_ID"     />
+		<result property="menuNm"    	column="MENU_NM"     />
+		<result property="menuUrl"   	column="MENU_URL"    />
+		<result property="menuParam"   	column="MENU_PARAM"    />
+		<result property="Level"	  	column="LEVEL"       />
+		<result property="menuLv"	  	column="MENU_LV"       />
+		<result property="useYn"	  	column="USE_YN"       />
+		<result property="vOrder"	  	column="V_ORDER"       />
+		<result property="menuIdTop"	column="TOP_MENU_ID"       />
+		<result property="menuSiteCd"	column="MENU_SITE_CD"       />
+	</resultMap>
+	
+	<resultMap id="CommMenuGridListKeywd" class="egovframework.admin.basicinf.service.CommMenu">
+		<result property="menuId"    	column="MENU_ID"     />
+		<result property="menuNm"    	column="MENU_NM"     />
+		<result property="menuUrl"   	column="MENU_URL"    />
+		<result property="menuParam"   	column="MENU_PARAM"    />
+		<result property="menuLv"	  	column="MENU_LV"       />
+		<result property="useYn"	  	column="USE_YN"       />
+		<result property="vOrder"	  	column="V_ORDER"       />
+	</resultMap>
+	
+	<resultMap id="CommMenuListInfo" class="egovframework.admin.basicinf.service.CommMenu">
+		<result property="menuId"    		column="MENU_ID"			jdbcType="DECIMAL"     />
+		<result property="menuIdPar"   		column="PAR_MENU_ID"		jdbcType="DECIMAL"     />
+		<result property="menuIdParDesc"	column="PAR_MENU_ID_DESC"   jdbcType="VARCHAR" />
+		<result property="menuNm"    		column="MENU_NM"    		jdbcType="VARCHAR" />
+		<result property="menuUrl"   		column="MENU_URL"   		jdbcType="VARCHAR" />
+		<result property="menuParam"   		column="MENU_PARAM" 		jdbcType="VARCHAR"   />
+		<result property="menuDesc"	  		column="MENU_DESC"  		jdbcType="VARCHAR"     />
+		<result property="useYn"	  		column="USE_YN"     		jdbcType="VARCHAR"  />
+		<result property="vOrder"	  		column="V_ORDER"     		jdbcType="DECIMAL"  />
+		<result property="menuIdTop"   		column="TOP_MENU_ID"    	jdbcType="VARCHAR" />
+		<result property="viewYn"   		column="VIEW_YN"    	jdbcType="VARCHAR" />
+		<result property="beforeMenuSiteCd"   		column="BEFORE_MENU_SITE_CD"    	jdbcType="VARCHAR" />
+	</resultMap>
+	
+	<select id="CommMenuDAO.selectCommMenuList" parameterClass="egovframework.admin.basicinf.service.CommUsr" resultMap="CommMenuList" >
+			SELECT
+			          M.MENU_ID, M.PAR_MENU_ID, LEVEL
+			           , (CASE WHEN LEVEL> 1 THEN '└' ELSE '' END) || LPAD(' ',  LEVEL, '→')  ||  M.MENU_NM AS MEMU_TITLE
+			           , 1 AS RE_CNT
+			           , M.MENU_NM
+			           , M.MENU_URL
+			           , C.MENU_ACC
+			           	<![CDATA[
+			           ,SUBSTR(SYS_CONNECT_BY_PATH(M.MENU_NM, ' > '),4) AS MENU_NAV
+			           ]]>
+			           ,M.MENU_PARAM
+			FROM   TB_COMM_MENU  M 
+			INNER JOIN  TB_COMM_MENUACC C 
+				ON M.MENU_ID = C.MENU_ID 
+					AND C.MENU_ACC > 0 
+					<isNotEmpty property="accCd" >
+					AND C.ACC_CD = #accCd#
+					</isNotEmpty>
+					AND M.USE_YN = 'Y'	
+			WHERE  1=1  
+		    AND    EXISTS ( 
+		               SELECT 1 FROM TB_COMM_MENU A
+		               WHERE 1 = 1 
+		               <isEqual property="menuSiteCd" compareValue="N" >
+						 AND MENU_SITE_CD = 'MN101'
+		 				</isEqual>
+						 <isEqual property="menuSiteCd" compareValue="Y" >
+						 AND MENU_SITE_CD = 'PN201'
+						 </isEqual>
+		               START WITH A.MENU_ID = M.MENU_ID  AND A.USE_YN = 'Y'
+		               CONNECT BY PRIOR A.MENU_ID = A.PAR_MENU_ID AND A.USE_YN = 'Y'
+		               ) 
+			<isNotEmpty property="menuUrl" prepend="AND">
+				M.MENU_URL LIKE '%'|| #menuUrl# || '%'
+			</isNotEmpty>
+			<isNotEmpty property="menuParam" prepend="AND">
+				M.MENU_PARAM LIKE '%' ||  #menuParam:VARCHAR# || '%'
+			</isNotEmpty> 
+			<isEmpty property="menuParam" prepend="AND">
+				<isEmpty property="menuTop">
+					M.MENU_PARAM IS NULL
+				</isEmpty>
+				<isNotEmpty property="menuTop">
+					<isEqual property="menuTop" compareValue="false">
+						M.MENU_PARAM IS NULL
+					</isEqual>
+				</isNotEmpty>
+			</isEmpty>
+			START WITH ( M.PAR_MENU_ID = 0 AND M.USE_YN = 'Y'
+			<isNotEmpty property="accCd" >
+				AND C.ACC_CD = #accCd#
+			</isNotEmpty>
+				)
+			CONNECT BY PRIOR M.MENU_ID = M.PAR_MENU_ID  AND M.USE_YN = 'Y'
+			<isNotEmpty property="accCd" >
+				AND C.ACC_CD = #accCd#
+			</isNotEmpty>
+			ORDER SIBLINGS BY M.V_ORDER
+	</select> 
+	
+	<!-- 전체 리스트 조회 -->
+	<select id="CommMenuDAO.selectMenuList" parameterClass="egovframework.admin.basicinf.service.CommMenu" resultMap="CommMenuGridList" >
+		SELECT
+				MENU_ID
+			  , TOP_MENU_ID
+			  , MENU_NM
+			  , MENU_URL
+			  , MENU_PARAM
+			  , LEVEL
+			  , LEVEL AS MENU_LV
+			  , DECODE(USE_YN, 'Y', 1, 'N', 0) AS USE_YN
+			  , V_ORDER
+			  , MENU_SITE_CD
+		  FROM 
+				TB_COMM_MENU
+		 WHERE  1=1
+		 AND MENU_SITE_CD = #menuSiteCd#
+		 		START WITH PAR_MENU_ID = 0
+				CONNECT BY PRIOR MENU_ID = PAR_MENU_ID
+				ORDER SIBLINGS BY V_ORDER
+		 
+	</select>
+	
+	<!-- 전체 리스트 조회 건수 -->
+	<select id="CommMenuDAO.selectMenuListCnt" parameterClass="egovframework.admin.basicinf.service.CommMenu" resultClass="java.lang.Integer" >
+		SELECT COUNT(*)
+		  FROM 
+				TB_COMM_MENU
+		 		START WITH PAR_MENU_ID = 0
+				CONNECT BY PRIOR MENU_ID = PAR_MENU_ID
+				ORDER SIBLINGS BY V_ORDER
+	</select>
+	
+	<!-- 키워드 조회 -->
+	<select id="CommMenuDAO.selectMenuListKeywd" parameterClass="egovframework.admin.basicinf.service.CommMenu" resultMap="CommMenuGridListKeywd" >
+		SELECT
+				MENU_ID
+			  , MENU_NM
+			  , MENU_URL
+			  , MENU_PARAM
+			  , 0 AS MENU_LV
+			  , DECODE(USE_YN, 'Y', 1, 'N', 0) AS USE_YN
+			  , V_ORDER
+			  
+		  FROM 
+				TB_COMM_MENU A
+		 WHERE  1=1 
+		   		<isNotEmpty property="searchWord" >
+					<isEqual property="searchWd" compareValue="1">
+					AND A.MENU_NM LIKE '%'||#searchWord#||'%'
+					</isEqual>
+					<isEqual property="searchWd" compareValue="2">
+					AND A.MENU_URL LIKE '%'||#searchWord#||'%'
+					</isEqual>
+				</isNotEmpty>
+				<isEqual property="useYn" compareValue="Y" >
+					AND A.USE_YN = 'Y'
+				</isEqual>	
+				<isEqual property="useYn" compareValue="N" >
+					AND A.USE_YN = 'N'
+				</isEqual>
+	 		 
+	</select>
+	
+	<!-- 키워드 조회 건수 -->
+	<select id="CommMenuDAO.selectMenuListKeywdCnt" parameterClass="egovframework.admin.basicinf.service.CommMenu" resultClass="java.lang.Integer" >
+		SELECT  COUNT(*)
+		  FROM 
+				TB_COMM_MENU A
+		 WHERE  1=1 
+		   		<isNotEmpty property="searchWord" >
+					<isEqual property="searchWd" compareValue="0" >
+					AND A.MENU_ID LIKE '%'||#searchWord:VARCHAR#||'%'
+					</isEqual>
+					<isEqual property="searchWd" compareValue="1">
+					AND A.MENU_NM LIKE '%'||#searchWord:VARCHAR#||'%'
+					</isEqual>
+					<isEqual property="searchWd" compareValue="2">
+					AND A.MENU_URL LIKE '%'||#searchWord:VARCHAR#||'%'
+					</isEqual>
+				</isNotEmpty>
+	</select>
+	
+	<!-- 상세 조회 -->
+	<select id="CommMenuDAO.selectMenuListInfo" parameterClass="egovframework.admin.basicinf.service.CommMenu" resultMap="CommMenuListInfo" >
+		SELECT
+				A.MENU_ID
+			  , A.PAR_MENU_ID
+			  , CASE WHEN A.PAR_MENU_ID != 0 
+			         THEN (SELECT B.MENU_NM FROM TB_COMM_MENU B 
+			         		WHERE A.PAR_MENU_ID = B.MENU_ID)
+			    ELSE      'X'
+			    END PAR_MENU_ID_DESC
+			  , A.MENU_NM
+			  , A.TOP_MENU_ID
+			  , A.MENU_URL
+			  , A.MENU_PARAM
+			  , A.MENU_DESC
+			  , A.USE_YN
+			  , A.V_ORDER
+			  , A.VIEW_YN
+			  , CASE WHEN A.MENU_SITE_CD = 'PN201' THEN 'Y' 
+			         WHEN A.MENU_SITE_CD = 'MN101' THEN 'N' END BEFORE_MENU_SITE_CD
+		  FROM 
+				TB_COMM_MENU A 
+		 WHERE   
+				MENU_ID=#menuId:NUMERIC#
+	 		 
+	</select>
+	
+	<!-- 메뉴 ID 조회(최대값+1) -->
+	<select id="CommMenuDAO.getMenuId" parameterClass="egovframework.admin.basicinf.service.CommMenu" resultClass="java.lang.Integer">
+		SELECT NVL(MAX(MENU_ID), 0)+1
+		 FROM TB_COMM_MENU
+	</select>
+	
+	<!-- 상세조회 하위메뉴 리스트 -->
+	<select id="CommMenuDAO.selectCommLowMenuList" parameterClass="egovframework.admin.basicinf.service.CommMenu" resultMap="CommMenuGridList" >
+		SELECT
+				MENU_ID
+			  , MENU_NM
+			  , MENU_URL
+			  , MENU_PARAM	
+			  , LEVEL
+			  , LEVEL AS MENU_LV
+			  , USE_YN
+			  , V_ORDER
+			  , TOP_MENU_ID
+			  , MENU_SITE_CD
+		  FROM 
+				TB_COMM_MENU
+		 		START WITH MENU_ID = #menuId:NUMERIC#
+				CONNECT BY PRIOR MENU_ID = PAR_MENU_ID
+				ORDER SIBLINGS BY V_ORDER
+	 		 
+	</select>
+	
+	<!-- 상세조회 하위메뉴 카운팅 -->
+	<select id="CommMenuDAO.selectCommLowMenuListCnt" parameterClass="egovframework.admin.basicinf.service.CommMenu" resultClass="java.lang.Integer" >
+		SELECT  COUNT(*)
+		  FROM 
+				TB_COMM_MENU
+		 		START WITH MENU_ID = #menuId:NUMERIC#
+				CONNECT BY PRIOR MENU_ID = PAR_MENU_ID
+				ORDER SIBLINGS BY V_ORDER
+	</select>
+	
+	<!-- 상위메뉴 팝업 조회 -->
+	<select id="CommMenuDAO.selectCommHighMenuList" parameterClass="egovframework.admin.basicinf.service.CommMenu" resultMap="CommMenuGridList" >
+		SELECT
+				MENU_ID
+			  , MENU_NM
+			  , MENU_URL
+			  , MENU_PARAM	
+			  , LEVEL
+			  , LEVEL AS MENU_LV
+			  
+		  FROM 
+				TB_COMM_MENU
+		 		START WITH PAR_MENU_ID = #menuIdPar:NUMERIC#
+				CONNECT BY MENU_ID = PAR_MENU_ID
+				ORDER SIBLINGS BY V_ORDER
+	 		 
+	</select>
+	
+	<!-- 상위 메뉴 조회 건수 -->
+	<select id="CommMenuDAO.selectCommHighMenuListCnt" parameterClass="egovframework.admin.basicinf.service.CommMenu" resultClass="java.lang.Integer" >
+			SELECT  COUNT(*)
+			  FROM 
+					TB_COMM_MENU
+			 		START WITH PAR_MENU_ID = #menuIdPar:NUMERIC#
+					CONNECT BY MENU_ID = PAR_MENU_ID
+					ORDER SIBLINGS BY V_ORDER
+	</select>
+	
+	<!-- 메뉴 등록 -->
+	<insert id="CommMenuDAO.insertMenu" parameterClass="egovframework.admin.basicinf.service.CommMenu" >
+		INSERT INTO TB_COMM_MENU
+			(  MENU_ID, MENU_NM
+			<isNotEmpty property="menuIdPar" >
+			 , PAR_MENU_ID
+			</isNotEmpty>
+			 , TOP_MENU_ID
+			 , MENU_FULLNM
+			 , MENU_URL, MENU_PARAM
+		     , MENU_DESC, V_ORDER, USE_YN, REG_ID, REG_DTTM
+		     , UPD_ID, UPD_DTTM
+		     , MENU_SITE_CD
+		     , VIEW_YN
+		    )
+		VALUES
+			( 
+			   #menuId:NUMERIC#
+			 , #menuNm:VARCHAR#
+			 <isNotEmpty property="menuIdPar" >
+			 , #menuIdPar:NUMERIC#
+			 </isNotEmpty>
+			 , NVL(#menuIdTop:NUMERIC#, 0)
+			 , #menuNm:VARCHAR#
+			 , #menuUrl:VARCHAR#
+			 , #menuParam:VARCHAR#
+			 , #menuDesc:VARCHAR#
+			 , 0
+			 , #useYn:CHAR#
+			 , #sessionUsrId:VARCHAR#
+			 , SYSDATE
+			 , #sessionUsrId:VARCHAR#
+			 , SYSDATE
+			 , #menuSiteCd:VARCHAR#
+		 	 , #viewYn:CHAR#
+			)
+	</insert>
+	
+	<!-- 메뉴 수정 -->	
+	<update id="CommMenuDAO.updateMenu" parameterClass="egovframework.admin.basicinf.service.CommMenu" >
+		<![CDATA[
+		UPDATE TB_COMM_MENU
+		  SET MENU_NM = #menuNm:VARCHAR#
+		  	, MENU_URL = #menuUrl:VARCHAR#
+		  	, MENU_PARAM = #menuParam:VARCHAR#
+		  	, MENU_DESC = #menuDesc:VARCHAR#
+			, USE_YN = #useYn:CHAR#
+			, V_ORDER = #vOrder:NUMERIC#
+			, UPD_ID = #sessionUsrId:VARCHAR#
+			, UPD_DTTM = SYSDATE
+			, PAR_MENU_ID = #menuIdPar:NUMERIC#
+			, TOP_MENU_ID = #menuIdTop:NUMERIC#
+		 	 ,VIEW_YN =  #viewYn:CHAR#
+		WHERE MENU_ID = #menuId:NUMERIC# 	
+		]]>
+	</update>
+	
+	<!-- 메뉴 삭제 -->
+	<update id="CommMenuDAO.deleteMenu" parameterClass="egovframework.admin.basicinf.service.CommMenu" >
+		DELETE FROM TB_COMM_MENU
+		 WHERE MENU_ID = #menuId:NUMERIC# 	
+	</update>
+	
+	
+	<update id="CommMenuDAO.commMenuListUpdateTreeOrder" parameterClass="egovframework.admin.basicinf.service.CommMenu" >
+		<![CDATA[
+		UPDATE   TB_COMM_MENU A 
+		   SET   A.V_ORDER = #vOrder:NUMERIC#
+		 WHERE   MENU_ID = #menuId:NUMERIC#        
+		]]>
+	</update>
+	
+	<!-- 메뉴 fullnm 업데이트 -->
+	<update id="CommMenuDAO.updateMenuFullnm" parameterClass="egovframework.admin.basicinf.service.CommMenu" >
+		<![CDATA[
+		UPDATE TB_COMM_MENU A
+		SET A.MENU_FULLNM = (SELECT LTRIM(SYS_CONNECT_BY_PATH (B.MENU_NM,'>'),'>') FROM TB_COMM_MENU B
+							 WHERE A.MENU_ID = B.MENU_ID
+							 START WITH B.PAR_MENU_ID = 0 
+							 CONNECT BY PRIOR B.MENU_ID = B.PAR_MENU_ID)
+		WHERE A.MENU_ID = #menuId:NUMERIC#
+		]]>  
+	</update>
+	
+</sqlMap>

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="OpenInfRe">
+	<resultMap id="OpenInfReAll" class="egovframework.admin.openinf.service.OpenInfRe">
+		<result property="infId" column="INF_ID"/>
+		<result property="infNm" column="INF_NM"/>
+		<result property="reSeq" column="RE_SEQ"/>
+		<result property="orgNm" column="ORG_NM"/>
+		<result property="reCont" column="RE_CONT"/>
+		<result property="regDttm" column="REG_DTTM"/>
+		<result property="delYn" column="DEL_YN"/>
+
+	</resultMap>
+	<select id="OpenInfReDao.openInfReListAll" parameterClass="egovframework.admin.openinf.service.OpenInfRe" resultMap="OpenInfReAll">
+		SELECT 
+			   A.INF_ID
+			  ,B.INF_NM
+			  ,A.RE_SEQ
+			  ,C.ORG_NM
+			  ,A.RE_CONT
+			  ,A.REG_DTTM
+			  ,A.DEL_YN
+		FROM TB_OPEN_INF_RE A
+			,TB_OPEN_INF B
+			,TB_COMM_ORG C
+		WHERE
+			A.INF_ID=B.INF_ID
+		AND B.ORG_CD=C.ORG_CD
+		<isNotEmpty property="searchWord">
+	 		<isEqual property="searchWd" compareValue="0">
+	 		AND ( B.INF_NM LIKE '%' || #searchWord#  || '%' 
+	 			 OR  B.INF_NM LIKE '%' || UPPER(#searchWord#)  || '%'
+	 			 OR  B.INF_NM LIKE '%' || LOWER(#searchWord#)  || '%'
+	 		 )
+	 		</isEqual>
+	 		<isEqual property="searchWd" compareValue="1">
+	 		AND ( C.ORG_NM LIKE '%' || #searchWord#  || '%' 
+	 			 OR  C.ORG_NM LIKE '%' || UPPER(#searchWord#)  || '%'
+	 			 OR  C.ORG_NM LIKE '%' || LOWER(#searchWord#)  || '%'
+	 		 )
+	 		</isEqual>
+	 	</isNotEmpty>
+		<isNotEmpty property="delYn">
+			AND A.DEL_YN = #delYn#
+		</isNotEmpty>
+		<isNotEmpty property="pubDttmFrom">	
+				AND A.REG_DTTM BETWEEN  TO_DATE(#pubDttmFrom#,'YYYY-MM-DD') AND TO_DATE(#pubDttmTo#,'YYYY-MM-DD') +1
+		</isNotEmpty>
+			ORDER BY REG_DTTM DESC
+	</select>
+	<update  id="OpenInfReDao.updateOpenInfRe" parameterClass="egovframework.admin.openinf.service.OpenInfRe">
+		UPDATE TB_OPEN_INF_RE
+		   SET DEL_YN = #delYn:CHAR#
+		 WHERE INF_ID = #infId:VARCHAR#
+		   AND RE_SEQ = #reSeq:NUMERIC#
+	</update>
+</sqlMap>
+

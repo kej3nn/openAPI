@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="portalBpmDate" >
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+	
+	<!-- 날짜별 의정활동 조회 -->
+	<sql id="bpmDate.col">
+		DT				AS "dt"
+		, BILL_KIND     AS "billKind"
+		, AGE           AS "age"
+		, BILL_ID       AS "billId"
+		, BILL_NO       AS "billNo"
+		, BILL_NM     	AS "billNm"
+		, STAGE         AS "stage"
+		, DTL_STAGE     AS "dtlStage"
+		, COMMITTEE     AS "committee"
+		, ACT_STATUS    AS "actStatus"
+		, LINK_URL		AS "linkUrl"
+	</sql>
+	<sql id="bpmDate.where">
+		WHERE 1=1
+		<isNotEmpty property="billNm" prepend=" AND ">
+			BILL_NM LIKE '%' || #billNm:VARCHAR# || '%'
+		</isNotEmpty>
+		<isNotEmpty property="stage" prepend=" AND ">
+			STAGE LIKE '%' || #stage:VARCHAR# || '%'
+		</isNotEmpty>
+		<isNotEmpty property="actStatus" prepend=" AND ">
+			ACT_STATUS LIKE '%' || #actStatus:VARCHAR# || '%'
+		</isNotEmpty>
+		<isNotEmpty property="committee" prepend=" AND ">
+			COMMITTEE LIKE '%' || #committee:VARCHAR# || '%'
+		</isNotEmpty>
+		<isNotEmpty property="frDt" prepend=" AND ">
+			<![CDATA[ DT >= #frDt:VARCHAR# ]]>
+		</isNotEmpty>
+		<isNotEmpty property="toDt" prepend=" AND ">
+			<![CDATA[ DT <= #toDt:VARCHAR# ]]> 
+		</isNotEmpty>
+	</sql>
+	
+	<select id="bpmDateDao.searchBpmDate" remapResults="true" parameterClass="params" resultClass="record">
+		/* sql id : bpmDateDao.searchBpmDate */
+		<isEqual property="paging" compareValue="0">
+		SELECT AA.* 
+		FROM   (SELECT ROWNUM AS ROW_NUM, AA.*
+				FROM   (
+		</isEqual>
+		
+			SELECT
+			    <include refid="bpmDate.col"/>
+			FROM
+				TV_BILL_ACT
+			<include refid="bpmDate.where"/>
+		<isEqual property="paging" compareValue="0">
+		<![CDATA[
+				) AA
+			WHERE ROWNUM <= #end:NUMERIC#
+			) AA
+		WHERE AA.ROW_NUM >= #start:NUMERIC#
+		]]>
+		</isEqual>
+	</select>
+	<select id="bpmDateDao.searchBpmDateCount" parameterClass="params" resultClass="int">
+		/* sql id : bpmDateDao.searchBpmDateCount */
+		SELECT
+		    COUNT(*)
+		FROM
+		    TV_BILL_ACT A
+		<include refid="bpmDate.where"/>
+	</select>
+	
+	<!-- 캘린더 데이터 조회(월단위로) -->
+	<select id="bpmDateDao.searchDateCalendar" parameterClass="Params" resultClass="record">
+		/* sql id : bpmDateDao.searchDateCalendar */
+		SELECT MEETTING_DATE AS "meettingDate" 
+		FROM (
+			SELECT TO_CHAR(SYSDATE, 'YYYY-MM-DD') AS MEETTING_DATE FROM DUAL
+			UNION ALL SELECT TO_CHAR(SYSDATE-1, 'YYYY-MM-DD') FROM DUAL
+			UNION ALL SELECT TO_CHAR(SYSDATE-3, 'YYYY-MM-DD') FROM DUAL
+			UNION ALL SELECT TO_CHAR(SYSDATE-4, 'YYYY-MM-DD') FROM DUAL
+			UNION ALL SELECT TO_CHAR(SYSDATE-6, 'YYYY-MM-DD') FROM DUAL
+			UNION ALL SELECT TO_CHAR(SYSDATE-7, 'YYYY-MM-DD') FROM DUAL
+			UNION ALL SELECT TO_CHAR(SYSDATE-8, 'YYYY-MM-DD') FROM DUAL
+			UNION ALL SELECT TO_CHAR(SYSDATE-10, 'YYYY-MM-DD') FROM DUAL
+			UNION ALL SELECT TO_CHAR(SYSDATE-11, 'YYYY-MM-DD') FROM DUAL
+			UNION ALL SELECT TO_CHAR(SYSDATE-13, 'YYYY-MM-DD') FROM DUAL
+			UNION ALL SELECT TO_CHAR(SYSDATE-17, 'YYYY-MM-DD') FROM DUAL
+			UNION ALL SELECT TO_CHAR(SYSDATE-18, 'YYYY-MM-DD') FROM DUAL
+			UNION ALL SELECT TO_CHAR(SYSDATE-20, 'YYYY-MM-DD') FROM DUAL
+			UNION ALL SELECT TO_CHAR(SYSDATE-23, 'YYYY-MM-DD') FROM DUAL
+			UNION ALL SELECT TO_CHAR(SYSDATE-26, 'YYYY-MM-DD') FROM DUAL
+			UNION ALL SELECT TO_CHAR(SYSDATE-30, 'YYYY-MM-DD') FROM DUAL
+			UNION ALL SELECT TO_CHAR(SYSDATE-31, 'YYYY-MM-DD') FROM DUAL
+			UNION ALL SELECT TO_CHAR(SYSDATE-37, 'YYYY-MM-DD') FROM DUAL
+			UNION ALL SELECT TO_CHAR(SYSDATE-39, 'YYYY-MM-DD') FROM DUAL
+			UNION ALL SELECT TO_CHAR(SYSDATE-42, 'YYYY-MM-DD') FROM DUAL
+			UNION ALL SELECT TO_CHAR(SYSDATE-46, 'YYYY-MM-DD') FROM DUAL
+			UNION ALL SELECT TO_CHAR(SYSDATE-50, 'YYYY-MM-DD') FROM DUAL
+			UNION ALL SELECT TO_CHAR(SYSDATE-52, 'YYYY-MM-DD') FROM DUAL
+		)
+		<isEmpty property="meettingYM">
+			WHERE 1=2
+		</isEmpty>
+		<isNotEmpty property="meettingYM">
+			WHERE MEETTING_DATE LIKE '%' || #meettingYM:VARCHAR# || '%'
+		</isNotEmpty>
+		ORDER BY MEETTING_DATE
+	</select>
+	
+</sqlMap>

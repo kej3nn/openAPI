@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- @(#)PortalOpenInfSrv_Sql_Tibero.xml 1.0 2015/06/15                      -->
+<!--                                                                         -->
+<!-- COPYRIGHT (C) 2013 WISEITECH CO., LTD. ALL RIGHTS RESERVED.             -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- 공공데이터 서비스를 관리하는 SQL 파일이다.                              -->
+<!--                                                                         -->
+<!-- @author 김은삼                                                          -->
+<!-- @version 1.0 2015/06/15                                                 -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<sqlMap namespace="PortalOpenInfSrvDao">
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Type Alias                                                          -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 공공데이터 서비스 메타정보를 조회한다.                              -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+   <select id="PortalOpenInfSrvDao.selectOpenInfSrvMeta" parameterClass="params" resultClass="record">
+    	/* sql id : PortalOpenInfSrvDao.selectOpenInfSrvMeta */
+    <![CDATA[
+         SELECT 'O' AS "opentyTag", 
+		        '데이터' AS "opentyTagNm",
+		        (
+				   		SELECT LISTAGG(INF_ID,'|') WITHIN GROUP (ORDER BY OPEN_DTTM) AS INF_IDS
+				   		FROM TB_OPEN_INF TOI 
+				   		WHERE O.INF_NM=TOI.INF_NM
+                ) AS "openInfIds", 
+                (
+				   		SELECT LISTAGG(TO_CHAR(OPEN_DTTM, 'YY-MM-DD'),'|') WITHIN GROUP (ORDER BY OPEN_DTTM) AS OPEN_DTTMS
+				   		FROM TB_OPEN_INF TOI 
+				   		WHERE O.INF_NM=TOI.INF_NM
+                ) AS "openDttms", 
+		        O.INF_ID AS "infId", 
+		        O.SEQ AS "seq", 
+		        O.INF_NM "infNm", 
+		        O.TOP_CATE_ID AS "topCateId", 
+		        C.CATE_NM AS "topCateNm", 
+		        C.SAVE_FILE_NM AS "cateSaveFileNm", 
+		       (SELECT NVL(AVG(APPR_VAL), 0) FROM TB_OPEN_INF_APPR WHERE INF_ID = O.INF_ID ) AS "apprVal",
+		        O.SRC_YN AS "srcYn", 
+		        O.SRC_URL AS "srcUrl", 
+		        O.SRC_EXP AS "srcExp", 
+		        O.CCL_CD AS "cclCd", 
+		        o.CCL_NM AS "cclNm", 
+		        FN_GET_COMM_VALUE_CD('D1008', O.CCL_CD) AS "cclFileNm", 
+		        O.CATE_FULLNM AS "cateFullnm", 
+		        O.TOP_ORG_NM AS "orgNm", 
+		        O.SCHW_TAG_CONT AS "infTag", 
+		        O.INF_EXP AS "infExp", 
+		        O.LOAD_CD AS "loadCd", 
+		        O.LOAD_NM AS "loadNm", 
+		        TO_CHAR(O.LOAD_DTTM, 'YYYY-MM-DD') AS "loadDttm", 
+		        TO_CHAR(O.OPEN_DTTM, 'YYYY-MM-DD') AS "openDttm",  
+		        DATA_DTTM_CONT 					   AS "dataDttmCont",
+		        S.INF_SEQ AS "infSeq", 
+		       S.SCOL_INF_SEQ AS "scolInfSeq", 
+		       S.CCOL_INF_SEQ AS "ccolInfSeq", 
+		       S.MCOL_INF_SEQ AS "mcolInfSeq", 
+		       S.FILE_INF_SEQ AS "fileInfSeq", 
+		       S.ACOL_INF_SEQ AS "acolInfSeq", 
+		       S.LINK_INF_SEQ AS "linkInfSeq", 
+		       S.VISL_INF_SEQ AS "vislInfSeq", 
+		      (CASE WHEN S.SCOL_INF_SEQ  =#infSeq:NUMERIC# THEN 'S'
+		       		 WHEN S.CCOL_INF_SEQ =#infSeq:NUMERIC# THEN 'C'
+		       		 WHEN S.MCOL_INF_SEQ =#infSeq:NUMERIC# THEN 'M'
+		             WHEN S.FILE_INF_SEQ =#infSeq:NUMERIC# THEN 'F'
+		             WHEN S.ACOL_INF_SEQ =#infSeq:NUMERIC# THEN 'A'
+		             WHEN S.LINK_INF_SEQ =#infSeq:NUMERIC# THEN 'L'
+		             WHEN S.VISL_INF_SEQ =#infSeq:NUMERIC# THEN 'V'
+		             ELSE S.SRV_CD END ) AS "srvCd"
+		  FROM TV_OPEN_INF O 
+		   INNER JOIN 
+		       (SELECT A.INF_ID , 
+		              B.INF_SEQ, 
+		              B.SRV_CD , 
+		              A.SCOL_INF_SEQ, 
+		              A.CCOL_INF_SEQ, 
+		              A.MCOL_INF_SEQ, 
+		              A.FILE_INF_SEQ, 
+		              A.ACOL_INF_SEQ, 
+		              A.LINK_INF_SEQ , 
+		              A.VISL_INF_SEQ 
+		         FROM 
+		              (SELECT INF_ID AS INF_ID,
+		                       MIN ( CASE SRV_CD WHEN 'S' THEN INF_SEQ END ) AS SCOL_INF_SEQ,
+		                       MIN ( CASE SRV_CD WHEN 'C' THEN INF_SEQ END ) AS CCOL_INF_SEQ,
+		                       MIN ( CASE SRV_CD WHEN 'M' THEN INF_SEQ END ) AS MCOL_INF_SEQ,
+		                       MIN ( CASE SRV_CD WHEN 'F' THEN INF_SEQ END ) AS FILE_INF_SEQ,
+		                       MIN ( CASE SRV_CD WHEN 'A' THEN INF_SEQ END ) AS ACOL_INF_SEQ,
+		                       MIN ( CASE SRV_CD WHEN 'L' THEN INF_SEQ END ) AS LINK_INF_SEQ,
+		                       MIN ( CASE SRV_CD WHEN 'V' THEN INF_SEQ END ) AS VISL_INF_SEQ,
+		                       MIN ( INF_SEQ) AS FIRST_INF_SEQ
+		                  FROM TB_OPEN_INF_SRV A
+		                  WHERE INF_ID = #infId:VARCHAR#
+		                       AND SRV_YN = 'Y'
+		                       AND SRV_CD IN ('S', 'C', 'M', 'F', 'A', 'L', 'V')
+		                  GROUP BY INF_ID
+		              ) A 
+		          INNER JOIN TB_OPEN_INF_SRV B 
+		              ON B.INF_ID = A.INF_ID 
+		              AND B.INF_SEQ = A.FIRST_INF_SEQ 
+		       ) S 
+		       ON O.INF_ID = S.INF_ID 
+		   INNER JOIN TB_OPEN_CATE C 
+		       ON O.TOP_CATE_ID = C.CATE_ID 
+		       AND C.USE_YN = 'Y'
+    ]]>
+    </select>
+     
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 공공데이터 서비스 조회이력을 등록한다.                              -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <insert id="PortalOpenInfSrvDao.insertOpenInfSrvHist" parameterClass="params">
+    	/* sql id : PortalOpenInfSrvDao.insertOpenInfSrvHist */
+         INSERT INTO TB_LOG_OPEN_INF_SRV
+                (
+                    SEQCE_NO,
+                    INF_ID,
+                    INF_SEQ,
+                    SRV_CD,
+                    SYS_TAG,
+                    USER_CD,
+                    USER_IP,
+                    REG_DTTM
+                )
+         SELECT SQ_LOG_SEQ.NEXTVAL AS "seqceNo",
+                A.INF_ID           AS "infId",
+                A.INF_SEQ          AS "infSeq",
+                A.SRV_CD           AS "srvCd",
+                #sysTag:CHAR#           AS "sysTag",
+                #userCd:NUMERIC#   AS "userCd",
+                #userIp:VARCHAR#           AS "userIp",
+                SYSDATE            AS "regDttm"
+           FROM TB_OPEN_INF_SRV     A
+          WHERE A.INF_ID            = #infId:VARCHAR#
+            AND A.INF_SEQ           = #infSeq:NUMERIC#
+    </insert>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 공공데이터 서비스 조회수를 수정한다.                                -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <update id="PortalOpenInfSrvDao.updateOpenInfSrvHits" parameterClass="params">
+    /* sql id : PortalOpenInfSrvDao.updateOpenInfSrvHits */
+         UPDATE TB_OPEN_INF_SRV A
+            SET A.VIEW_CNT      = NVL(A.VIEW_CNT, 0) + 1
+          WHERE A.INF_ID        = #infId:VARCHAR#
+            AND A.INF_SEQ       = #infSeq:NUMERIC#
+    </update>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 공공데이터 서비스 저장이력을 등록한다.                              -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <insert id="PortalOpenInfSrvDao.insertOpenInfSavHist" parameterClass="params">
+    /* sql id : PortalOpenInfSrvDao.insertOpenInfSavHist */
+         INSERT INTO TB_LOG_OPEN_INF_SAVE
+                (
+                    SEQCE_NO,
+                    INF_ID,
+                    INF_SEQ,
+                    SRV_CD,
+                    SYS_TAG,
+                    USER_CD,
+                    USER_IP,
+                    SAVE_EXT,
+                    ROW_CNT,
+                    DB_SIZE,
+                    OUT_SIZE,
+                    LEADTIME,
+                    REG_DTTM
+                )
+         SELECT SQ_LOG_SEQ.NEXTVAL AS "seqceNo",
+                A.INF_ID           AS "infId",
+                A.INF_SEQ          AS "infSeq",
+                A.SRV_CD           AS "srvCd",
+                #sysTag:CHAR#           AS "sysTag",
+                #userCd:NUMERIC#   AS "userCd",
+                #userIp:VARCHAR#           AS "userIp",
+                #saveExt:VARCHAR#          AS "saveExt",
+                #rowCnt:NUMERIC#           AS "rowCnt",
+                #dbSize:NUMERIC#           AS "dbSize",
+                #outSize:NUMERIC#          AS "outSize",
+                #leadtime:NUMERIC#         AS "leadtime",
+                SYSDATE            AS "regDttm"
+           FROM TB_OPEN_INF_SRV     A
+          WHERE A.INF_ID            = #infId:VARCHAR#
+            AND A.INF_SEQ           = #infSeq:NUMERIC#
+    </insert>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 공공데이터 서비스 평가점수를 조회한다.                              -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="PortalOpenInfSrvDao.selectOpenInfSrvAppr" parameterClass="params" resultClass="record">
+     /* sql id : PortalOpenInfSrvDao.selectOpenInfSrvAppr */
+         SELECT AVG(A.APPR_VAL) AS "apprVal"
+           FROM TB_OPEN_INF_APPR A
+          WHERE A.INF_ID         = #infId:VARCHAR#
+    </select>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 공공데이터 서비스 평가점수를 등록한다.                              -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <insert id="PortalOpenInfSrvDao.insertOpenInfSrvAppr" parameterClass="params">
+      /* sql id : PortalOpenInfSrvDao.insertOpenInfSrvAppr */
+         INSERT INTO TB_OPEN_INF_APPR
+                (   SEQCE_NO, 
+                    INF_ID,
+                    APPR_VAL,
+                    USER_CD,
+					USER_IP,
+                    REG_DTTM
+                )
+         VALUES (   SQ_LOG_SEQ.NEXTVAL,
+                    #infId:VARCHAR#,
+                    #apprVal:NUMERIC#,
+                    #userCd:NUMERIC#,
+			   		#userIp:VARCHAR#,
+                    SYSDATE
+                )
+    </insert>
+    
+    <!-- 공공데이터 서비스 최소 번호를 조회한다.(infSeq가 인자로 넘어오지 않았을경우) -->
+    <select id="PortalOpenInfSrvDao.selectOpenInfSrvMinInfSeq" parameterClass="params" resultClass="int">
+     /* sql id : PortalOpenInfSrvDao.selectOpenInfSrvMinInfSeq */
+		SELECT NVL(MIN(INF_SEQ), 0) FROM TB_OPEN_INF_SRV 
+		WHERE  INF_ID = #infId:VARCHAR# 
+		AND    SRV_YN = 'Y'
+    </select>
+	
+	<!-- 공공데이터 서비스 최소 번호를 조회한다.(infSeq가 인자로 넘어오지 않았을경우) -->
+    <select id="PortalOpenInfSrvDao.selectOpenInfSrvApiInfSeq" parameterClass="params" resultClass="int">
+     /* sql id : PortalOpenInfSrvDao.selectOpenInfSrvApiInfSeq */
+		SELECT NVL(MIN(INF_SEQ), 0) FROM TB_OPEN_INF_SRV 
+		WHERE  INF_ID = #infId:VARCHAR# 
+		AND	  SRV_CD = 'A'
+		AND    SRV_YN = 'Y'
+    </select>
+</sqlMap>

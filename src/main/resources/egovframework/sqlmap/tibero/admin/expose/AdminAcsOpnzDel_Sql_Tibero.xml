@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- @(#)AdminAcsOpnzDel_Sql_Tibero.xml 1.0 2020/09/16                       -->
+<!--                                                                         -->
+<!-- COPYRIGHT (C) 2013 WISEITECH CO., LTD. ALL RIGHTS RESERVED.             -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- 정보공개관리 SQL 파일이다.	                                      	         -->
+<!--                                                                         -->
+<!-- @author 최성빈                                                        	                             -->
+<!-- @version 1.0 2020/09/16                                                 -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<sqlMap namespace="AdminAcsOpnzDel">
+
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Type Alias                                                          -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+   	
+   	<!-- 청구인정보 기록삭제 쿼리 -->
+    <sql id="AdminAcsOpnzDelDao.acsOpnzDel">
+    	SELECT A.APL_NO             		     AS "aplNo"
+		      , A.APL_DT             			 AS "aplDt"
+		      , NVL(B.APL_SJ, A.APL_SJ)          AS "aplSj"
+		      , A.APL_INST_CD                    AS "aplInstCd"
+		      , FC_COMCODE(A.APL_INST_CD, '')    AS "aplInstNm"
+		      , NVL(B.APL_DEAL_INST_CD, A.APL_DEAL_INST_CD)                 AS "aplDealInstCd"
+		      , FC_COMCODE(NVL(B.APL_DEAL_INST_CD, A.APL_DEAL_INST_CD), '') AS "aplDealInstNm"
+		      , NVL(B.PRG_STAT_CD, A.PRG_STAT_CD)    AS "prgStatCd"
+		      , CASE WHEN C.IMD_DEAL_DIV = '1' THEN '즉시처리'
+		             WHEN A.PRG_STAT_CD = '08' THEN SUBSTR(FC_COMCODE(NVL(B.PRG_STAT_CD, A.PRG_STAT_CD), 'D'),1,(INSTR(FC_COMCODE(NVL(B.PRG_STAT_CD, A.PRG_STAT_CD), 'D'),'(')-1)) 
+		             ELSE FC_COMCODE(NVL(B.PRG_STAT_CD, A.PRG_STAT_CD), 'D')
+		             END             AS "prgStatNm"
+		      , CASE WHEN A.PRG_STAT_CD = '08' THEN '종결' 
+		             WHEN C.IMD_DEAL_DIV = '1' THEN '종결' 
+		             ELSE '' END     AS "endNm"
+		      , A.APL_PN             AS "aplPn"
+		      , NVL(B.RCP_NO,'')     AS "rcpNo"
+		      , A.RG_DIV             AS "rgDiv"
+		      , CASE WHEN B.RCP_NO IS NULL THEN '0'
+		             ELSE SUBSTR(B.RCP_NO, 1, 2)||LPAD(SUBSTR(B.RCP_NO,4), 4, 0)
+		             END             AS "rcpno"
+		      , NVL(C.OPB_YN,'')             AS "opbYn"
+		      , CASE WHEN OPB_YN = '0' THEN '공개'
+		             WHEN OPB_YN = '1' THEN '부분공개'
+		             WHEN OPB_YN = '2' THEN '비공개'
+		             WHEN OPB_YN = '3' THEN '부존재 등'
+		             WHEN OPB_YN = '' THEN ' '
+		             END                     AS "opbYnNm"
+		      , NVL(B.RCP_DTS_NO,'')         AS "rcpDtsNo"
+		      , NVL(B.INST_TRSF_YN,'')       AS "instTrsfYn"
+		      , A.APL_TAK_MTH                AS "aplTakMth"
+		      , FC_COMCODE(A.APL_TAK_MTH, 'B') AS "aplTakMthNm"
+		      , NVL(C.OPB_FOM_VAL,'')        AS "opbFomVal"
+		      , NVL(FC_COMCODE(C.OPB_FOM_VAL, 'A'),'')   AS "opbFomNm"
+		      , NVL(C.GIVE_MTH,'')           AS "giveMth"
+		      , NVL(C.DCS_NTC_DT,'')         AS "dcsNtcDt"
+		      , NVL(C.CLSD_RSON_CD,'')       AS "clsdRsonCd"
+		      , NVL(D.OBJTN_DEAL_RSLT_CD,'') AS "objtnDealRsltCd"
+		      , NVL(C.IMD_DEAL_DIV,'')       AS "imdDealDiv"
+		      , CASE WHEN A.PRG_STAT_CD = '99' THEN 5
+		             WHEN A.PRG_STAT_CD = '08' THEN 1
+		             WHEN A.PRG_STAT_CD = '04' THEN 2
+		             WHEN A.PRG_STAT_CD = '03' THEN 3
+		             ELSE 4 END              AS "statOrder"
+		      , NVL(B.END_CN, 'NULL')        AS "endCn"
+		      , A.PDP_DTTM                   AS "pdpDttm"
+		   FROM TB_OPNZ_APL              A
+		   LEFT OUTER JOIN TB_OPNZ_RCP   B
+		     ON A.APL_NO = B.APL_NO
+		   LEFT OUTER JOIN TB_OPNZ_DCS   C
+		     ON A.APL_NO = C.APL_NO
+		   LEFT OUTER JOIN TB_OPNZ_OBJTN D 
+		     ON A.APL_NO = D.APL_NO
+	</sql>
+	
+	<!-- 청구인정보 기록삭제 조회 조건 -->
+	<sql id="AdminAcsOpnzDelDao.acsOpnzDel.where">
+		WHERE 1=1 
+		<isNotEmpty prepend="AND" property="aplDealInstCd">
+    	   A.APL_DEAL_INST_CD = #aplDealInstCd# 
+		</isNotEmpty> 
+		<isNotEmpty prepend="AND" property="aplDeptCd">
+    	   A.APL_NO IN (SELECT APL_NO FROM TB_OPNZ_APL_DEPT WHERE DEPT_CD = #aplDeptCd# )
+		</isNotEmpty> 
+		<isNotEmpty prepend="AND" property="prgStatCd">
+			NVL(B.PRG_STAT_CD, A.PRG_STAT_CD) = #prgStatCd#
+			<isNotEqual prepend="and" property="imdDealDiv" compareValue="1">
+				C.IMD_DEAL_DIV IS NULL
+			</isNotEqual>
+			<isEqual prepend="and" property="imdDealDiv" compareValue="1">
+				C.IMD_DEAL_DIV = #imdDealDiv#
+			</isEqual>									
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="startAplDt">
+			A.APL_DT BETWEEN #startAplDt# AND #endAplDt#
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="aplPn">
+			A.APL_PN LIKE '%'||#aplPn#||'%'
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="aplSj">
+			A.APL_SJ LIKE '%'||#aplSj#||'%'
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="aplDtsCn">
+			A.APL_DTS_CN LIKE '%'||#aplDtsCn#||'%'
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="opbYn">
+			C.OPB_YN = #opbYn#
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="startDcsNtcDt">
+			C.DCS_NTC_DT BETWEEN #startDcsNtcDt# AND #endDcsNtcDt#
+		</isNotEmpty>
+		<isNotEmpty property="startDelDt" prepend="AND">
+		   A.PDP_DTTM <![CDATA[ >= ]]> TO_DATE(#startDelDt:VARCHAR#, 'YYYY-MM-DD') + 0	   	 
+	   	</isNotEmpty>
+	   	<isNotEmpty property="endDelDt" prepend="AND">
+		   A.PDP_DTTM <![CDATA[ < ]]> TO_DATE(#endDelDt:VARCHAR#, 'YYYY-MM-DD') + 1
+	   	</isNotEmpty>
+	</sql>	
+	
+	<!-- 청구인정보 기록삭제 리스트 조회 -->
+  	<select id="AdminAcsOpnzDelDao.selectAcsOpnzDelList" parameterClass="params" resultClass="record">
+  		/* sql id : AdminAcsOpnzDelDao.selectAcsOpnzDelList */
+  		<isEqual property="paging" compareValue="0">
+		SELECT AA.* 
+		FROM   (SELECT ROWNUM AS ROW_NUM, AA.*
+				FROM   (  
+		</isEqual>
+			<include refid="AdminAcsOpnzDelDao.acsOpnzDel"></include>
+			<include refid="AdminAcsOpnzDelDao.acsOpnzDel.where"></include>
+			ORDER BY A.APL_DT
+			       , A.APL_NO
+		<isEqual property="paging" compareValue="0">
+		<![CDATA[
+				) AA
+			WHERE ROWNUM <= #end:NUMERIC#
+			) AA
+		WHERE AA.ROW_NUM >= #start:NUMERIC#
+		]]>
+		</isEqual>
+  	</select>
+  	
+  	<select id="AdminAcsOpnzDelDao.selectAcsOpnzDelListCount" parameterClass="params" resultClass="int">
+  		/* sql id : AdminAcsOpnzDelDao.selectAcsOpnzDelListCount */
+  		
+		SELECT COUNT(*) 
+		  FROM TB_OPNZ_APL A 
+          LEFT OUTER JOIN TB_OPNZ_RCP B 
+              ON A.APL_NO = B.APL_NO 
+          LEFT OUTER JOIN TB_OPNZ_DCS C 
+              ON A.APL_NO = C.APL_NO 
+          LEFT OUTER JOIN TB_OPNZ_OBJTN D 
+              ON A.APL_NO = D.APL_NO  
+		<include refid="AdminAcsOpnzDelDao.acsOpnzDel.where"></include>
+  	</select>
+  	
+  	<!-- 청구인정보 기록삭제 데이터 수정(신청) -->
+  	<update id="AdminAcsOpnzDelDao.deleteAcsOpnzAplDel" parameterClass="java.util.List">
+  		/* sql id : AdminAcsOpnzDelDao.deleteAcsOpnzAplDel */
+  		
+  		UPDATE TB_OPNZ_APL 
+  			SET PDP_DTTM = SYSDATE  
+  			    , APL_RNO2 = '***' 
+       			, APL_2_ADDR = '***' 
+             	, APL_PNO = '***' 
+       			, APL_MBL_PNO = '***' 
+       			, APL_FAX_NO = '***' 
+       			, APL_EMAIL_ADDR = '***' 
+       			, APL_PN = '***'
+       	WHERE  APL_NO IN
+		<iterate open="(" close=")" conjunction=", ">
+				#[].aplNo:VARCHAR#
+		</iterate>		 
+  	</update>
+  	
+  	<!-- 청구인정보 기록삭제 데이터 수정(접수) -->
+  	<update id="AdminAcsOpnzDelDao.deleteAcsOpnzRcpDel" parameterClass="java.util.List">
+  		/* sql id : AdminAcsOpnzDelDao.deleteAcsOpnzRcpDel */
+  		
+  		UPDATE TB_OPNZ_RCP 
+  			SET PDP_DTTM = SYSDATE  
+  			    , APL_RNO2 = '***' 
+       			, APL_2_ADDR = '***' 
+             	, APL_PNO = '***' 
+       			, APL_MBL_PNO = '***'
+       			, APL_FAX_NO = '***' 
+       			, APL_EMAIL_ADDR = '***' 
+       			, APL_PN = '***'
+       	WHERE  APL_NO IN
+		<iterate open="(" close=")" conjunction=", ">
+				#[].aplNo:VARCHAR#
+		</iterate>		 
+  	</update>
+          
+</sqlMap>

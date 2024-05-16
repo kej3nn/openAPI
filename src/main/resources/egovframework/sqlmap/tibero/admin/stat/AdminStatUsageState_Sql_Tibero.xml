@@ -1,0 +1,453 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- @(#)AdminStatUsageState_Sql_Tibero.xml 1.0 2018/01/26                     -->
+<!--                                                                         -->
+<!-- COPYRIGHT (C) 2013 WISEITECH CO., LTD. ALL RIGHTS RESERVED.             -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- 통계 공개현황 관리 SQL 파일이다.	                                  -->
+<!--                                                                         -->
+<!-- @author 김정호                                                        	-->
+<!-- @version 1.0 2018/01/26                                                -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<sqlMap namespace="StatUsageState">
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Type Alias                                                          -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+    
+    
+    <!-- 통계 활용현황 리스트 조회  -->
+	<select id="statUsageStateDao.selectStatUsageState" parameterClass="params" resultClass="record">
+		/* sql id : statUsageStateDao.selectStatUsageState */
+		 SELECT   S.YYYYMM 			AS "yyyymmdd",
+		          C.USE_IP_TAG		AS "useIpTag",
+		          C.USE_IP_TAG_NM	AS "useIpTagNm",
+		          SUM(CASE WHEN C.USE_IP_TAG = S.USE_IP_TAG THEN STATBL_CNT ELSE 0 END) AS "statblCnt",
+		          SUM(CASE WHEN C.USE_IP_TAG = S.USE_IP_TAG THEN DOWN_CNT 	ELSE 0 END) AS "downCnt",
+		          SUM(CASE WHEN C.USE_IP_TAG = S.USE_IP_TAG THEN EXCEL_CNT 	ELSE 0 END) AS "excelCnt",
+		          SUM(CASE WHEN C.USE_IP_TAG = S.USE_IP_TAG THEN CSV_CNT 	ELSE 0 END) AS "csvCnt",
+		          SUM(CASE WHEN C.USE_IP_TAG = S.USE_IP_TAG THEN JSON_CNT 	ELSE 0 END) AS "jsonCnt",
+		          SUM(CASE WHEN C.USE_IP_TAG = S.USE_IP_TAG THEN XML_CNT 	ELSE 0 END) AS "xmlCnt",
+		          SUM(CASE WHEN C.USE_IP_TAG = S.USE_IP_TAG THEN TXT_CNT 	ELSE 0 END) AS "txtCnt",
+		          SUM(CASE WHEN C.USE_IP_TAG = S.USE_IP_TAG THEN HWP_CNT 	ELSE 0 END) AS "hwpCnt"
+		 FROM     ( SELECT  TO_CHAR(TO_DATE(YYYYMMDD), 'YYYY-MM') AS YYYYMM,
+		                   USE_IP_TAG,
+		                   0              AS STAT_CNT,
+		                   SUM(USE_CNT)   AS STATBL_CNT,
+		                   SUM(DOWN_CNT)  AS DOWN_CNT,
+		                   SUM(EXCEL_CNT) AS EXCEL_CNT,
+		                   SUM(CSV_CNT)   AS CSV_CNT,
+		                   SUM(JSON_CNT)  AS JSON_CNT,
+		                   SUM(XML_CNT)   AS XML_CNT,
+		                   SUM(TXT_CNT)   AS TXT_CNT,
+		                   SUM(HWP_CNT)   AS HWP_CNT
+		          FROM     TB_STTS_USE
+		          WHERE    1=1
+		          AND      YYYYMMDD BETWEEN REPLACE(#startYmd:VARCHAR#, '-', '') AND REPLACE(#endYmd:VARCHAR#, '-','')
+		          GROUP BY TO_CHAR(TO_DATE(YYYYMMDD), 'YYYY-MM') ,
+		                   USE_IP_TAG
+		          )
+		          S
+		          CROSS JOIN
+		                   ( SELECT DITC_CD AS USE_IP_TAG ,
+		                           DITC_NM  AS USE_IP_TAG_NM
+		                   FROM    TB_COMM_CODE
+		                   WHERE   GRP_CD = 'C1023'
+		                   AND     USE_YN = 'Y'
+		                   )
+		                   C
+		 <isNotEmpty property="useIpTag">
+		 	WHERE    C.USE_IP_TAG = #useIpTag#		
+		 </isNotEmpty>                  
+		 GROUP BY S.YYYYMM,
+		          C.USE_IP_TAG ,
+		          C.USE_IP_TAG_NM
+		 ORDER BY YYYYMM DESC ,
+		          C.USE_IP_TAG ASC	
+    </select>
+    
+    <!-- 메뉴별 활용현황 리스트 조회 -->
+    <select id="statUsageStateDao.selectMenuUsageState" parameterClass="params" resultClass="record">
+		/* sql id : statUsageStateDao.selectMenuUsageState */
+			 SELECT   S.MENU_ID		AS "menuId",
+			          S.MENU_NM		AS "menuNm",
+			          SUM(CASE WHEN C.USE_IP_TAG = S.USE_IP_TAG AND S.USE_IP_TAG = 'A' THEN MENU_CNT ELSE 0 END) AS "menuAllCnt" ,
+			          SUM(CASE WHEN C.USE_IP_TAG = S.USE_IP_TAG AND S.USE_IP_TAG = 'I' THEN MENU_CNT ELSE 0 END) AS "menuInCnt" ,
+			          SUM(CASE WHEN C.USE_IP_TAG = S.USE_IP_TAG AND S.USE_IP_TAG = 'O' THEN MENU_CNT ELSE 0 END) AS "menuOutCnt" ,
+			          MAX(MENU_CNT) AS V_ORDER,
+			          S.YYYYMMDD AS "baseDate"
+			 FROM     ( SELECT  S.MENU_ID,
+			                   M.MENU_NM ,
+			                   <isNotEmpty property="dateGb">
+			                   TO_CHAR(TO_DATE(S.YYYYMMDD, 'YYYY-MM-DD'), 'YYYY-MM-DD') AS YYYYMMDD,
+			                   </isNotEmpty>
+			                   <isEmpty property="dateGb">
+			                    TO_CHAR(TO_DATE(S.YYYYMMDD, 'YYYY-MM-DD'), 'YYYY-MM') AS YYYYMMDD,
+			                   </isEmpty>
+			                   S.USE_IP_TAG ,
+			                   SUM(S.MENU_CNT) AS MENU_CNT
+			          FROM     TB_STAT_SITE_USE S
+			                   INNER JOIN TB_COMM_MENU M
+			                   ON       S.MENU_ID = M.MENU_ID
+			          WHERE    1                  =1
+			          AND      S.YYYYMMDD BETWEEN REPLACE(#startYmd:VARCHAR#, '-', '') AND REPLACE(#endYmd:VARCHAR#, '-','')
+			          AND M.MENU_SITE_CD = 'PN201'
+			          GROUP BY S.MENU_ID,
+			                   M.MENU_NM,
+			                   <isNotEmpty property="dateGb">
+			                   TO_CHAR(TO_DATE(S.YYYYMMDD, 'YYYY-MM-DD'), 'YYYY-MM-DD'),
+			                   </isNotEmpty>
+			                   <isEmpty property="dateGb">
+			                   TO_CHAR(TO_DATE(S.YYYYMMDD, 'YYYY-MM-DD'), 'YYYY-MM'),
+			                   </isEmpty>
+			                   S.USE_IP_TAG
+			          )
+			          S
+			          CROSS JOIN
+			                   ( SELECT DITC_CD AS USE_IP_TAG ,
+			                           DITC_NM  AS USE_IP_TAG_NM
+			                   FROM    TB_COMM_CODE
+			                   WHERE   GRP_CD = 'C1023'
+			                  		  
+			                   AND     USE_YN = 'Y'
+			                   )
+			                   C
+			 GROUP BY S.MENU_ID,
+			          S.MENU_NM,
+			          S.YYYYMMDD
+			 ORDER BY S.YYYYMMDD DESC,
+			          V_ORDER DESC,
+			          MENU_ID ASC
+    </select>
+    
+    <!-- 분류별 활용현황 리스트 조회 -->
+    <select id="statUsageStateDao.selectCateUsageState" parameterClass="params" resultClass="record">
+		/* sql id : statUsageStateDao.selectCateUsageState */
+		SELECT   S.CATE_ID				AS "cateId",
+		         S.CATE_NM 				AS "cateNm",
+		         C.USE_IP_TAG			AS "useIpTag",
+		         C.USE_IP_TAG_NM 	AS "useIpTagNm",
+				 SUM(CASE WHEN C.USE_IP_TAG = S.USE_IP_TAG THEN USE_CNT 	ELSE 0 END) AS "useCnt",
+		         SUM(CASE WHEN C.USE_IP_TAG = S.USE_IP_TAG THEN DOWN_CNT 	ELSE 0 END) AS "downCnt",
+		         SUM(CASE WHEN C.USE_IP_TAG = S.USE_IP_TAG THEN EXCEL_CNT 	ELSE 0 END) AS "excelCnt",
+		         SUM(CASE WHEN C.USE_IP_TAG = S.USE_IP_TAG THEN CSV_CNT 	ELSE 0 END) AS "csvCnt",
+		         SUM(CASE WHEN C.USE_IP_TAG = S.USE_IP_TAG THEN JSON_CNT 	ELSE 0 END) AS "jsonCnt",
+		         SUM(CASE WHEN C.USE_IP_TAG = S.USE_IP_TAG THEN XML_CNT 	ELSE 0 END) AS "xmlCnt",
+		         SUM(CASE WHEN C.USE_IP_TAG = S.USE_IP_TAG THEN TXT_CNT 	ELSE 0 END) AS "txtCnt",
+		         SUM(CASE WHEN C.USE_IP_TAG = S.USE_IP_TAG THEN HWP_CNT 	ELSE 0 END) AS "hwpCnt", 
+		         MAX(USE_CNT) AS V_ORDER
+		FROM     ( SELECT  C.TOP_CATE_ID AS CATE_ID,
+		                  CT.CATE_NM ,
+		                  S.USE_IP_TAG ,
+		                  SUM(USE_CNT)   AS USE_CNT ,
+		                  SUM(DOWN_CNT)  AS DOWN_CNT ,
+		                  SUM(EXCEL_CNT) AS EXCEL_CNT ,
+		                  SUM(CSV_CNT)   AS CSV_CNT ,
+		                  SUM(JSON_CNT)  AS JSON_CNT ,
+		                  SUM(XML_CNT)   AS XML_CNT ,
+		                  SUM(TXT_CNT)   AS TXT_CNT ,
+		                  SUM(HWP_CNT)   AS HWP_CNT
+		         FROM     TB_STTS_USE S
+		                  INNER JOIN TB_STTS_CATE C
+		                  ON       S.CATE_ID = C.CATE_ID
+		                  INNER JOIN TB_STTS_CATE CT
+		                  ON       C.TOP_CATE_ID = CT.CATE_ID
+		         WHERE    1                      =1
+		         AND      S.YYYYMMDD BETWEEN REPLACE(#startYmd:VARCHAR#, '-', '') AND REPLACE(#endYmd:VARCHAR#, '-','')
+		         GROUP BY C.TOP_CATE_ID,
+		                  CT.CATE_NM,
+		                  S.USE_IP_TAG
+		         )
+		         S
+		         CROSS JOIN
+		                  ( SELECT DITC_CD AS USE_IP_TAG ,
+		                          DITC_NM  AS USE_IP_TAG_NM
+		                  FROM    TB_COMM_CODE
+		                  WHERE   GRP_CD = 'C1023'
+		                  AND     USE_YN = 'Y'
+		                  )
+		                  C
+		<isNotEmpty property="useIpTag">		                  
+			WHERE    C.USE_IP_TAG = #useIpTag#		
+		</isNotEmpty>                  
+		GROUP BY S.CATE_ID,
+		         S.CATE_NM,
+		         C.USE_IP_TAG ,
+		         C.USE_IP_TAG_NM
+		ORDER BY V_ORDER DESC,
+		         CATE_ID ASC,
+		         C.USE_IP_TAG ASC		
+	</select>
+	
+	<!-- 통계표별 활용현황 리스트 조회 -->
+    <select id="statUsageStateDao.selectStatblUsageState" parameterClass="params" resultClass="record">
+		/* sql id : statUsageStateDao.selectStatblUsageState */
+		SELECT   S.STATBL_ID			AS "statblId",
+		         S.STATBL_NM 			AS "statblNm",
+		         MAX(SC.CATE_FULLNM) 	AS "cateFullNm",
+		         C.USE_IP_TAG			AS "useIpTag",
+		         C.USE_IP_TAG_NM 		AS "useIpTagNm",
+		         SUM(CASE WHEN C.USE_IP_TAG = S.USE_IP_TAG THEN USE_CNT 	ELSE 0 END) AS "useCnt",
+		         SUM(CASE WHEN C.USE_IP_TAG = S.USE_IP_TAG THEN DOWN_CNT 	ELSE 0 END) AS "downCnt",
+		         SUM(CASE WHEN C.USE_IP_TAG = S.USE_IP_TAG THEN EXCEL_CNT 	ELSE 0 END) AS "excelCnt",
+		         SUM(CASE WHEN C.USE_IP_TAG = S.USE_IP_TAG THEN CSV_CNT 	ELSE 0 END) AS "csvbCnt",
+		         SUM(CASE WHEN C.USE_IP_TAG = S.USE_IP_TAG THEN JSON_CNT 	ELSE 0 END) AS "jsonCnt",
+		         SUM(CASE WHEN C.USE_IP_TAG = S.USE_IP_TAG THEN XML_CNT 	ELSE 0 END) AS "xmlCnt",
+		         SUM(CASE WHEN C.USE_IP_TAG = S.USE_IP_TAG THEN TXT_CNT 	ELSE 0 END) AS "txtCnt",
+		         SUM(CASE WHEN C.USE_IP_TAG = S.USE_IP_TAG THEN HWP_CNT 	ELSE 0 END) AS "hwpCnt", 
+		         MAX(USE_CNT) AS V_ORDER
+		FROM     ( SELECT  S.STATBL_ID,
+		                  T.STATBL_NM ,
+		                  T.CATE_ID,
+		                  S.USE_IP_TAG ,
+		                  SUM(USE_CNT)   AS USE_CNT ,
+		                  SUM(DOWN_CNT)  AS DOWN_CNT ,
+		                  SUM(EXCEL_CNT) AS EXCEL_CNT ,
+		                  SUM(CSV_CNT)   AS CSV_CNT ,
+		                  SUM(JSON_CNT)  AS JSON_CNT ,
+		                  SUM(XML_CNT)   AS XML_CNT ,
+		                  SUM(TXT_CNT)   AS TXT_CNT ,
+		                  SUM(HWP_CNT)   AS HWP_CNT
+		         FROM     TB_STTS_USE S
+		                  INNER JOIN TB_STTS_TBL T
+		                  ON       S.STATBL_ID = T.STATBL_ID
+		         WHERE    1                    =1
+		         AND      S.YYYYMMDD BETWEEN REPLACE(#startYmd:VARCHAR#, '-', '') AND REPLACE(#endYmd:VARCHAR#, '-','')
+		         GROUP BY S.STATBL_ID,
+		                  T.STATBL_NM,
+		                  T.CATE_ID,
+		                  S.USE_IP_TAG
+		         )
+		         S
+		         INNER JOIN TB_STTS_CATE SC On S.CATE_ID = SC.CATE_ID
+		         CROSS JOIN
+		                  ( SELECT DITC_CD AS USE_IP_TAG ,
+		                          DITC_NM  AS USE_IP_TAG_NM
+		                  FROM    TB_COMM_CODE
+		                  WHERE   GRP_CD = 'C1023'
+		                  AND     USE_YN = 'Y'
+		                  )
+		                  C
+		WHERE    C.USE_IP_TAG = 'A'                  
+		GROUP BY S.STATBL_ID,
+		         S.STATBL_NM,
+		         C.USE_IP_TAG ,
+		         C.USE_IP_TAG_NM
+		ORDER BY V_ORDER DESC,
+		         STATBL_ID ASC,
+		         C.USE_IP_TAG ASC		
+	</select>
+	
+	<!-- 출처별 활용현황 리스트 조회 -->
+    <select id="statUsageStateDao.selectOrgUsageState" parameterClass="params" resultClass="record">
+		/* sql id : statUsageStateDao.selectOrgUsageState */
+		SELECT   S.ORG_CD		AS "orgCd",
+		         S.ORG_NM 		AS "orgNm",
+		         SUM(CASE WHEN C.USE_IP_TAG = S.USE_IP_TAG THEN USE_CNT 	ELSE 0 END) AS "useCnt",
+		         SUM(CASE WHEN C.USE_IP_TAG = S.USE_IP_TAG THEN DOWN_CNT 	ELSE 0 END) AS "downCnt",
+			     SUM(CASE WHEN C.USE_IP_TAG = S.USE_IP_TAG THEN EXCEL_CNT 	ELSE 0 END) AS "excelCnt",
+		         SUM(CASE WHEN C.USE_IP_TAG = S.USE_IP_TAG THEN CSV_CNT 	ELSE 0 END) AS "csvbCnt",
+		         SUM(CASE WHEN C.USE_IP_TAG = S.USE_IP_TAG THEN JSON_CNT 	ELSE 0 END) AS "jsonCnt",
+		         SUM(CASE WHEN C.USE_IP_TAG = S.USE_IP_TAG THEN XML_CNT 	ELSE 0 END) AS "xmlCnt",
+		         SUM(CASE WHEN C.USE_IP_TAG = S.USE_IP_TAG THEN TXT_CNT 	ELSE 0 END) AS "txtCnt",
+		         SUM(CASE WHEN C.USE_IP_TAG = S.USE_IP_TAG THEN HWP_CNT 	ELSE 0 END) AS "hwpCnt",
+		         MAX(USE_CNT) AS V_ORDER
+		FROM     ( SELECT  S.ORG_CD,
+		                  O.ORG_NM ,
+		                  S.USE_IP_TAG ,
+		                  SUM(USE_CNT)   AS USE_CNT ,
+		                  SUM(DOWN_CNT)  AS DOWN_CNT ,
+		                  SUM(EXCEL_CNT) AS EXCEL_CNT ,
+		                  SUM(CSV_CNT)   AS CSV_CNT ,
+		                  SUM(JSON_CNT)  AS JSON_CNT ,
+		                  SUM(XML_CNT)   AS XML_CNT ,
+		                  SUM(TXT_CNT)   AS TXT_CNT ,
+		                  SUM(HWP_CNT)   AS HWP_CNT
+		         FROM     TB_STTS_USE S
+		                  INNER JOIN TB_COMM_ORG O
+		                  ON       S.ORG_CD = O.ORG_CD
+		         WHERE    1                 =1
+		         AND      S.YYYYMMDD BETWEEN REPLACE(#startYmd:VARCHAR#, '-', '') AND REPLACE(#endYmd:VARCHAR#, '-','')
+		         GROUP BY S.ORG_CD,
+		                  O.ORG_NM,
+		                  S.USE_IP_TAG
+		         )
+		         S
+		         CROSS JOIN
+		                  ( SELECT DITC_CD AS USE_IP_TAG ,
+		                          DITC_NM  AS USE_IP_TAG_NM
+		                  FROM    TB_COMM_CODE
+		                  WHERE   GRP_CD  = 'C1023'
+		                  AND     USE_YN  = 'Y'
+		                  )
+		                  C
+		WHERE    C.USE_IP_TAG = 'A'
+		GROUP BY S.ORG_CD,
+		         S.ORG_NM,
+		         C.USE_IP_TAG ,
+		         C.USE_IP_TAG_NM
+		ORDER BY V_ORDER DESC,
+		         ORG_CD ASC		
+	</select>
+	
+	<!-- 사용자별 로그 분석 쿼리 -->
+    <sql id="statUsageStateDao.userUsageState">
+	SELECT     TO_CHAR(M.REG_DTTM, 'YYYY-MM') AS "month"
+			 ,CASE WHEN M.SYS_TAG = 'K' THEN 'PC'
+		            WHEN M.SYS_TAG = 'E' THEN '영문'
+		            WHEN M.SYS_TAG = 'M' THEN '모바일'
+		            ELSE '' 
+		        END "sysTag"
+		     , CASE WHEN M.USER_IP ='0:0:0:0:0:0:0:1' THEN '127.0.0.1' 
+		       		ELSE M.USER_IP 
+		        END "userIp"
+		     , M.MENU_ID AS "menuId"
+		     , CASE WHEN M.MENU_URL = '/infonavi' THEN '국회 정보나침반'
+		            ELSE '국회의원'
+		       END AS "menuNm"
+		     , M.MENU_URL AS "menuUrl"
+		     , TO_CHAR(M.REG_DTTM,'YYYY-MM-DD HH24:MI:SS') AS "regDttm"
+		     , M.MENU_PARAM AS "menuParam"
+		     , T.HG_NM AS "hgNm"
+		     , (SELECT COUNT(*) FROM TB_LOG_COMM_MENU WHERE MENU_URL = '/infonavi') AS "infonaviCount"
+  			 , (SELECT COUNT(*) FROM TB_LOG_COMM_MENU WHERE MENU_URL = '/21stMembers') AS "membersCount"
+  	  FROM (
+    	SELECT L.SYS_TAG, L.USER_IP, L.MENU_ID, C.MENU_NM, L.MENU_URL, L.REG_DTTM, L.MENU_PARAM
+		  FROM TB_LOG_COMM_MENU L 
+		  INNER JOIN  TB_COMM_MENU C
+			  ON L.MENU_ID = C.MENU_ID
+    	 WHERE L.MENU_URL IS NOT NULL
+    ) M, TV_THXPSN01 T
+    WHERE M.MENU_PARAM = T.OPEN_NA_ID(+)
+	</sql>
+	
+	<!-- 사용자별 로그 분석 조회 조건 -->
+	<sql id="statUsageStateDao.userUsageState.where">
+		<isNotEmpty property="searchWd" prepend="AND">
+			M.MENU_URL LIKE '%' || #searchWd#  || '%' 
+		</isNotEmpty>
+		<isNotEmpty property="searchWord" prepend="AND">
+			T.HG_NM LIKE '%' || #searchWord# || '%'
+		</isNotEmpty>
+   		<isNotEmpty property="startYmd" prepend="AND">
+		    M.REG_DTTM <![CDATA[ >= ]]> TO_DATE(#startYmd:VARCHAR#, 'YYYY-MM-DD') + 0	   	 
+	   	</isNotEmpty>
+	   	<isNotEmpty property="endYmd" prepend="AND">
+		    M.REG_DTTM <![CDATA[ < ]]> TO_DATE(#endYmd:VARCHAR#, 'YYYY-MM-DD') + 1
+	   	</isNotEmpty>
+    </sql>
+	
+	<!-- 사용자별 로그 분석 리스트 조회 -->
+  	<select id="statUsageStateDao.selectUserUsageStateList" parameterClass="params" resultClass="record">
+  		/* sql id : statUsageStateDao.selectUserUsageStateList */
+  		<isEqual property="paging" compareValue="0">
+		SELECT AA.* 
+		FROM   (SELECT ROWNUM AS ROW_NUM, AA.*
+				FROM   (  
+		</isEqual>
+			<include refid="statUsageStateDao.userUsageState"></include>
+			<include refid="statUsageStateDao.userUsageState.where"></include>
+			ORDER BY
+			    M.REG_DTTM DESC
+		<isEqual property="paging" compareValue="0">
+		<![CDATA[
+				) AA
+			WHERE ROWNUM <= #end:NUMERIC#
+			) AA
+		WHERE AA.ROW_NUM >= #start:NUMERIC#
+		]]>
+		</isEqual>
+  	</select>
+  	
+  	<select id="statUsageStateDao.selectUserUsageStateListCount" parameterClass="params" resultClass="int">
+  		/* sql id : statUsageStateDao.selectUserUsageStateListCount */
+	SELECT COUNT(*) 
+  	  FROM (
+    	SELECT L.SYS_TAG, L.USER_IP, L.MENU_ID, C.MENU_NM, L.MENU_URL, L.REG_DTTM, L.MENU_PARAM
+		  FROM TB_LOG_COMM_MENU L 
+		  INNER JOIN  TB_COMM_MENU C
+			  ON L.MENU_ID = C.MENU_ID
+    	 WHERE L.MENU_URL IS NOT NULL
+    ) M, TV_THXPSN01 T
+    WHERE M.MENU_PARAM = T.OPEN_NA_ID(+)
+		<include refid="statUsageStateDao.userUsageState.where"></include>
+  	</select>
+    
+    
+    <!-- API 호출 현황 쿼리 -->
+    <sql id="statUsageStateDao.apiUsageState">
+    	SELECT YYYYMM          AS "yyyymm"
+		      , USER_CNT       AS "userCnt"
+			  , INF_CNT        AS "infCnt"
+			  , CALL_CNT       AS "callCnt"
+			  , ROW_CNT        AS "rowCnt"
+			  , ERR_CNT        AS "errCnt"
+			  , XML_CNT        AS "xmlCnt"
+			  , JSON_CNT       AS "jsonCnt"
+			  , AVG_LT         AS "avgLt"
+			  , DB_SIZE        AS "dbSize"
+			  , OUT_SIZE       AS "outSize"
+			  , REG_DTTM       AS "regDttm"
+		  FROM TB_STAT_PERF_API_M   
+	</sql>
+	
+	<!-- API 호출 현황 조회 조건 -->
+	<sql id="statUsageStateDao.apiUsageState.where">
+    	WHERE 1=1
+   		<isNotEmpty property="startYmd" prepend="AND">
+		   TO_DATE(YYYYMM, 'YYYY-MM') <![CDATA[ >= ]]> TO_DATE(#startYmd:VARCHAR#, 'YYYY-MM') + 0	   	 
+	   	</isNotEmpty>
+	   	<isNotEmpty property="endYmd" prepend="AND">
+		   TO_DATE(YYYYMM, 'YYYY-MM') <![CDATA[ < ]]> TO_DATE(#endYmd:VARCHAR#, 'YYYY-MM') + 1
+	   	</isNotEmpty>
+
+    </sql>
+	
+	<!-- API 호출 현황 리스트 조회 -->
+  	<select id="statUsageStateDao.selectApiUsageStateList" parameterClass="params" resultClass="record">
+  		/* sql id : statUsageStateDao.selectApiUsageStateList */
+  		<isEqual property="paging" compareValue="0">
+		SELECT AA.* 
+		FROM   (SELECT ROWNUM AS ROW_NUM, AA.*
+				FROM   (  
+		</isEqual>
+			<include refid="statUsageStateDao.apiUsageState"></include>
+			<include refid="statUsageStateDao.apiUsageState.where"></include>
+			ORDER BY
+			   YYYYMM DESC
+		<isEqual property="paging" compareValue="0">
+		<![CDATA[
+				) AA
+			WHERE ROWNUM <= #end:NUMERIC#
+			) AA
+		WHERE AA.ROW_NUM >= #start:NUMERIC#
+		]]>
+		</isEqual>
+  	</select>
+  	
+  	<select id="statUsageStateDao.selectApiUsageStateListCount" parameterClass="params" resultClass="int">
+  		/* sql id : statUsageStateDao.selectApiUsageStateListCount */
+		SELECT COUNT(*) 
+		  FROM TB_STAT_PERF_API_M 
+		<include refid="statUsageStateDao.apiUsageState.where"></include>
+  	</select>
+  	
+	
+      	
+  	 <select id="statUsageStateDao.userUsageStatePie" parameterClass="params" resultClass="java.util.LinkedHashMap" remapResults="true">
+  		<include refid="statUsageStateDao.userUsageState"></include>
+		<include refid="statUsageStateDao.userUsageState.where"></include>
+	</select>
+  	
+  	  <select id="statUsageStateDao.apiUsageStateGraph" parameterClass="params" resultClass="java.util.LinkedHashMap" remapResults="true">
+	  	<include refid="statUsageStateDao.apiUsageState"></include>
+		<include refid="statUsageStateDao.apiUsageState.where"></include>
+			   	ORDER BY TO_DATE(YYYYMM, 'YYYY-MM') DESC
+	</select>
+</sqlMap>

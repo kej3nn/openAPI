@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- @(#)AdminStatStddItm_Sql_Tibero.xml 1.0 2017/06/26                       -->
+<!--                                                                         -->
+<!-- COPYRIGHT (C) 2013 WISEITECH CO., LTD. ALL RIGHTS RESERVED.             -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- 표준항목분류정보 관리 SQL 파일이다.	                                  -->
+<!--                                                                         -->
+<!-- @author 김정호                                                        	-->
+<!-- @version 1.0 2017/06/26                                                -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<sqlMap namespace="StatStddItm">
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Type Alias                                                          -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+    
+    <!-- 표준항목분류정보 메인 리스트 조회 -->
+    <select id="StatStddItmDao.selectStatStddItmList" parameterClass="params" resultClass="java.util.HashMap">
+		SELECT
+			ITM_ID				AS "itmId"
+			, PAR_ITM_ID		AS "parItmId"
+			, ITM_NM			AS "itmNm"
+			, ENG_ITM_NM		AS "engItmNm"
+			, LTRIM(SYS_CONNECT_BY_PATH(ITM_NM, '>'), '>')  AS "itmFullnm"
+			, ITM_EXP			AS "itmExp"
+			, GEO_CD			AS "geoCd"
+			, USE_YN			AS "useYn"
+			, V_ORDER			AS "vOrder"
+		<isEmpty property="parItmId">	
+			, LEVEL			AS "Level"
+		</isEmpty>
+		<isNotEmpty property="parItmId">
+			, LEVEL + 1		AS "Level"
+		</isNotEmpty>	
+			, DECODE(CONNECT_BY_ISLEAF, 0, 1, 0) AS "HaveChild"
+		FROM
+			TB_STTS_STDDITM	
+		WHERE
+			1=1
+		<isEmpty property="parItmId">
+			AND PAR_ITM_ID = 0
+		START WITH	
+			PAR_ITM_ID = 0	
+			<isNotEmpty property="useYn">
+					AND USE_YN = #useYn#
+				</isNotEmpty>
+			<isNotEmpty property="searchVal">	
+				AND ITM_ID IN (
+					SELECT DISTINCT ITM_ID FROM TB_STTS_STDDITM B
+				<isEmpty property="searchGubun">
+					START WITH B.ITM_NM LIKE '%' || #searchVal:VARCHAR# || '%'
+				</isEmpty>
+				<isNotEmpty property="searchGubun">
+					<isEqual property="searchGubun" compareValue="ITM_NM" >
+						START WITH B.ITM_NM LIKE '%' || #searchVal:VARCHAR# || '%'
+					</isEqual>
+					<isEqual property="searchGubun" compareValue="ENG_ITM_NM" >
+						START WITH B.ENG_ITM_NM LIKE '%' || #searchVal:VARCHAR# || '%'
+					</isEqual>
+					<isEqual property="searchGubun" compareValue="ITM_ID" >
+						START WITH B.ITM_ID LIKE '%' || #searchVal:VARCHAR# || '%'
+					</isEqual>
+				</isNotEmpty>	
+					CONNECT BY ITM_ID = PRIOR PAR_ITM_ID
+					<isNotEmpty property="useYn">
+						AND USE_YN = #useYn#
+					</isNotEmpty>
+				)
+			</isNotEmpty>
+		</isEmpty>
+		<isNotEmpty property="parItmId"> 
+		START WITH	PAR_ITM_ID = #parItmId#
+				<isNotEmpty property="useYn">
+					AND USE_YN = #useYn#
+				</isNotEmpty>
+		</isNotEmpty>	
+		CONNECT BY 
+			PRIOR ITM_ID = PAR_ITM_ID
+		<isNotEmpty property="useYn">
+			AND USE_YN = #useYn#
+		</isNotEmpty>
+		ORDER SIBLINGS BY V_ORDER
+	</select>
+	<select id="StatStddItmDao.selectStatStddItmListCount" parameterClass="params" resultClass="java.util.HashMap">
+		SELECT
+			COUNT(*)
+		FROM
+			TB_STTS_STDDITM	
+		WHERE
+			1=1
+		<isEmpty property="parItmId">
+			AND PAR_ITM_ID = 0
+		START WITH	
+			PAR_ITM_ID = 0	
+			<isNotEmpty property="useYn">
+					AND USE_YN = #useYn#
+				</isNotEmpty>
+			<isNotEmpty property="searchVal">	
+				AND ITM_ID IN (
+					SELECT DISTINCT ITM_ID FROM TB_STTS_STDDITM B
+				<isEmpty property="searchGubun">
+					START WITH B.ITM_NM LIKE '%' || #searchVal:VARCHAR# || '%'
+				</isEmpty>
+				<isNotEmpty property="searchGubun">
+					<isEqual property="searchGubun" compareValue="ITM_NM" >
+						START WITH B.ITM_NM LIKE '%' || #searchVal:VARCHAR# || '%'
+					</isEqual>
+					<isEqual property="searchGubun" compareValue="ENG_ITM_NM" >
+						START WITH B.ENG_ITM_NM LIKE '%' || #searchVal:VARCHAR# || '%'
+					</isEqual>
+					<isEqual property="searchGubun" compareValue="ITM_ID" >
+						START WITH B.ITM_ID LIKE '%' || #searchVal:VARCHAR# || '%'
+					</isEqual>
+				</isNotEmpty>	
+					CONNECT BY ITM_ID = PRIOR PAR_ITM_ID
+					<isNotEmpty property="useYn">
+						AND USE_YN = #useYn#
+					</isNotEmpty>
+				)
+			</isNotEmpty>
+		</isEmpty>
+		<isNotEmpty property="parItmId"> 
+		START WITH	PAR_ITM_ID = #parItmId#
+				<isNotEmpty property="useYn">
+					AND USE_YN = #useYn#
+				</isNotEmpty>
+		</isNotEmpty>	
+		CONNECT BY 
+			PRIOR ITM_ID = PAR_ITM_ID
+		<isNotEmpty property="useYn">
+			AND USE_YN = #useYn#
+		</isNotEmpty>
+		ORDER SIBLINGS BY V_ORDER
+	</select>
+	
+	<!-- 표준항목분류정보 상세조회 -->
+	<select id="StatStddItmDao.selectStatStddItmDtl" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		SELECT 
+			ITM_ID			AS "itmId"
+			, ITM_NM		AS "itmNm"
+			, ENG_ITM_NM	AS "engItmNm"
+			, PAR_ITM_ID	AS "parItmId"
+			, NVL((SELECT B.ITM_NM FROM TB_STTS_STDDITM B 
+				   WHERE  A.PAR_ITM_ID = B.ITM_ID), '최상위'
+			) AS "parItmNm"
+			, ITM_EXP		AS "itmExp"
+			, ENG_ITM_EXP	AS "engItmExp"
+			, GEO_CD		AS "geoCd"
+			, USE_YN		AS "useYn"
+			, V_ORDER		AS "vOrder"
+		FROM 
+			TB_STTS_STDDITM A
+		WHERE
+			ITM_ID = #itmId:NUMERIC#		
+	</select>
+	
+	<!-- 상위 항목구분 변경 및 삭제시 자식레벨이 있는지 확인(0일경우 자식이 있음) -->
+	<select id="StatStddItmDao.selectStatStddItmIsLeaf" parameterClass="String" resultClass="String">
+		SELECT 	NVL(MAX(DECODE(CONNECT_BY_ISLEAF, 0, 'Y', 'N')), 'N') AS "isLeaf"
+		FROM 	TB_STTS_STDDITM
+		WHERE   ITM_ID = #id:NUMERIC#
+		START WITH ITM_ID = #id:NUMERIC#
+		CONNECT BY PRIOR ITM_ID = PAR_ITM_ID
+	</select>
+	
+	<!-- 표준항목분류정보 등록 -->
+	<insert id="StatStddItmDao.insertStatStddItm" parameterClass="params">
+		INSERT INTO TB_STTS_STDDITM
+			(
+				ITM_ID
+				, ITM_NM
+				, ENG_ITM_NM
+				, PAR_ITM_ID
+				, USE_YN
+				, GEO_CD
+				, V_ORDER
+				, ITM_EXP
+				, ENG_ITM_EXP
+				, REG_ID
+				, REG_DTTM
+				, UPD_ID
+				, UPD_DTTM
+			)
+			VALUES (
+				SQ_STTS_STDDITM_ID.NEXTVAL
+				, #itmNm:VARCHAR#
+				, #engItmNm:VARCHAR#
+				, #parItmId:NUMERIC#
+				, #useYn:CHAR#
+				, #geoCd:VARCHAR#
+				, #vOrder:NUMERIC#
+				, #itmExp:VARCHAR#
+				, #engItmExp:VARCHAR#
+				, #regId:VARCHAR#
+				, SYSDATE
+				, #updId:VARCHAR#
+				, SYSDATE
+			)
+	</insert>
+	
+	<!-- 표준항목분류정보 저장 -->
+	<update id="StatStddItmDao.updateStatStddItm" parameterClass="params" >
+		UPDATE TB_STTS_STDDITM
+		SET
+			ITM_NM = #itmNm:VARCHAR#
+			, ENG_ITM_NM = #engItmNm:VARCHAR#
+			, PAR_ITM_ID = #parItmId:NUMERIC#
+			, USE_YN = #useYn:CHAR#
+			, GEO_CD = #geoCd:VARCHAR#
+			, ITM_EXP = #itmExp:VARCHAR#
+			, ENG_ITM_EXP = #engItmExp:VARCHAR#
+			, UPD_ID = #updId:VARCHAR#
+			, UPD_DTTM = SYSDATE
+		WHERE
+			ITM_ID = #itmId:NUMERIC#
+	</update>
+	
+	<!-- 표준항목분류정보 삭제 -->
+	<delete id="StatStddItmDao.deleteStatStddItm" parameterClass="params" >
+		DELETE FROM TB_STTS_STDDITM
+		WHERE  ITM_ID = #itmId:NUMERIC#
+	</delete>
+	
+	<update id="StatStddItmDao.saveStatStddItmNm" parameterClass="params" >
+		UPDATE TB_STTS_STDDITM
+		SET
+			ITM_NM = #itmNm:VARCHAR#
+			, UPD_ID = #updId:VARCHAR#
+			, UPD_DTTM = SYSDATE
+		WHERE
+			ITM_ID = #itmId:NUMERIC#
+	</update>
+	
+	<!-- 표준항목분류 순서저장 -->
+	<update id="StatStddItmDao.saveStatStddItmOrder" parameterClass="record" >
+		UPDATE TB_STTS_STDDITM
+		SET    V_ORDER = #vOrder:NUMERIC#
+		WHERE  ITM_ID = #itmId:NUMERIC#
+	</update>
+	
+</sqlMap>

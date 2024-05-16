@@ -1,0 +1,68 @@
+@charset "utf-8";
+
+
+.eventArea img{width:auto;max-width:none}
+.eventArea .event1{position:relative;width:100%;overflow:hidden;}
+.eventArea .event1 .img img{opacity:0}
+.eventArea .event1 .img_m{display:none;}
+.eventArea .event2{position:relative;width:100%;overflow:hidden;}
+.eventArea .event2 .img img{opacity:0}
+.eventArea .event2 .img_m{display:none;}
+
+@media all and (min-width:1024px) {
+	.eventArea .event1 .btnDown{position:absolute;top:1864px;;left:0;text-align:center;width:100%;}
+	.eventArea .event2 .btnDown{position:absolute;top:1440px;;left:0;text-align:center;width:100%;}
+}
+
+
+
+@media all and (max-width:1023px) {
+	.eventArea .event1 .img{display:none;}
+	.eventArea .event1 .img_m{display:block;width:100%;}
+	.eventArea .event1 .img_m img{width:100%;}
+
+	.eventArea .event2 .img{display:none;}
+	.eventArea .event2 .img_m{display:block;width:100%;}
+	.eventArea .event2 .img_m img{width:100%;}
+
+	.eventArea .event1 .btnDown{position:absolute;bottom:20px;;left:0;text-align:center;width:100%;text-align:center;}
+	.eventArea .event1 .btnDown img{width:50%;}
+	.eventArea .event2 .btnDown{position:absolute;bottom:20px;;left:0;text-align:center;width:100%;text-align:center;}
+	.eventArea .event2 .btnDown img{width:50%;}
+}
+
+/* 1024 이상 */
+.event_summary{border:1px solid #c9c9c9;background:#f9f9f9;padding:15px;margin:0 0 20px 0;
+	border-radius:5px;
+	-webkit-border-radius:5px;
+	-moz-border-radius:5px;
+	-ms-border-radius:5px;
+	-o-border-radius:5px;
+}
+.event_summary span{line-height:1.6;}
+.event_summary_header span:before{content:": ";}
+.event_summary_content{margin:3px 0;}
+.event_summary_content span:first-child:before{content:"ㆍ";font-weight:bold;}
+.event_summary_content span:before{content:": ";}
+.event_summary_pd{padding-left:64px;display:inline-block;}
+span.event_summary_pd:before{content:"";}
+.event_summary_etc{color:#ff0000;}
+.event_summary_etc:before{content:"※";}
+
+.event_bottom_txt{margin:10px 0;}
+.event_bottom_txt li{color:#888888;padding:2px 0;font-size:12px;}
+.event_bottom_txt li:before{content:"- ";}
+.event_bottom_txt li.event_bottom_txt_last:before{content:"※";}
+
+/* 1024 이하 */
+@media all and (max-width:1023px) {
+	.event_summary{margin:20px 0;}
+	.event_summary_content span:first-child{padding-left:0;font-weight:bold;}
+	.event_summary_content span{display:block;padding-left:11px;}
+	.event_summary_content span:before{content:"";}
+	
+	.event_bottom_txt li{padding:0 0 0 8px;text-indent:-8px;}
+}
+
+.event_agree2 input{-webkit-appearance:checkbox;}
+.event_agree2 label{font-size:12px;}

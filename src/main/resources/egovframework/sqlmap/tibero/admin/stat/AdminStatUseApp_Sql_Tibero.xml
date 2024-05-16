@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="StatUseApp" >
+  <typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+	
+	<resultMap id="StatUseApp" class="egovframework.admin.stat.service.StatUseApp" >
+		<result column="USER_CNT"			property="userCnt"/>
+	    <result column="KEY_CNT"			property="keyCnt"/>
+	    <result column="RE_CNT"	            property="reCnt"/>
+	    <result column="QA_CNT"			    property="qaCnt"/>
+	    <result column="GA_CNT"			    property="gaCnt"/>
+	    <result column="YYYYMMDD"			property="yyyyMmDd"/>
+	    
+    </resultMap>
+    
+    <!-- 활용성평가 Sheet형 데이터 조회 -->
+	<select id="StatUseAppDao.getUseAppStatSheetAll" parameterClass="egovframework.admin.stat.service.StatUseApp" resultClass="java.util.LinkedHashMap">
+<!-- 		SELECT USER_CNT
+			   ,KEY_CNT
+			   ,RE_CNT
+			   ,QA_CNT
+			   ,GA_CNT
+			   ,SUBSTR(YYYYMMDD, 0, 4)||'-'||SUBSTR(YYYYMMDD, 5, 2)||'-'||SUBSTR(YYYYMMDD, 7, 2) AS YYYYMMDD
+	    FROM TB_STAT_USE_ACT
+		
+		
+		WHERE       
+		
+		YYYYMMDD BETWEEN REPLACE(#pubDttmFrom#, '-', '') AND REPLACE(#pubDttmTo#, '-', '')
+		
+			
+			ORDER BY YYYYMMDD
+		 -->
+		SELECT
+			(SELECT CATE_NM FROM TB_OPEN_CATE WHERE CATE_ID = C.TOP_CATE_ID) "cateNmTop"
+			, C.CATE_NM "cateNm"
+			, B.INF_NM "infNm"
+			, (SELECT ORG_NM FROM TB_COMM_ORG WHERE ORG_CD = B.ORG_CD) "orgNm"
+			, FN_GET_OPEN_SRV_HTML(B.OPEN_SRV) "openSrv"
+			, COUNT(A.APPR_VAL) "apprCnt"
+			, ROUND(AVG(A.APPR_VAL), 2) "apprVal"
+		FROM
+			TB_OPEN_INF_APPR A
+			, TB_OPEN_INF B
+			, TB_OPEN_CATE C
+		WHERE
+			A.INF_ID = B.INF_ID
+			AND B.CATE_ID = C.CATE_ID
+			AND TO_CHAR(A.REG_DTTM, 'YYYYMMDD') BETWEEN #pubDttmFrom:VARCHAR# AND #pubDttmTo:VARCHAR#
+			<isNotEmpty property="cateId">
+			AND C.TOP_CATE_ID = #cateId#
+			</isNotEmpty>
+			<isNotEmpty property="infNm">
+			AND B.INF_NM LIKE '%' || #infNm# || '%'
+			</isNotEmpty>
+		GROUP BY
+			C.TOP_CATE_ID
+			, C.CATE_NM
+			, B.INF_NM
+			, B.ORG_CD
+			, B.OPEN_SRV
+		ORDER BY
+			"cateNmTop"
+			, CATE_NM
+			, INF_NM
+	</select>
+	
+	
+</sqlMap>

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- @(#)AdminInfSetOrder_Sql_Tibero.xml 1.0 2019/09/19                     -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- 정보셋 순서를 관리하는 SQL 파일이다.	                                     -->
+<!--                                                                         -->
+<!-- @author JHKIM                                                         	-->
+<!-- @version 1.0 2019/09/29                                                -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<sqlMap namespace="InfSetOrder">
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Type Alias                                                          -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+    
+    <!-- 정보셋 트리 목록 조회 -->
+	<select id="InfSetOrderDao.selectInfSetOrderList" parameterClass="params" resultClass="record">
+		/* sql id : InfSetOrderDao.selectInfSetOrderList */
+		WITH
+		    TMP_INFO_SET AS (
+		        SELECT
+		            'C' AS GUBUN_TAG,
+		            C.CATE_ID 		AS INFS_ID,
+		            C.PAR_CATE_ID 	AS PAR_INFS_ID,
+		            C.CATE_NM 		AS INFS_NM,
+		            '' 				AS ORG_NM,
+		            '' 				AS DOC_CNT,
+		            '' 				AS INF_CNT,
+		            '' 				AS STATBL_CNT,
+		            '' 				AS OPEN_STATE,
+           			NULL 			AS OPEN_DTTM,
+		            C.V_ORDER 		AS V_ORDER
+		        FROM
+		            TB_INFO_CATE C
+		        WHERE
+		            C.USE_YN = 'Y'
+		        UNION ALL
+		        SELECT
+		            'T' 					AS GUBUN_TAG,
+		            A.INFS_ID,
+		            B.CATE_ID 				AS PAR_INFS_ID,
+		            A.INFS_NM,
+		            C.ORG_NM,
+		            TO_CHAR(A.DOC_CNT) 		AS DOC_CNT,
+		            TO_CHAR(A.INF_CNT) 		AS INF_CNT,
+		            TO_CHAR(A.STATBL_CNT) 	AS STATBL_CNT,
+		            DECODE(A.OPEN_STATE, 'Y', '공개', 'N', '미공개', '') AS OPEN_STATE,
+		            A.OPEN_DTTM,
+		            B.V_ORDER
+		        FROM
+		            TB_INFO_SET A
+		            INNER JOIN TB_INFO_SET_CATE B ON A.INFS_ID = B.INFS_ID AND B.USE_YN = 'Y'
+		            LEFT JOIN TB_COMM_ORG C ON A.ORG_CD = C.ORG_CD AND C.USE_YN = 'Y'
+		        WHERE
+		            A.USE_YN = 'Y'
+		            <isNotEmpty property="openState" prepend="AND">
+						A.OPEN_STATE = #openState:VARCHAR#	   	 
+			   		</isNotEmpty>
+		    )
+		SELECT
+		    LEVEL 				AS "Level",
+		    L.GUBUN_TAG 		AS "gubunTag",
+		    L.INFS_ID 			AS "infsId",
+		    L.PAR_INFS_ID 		AS "parInfsId",
+		    L.INFS_NM 			AS "infsNm",
+		    L.ORG_NM 			AS "orgNm",
+		    L.DOC_CNT 			AS "docCnt",
+		    L.INF_CNT 			AS "infCnt",
+		    L.STATBL_CNT 		AS "statblCnt",
+		    L.OPEN_STATE		AS "openState",
+		    L.OPEN_DTTM			AS "openDttm",
+		    L.V_ORDER 			AS "vOrder"
+		FROM
+		    TMP_INFO_SET L
+		WHERE
+		    1 = 1
+		    <!-- 분류에 정보셋이 들어있는것만 표시하고싶을경우 --> 
+		    AND EXISTS (
+		        SELECT 1
+		        FROM   TMP_INFO_SET E
+		        WHERE  E.GUBUN_TAG = 'T'
+		        START WITH E.INFS_ID = L.INFS_ID
+		        CONNECT BY PRIOR E.INFS_ID = E.PAR_INFS_ID
+		    )
+		START WITH
+		    L.PAR_INFS_ID = 'T'
+		    AND L.GUBUN_TAG = 'C'
+		CONNECT BY
+		    PRIOR L.INFS_ID = L.PAR_INFS_ID
+		ORDER SIBLINGS BY
+		    L.V_ORDER,
+		    L.INFS_NM		
+	</select>
+  	
+  	<!-- 정보셋 순서 저장 -->
+	<update id="InfSetOrderDao.saveInfSetOrder" parameterClass="record">
+		/* sql id : InfSetOrderDao.saveInfSetOrder */
+		UPDATE TB_INFO_SET_CATE
+		SET    V_ORDER = #vOrder:NUMERIC#
+		WHERE  INFS_ID = #infsId:VARCHAR#
+		AND    CATE_ID = #cateId:VARCHAR#
+	</update>
+	
+</sqlMap>

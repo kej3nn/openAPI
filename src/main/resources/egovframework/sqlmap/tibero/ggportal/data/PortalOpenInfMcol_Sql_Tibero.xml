@@ -1,0 +1,349 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- @(#)PortalOpenInfMcol_Sql_Tibero.xml 1.0 2015/06/15                     -->
+<!--                                                                         -->
+<!-- COPYRIGHT (C) 2013 WISEITECH CO., LTD. ALL RIGHTS RESERVED.             -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- 공공데이터 지도 서비스를 관리하는 SQL 파일이다.                         -->
+<!--                                                                         -->
+<!-- @author 김은삼                                                          -->
+<!-- @version 1.0 2015/06/15                                                 -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<sqlMap namespace="PortalOpenInfMcolDao">
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Type Alias                                                          -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 공공데이터 지도 서비스 메타정보를 조회한다.                         -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="PortalOpenInfMcolDao.selectOpenInfMcolMeta" parameterClass="params" resultClass="record">
+        <![CDATA[
+         SELECT B.INF_NM       AS "infNm",
+                A.SRV_CD       AS "srvCd",
+                A.MAP_LEVEL    AS "mapLevel",
+                A.XPOS         AS "xPos",
+                A.YPOS         AS "yPos",
+                (
+                    SELECT D.VALUE_CD
+                      FROM TB_COMM_CODE D
+                     WHERE D.GRP_CD     = 'D1019'
+                       AND D.DITC_CD    = A.MARKER_CD
+                       AND D.USE_YN     = 'Y'
+                )              AS "markerCd"
+           FROM TB_OPEN_INF_SRV A
+           JOIN TB_OPEN_INF     B
+             ON B.INF_ID        = A.INF_ID
+           JOIN TB_OPEN_DS      C
+             ON C.DS_ID         = B.DS_ID
+          WHERE A.INF_ID        = #infId:VARCHAR#
+            AND A.INF_SEQ       = #infSeq:NUMERIC#
+            AND A.SRV_YN        = 'Y'
+            AND A.SRV_CD        = 'M'
+            AND B.INF_STATE     = 'Y'
+            AND B.OPEN_DTTM    <= SYSDATE
+            AND C.USE_YN        = 'Y'
+        ]]>
+    </select>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 공공데이터 지도 서비스 항목정보를 검색한다.                         -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="PortalOpenInfMcolDao.searchOpenInfMcolInfo" parameterClass="params" resultClass="record">
+        <![CDATA[
+         SELECT CASE A.COL_CD
+                WHEN 'ITEM'
+                THEN E.SRC_COL_ID
+                ELSE A.COL_CD
+                END             AS "colCd",
+                E.COL_NM        AS "colNm"
+           FROM TB_OPEN_INF_MCOL A
+           JOIN TB_OPEN_INF_SRV  B
+             ON B.INF_ID         = A.INF_ID
+            AND B.INF_SEQ        = A.INF_SEQ
+           JOIN TB_OPEN_INF      C
+             ON C.INF_ID         = B.INF_ID
+           JOIN TB_OPEN_DS       D
+             ON D.DS_ID          = C.DS_ID
+           JOIN TB_OPEN_DSCOL    E
+             ON E.DS_ID          = D.DS_ID
+            AND E.COL_SEQ        = A.COL_SEQ
+          WHERE A.INF_ID         = #infId:VARCHAR#
+            AND A.INF_SEQ        = #infSeq:NUMERIC#
+            AND A.USE_YN         = 'Y'
+            AND A.VIEW_YN        = 'Y'
+            AND B.SRV_YN         = 'Y'
+            AND B.SRV_CD         = 'M'
+            AND C.INF_STATE      = 'Y'
+            AND C.OPEN_DTTM     <= SYSDATE
+            AND D.USE_YN         = 'Y'
+            AND E.USE_YN         = 'Y'
+          ORDER BY
+                E.V_ORDER ASC
+        ]]>
+    </select>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 공공데이터 지도 서비스 테이블명을 조회한다.                         -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="PortalOpenInfMcolDao.selectOpenInfMcolTbNm" parameterClass="params" resultClass="record">
+        <![CDATA[
+         SELECT C.DS_ID        AS "dsId",
+                C.OWNER_CD     AS "ownerCd"
+           FROM TB_OPEN_INF_SRV A
+           JOIN TB_OPEN_INF     B
+             ON B.INF_ID        = A.INF_ID
+           JOIN TB_OPEN_DS      C
+             ON C.DS_ID         = B.DS_ID
+          WHERE A.INF_ID        = #infId:VARCHAR#
+            AND A.INF_SEQ       = #infSeq:NUMERIC#
+            AND A.SRV_YN        = 'Y'
+            AND A.SRV_CD        = 'M'
+            AND B.INF_STATE     = 'Y'
+            AND B.OPEN_DTTM    <= SYSDATE
+            AND C.USE_YN        = 'Y'
+        ]]>
+    </select>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 공공데이터 지도 서비스 조회컬럼을 검색한다.                         -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="PortalOpenInfMcolDao.searchOpenInfMcolCols" parameterClass="params" resultClass="string">
+        <![CDATA[
+         SELECT E.SRC_COL_ID    ||' AS '||
+                CASE A.COL_CD
+                WHEN 'ITEM'
+                THEN E.SRC_COL_ID
+                ELSE A.COL_CD
+                END             AS "columnName"
+           FROM TB_OPEN_INF_MCOL A
+           JOIN TB_OPEN_INF_SRV  B
+             ON B.INF_ID         = A.INF_ID
+            AND B.INF_SEQ        = A.INF_SEQ
+           JOIN TB_OPEN_INF      C
+             ON C.INF_ID         = B.INF_ID
+           JOIN TB_OPEN_DS       D
+             ON D.DS_ID          = C.DS_ID
+           JOIN TB_OPEN_DSCOL    E
+             ON E.DS_ID          = D.DS_ID
+            AND E.COL_SEQ        = A.COL_SEQ
+          WHERE A.INF_ID         = #infId:VARCHAR#
+            AND A.INF_SEQ        = #infSeq:NUMERIC#
+            AND A.USE_YN         = 'Y'
+            AND A.VIEW_YN        = 'Y'
+            AND B.SRV_YN         = 'Y'
+            AND B.SRV_CD         = 'M'
+            AND C.INF_STATE      = 'Y'
+            AND C.OPEN_DTTM     <= SYSDATE
+            AND D.USE_YN         = 'Y'
+            AND E.USE_YN         = 'Y'
+          ORDER BY
+                A.V_ORDER ASC
+        ]]>
+    </select>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 공공데이터 지도 서비스 조회조건을 검색한다.                         -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="PortalOpenInfMcolDao.searchOpenInfMcolCond" parameterClass="params" resultClass="string">
+        <![CDATA[
+         SELECT E.SRC_COL_ID    ||' '||
+                A.COND_OP       ||' '||
+                CASE A.COND_OP
+                WHEN 'IN'
+                THEN '('
+                END             ||' '||
+                A.COND_VAR      ||' '||
+                CASE A.COND_OP
+                WHEN 'IN'
+                THEN ')'
+                END             AS "searchCondition"
+           FROM TB_OPEN_INF_MCOL A
+           JOIN TB_OPEN_INF_SRV  B
+             ON B.INF_ID         = A.INF_ID
+            AND B.INF_SEQ        = A.INF_SEQ
+           JOIN TB_OPEN_INF      C
+             ON C.INF_ID         = B.INF_ID
+           JOIN TB_OPEN_DS       D
+             ON D.DS_ID          = C.DS_ID
+           JOIN TB_OPEN_DSCOL    E
+             ON E.DS_ID          = D.DS_ID
+            AND E.COL_SEQ        = A.COL_SEQ
+          WHERE A.INF_ID         = #infId:VARCHAR#
+            AND A.INF_SEQ        = #infSeq:NUMERIC#
+            AND A.USE_YN         = 'Y'
+            AND A.COND_YN        = 'Y'
+            AND B.SRV_YN         = 'Y'
+            AND B.SRV_CD         = 'M'
+            AND C.INF_STATE      = 'Y'
+            AND C.OPEN_DTTM     <= SYSDATE
+            AND D.USE_YN         = 'Y'
+            AND E.USE_YN         = 'Y'
+          ORDER BY
+                A.V_ORDER ASC
+        ]]>
+    </select>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 공공데이터 지도 서비스 데이터를 검색한다.                           -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- TB_META_ORG_DS_REL 테이블 없음 -->
+	<select id="PortalOpenInfMcolDao.searchOpenInfMcolData" parameterClass="params" resultClass="record" remapResults="true">
+		SELECT *
+		FROM (
+				SELECT <iterate property="columnNames" conjunction=",">$columnNames[]$</iterate>
+				FROM $ownerName$.$tableName$
+				WHERE 1=1
+				<isNotEmpty property="wgsCoordinate">
+					$wgsCoordinate$
+				</isNotEmpty>
+				<isEqual property="aprvProcYn" compareValue="Y" prepend="AND">
+					APRV_YN = 'Y'
+				</isEqual>
+				<isNotEmpty property="searchConditions" prepend="AND">
+					<iterate property="searchConditions" conjunction=" AND ">$searchConditions[]$</iterate>
+				</isNotEmpty>
+				<isNotEmpty property="searchFilters" prepend="AND">
+					<iterate property="searchFilters" conjunction=" AND ">$searchFilters[]$</iterate>
+				</isNotEmpty>
+				<isNotEmpty property="parSigunNm">
+					AND SIGUN_NM = #parSigunNm#
+				</isNotEmpty>
+				<isNotEmpty property="sigunNm">
+					AND EMD_NM = #sigunNm#
+				</isNotEmpty>
+				<isNotEmpty property="mParSigunNm">
+					<isNotEqual property="mParSigunNm" compareValue="경기도">	
+						AND	SIGUN_NM = #mParSigunNm#
+					</isNotEqual>
+					<isEqual property="mParSigunNm" compareValue="경기도">	
+						AND SIGUN_NM = #mSigunNm#
+					</isEqual>
+				</isNotEmpty>
+				<isNotEmpty property="mSigunNm">
+					<isNotEqual property="mParSigunNm" compareValue="경기도">	
+						AND EMD_NM = #mSigunNm#
+					</isNotEqual>			                        
+				</isNotEmpty>
+				<isNotEmpty property="sigunFlag" prepend="AND">
+					<isEqual property="sigunCdYn" compareValue="Y">
+						SIGUN_CD = #sigunFlag#				                    	
+					</isEqual>
+					<isNotEqual property="sigunCdYn" compareValue="Y">
+						<!-- 2016.07.29 이 조건은 필요없어 보인는데???-->
+						EXISTS (
+							SELECT ORG_CD 
+							FROM TB_META_ORG_DS_REL 
+							WHERE INF_ID = #infId:VARCHAR#   
+							AND ORG_CD  in (SELECT ORG_CD FROM TB_COMM_ORG WHERE TYPE_CD = #sigunFlag# )
+						)
+					</isNotEqual>
+				</isNotEmpty>
+			)
+		WHERE Y_WGS84 > 0
+		AND X_WGS84 > 0
+        <isNotEmpty property="Y_WGS84_FROM">
+            <![CDATA[
+            AND Y_WGS84 >= #Y_WGS84_FROM#
+            ]]>
+        </isNotEmpty>
+        <isNotEmpty property="Y_WGS84_TO">
+            <![CDATA[
+            AND Y_WGS84 <= #Y_WGS84_TO#
+            ]]>
+        </isNotEmpty>
+        <isNotEmpty property="X_WGS84_FROM">
+            <![CDATA[
+            AND X_WGS84 >= #X_WGS84_FROM#
+            ]]>
+        </isNotEmpty>
+        <isNotEmpty property="X_WGS84_TO">
+            <![CDATA[
+            AND X_WGS84 <= #X_WGS84_TO#
+            ]]>
+        </isNotEmpty>
+        <isEmpty property="first">
+            <![CDATA[
+            AND ROWNUM  <= 500
+            ]]>
+        </isEmpty>
+        <isNotEmpty property="first">
+            <![CDATA[
+            AND ROWNUM  <= #first:NUMERIC#
+            ]]>
+        </isNotEmpty>
+    </select>
+    
+    
+    <select id="PortalOpenInfMcolDao.searchOpenInfMcolFilt" parameterClass="params" resultClass="record">
+        /*map filter search*/
+        
+         SELECT E.COL_NM          AS "colNm",
+                E.SRC_COL_ID      AS "srcColId",
+                A.FILT_CD         AS "filtCd",
+                A.FILT_NEED       AS "filtNeed",
+                A.FILT_CODE       AS "filtCode",
+                A.FILT_DEFAULT    AS "filtDefault",
+               <!--  A.FILT_DEFAULT_NM AS "filtDefaultNm", -->
+                A.FILT_MAX_DAY    AS "filtMaxDay",
+                A.FILT_TBL_CD     AS "filtTblCd"
+           FROM TB_OPEN_INF_MCOL A
+           JOIN TB_OPEN_INF_SRV  B
+             ON B.INF_ID         = A.INF_ID
+            AND B.INF_SEQ        = A.INF_SEQ
+           JOIN TB_OPEN_INF      C
+             ON C.INF_ID         = B.INF_ID
+           JOIN TB_OPEN_DS       D
+             ON D.DS_ID          = C.DS_ID
+           JOIN TB_OPEN_DSCOL    E
+             ON E.DS_ID          = D.DS_ID
+            AND E.COL_SEQ        = A.COL_SEQ
+          WHERE A.INF_ID         = #infId:VARCHAR#
+            AND A.INF_SEQ        = #infSeq:NUMERIC#
+            AND A.USE_YN         = 'Y'
+            AND A.FILT_YN        = 'Y'
+            AND A.FILT_CD       IN ('CHECK', 'RADIO', 'COMBO', 'WORDS', 'FDATE', 'LDATE', 'PDATE', 'SDATE', 'CDATE')
+            AND B.SRV_YN         = 'Y'
+            AND B.SRV_CD         = 'M'
+            AND C.INF_STATE      = 'Y'
+           <![CDATA[ AND C.OPEN_DTTM     <= SYSDATE ]]>
+            AND D.USE_YN         = 'Y'
+            AND E.USE_YN         = 'Y'
+          ORDER BY
+                E.V_ORDER ASC
+        
+    </select>
+    
+    <select id="PortalOpenInfMcolDao.searchOpenInfMcolMarkerCd" parameterClass="params" resultClass="record">
+		SELECT DISTINCT(MARKER) AS MARKER
+		FROM (
+			SELECT <iterate property="columnNames" conjunction=",">$columnNames[]$</iterate>
+			FROM $ownerName$.$tableName$
+		)
+		ORDER BY MARKER ASC
+    </select>
+    
+    
+    <!-- map이 shape로 구성된것인지 체크  -->
+    <select id="PortalOpenInfMcolDao.selectOpenInfShapeFile" parameterClass="params" resultClass="record">
+		SELECT B.INF_ID		AS "infId"
+			 , B.INF_SEQ	AS "infSeq"
+			 , B.FILE_SEQ	AS "fileSeq"
+		FROM   TB_OPEN_INF_SRV A 
+			INNER JOIN TB_OPEN_INF_FILE B
+				ON  A.INF_ID = B.INF_ID
+				AND B.FILE_CD = 'SHP'
+				AND B.USE_YN = 'Y'
+		WHERE  A.INF_ID = #infId:VARCHAR# 
+		AND    A.SRV_CD = 'F' 
+		AND    A.SGRP_CD = 'SHP' 
+	</select>
+
+</sqlMap>

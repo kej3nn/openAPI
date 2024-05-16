@@ -1,0 +1,318 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="AdminCommUsr">
+	<typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+	<resultMap id="AdminUserSearchInfo" class="egovframework.admin.user.service.CommUsr">
+		<result property="usrId" column="USR_ID"/>
+		<result property="usrNm" column="USR_NM"/>
+		<result property="usrHp" column="USR_HP"/>
+		<result property="hpYn" column="HP_YN"/>
+		<result property="usrPw" column="USR_PW"/>
+	</resultMap>
+	
+	<resultMap id="SmsSendInfo" class="egovframework.admin.user.service.CommUsr">
+		<result property="usrId" column="USR_ID"/>
+		<result property="usrHp" column="USR_HP"/>
+		<result property="hpYn" column="HP_YN"/>
+	</resultMap>
+
+	<resultMap id="AdminMemInfo" class="egovframework.admin.user.service.CommUsr">
+		<result property="usrNm" column="USR_NM"/>
+		<result property="usrNmEng" column="ENG_USR_NM"/>
+		<result property="jobCd" column="JOB_CD"/>
+		<result property="jobNm" column="JOB_NM"/>
+		<result property="usrId" column="USR_ID"/>
+		<result property="deptNm" column="DEPT_NM"/>
+		<result property="orgNm" column="ORG_NM"/>
+		<result property="usrEmailSplit1" column="USR_EMAIL_SPLIT_1"/>
+		<result property="usrEmailSplit2" column="USR_EMAIL_SPLIT_2"/>
+		<result property="emailYn" column="EMAIL_YN"/>
+		<result property="usrTelSplit1" column="USR_TEL_SPLIT_1"/>
+		<result property="usrTelSplit2" column="USR_TEL_SPLIT_2"/>
+		<result property="usrTelSplit3" column="USR_TEL_SPLIT_3"/>
+		<result property="usrHpSplit1" column="USR_HP_SPLIT_1"/>
+		<result property="usrHpSplit2" column="USR_HP_SPLIT_2"/>
+		<result property="usrHpSplit3" column="USR_HP_SPLIT_3"/>
+		<result property="hpYn" column="HP_YN"/>
+		<result property="accCd" column="ACC_CD"/>
+		<result property="pkiDttm" column="PKI_DTTM"/>
+		<result property="naidCd" column="NAID_CD"/>
+		<result property="naidId" column="NAID_ID"/>
+		<result property="orgCd" column="ORG_CD"/>
+		<result property="orgCdNm" column="ORG_CD_NM"/>
+		<result property="usrWork" column="USR_WORK"/>
+		<result property="notiHhCd" column="NOTI_HH_CD"/>
+		<result property="notiStartHh" column="NOTI_START_HH"/>
+		<result property="notiEndHh" column="NOTI_END_HH"/>
+	</resultMap>
+
+
+	<!-- 관리자 회원아이디 중복체크  -->
+	<select id="AdminCommUsrDao.memRegUsrIdDup" parameterClass="egovframework.admin.user.service.CommUsr"  resultClass="java.lang.Integer">
+		 SELECT COUNT(*)
+	       FROM TB_COMM_USR
+	      WHERE USR_ID = #usrId:VARCHAR#
+	</select>
+
+
+	<!-- 계정가입전 usrcd값 조회  -->
+	<select id="AdminCommUsrDao.getUsrCd" parameterClass="egovframework.admin.user.service.CommUsr"  resultClass="java.lang.Integer">
+		SELECT NVL(MAX(USR_CD)+1,7000000)
+	      FROM TB_COMM_USR
+	</select>
+	
+	
+	<!-- 관리자 회원가입  -->
+	<insert id="AdminCommUsrDao.insertUsr" parameterClass="egovframework.admin.user.service.CommUsr">
+		INSERT INTO TB_COMM_USR
+			(
+				USR_CD
+			,	USR_ID
+			,	USR_NM
+			,	USR_PW
+			<isNotEqual property="usrEmail" compareValue="1">
+			,	USR_EMAIL
+			</isNotEqual>
+			<isNotNull property="emailYn">
+			, 	EMAIL_YN
+			,	EMAIL_DTTM
+			</isNotNull>
+			<isNotEqual property="usrTel" compareValue="1"> 
+			,	USR_TEL
+			</isNotEqual>
+			<isNotEqual property="usrHp" compareValue="1">
+			,	USR_HP
+			</isNotEqual>
+			<isNotNull property="hpYn">
+			,	HP_YN
+			, 	HP_DTTM
+			</isNotNull>
+			,	ACC_CD
+			,	REG_DTTM
+			,	PW_DTTM
+			,	AGREE_YN
+			,	AGREE_DTTM
+			,	ACC_YN
+			,	USE_YN
+			<!-- GPIN 실명인증 정보(순서대로 개인식별번호, 중복가입정보, 생년월일, 성별, 내외국인 구분, 실명인증 여부, 실명인증시간 -->
+			,   RAUTH_VID
+			,   RAUTH_DI
+			,   RAUTH_BIRTH
+			,   RAUTH_SEX
+			,   RAUTH_NI
+			,   RAUTH_YN
+			,   RAUTH_DTTM
+			)
+		VALUES
+			(
+				#usrCd:NUMERIC#
+			,	#usrId:VARCHAR#
+			,	#usrNm:VARCHAR#
+			,   FN_SCP_EDC_STR('H',#usrPw:VARCHAR#)
+			<isNotEqual property="usrEmail" compareValue="1">
+			, 	pkg_crypto2.encrypt(#usrEmail:VARCHAR# || '@' || #usrEmailLast:VARCHAR#)
+			</isNotEqual>
+			<isNotNull property="emailYn">
+			,	#emailYn:CHAR#
+			,	SYSDATE
+			</isNotNull>
+			<isNotEqual property="usrTel" compareValue="1">
+			,   replace(#usrTel:VARCHAR#, ',' , '-')
+			</isNotEqual>
+			<isNotEqual property="usrHp" compareValue="1">
+			,   pkg_crypto2.encrypt(replace(#usrHp:VARCHAR#, ',' , '-'))
+			</isNotEqual>
+			<isNotNull property="hpYn">
+			,	#hpYn:CHAR#
+			, 	SYSDATE
+			</isNotNull>
+			,	#accCd:CHAR#
+			, 	SYSDATE
+			, 	SYSDATE	
+			,	#agreeYn:CHAR#
+			,	SYSDATE
+			,	'Y'
+			,	'Y'
+			<!-- GPIN 실명인증 정보 -->
+			,   FN_SCP_EDC_STR('E', #rauthVid:VARCHAR#)
+			,   FN_SCP_EDC_STR('E', #rauthDi:VARCHAR#)
+			,   #rauthBirth:CHAR#
+			,   DECODE(#rauthSex:CHAR#, 0, 'F', 1, 'M')	<!-- 성별 0이면 여성, 1이면 남성 -->
+			,   #rauthNi:CHAR#	<!-- 0 : 내국인 / 1 : 외국인 / 2 : 재외국민 -->
+			,   #rauthYn:CHAR#
+			,   SYSDATE
+			)
+	</insert>
+	
+	<update id="AdminCommUsrDao.initialPw" parameterClass="egovframework.admin.user.service.CommUsr">
+		UPDATE   TB_COMM_USR
+		   SET   USR_PW = FN_SCP_EDC_STR('H',#usrPw:VARCHAR# )
+		       , FAIL_CNT = 0
+		       , REQ_PW_YN = 'Y'
+		 WHERE   USR_ID = #usrId:VARCHAR#
+	</update>
+	
+	<select id="AdminCommUsrDao.getAdminUserIdPwSearchInfo" parameterClass="egovframework.admin.user.service.CommUsr" resultMap="AdminUserSearchInfo">
+		SELECT 	 USR_ID
+		 	   , USR_NM
+			   , FN_SCP_EDC_STR('D',USR_HP ) AS USR_HP
+			   , HP_YN	
+		 	   , #usrPwTemp:VARCHAR# as USR_PW  <!-- 초기화한 비밀번호(암호화x)를 sms메세지에 전달한다.  -->
+		  FROM TB_COMM_USR
+		 WHERE USR_ID = #usrId:VARCHAR#
+	</select>
+	
+	<select id="AdminCommUsrDao.selectSmsSendInfo" parameterClass="egovframework.admin.user.service.CommUsr" resultMap="SmsSendInfo">
+		SELECT    FN_SCP_EDC_STR('D',USR_HP) AS USR_HP
+				, USR_ID
+				, HP_YN
+		  FROM TB_COMM_USR
+		 WHERE USR_ID = #usrId:VARCHAR#
+	</select>
+	
+	<!-- 관리자 정보 수정을 위해 아이디/비밀번호 체크한다.   -->
+	<select id="AdminCommUsrDao.selectPwConfirm" parameterClass="egovframework.admin.user.service.CommUsr" resultClass="java.lang.Integer">
+		SELECT COUNT(*)
+		  FROM TB_COMM_USR
+		 WHERE USR_ID = #usrId:VARCHAR#
+		   AND USR_PW = #usrPw:VARCHAR#
+	</select>
+	
+	<!-- 관리자 정보 수정사용할 정보 조회  -->
+	<select id="AdminCommUsrDao.getMemIdPwSearchInfo" parameterClass="egovframework.admin.user.service.CommUsr" resultMap="AdminMemInfo">
+	<!-- 
+	    SELECT 	 	A.USR_NM
+   			   , (SELECT ORG_NM FROM TB_COMM_ORG WHERE ORG_CD = A.ORG_CD ) AS ORG_CD_NM
+	    	   , A.ENG_USR_NM
+			   , A.JOB_CD
+			   , A.USR_ID
+			   , A.DEPT_NM
+			   , A.ORG_NM
+			   , SUBSTR( FN_SCP_EDC_STR('D', A.USR_EMAIL ) ,1,INSTR(  FN_SCP_EDC_STR('D', A.USR_EMAIL ) ,'@',1,1) -1) AS USR_EMAIL_SPLIT_1
+		 	   , SUBSTR( FN_SCP_EDC_STR('D', A.USR_EMAIL ) ,INSTR( FN_SCP_EDC_STR('D', A.USR_EMAIL ) ,'@',1,1) +1) AS USR_EMAIL_SPLIT_2
+		 	   , A.EMAIL_YN
+		 	   , SUBSTR( FN_SCP_EDC_STR('D', A.USR_HP ) ,1,INSTR( FN_SCP_EDC_STR('D', A.USR_HP ) ,'-',1,1) -1) AS USR_HP_SPLIT_1
+		 	   , SUBSTR( FN_SCP_EDC_STR('D', A.USR_HP ) ,INSTR( FN_SCP_EDC_STR('D', A.USR_HP ) ,'-',1,1)+1, INSTR( FN_SCP_EDC_STR('D', A.USR_HP ) ,'-',1,2) -  (INSTR( FN_SCP_EDC_STR('D', A.USR_HP ) ,'-',1,1)+1) ) AS USR_HP_SPLIT_2
+		 	   , SUBSTR( FN_SCP_EDC_STR('D', A.USR_HP ) ,INSTR( FN_SCP_EDC_STR('D', A.USR_HP ) ,'-',1,2)+1) AS USR_HP_SPLIT_3
+		 	   , SUBSTR( A.USR_TEL  ,1,INSTR(  A.USR_TEL  ,'-',1,1) -1) AS USR_TEL_SPLIT_1
+		 	   , SUBSTR( A.USR_TEL  ,INSTR(  A.USR_TEL  ,'-',1,1)+1, INSTR(  A.USR_TEL  ,'-',1,2) -  (INSTR( A.USR_TEL  ,'-',1,1)+1) ) AS USR_TEL_SPLIT_2
+		 	   , SUBSTR( A.USR_TEL  ,INSTR(  A.USR_TEL  ,'-',1,2)+1) AS USR_TEL_SPLIT_3
+		 	   , A.HP_YN
+		 	   , A.ACC_CD
+		 	   , TO_CHAR(A.PKI_DTTM, 'YYYY-MM-DD') AS PKI_DTTM
+		 	   , A.NAID_CD
+		 	   , A.NAID_ID
+		 	   , A.ORG_CD
+		 FROM TB_COMM_USR A
+		WHERE A.USR_ID = #usrId#
+	-->
+		    SELECT 	 	A.USR_NM
+   			   , (SELECT ORG_NM FROM TB_COMM_ORG WHERE ORG_CD = A.ORG_CD ) AS ORG_CD_NM
+	    	   , A.ENG_USR_NM
+	    	   , FN_GET_COMM_CODE_NM('C1003', A.JOB_CD) AS JOB_NM
+			   , A.JOB_CD
+			   , A.USR_ID
+			   , C.ORG_NM AS DEPT_NM
+			   , B.ORG_NM
+		       , SUBSTR((pkg_crypto2.decrypt(A.USR_EMAIL)), 1, INSTR((pkg_crypto2.decrypt(A.USR_EMAIL)), '@')-1) AS USR_EMAIL_SPLIT_1
+		       , SUBSTR((pkg_crypto2.decrypt(A.USR_EMAIL)), INSTR((pkg_crypto2.decrypt(A.USR_EMAIL)), '@')+1, LENGTH((pkg_crypto2.decrypt(A.USR_EMAIL)))) AS USR_EMAIL_SPLIT_2
+		 	   , A.EMAIL_YN
+		 	   , pkg_crypto2.decrypt(A.USR_HP) AS USR_HP_SPLIT_1
+		 	   , '' AS USR_HP_SPLIT_2
+		 	   , '' AS USR_HP_SPLIT_3
+		 	   , pkg_crypto2.decrypt(A.USR_TEL) AS USR_TEL_SPLIT_1
+		 	   , '' AS USR_TEL_SPLIT_2
+		 	   , '' AS USR_TEL_SPLIT_3
+		 	   , A.HP_YN
+		 	   , A.ACC_CD
+		 	   , TO_CHAR(A.PKI_DTTM, 'YYYY-MM-DD') AS PKI_DTTM
+		 	   , '' AS NAID_CD
+		 	   , '' AS NAID_ID
+		 	   , A.ORG_CD
+		 	   , A.USR_WORK 
+		 	   , A.NOTI_HH_CD
+		 	   , A.NOTI_START_HH
+		 	   , A.NOTI_END_HH
+		 FROM TB_COMM_USR A
+		 	 INNER JOIN TB_COMM_ORG B
+			 ON  A.ORG_CD = B.ORG_CD 
+			 INNER JOIN TB_COMM_ORG C
+			 ON B.TOP_ORG_CD = C.ORG_CD
+		WHERE A.USR_ID = #usrId:VARCHAR#
+	</select>
+	
+	<!-- 회원정보 수정시 비밀번호 변경 없을시 기존 비밀번호 가져온다.  -->
+	<select id="AdminCommUsrDao.getUserPW"  parameterClass="egovframework.admin.user.service.CommUsr"  resultClass="java.lang.String" >
+		SELECT USR_PW
+		  FROM TB_COMM_USR
+		 WHERE USR_ID = #usrId:VARCHAR#
+	</select>
+	
+	
+	<!-- 회원정보 수정 .. 비밀번호 변경일자 수정해야한다. 같은번호인지 아닌지.  -->
+	<update id="AdminCommUsrDao.updateUser" parameterClass="egovframework.admin.user.service.CommUsr" >
+		UPDATE   TB_COMM_USR
+		   SET  UPD_DTTM = SYSDATE
+		   <!-- 
+		  	   <isNotNull property="usrNmEng">
+		   	   , ENG_USR_NM = #usrNmEng:VARCHAR#
+		   	   </isNotNull>
+		   	   <isNull property="usrNmEng">
+		   	   , ENG_USR_NM = NULL
+		   	   </isNull> 
+		       <isNotEmpty property="usrEmail" >
+		  		<isNotEmpty property="usrEmailLast">
+		       , USR_EMAIL = pkg_crypto2.encrypt(#usrEmail# || '@' || #usrEmailLast#)
+		      	</isNotEmpty>
+			   </isNotEmpty>
+		       <isNotNull property="emailYn">
+			   , EMAIL_YN = #emailYn:CHAR#
+			   , EMAIL_DTTM = SYSDATE
+			   </isNotNull>
+			   <isNull property="emailYn">
+			   , EMAIL_YN = 'N'
+			   , EMAIL_DTTM = NULL
+			   </isNull>
+			   , USR_TEL = pkg_crypto2.encrypt(#usrTel:VARCHAR#)
+			   , USR_HP = pkg_crypto2.encrypt(#usrHp:VARCHAR#)
+			   <isNotNull property="hpYn">
+			   , HP_YN = #hpYn:CHAR#
+			   , HP_DTTM = SYSDATE
+			   </isNotNull>
+			   <isNull property="hpYn">
+			   , HP_YN = 'N'
+			   , HP_DTTM = NULL
+			   </isNull>
+			   <isNotEmpty property="usrPw">
+		       , USR_PW = #usrPw#
+		       , PW_DTTM = SYSDATE
+		       </isNotEmpty>
+			   , JOB_CD = #jobCd:VARCHAR# -->
+			   , USR_WORK = #usrWork:VARCHAR#
+			   , NOTI_HH_CD = #notiHhCd:VARCHAR#
+			   , NOTI_START_HH = #notiStartHh:VARCHAR#
+			   , NOTI_END_HH = #notiEndHh:VARCHAR#
+		 WHERE   USR_ID = #usrId:VARCHAR#  
+	</update>
+	
+	<!-- 관리자 로그인시 I-PIN 미인증 인원 재인증 -->
+	<update id="AdminCommUsrDao.saveIpinAgree" parameterClass="egovframework.admin.user.service.CommUsr" >
+		UPDATE TB_COMM_USR
+		   SET RAUTH_VID = FN_SCP_EDC_STR('E', #rauthVid:VARCHAR#)
+			 , RAUTH_DI = FN_SCP_EDC_STR('E', #rauthDi:VARCHAR#)
+			 , RAUTH_BIRTH = #rauthBirth:CHAR#
+			 , RAUTH_SEX = DECODE(#rauthSex:CHAR#, 0, 'F', 1, 'M')	<!-- 성별 0이면 여성, 1이면 남성 -->
+			 , RAUTH_NI = #rauthNi:CHAR#	<!-- 0 : 내국인 / 1 : 외국인 / 2 : 재외국민 -->
+			 , RAUTH_YN = 'Y'
+			 , RAUTH_DTTM = SYSDATE
+		 WHERE USR_ID = #usrId:VARCHAR#
+	</update>	
+	
+	<!-- I-PIN 인증내역으로 관리자 ID 찾기 -->		
+	<select id="AdminCommUsrDao.findAdminId"  parameterClass="egovframework.admin.user.service.CommUsr"  resultClass="java.lang.String" >
+		SELECT USR_ID
+		  FROM TB_COMM_USR
+		 WHERE RAUTH_VID = FN_SCP_EDC_STR('E', #rauthVid:VARCHAR#)
+		   AND RAUTH_DI = FN_SCP_EDC_STR('E', #rauthDi:VARCHAR#)
+	</select>
+</sqlMap>

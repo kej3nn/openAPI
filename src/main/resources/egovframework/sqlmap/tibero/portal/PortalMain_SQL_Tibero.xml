@@ -1,0 +1,369 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="portalMain">
+
+	<!-- 게시판 목록을 조회한다. -->
+	<select id="portalMainDao.searchBbsList" parameterClass="Params" resultClass="record">
+		/* sql id : portalMainDao.searchBbsList */
+		SELECT * FROM (
+			SELECT B.BBS_TYPE_CD 		AS "bbsTypeCd"
+				 , A.BBS_CD 			AS "bbsCd"
+				 , A.SEQ 				AS "seq"
+				 , A.NOTICE_YN 			AS "noticeYn"
+				 , A.BBS_TIT 			AS "bbsTit"
+				 , A.VIEW_CNT 			AS "viewCnt"
+				 , TO_CHAR(A.USER_DTTM,'YYYY-MM-DD') AS "userDttm"
+			FROM   TB_BBS_LIST A JOIN TB_BBS_ADMIN B 
+				ON B.BBS_CD = A.BBS_CD AND B.USE_YN = 'Y'
+	        WHERE  A.BBS_CD = #bbsCd:VARCHAR#
+	        AND    A.P_SEQ = '0'
+			AND    A.DEL_YN = 'N'
+			ORDER BY A.USER_DTTM DESC, A.SEQ DESC
+		) WHERE ROWNUM <![CDATA[<= ]]> 5
+	</select>
+	
+	<!-- 국회는 지금 리스트 조회 -->
+	<select id="portalMainDao.selectAssmNowList" parameterClass="Params" resultClass="record">
+		/* sql id : portalMainDao.selectAssmNowList */
+		SELECT AA.*
+		FROM
+			(
+				SELECT
+					ROWNUM AS RN
+					, STORY_ID			AS "storyId"
+					, V_TITLE			AS "vTitle"
+					, S_TITLE			AS "sTitle"
+					, URL_LINK			AS "urlLink"
+					, TITLE_IMAGE_URL	AS "titleImageUrl"
+					, V_BODY			AS "vBody"
+					, CATEGORY_NAME		AS "categoryName"
+					, DATE_RELEASED		AS "dataReleased"				
+				FROM
+					TV_ASSM_SRV_CONT A
+				ORDER BY DATE_RELEASED DESC
+			) AA
+		WHERE RN <![CDATA[<= ]]> 5	
+	</select>
+	
+	<!-- 진행중 입법예고 리스트 조회 -->
+	<select id="portalMainDao.selectPalInPrgrList" parameterClass="Params" resultClass="record">
+		/* sql id : portalMainDao.selectPalInPrgrList */
+		SELECT AA.*
+		FROM
+			(
+				SELECT
+					ROWNUM AS RN
+					, SJ 			AS "sj"
+					, CN			AS "cn"
+					, CMT_ID		AS "cmtId"
+					, CMT_NM		AS "cmtNm"
+					, NOTI_BG_DT	AS "notiBgDt"
+					, NOTI_ED_DT	AS "notiEdDt"
+					, LINK_URL      AS "linkUrl"
+				FROM
+					TV_PAL_IN_PRGR A
+			) AA
+		WHERE RN <![CDATA[<= ]]> 4
+	</select>	
+	
+	
+	<!-- 의안목록 조회 -->
+	<select id="portalMainDao.selectBpmBillList" parameterClass="Params" resultClass="record">
+		/* sql id : portalMainDao.selectBpmBillList */
+		SELECT AA.*
+		FROM
+			(		
+				SELECT
+					ROWNUM 			AS RN 
+					, REPRESENT		AS "represent"
+					, BILL_ID		AS "billId"
+					, BILL_NAME		AS "billName"
+					, PROC_RESULT	AS "procResult"
+					, LINK_URL		AS "linkUrl"
+					, PROC_DT		AS "proposeDt"
+				FROM TV_BPM_BILL2 A
+				ORDER BY SORT_NO DESC	
+			) AA
+		WHERE RN <![CDATA[<= ]]> 5
+	</select>
+
+
+	<!-- 표결현황수 조회 -->
+	<select id="portalMainDao.selectBpmVoteResultCnt" parameterClass="Params" resultClass="record">
+		/* sql id : portalMainDao.selectBpmVoteResultCnt */
+		SELECT DISTINCT A.MEMBER_TCNT AS "allCnt" 
+               , A.VOTE_TCNT          AS "totalCnt"
+               , A.YES_TCNT           AS "agreeCnt"
+               , A.NO_TCNT            AS "disCnt"
+               , A.BLANK_TCNT         AS "absCnt" 
+               , A.OUT_TCNT           AS "outCnt"  
+         FROM TV_BPM_VOTE_RESULT A
+		WHERE A.BILL_ID = #billId#
+	</select>	
+	
+
+	<!-- 표결현황 목록 조회 -->
+	<select id="portalMainDao.selectBpmVoteResultList" parameterClass="Params" resultClass="record">
+		/* sql id : portalMainDao.selectBpmVoteResultList */
+		SELECT
+			A.EMP_NO			AS "empNo"
+			, B.MONA_CD			AS "monaCd"
+		    , A.HG_NM			AS "hgNm"
+		    , A.LINK_URL        AS "linkUrl"          
+		    , A.RESULT_VOTE_CD	AS "resultVoteCd"
+		    , B.POLY_NM			AS "polyNm"
+		    , B.POLY_CD			AS "polyCd"
+		    , B.REELE_GBN_NM	AS "reeleGbnNm"
+		    , A.DEPT_IMG_URL	AS "deptImgUrl"
+		FROM
+		    TV_BPM_VOTE_RESULT A LEFT JOIN TV_THXPSN01 B 
+		    ON  A.EMP_NO  = B.EMP_NO
+		    AND	A.UNIT_CD = B.UNIT_CD
+		WHERE A.BILL_ID = #billId#
+	</select>	
+	
+	<!-- 국회일정 -->
+	<select id="portalMainDao.selectBultSchdList" parameterClass="Params" resultClass="record">
+		/* sql id : portalMainDao.selectBultSchdList */
+		SELECT 
+			GUBUN				AS "gubun"
+			, GUBUN_NM			AS "gubunNm"
+			, A.MEETINGSESSION	AS "meetingsession"
+			, CHA				AS "cha"
+			, TITLE				AS "title"
+			, MEETTING_DATE		AS "meettingDate"
+			, MEETTING_TIME		AS "meettingTime"
+			, COMMITTEE_NAME	AS "committeeName"
+			, A.AGENDAID		AS "agendaid"
+			, MEETTING_DATE || ' ' || MEETTING_TIME AS "meettingDateTime"
+			, LINK_URL          AS "linkUrl"
+			, LIVE_URL			AS "liveUrl"
+		FROM  TV_ASSEM_SCHEDULE A
+		<isEmpty property="meettingYmd">
+			WHERE 1=2
+		</isEmpty>
+		<isNotEmpty property="meettingYmd">
+			WHERE MEETINGDAY = TO_CHAR(TO_DATE(#meettingYmd:VARCHAR#, 'YYYY-MM-DD'), 'YYYYMMDD')
+		</isNotEmpty>
+		
+		<isNotEmpty property="gubun" prepend=" AND ">
+			AND   A.GUBUN = #gubun:VARCHAR#
+		</isNotEmpty>
+		ORDER BY SORT_NO
+	</select>
+	
+	<select id="portalMainDao.selectBultSchdCalendarList" parameterClass="Params" resultClass="record">
+		/* sql id : portalMainDao.selectBultSchdCalendarList */
+		SELECT
+		    GUBUN			AS "gubun",
+		    MEETTING_DATE	AS "meettingDate"
+		FROM
+		    TV_ASSEM_SCHEDULE A
+		<isEmpty property="meettingYM">
+			WHERE 1=2
+		</isEmpty>
+		<isNotEmpty property="meettingYM">
+			WHERE MEETINGDAY BETWEEN TO_CHAR(TO_DATE(#meettingYM:VARCHAR# || '-01', 'YYYY-MM-DD'), 'YYYYMMDD') AND (TO_CHAR(LAST_DAY(TO_DATE(#meettingYM:VARCHAR# || '-01', 'YYYY-MM-DD')), 'YYYYMMDD'))
+		</isNotEmpty>
+		GROUP BY GUBUN, MEETTING_DATE
+		ORDER BY MEETTING_DATE, 
+		CASE WHEN GUBUN = 'ARTCL' THEN 5 
+			 WHEN GUBUN = 'ASSEM' THEN 1 
+			 WHEN GUBUN = 'CMMTT' THEN 2 
+		 	 WHEN GUBUN = 'SPEAK' THEN 3 
+			 WHEN GUBUN = 'SEMNA' THEN 4 	
+		ELSE 99 END	
+	</select>
+	
+	<!-- 국회TV(편성표) 조회 -->
+	<select id="portalMainDao.selectBrdPrmList" parameterClass="Params" resultClass="record">
+		/* sql id : portalMainDao.selectBrdPrmList */
+		SELECT
+			FORMATION_ID       AS "formationId",
+			FORMATION_TIME     AS "formationTime",
+			FORMATION_DATE     AS "formationDate",
+			PRO_TITLE          AS "proTitle",
+			ADD_DISCRIPT       AS "addDiscript",
+			PROGRAM_ID         AS "programId",
+			LINK_URL           AS "linkUrl"
+		FROM  TV_BRD_PROGRAM A
+       ORDER BY SORT_NO	
+	</select>
+	
+	<!-- 인기공개정보 조회 -->
+	<select id="portalMainDao.selectPplrInfa" parameterClass="Params" resultClass="record">
+		/* sql id : portalMainDao.selectPplrInfa */
+		SELECT A.OBJ_ID AS "infaId"
+		    , CNT AS "cnt"
+		    , TAG AS "opentyTag"
+		    , NVL(O.INF_NM, S.STATBL_NM) AS "infaNm"
+		FROM (
+		    SELECT TAG, OBJ_ID, CNT
+		        , ROW_NUMBER () OVER(ORDER BY CNT DESC) AS RN
+		    FROM (
+		            SELECT 'O' AS TAG, INF_ID AS OBJ_ID , COUNT(*) AS CNT
+		            FROM TB_LOG_OPEN_INF_SRV
+		            <isEqual property="range" compareValue="D">
+		            WHERE REG_DTTM &gt;= TRUNC(SYSDATE - 1)
+		            </isEqual>
+		            <isEqual property="range" compareValue="W">
+		            WHERE REG_DTTM &gt;= TRUNC(SYSDATE - 7)
+		            </isEqual>
+		            <isEqual property="range" compareValue="M">
+		            WHERE REG_DTTM &gt;= TRUNC(SYSDATE - 30)
+		            </isEqual>
+		            GROUP BY INF_ID
+		            UNION ALL
+		            SELECT 'S' AS TAG, STATBL_ID AS OBJ_ID, COUNT(*) AS CNT
+		            FROM TB_LOG_STTS_TBL
+		            <isEqual property="range" compareValue="D">
+		            WHERE REG_DTTM &gt;= TRUNC(SYSDATE - 1)
+		            </isEqual>
+		            <isEqual property="range" compareValue="W">
+		            WHERE REG_DTTM &gt;= TRUNC(SYSDATE - 7)
+		            </isEqual>
+		            <isEqual property="range" compareValue="M">
+		            WHERE REG_DTTM &gt;= TRUNC(SYSDATE - 30)
+		            </isEqual>
+		            GROUP BY STATBL_ID
+		            ORDER BY CNT DESC
+		    ) 
+		) A 
+		LEFT OUTER JOIN TV_OPEN_INF O ON A.OBJ_ID = O.INF_ID AND A.TAG =  'O'
+		LEFT OUTER JOIN TV_STTS_TBL S ON A.OBJ_ID = S.STATBL_ID AND A.TAG =  'S'
+		<![CDATA[
+		WHERE RN <= 12
+		]]>	
+		ORDER BY RN
+	</select>
+	
+	<!-- 국회생중계 데이터 조회 -->
+	<select id="portalMainDao.selectAssmLiveStat" parameterClass="Params" resultClass="record">
+		/* sql id : portalMainDao.selectAssmLiveStat */
+		SELECT
+			XBILL		AS "xBill"
+			, XNAME		AS "xName"
+			, XSUBJ		AS "xSubj"
+			, XDESC		AS "xDesc"
+			, XSTAT		AS "xStat"
+			, XTIME		AS "xTime"
+			, LINK_URL		AS "linkUrl"
+		FROM  TV_LIVE_STAT A
+	</select>	
+	
+	<!-- 통합검색시 로그 입력 -->
+	<insert id="portalMainDao.insertTbLogSearch" parameterClass="params">
+		INSERT INTO TB_LOG_SEARCH(
+			SEQCE_NO
+			, SYS_TAG
+			, USER_CD
+			, USER_IP
+			, SEARCH_STR
+			, REG_DTTM
+		)
+		VALUES (
+			SQ_LOG_SEARCH_SEQ.NEXTVAL
+			, 'K'
+			, #regId:NUMERIC#
+			, #userIp:VARCHAR#
+			, #query:VARCHAR#
+			, SYSDATE
+		)	
+	</insert>
+	
+	<!-- 의안처리현황 조회 -->
+	<select id="portalMainDao.selectBillRecpFnshCnt" parameterClass="params" resultClass="record">
+		/* sql id : portalMainDao.selectBillRecpFnshCnt */
+		SELECT
+			HG_RECEIPT_CNT		AS "hgReceiptCnt"
+			, HG_FINISH_CNT		AS "hgFinishCnt"
+			, COG_RECEIPT_CNT	AS "cogReceiptCnt"
+			, COG_FINISH_CNT 	AS "cogFinishCnt"
+			, GOV_RECEIPT_CNT	AS "govReceiptCnt"
+			, GOV_FINISH_CNT	AS "govFinishCnt"
+			, TOT_RECEIPT_CNT	AS "totReceiptCnt"
+			, TOT_FINISH_CNT	AS "totFinishCnt"
+		FROM TV_BILL_RECP_FNSH_CNT
+	</select>
+	
+	<!-- 메인설정 리스트 조회 -->
+	<select id="portalMainDao.selectCommHomeList" parameterClass="params" resultClass="record">
+		/* sql id : portalMainDao.selectCommHomeList */
+		SELECT SRV_NM		AS "srvNm", 
+	       LINK_URL			AS "linkUrl", 
+	       SAVE_FILE_NM		AS "saveFileNm",
+	       HOME_TAG_CD      AS "homeTagCd",
+	       HOME_SEQ			AS "homeSeq",
+	       SRV_CONT         AS "srvCont",
+	       TO_CHAR(START_DTTM, 'YYYYMMDD') 	AS "startDttm", 
+	       TO_CHAR(END_DTTM, 'YYYYMMDD') 	AS "endDttm"
+	  FROM TB_COMM_HOME A
+	  <isEmpty property="homeTagCd">
+	 	WHERE HOME_TAG_CD = 'PROMT' 
+	  </isEmpty>
+	  <isNotEmpty property="homeTagCd">
+	  	WHERE HOME_TAG_CD = #homeTagCd:VARCHAR#
+	  </isNotEmpty>
+	  	<isNotEmpty property="homeSeq">
+	  		AND HOME_SEQ = #homeSeq#
+	  	</isNotEmpty> 
+	       AND USE_YN = 'Y'
+	       AND TO_CHAR(SYSDATE, 'YYYYMMDD') BETWEEN TO_CHAR(START_DTTM, 'YYYYMMDD') AND TO_CHAR(END_DTTM, 'YYYYMMDD')
+	    ORDER BY HOME_SEQ DESC   
+	</select>
+	
+	<!-- OPEN API 메인 주간인기 조회(월~일) -->
+	<select id="portalMainDao.selectOpenApiWeeklyPopularList" parameterClass="params" resultClass="record">
+		/* sql id : portalMainDao.selectOpenApiWeeklyPopularList */
+		SELECT INF_ID, INF_NM, CALL_CNT
+		FROM 
+			(SELECT 
+			       A.INF_ID 
+			     , B.INF_NM 
+			     , SUM(CALL_CNT) AS CALL_CNT 
+			  FROM 
+			       TB_STAT_API_D A 
+			   INNER JOIN 
+			       TB_OPEN_INF B 
+			       ON  A.INF_ID = B.INF_ID 
+			       AND INF_STATE = 'Y' 
+			 WHERE 
+			       YYYYMMDD BETWEEN TO_CHAR(TRUNC(SYSDATE, 'IW'), 'YYYYMMDD') AND TO_CHAR(TRUNC(SYSDATE, 'IW') +7 , 'YYYYMMDD') 
+			 GROUP BY 
+			       A.INF_ID 
+			     , B.INF_NM
+			 ORDER BY CALL_CNT DESC
+			 )
+		<![CDATA[	 
+	    WHERE ROWNUM <= 5
+	    ]]> 
+	</select>
+	
+	<!-- OPEN API 메인 월간인기 조회 -->
+	<select id="portalMainDao.selectOpenApiMonthlyPopularList" parameterClass="params" resultClass="record">
+		/* sql id : portalMainDao.selectOpenApiMonthlyPopularList */
+		SELECT INF_ID, INF_NM, CALL_CNT
+		FROM 
+			(SELECT 
+			       A.INF_ID 
+			     , B.INF_NM 
+			     , SUM(CALL_CNT) AS CALL_CNT 
+			  FROM 
+			       TB_STAT_API_D A 
+			   INNER JOIN 
+			       TB_OPEN_INF B 
+			       ON  A.INF_ID = B.INF_ID 
+			       AND INF_STATE = 'Y' 
+			 WHERE 
+			       YYYYMMDD BETWEEN TO_CHAR(ADD_MONTHS(LAST_DAY(SYSDATE)+1,-1),'YYYYMMDD') AND TO_CHAR(LAST_DAY(SYSDATE),'YYYYMMDD') 
+			 GROUP BY 
+			       A.INF_ID 
+			     , B.INF_NM
+			 ORDER BY CALL_CNT DESC
+			 )
+		<![CDATA[	 
+	    WHERE ROWNUM <= 5
+	    ]]> 
+	</select>
+</sqlMap>

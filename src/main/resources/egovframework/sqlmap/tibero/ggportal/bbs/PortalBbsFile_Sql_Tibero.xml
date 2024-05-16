@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- @(#)PortalBbsFile_Sql_Tibero.xml 1.0 2015/06/15                         -->
+<!--                                                                         -->
+<!-- COPYRIGHT (C) 2013 WISEITECH CO., LTD. ALL RIGHTS RESERVED.             -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- 게시판 첨부파일을 관리하는 SQL 파일이다.                                -->
+<!--                                                                         -->
+<!-- @author 김은삼                                                          -->
+<!-- @version 1.0 2015/06/15                                                 -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<sqlMap namespace="PortalBbsFileDao">
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Type Alias                                                          -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 게시판 첨부파일을 검색한다.                                         -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="PortalBbsFileDao.searchBbsFile" parameterClass="params" resultClass="record">
+         SELECT A.BBS_CD       AS "bbsCd",
+                A.SEQ          AS "seq",
+                A.FILE_SEQ     AS "fileSeq",
+                A.VIEW_FILE_NM AS "viewFileNm",
+                A.FILE_EXT     AS "fileExt",
+                A.FILE_SIZE    AS "fileSize",
+                A.TOP_YN       AS "topYn"
+           FROM TB_BBS_FILE A
+          WHERE A.BBS_CD    = #bbsCd:VARCHAR#
+            AND A.SEQ       = #seq:CHAR#
+            AND A.DEL_YN    = 'N'
+          ORDER BY
+                A.TOP_YN   DESC NULLS LAST,
+                A.FILE_SEQ ASC
+    </select>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 게시판 첨부파일을 조회한다.                                         -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="PortalBbsFileDao.selectBbsFile" parameterClass="params" resultClass="record">
+         SELECT A.BBS_CD       AS "bbsCd",
+                A.SEQ          AS "seq",
+                A.FILE_SEQ     AS "fileSeq",
+                A.SAVE_FILE_NM AS "saveFileNm",
+                A.VIEW_FILE_NM AS "viewFileNm",
+                A.FILE_EXT     AS "fileExt",
+                A.FILE_SIZE    AS "fileSize"
+           FROM TB_BBS_FILE A 
+          INNER JOIN TB_BBS_ADMIN B
+             ON  A.BBS_CD = B.BBS_CD
+          INNER JOIN TB_BBS_LIST C
+            ON C.SEQ = A.SEQ
+          WHERE A.FILE_SEQ  = #fileSeq:NUMERIC#
+            AND B.USE_YN = 'Y'
+            AND A.DEL_YN = 'N'
+            AND C.DEL_YN = 'N'
+    </select>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 게시판 첨부파일을 등록한다.                                         -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <insert id="PortalBbsFileDao.insertBbsFile" parameterClass="params">
+        <selectKey keyProperty="fileSeq" resultClass="int">
+         SELECT NVL(MAX(A.FILE_SEQ), 0) + 1
+           FROM TB_BBS_FILE A
+        </selectKey>
+         INSERT INTO TB_BBS_FILE
+                (
+                    BBS_CD,
+                    SEQ,
+                    FILE_SEQ,
+                    TOP_YN,
+                    SRC_FILE_NM,
+                    SAVE_FILE_NM,
+                    VIEW_FILE_NM,
+                    FILE_EXT,
+                    FILE_SIZE,
+                    VIEW_CNT,
+                    DEL_YN,
+                    REG_DTTM,
+                    UPD_ID,
+                    UPD_DTTM
+                )
+         VALUES (
+                    #bbsCd:VARCHAR#,
+                    #seq:NUMERIC#,
+                    #fileSeq:NUMERIC#,
+                    NVL(#topYn:CHAR#, 'N'),
+                    #srcFileNm:VARCHAR#,
+                    #fileSeq:NUMERIC#||
+                    CASE
+                    WHEN #fileExt:VARCHAR# IS NOT NULL
+                    THEN '.'
+                    END      ||
+                    #fileExt:VARCHAR#,
+                    #viewFileNm:VARCHAR#,
+                    #fileExt:VARCHAR#,
+                    #fileSize:NUMERIC#,
+                    0,
+                    'N',
+                    SYSDATE,
+                    #updId:VARCHAR#,
+                    SYSDATE
+                )
+    </insert>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 게시판 첨부파일 조회수를 수정한다.                                  -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <update id="PortalBbsFileDao.updateBbsFileViewCnt" parameterClass="params">
+         UPDATE TB_BBS_FILE A
+            SET A.VIEW_CNT  = NVL(A.VIEW_CNT, 0) + 1
+          WHERE A.FILE_SEQ  = #fileSeq:NUMERIC#
+            AND A.DEL_YN    = 'N'
+    </update>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 게시판 첨부파일을 삭제한다.                                         -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <delete id="PortalBbsFileDao.deleteBbsFile" parameterClass="params">
+         UPDATE TB_BBS_FILE A
+            SET A.DEL_YN    = 'Y',
+                A.UPD_ID    = #updId:VARCHAR#,
+                A.UPD_DTTM  = SYSDATE
+          WHERE A.BBS_CD    = #bbsCd:VARCHAR#
+            AND A.SEQ       = #seq:NUMERIC#
+            <isNotEmpty property="fileSeq">
+            AND A.FILE_SEQ  = #fileSeq#
+            </isNotEmpty>
+            AND A.DEL_YN    = 'N'
+    </delete>
+    
+</sqlMap>

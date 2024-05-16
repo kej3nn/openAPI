@@ -1,0 +1,202 @@
+
+@charset "euc-kr";
+
+/**********************************************************
+	layout
+**********************************************************/
+/*.sectionWrap{position:absolute;top:0;left:0;right:0;bottom:0;width:100%;overflow-x:hidden;}
+
+.section{display:none;}
+.section_9{display:block;left:0% !important}
+*/
+
+
+.dataVisual .sectionWrap{border-top:2px solid #494a5c;}
+
+
+.scale{
+   -ms-transform: scale(0.75,0.75); /* IE 9 */
+    -webkit-transform: scale(0.75,0.75); /* Safari */
+    transform: scale(0.75,0.75);
+}
+
+.section .dataPage{position:relative;/*width:1350px;height:1030px;*/overflow:hidden;/*background:url('../../../img/ggportal/desktop/data/visual/infographic/page_conts_bg.png') repeat 0 0;*/}
+.section .dataPage.bg{background:url('../../../img/ggportal/desktop/data/visual/infographic/page_conts_bg.png') repeat 0 0;}
+.section .dataPage .pageTop{position:relative;padding-top:30px;padding-bottom:20px;background:#ffffff;}
+.section .dataPage .pageTop .btn{position:absolute;top:30px;right:0;}
+/* 임시버튼 입니다*/
+.section .dataPage .pageTop .imsi_btn{position:absolute;top:30px;right:0;display: none;z-index:50;}
+.section .dataPage .titLabel span{display:inline-block;height:25px;line-height:25px;color:#202020;font-size:14px;border-top:1px solid #cccccc;border-bottom:1px solid #cccccc;}
+.section .dataPage .pageTit{font-size:36px;font-weight:bold;color:#323232;}
+.section .dataPage .pageTit strong.name{color:#306dbb;}
+.section .dataPage .pageTit span{position:relative;top:-35px;left:-60px;opacity:0;font-size:18px;}
+.section .dataPage .pageTit span.on{top:0;left:0;opacity:1;}
+.section .dataPage .pageTit em{display:block;opacity:0;margin-top:10px;font-size:12px;color:#666666;}
+.section .dataPage .pageTit .blue{color:#1fb3ea;}
+
+
+
+.section .contsBody{position:relative;} 
+
+
+/**********************************************************
+	contents
+**********************************************************/
+
+/* 탭 */
+.dataTab{float:left;width:100%;height:31px;border-bottom:1px solid #717183;background:#fff;}
+.dataTab li{float:left;border:1px solid #e3e3e3;border-bottom:none;margin-left:5px;border-radius:3px 3px 0 0;font-weight:bold;}
+.dataTab li:first-child{margin-left:10px;}
+.dataTab li a{display:block;width:140px;height:30px;line-height:30px;color:#999999;text-align:center;}
+.dataTab li.on{position:relative;float:left;border:1px solid #717183;border-bottom:1px solid #fff;color:#4a4a5c;}
+.dataTab li.on a{color:#4a4a5c;}
+
+
+.conts{clear:both;}
+.conts.type2{clear:both;height:600px;padding-top:30px;margin-bottom:-50px;overflow:hidden;}
+.conts.type2 .mapArea{position:relative;top:35px;left:-20px;}
+.conts.type3{clear:both;height:550px;overflow:hidden;}
+.conts.type3 .chartArea{margin-top:50px;}
+
+
+
+
+/* 지도 */
+map area{cursor:pointer;}
+.mapCountry{position:absolute;top:350px;left:30px;width:322px;height:456px;opacity:0;}
+.mapCountry.type2{position:absolute;top:350px;left:30px;width:387px;height:460px;opacity:0;}
+.mapCountry .imgMap{position:absolute;top:0;left:0;z-index:10;}
+.mapCountry .map img{display:none;position:absolute;top:0;left:0;width:387px;height:460px;}
+.mapCountry.type1 .map img{display:none;}
+.mapCountry.type1  .map img{width:256px;height:374px;}
+.mapCountry .map .init{display:block;}
+.mapCountry .map img:first-child{display:block;}
+.mapCountry .mapLabel{position:absolute;top:10px;left:10px;z-index:15}
+.mapCountry .mapLabel > span{display:block;margin-top:5px;}
+.mapCountry .mapLabel .label{display:inline-block;width:8px;height:8px;border-radius:8px;margin-right:5px;}
+.mapCountry .mapLabel .label1 .label{background:#ff7900;}
+.mapCountry .mapLabel .label2 .label{background:#9966ff;}
+.mapCountry .mapLabel .labelTxt{color:#222222;font-weight:bold;font-size:12px;}
+
+
+.goMapCountry{position:absolute;top:500px;left:50px;height:30px;color:#003399;box-shadow:3px 3px 3px #b0b0b0;border:1px solid #3366cc;font-size:14px;text-align:left;padding:0 35px 0 15px;font-weight:bold;z-index:30;background:#fff url('../../../img/ggportal/desktop/data/visual/infographic/bg_goMapCountry.png') no-repeat 100% 50%;}
+.on .goMapCountry{z-index:40}
+
+/* 차트 */
+.chartArea{position:relative;top:100px;opacity:0;margin-top:70px;}
+.chartArea .chartTit{clear:both;padding-left:20px;font-size:18px;font-weight:bold;color:#4a4a5c;background:url('../../../img/ggportal/desktop/data/visual/infographic/ico_arr.png') no-repeat 0 50%;}
+.chartArea .chartTit .name{color:#0054a6;vertical-align:top;font-size:18px;}
+.chartArea .chartTit .blue{color:#0054a6;vertical-align:top;font-size:18px;}
+.chartArea .chartTit .black{color:#000000;vertical-align:top;font-size:18px;}
+
+
+.chartBorder{border:1px solid #414156;width:800px;height:450px;}
+.chartBox{position:relative;/*height:400px;width:835px;*/padding-top:70px;}
+.chartBox:after {content: "."; display: block; height: 0; clear: both; visibility: hidden; }
+.chartBox .chartView{position:relative;height:100%;margin-left:70px;border-left:1px solid #7d7d7d;}
+.chartBox .chartView .viewer{height:100%;padding:0 10px;}
+.chartBox .chartView .bar .label{display:block;position:absolute;bottom:0;opacity:0;}
+.chartBox .yAxis{position:absolute;bottom:10px;left:5px;width:70px;font-size:16px;text-align:right;}
+.chartBox .yAxis .unit{display:block;}
+.chartBox .yAxis .unit span{display:block;height:50px;padding-right:15px;color:#323232;font-size:13px;text-align:right;background:url('../../../img/ggportal/desktop/data/visual/infographic/ico_chartDot.png') no-repeat 100% 7px;}
+.chartBox .yAxis .unit.unit35 span{height:35px}
+.chartBox .yAxis .unit.unit40 span{height:40px}
+.chartBox .yAxis .unit.unit45 span{height:45px}
+.chartBox .yAxis .unit.unit60 span{height:60px}
+.chartBox .yAxis .initNum{position:absolute;bottom:-23px;left:0;;width:55px;text-align:right;}
+.chartBox .yAxis .unitTxt{position:absolute;top:-25px;left:0;font-size:12px;width:100px;font-size:13px;color:#4a4a5c;}
+.chartBox .xAxis{margin-left:65px;}
+.chartBox .xAxis .bar{display:block;height:6px;border-radius:6px;background:#7d7d7d;}
+.chartBox .xAxis .unit{display:block;padding:0 10px 0 15px;font-size:22px;}
+.chartBox .xAxis .unit span{float:left;;margin-top:5px;font-weight:bold;font-size:15px;text-align:center;color:#222222;}
+
+/* 막대그래프 타입1*/
+.chartBox.stic1 .chartView .bar{float:left;position:relative;width:25%;height:100%;}
+.chartBox.stic1 .chartView .bar .chartbar{display:none;position:absolute;bottom:0;left:50%;width:58px;margin-left:-29px;border:1px solid #306dbb;}
+.chartBox.stic1 .chartView .bar .label{left:50%;margin-left:-29px;width:60px;height:69px;color:#fff;font-weight:bold;text-align:center;font-size:16px;line-height:60px;}
+
+/*
+.chartBox.stic1 .chartView .bar:nth-child(odd) .label{background:url('../../../img/ggportal/desktop/data/visual/infographic/chartLabel_1_1.png') no-repeat 0 0;}
+.chartBox.stic1 .chartView .bar:nth-child(even) .label{background:url('../../../img/ggportal/desktop/data/visual/infographic/chartLabel_1_2.png') no-repeat 0 0;}
+*/
+/* 일반한줄 막대 */
+.chartBox.stic3 .chartView .bar{float:left;position:relative;height:100%;}
+.chartBox.stic3 .chartView .bar .label{z-index:10;height:30px;width:64px;left:50%;margin-left:-32px;line-height:30px;color:#fff;text-align:center;font-size:14px;border-radius:10px;margin-bottom:40px;background:#306dbb;}
+.chartBox.stic3 .chartView .bar .label:after{content:"";display:block;width :0; height:0;position:relative;left:50%;margin-left:-6px;border-left: 6px solid transparent; border-right: 6px solid transparent; margin-top:-1px;border-top:20px solid #3366cc;}
+.chartBox.stic3 .chartView .bar .label .rankNum{display:none;height:30px;line-height:30px;font-size:14px;}
+.chartBox.stic3 .chartView .bar .label .valNum{display:block;height:30px;line-height:30px;font-size:14px;}
+.chartBox.stic3 .chartView .bar .label.rank{z-index:11;}
+.chartBox.stic3 .chartView .bar .label.rank .rankNum{display:block;}
+.chartBox.stic3 .chartView .bar .label.rank .valNum{display:none;}
+.chartBox.stic3 .chartView .bar .label > span{;color:#fff;}
+.chartBox.stic3 .chartView .bar .chartbar{display:none;position:absolute;bottom:0;left:50%;width:12px;margin-left:-6px;background:#306dbb;}
+//.chartBox.stic3 .chartView .bar:nth-child(even) .chartbar{background:#89ba38;}
+
+.chartBox.stic3 .chartView .bar .label.rank > span{}
+.chartBox.stic3 .chartView .bar .label.type2{height:32px;width:56px;left:50%;margin-left:-28px;}
+
+
+.chartBox.stic3 .chartView .bar.org .chartbar{background:#ff6600;}
+.chartBox.stic3 .chartView .bar.org .label{background:#ff6600;}
+.chartBox.stic3 .chartView .bar.org .label:after{border-top: 20px solid #ff6600;}
+.chartBox.stic3 .chartView .bar.green .label{background:#00bf82;}
+.chartBox.stic3 .chartView .bar.green .label:after{border-top: 20px solid #00bf82;}
+.chartBox.stic3 .chartView .bar.pupple .label{background:#945eff;}
+.chartBox.stic3 .chartView .bar.pupple .label:after{border-top: 20px solid #945eff;}
+.chartBox.stic3 .chartView .bar.blue .label{background:#20a7ff;}
+.chartBox.stic3 .chartView .bar.blue .label:after{border-top: 20px solid #20a7ff;}
+
+.chartBox.stic3 .chartView .bar.pupple .chartbar{background:#945eff;}
+.chartBox.stic3 .chartView .bar.green .chartbar{background:#00bf82;}
+.chartBox.stic3 .chartView .bar.blue .chartbar{background:#20a7ff;}
+
+.chartBox.stic3.financeOrder .bar .chartbar{width:22px;margin-left:-11px;}
+.chartBox.stic3.financeOrder.type2 .bar .chartbar{width:50px;margin-left:-25px;}
+.chartBox.stic3.welfareOrder .bar .chartbar{width:22px;margin-left:-11px;}
+.chartBox.stic3.welfareOrder.type2 .bar .chartbar{width:50px;margin-left:-25px;}
+.chartBorder.type2 .chartBox.stic3 .bar .chartbar{width:30px;margin-left:-15px;}
+
+
+.flashObj object{width:980px;height:630px;}
+.flashObj.type2{position:relative;top:-5px;padding-bottom:20px;}
+.flashObj.type2 object{width:950px;height:450px;margin-left:10px;}
+
+
+
+/* 상하수도 */
+.waterTitle{margin-bottom:40px;color:#000000; font-size:48px;text-align:center;font-weight:bold;font-family:"Nanum Gothic"}
+.waterTitle .red{color:#990000;}
+.orderBtn{position:absolute;top:30px;right:45px;cursor:pointer;}
+.waterFla{width:1160px;margin: 0 auto;}
+.bgWater{height:750px;background:url('../../../img/ggportal/desktop/data/visual/infographic/bg_water.png') no-repeat 0 100%;}
+
+/* 임시 좌측 플로팅 메뉴입니다 나중에 삭제해 주세요*/
+body{margin:0px; padding:0px;}
+#fl_menu{position:absolute; top:118px; left:0px; z-index:9999; width:150px; height:50px;}
+#fl_menu .label{padding-left:20px; line-height:50px; font-family:"Arial Black", Arial, Helvetica, sans-serif; font-size:14px; font-weight:bold; background:#1fb3ea; color:#fff; letter-spacing:7px;}
+#fl_menu .menu{display:none;}
+#fl_menu .menu .menu_item{display:block; background:#1fb3ea; color:#fff; border-top:1px solid #333; padding:10px 20px; font-family:Arial, Helvetica, sans-serif; font-size:12px; text-decoration:none;}
+#fl_menu .menu a.menu_item:hover{background:#333; color:#fff;}
+
+
+
+/* new update (0904) */
+.dataVisualArea{padding-top:30px; border-top:2px solid #1a659b;}
+
+.tab_A.type2 a{width:auto;padding:0 28px;}
+
+.infoTop h4{display:inline-block;font-size:18px;color:#5d5d5d;margin-right:18px;font-weight:bold;vertical-align:middle;}
+.selectbox{display:inline-block;position:relative;}
+.selectbox a{display:inline-block;height:24px;width:100px;padding-right:25px;color:#ffffff;text-align:center;font-weight:bold;line-height:22px;border-radius:1px;background:#3399cc url('../../img/ggportal/desktop/data/visual/datainfovisual/arr_selectbox.png') no-repeat 100% 0;}
+.selectbox select{position:absolute;top:0;left:0;width:125px;height:24px;opacity:0;cursor:pointer;}
+
+.filedownBtn{display:inline-block;border-radius:3px;color:#fff;font-weight:bold;padding:0 20px;height:35px;line-height:35px;background:#26baf1;}
+
+
+.chartData{margin-top:30px;}
+.chartData table{width:100%;table-layout:fixed;}
+.chartData table th{padding:10px 5px;color:#333333;border:1px solid #cccccc;text-align:center;background:#ececec;}
+.chartData table tbody th{border-top:none;}
+.chartData table td{border:1px solid #cccccc;border-top:none;text-align:center;}
+.chartData .green{color:#009966 !important;}
+.chartData .org{color:#fe3f10 !important;}

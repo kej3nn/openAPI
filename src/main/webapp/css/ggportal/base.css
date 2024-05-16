@@ -1,0 +1,101 @@
+@charset "utf-8";
+
+/* basic */
+html{
+	overflow-y:scroll;
+	height:100%; 
+	margin:0px; 
+	padding:0px;
+}
+body{
+	height:100%;
+	margin:0px;
+	padding:0px;
+	text-align:left;
+	font:14px;
+}
+div, p, strong, span, object, img, a, iframe, h1, h2, h3, h4, h5, h6, address, blockquote, q, pre, abbr, 
+cite, code, dfn, em, ins, kbd, samp, small, sub, sup, var, b, i, ol, ul, li, dl, dt, dd, form, fieldset, 
+legend, label, table, textarea, input, select, caption, tbody, thead, tfoot, tr, th, td, aside, canvas, 
+details, figcaption, figure,  header, footer, menu, nav, section, summary, time, mark, audio, video {
+	margin:0px; 
+	padding:0px; 
+	border:0px; 
+	font-size:14px; 
+	font-family: "notoKrR", "맑은 고딕", "돋움", AppleSDGothicNeo, Dotum, Droid Sans, arial, sans-serif; 
+	color:#5D5D5D; 
+	line-height:20px; 
+	word-break:break-all;
+}
+
+@media all and (min-width:768px){
+	div, p, strong, span, object, img, a, iframe, h1, h2, h3, h4, h5, h6, address, blockquote, q, pre, abbr, 
+	cite, code, dfn, em, ins, kbd, samp, small, sub, sup, var, b, i, ol, ul, li, dl, dt, dd, form, fieldset, 
+	legend, label, table, textarea, input, select, caption, tbody, thead, tfoot, tr, th, td, aside, canvas, 
+	details, figcaption, figure,  header, footer, menu, nav, section, summary, time, mark, audio, video{
+		font-size:12px;
+		font-family: "notoKrR", "맑은 고딕", "돋움", AppleSDGothicNeo, Dotum, Droid Sans, arial, sans-serif;
+		line-height:18px; 
+		word-break:break-all;
+	}
+}
+
+table{
+	border-collapse:collapse;
+	border-spacing:0px;
+	empty-cells:show;
+}
+ 
+table caption, legend, figcaption{
+	position:absolute;
+	left:-10000px;
+	height:0px;
+	line-height:0px;
+}
+
+hr{
+	clear:both;
+	visibility:hidden;
+}
+ul, ol{
+	list-style-type:none;
+}
+img, button, fieldset, iframe, abbr, acronym {
+	border:0px;
+}
+address, caption, cite, code, dfn, em, var {
+	font-style:normal;
+	font-weight:normal;
+}
+img {
+	vertical-align:top;
+	font-size:0px;
+}
+
+li img, dd img {
+	vertical-align:top;
+}
+input {vertical-align:middle;}
+img, video, audio, object, embed, iframe {max-width:100%; height:auto;}
+video {min-width:100%;}
+header, footer, section, article, aside, nav, hgroup, details, menu, figure, figcaption {display:block;}
+pre {white-space:pre-line;}
+@media all and (max-width:767px){
+* {-webkit-tap-highlight-color:rgba(0,0,0,0); -webkit-appearance:none; -webkit-focus-ring-color:rgba(0,0,0,0); -webkit-overflow-scrolling: touch; resize:none;} 
+}
+
+a:link {text-decoration:none;}
+a:visited {text-decoration:none;}
+a:hover {text-decoration:none;}
+a:active {text-decoration:none;}
+
+h1, h2, h3, h4, h5, h6 {font-weight:normal;}
+
+.clfix:after {content:"."; display:block; clear:both; visibility:hidden; height:0px;} 
+.clfix {display:inline-block;}
+
+/* ie Holly Hack \*/ 
+* html .clfix {height:1%;} 
+.clfix {display:block;}
+/* //ie Holly Hack E */
+

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="portalThemeVisual" >
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+	
+	<!-- TreeMap Chart 데이터 조회 -->
+	<select id="themeVisualDao.selectTreeMapData" parameterClass="params" resultClass="record">
+		/* sql id : themeVisualDao.selectTreeMapData */
+		SELECT A.POLY_NM AS "name", 
+		       A.POLY_CD AS "code",
+		       COUNT(A.EMP_NO) AS "value",
+		       MAX(C.VALUE_CD) AS "color",
+		       NVL(MAX(C.V_ORDER),9999) AS "order"
+		  FROM TV_THXPSN01 A
+		  	LEFT OUTER JOIN TB_COMM_CODE C ON A.POLY_CD = C.DITC_CD AND C.GRP_CD  = 'A8015' AND C.USE_YN = 'Y'    
+		 WHERE A.STATUS_YN = 'Y'  
+		 GROUP BY A.POLY_NM, A.POLY_CD
+		 ORDER BY "order"
+	</select>
+	
+	<!-- Column Chart 데이터 조회 -->
+	<select id="themeVisualDao.selectColumnReeleData" parameterClass="params" resultClass="record">
+		/* sql id : themeVisualDao.selectColumnReeleData */
+		SELECT 
+		       REELE_GBN_NM  AS "name", 
+		       COUNT(EMP_NO) AS "value" 
+		  FROM TV_THXPSN01
+		 WHERE STATUS_YN = 'Y'
+		 GROUP BY REELE_GBN_NM 
+		 ORDER BY 
+		       CASE 
+		           WHEN REELE_GBN_NM ='초선' 
+		           THEN 1 
+		           WHEN REELE_GBN_NM ='재선' 
+		           THEN 2 
+		       END ,
+		       REELE_GBN_NM
+	</select>
+	
+	<!-- Pie Chart 데이터 조회 -->
+	<select id="themeVisualDao.selectPieData" parameterClass="params" resultClass="record">
+		/* sql id : themeVisualDao.selectPieData */
+		SELECT SEX_GBN_NM AS "name"
+       		   , COUNT(EMP_NO) AS "value"
+		 FROM TV_THXPSN01
+		WHERE STATUS_YN = 'Y'
+		GROUP BY SEX_GBN_NM
+		ORDER BY SEX_GBN_NM
+	</select>
+	
+	<!-- Column Chart 데이터 조회(연령) -->
+	<select id="themeVisualDao.selectColumnAgeData" parameterClass="params" resultClass="record">
+		/* sql id : themeVisualDao.selectColumnAgeData */
+		SELECT AGE AS "name", 
+		       CNT AS "value" 
+		  FROM TV_THXPSN01_AGE
+	</select>
+	
+	
+	<!-- 정당 및 교섭단체 정보 데이터 조회 -->
+	<select id="themeVisualDao.selectHgNumSeat" parameterClass="params" resultClass="record">
+		/* sql id : themeVisualDao.selectHgNumSeat */
+		SELECT 
+		  POLY_GROUP_CD		AS "polyGroupCd"
+		  , POLY_GROUP_NM   AS "polyGroupNm"
+		  , POLY_CD         AS "polyCd"
+		  , POLY_NM         AS "polyNm"
+		  , N1              AS "n1"
+		  , N2              AS "n2"
+		  , N3              AS "n3"
+		  , N4              AS "n4"
+		FROM IOPEN_DATA.TV_LV_VP_THXPSN01
+	</select>
+</sqlMap>

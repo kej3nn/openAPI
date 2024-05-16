@@ -1,0 +1,903 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="OpenDs" >
+<typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+<typeAlias alias="clobHandler" type="com.ibatis.sqlmap.engine.type.ClobTypeHandlerCallback" />
+
+  <resultMap id="BaseResultMap" class="egovframework.admin.openinf.service.OpenDs" >
+    <result column="DS_ID" property="dsId" jdbcType="VARCHAR" />
+    <result column="DS_NM" property="dsNm" jdbcType="VARCHAR" />
+    <result column="ENG_DS_NM" property="dsNmEng" jdbcType="VARCHAR" />
+    <result column="OWNER_CD" property="ownerCd" jdbcType="VARCHAR" />
+    <result column="DT_ID" property="dtId" jdbcType="DECIMAL" />
+    <result column="DT_NM" property="dtNm" jdbcType="VARCHAR" />
+    <result column="DS_EXP" property="dsExp" jdbcType="VARCHAR" />
+    <result column="ENG_DS_EXP" property="dsExpEng" jdbcType="VARCHAR" />
+    <result column="USE_YN" property="useYn" jdbcType="CHAR" />
+    <result column="REG_ID" property="regId" jdbcType="VARCHAR" />
+    <result column="REG_DTTM" property="regDttm" jdbcType="TIMESTAMP" />
+    <result column="UPD_ID" property="updId" jdbcType="VARCHAR" />
+    <result column="UPD_DTTM" property="updDttm" jdbcType="TIMESTAMP" />
+    <result column="KEY_DB_YN" property="keyDbYn" jdbcType="CHAR" />
+    <result column="STDD_DS_YN" property="stddDsYn" jdbcType="CHAR" />
+  </resultMap>
+  
+   <resultMap id="DtlResultMap" class="egovframework.admin.openinf.service.OpenDs" >
+    <result column="DS_ID" property="dsId" jdbcType="VARCHAR" />
+    <result column="DS_NM" property="dsNm" jdbcType="VARCHAR" />
+    <result column="ENG_DS_NM" property="dsNmEng" jdbcType="VARCHAR" />
+    <result column="OWNER_CD" property="ownerCd" jdbcType="VARCHAR" />
+    <result column="DT_ID" property="dtId" jdbcType="DECIMAL" />
+    <result column="DT_NM" property="dtNm" jdbcType="VARCHAR" />
+    <result column="DS_EXP" property="dsExp" jdbcType="VARCHAR" />
+    <result column="ENG_DS_EXP" property="dsExpEng" jdbcType="VARCHAR" />
+    <result column="USE_YN" property="useYn" jdbcType="CHAR" />
+    <result column="REG_ID" property="regId" jdbcType="VARCHAR" />
+    <result column="REG_DTTM" property="regDttm" jdbcType="TIMESTAMP" />
+    <result column="UPD_ID" property="updId" jdbcType="VARCHAR" />
+    <result column="UPD_DTTM" property="updDttm" jdbcType="TIMESTAMP" />
+    <!-- <result column="FS_YN" property="fsYn" jdbcType="VARCHAR" />
+    <result column="FS_CD" property="fsCd" jdbcType="VARCHAR" /> -->
+    <result column="IS_LOCK" property="isLock" jdbcType="VARCHAR" />
+    <result column="KEY_DB_YN" property="keyDbYn" jdbcType="CHAR" />
+    <result column="STDD_DS_YN" property="stddDsYn" jdbcType="CHAR" />
+    <result column="BCP_OWNER_CD" property="bcpOwnerCd" jdbcType="VARCHAR" />
+    <result column="BCP_DS_ID" property="bcpDsId" jdbcType="VARCHAR" />
+    <result column="CONNTY_CD" property="conntyCd" jdbcType="VARCHAR" />
+    <result column="LOAD_CD" property="loadCd" jdbcType="VARCHAR" />
+    <result column="LDDATA_CD" property="lddataCd" jdbcType="VARCHAR" />
+    <result column="AUTO_ACC_YN" property="autoAccYn" jdbcType="VARCHAR" />
+  </resultMap>
+  
+  <resultMap id="BasePopResultMap" class="egovframework.admin.openinf.service.OpenDs">
+  	<result column="TABLE_NAME" property="tableName" jdbcType="VARCHAR" />
+  	<result column="OWNER" property="owner" jdbcType="VARCHAR" />
+  	<result column="OWN_TAB_ID" property="ownTabId" jdbcType="VARCHAR" />
+  	<result column="TABLE_COMMENTS" property="tableComments" jdbcType="VARCHAR" />
+  </resultMap>
+  
+  <resultMap id="BackPopResultMap" class="egovframework.admin.openinf.service.OpenDs">
+  	<result column="TABLE_NAME" property="tableName" jdbcType="VARCHAR" />
+  	<result column="OWNER" property="owner" jdbcType="VARCHAR" />
+  	<result column="TABLE_COMMENTS" property="tableComments" jdbcType="VARCHAR" />
+  </resultMap>
+  
+   <resultMap id="BasePopDtResultMap" class="egovframework.admin.openinf.service.OpenDs">
+	  <result column="DT_ID" property="dtId" jdbcType="VARCHAR" />
+	  <result column="DT_NM" property="dtNm" jdbcType="VARCHAR" />
+	  <result column="SRC_EXP" property="srcExp" jdbcType="VARCHAR" />
+   </resultMap>
+  
+  <resultMap id="BaseColResultMap" class="egovframework.admin.openinf.service.OpenDscol">
+    <result column="DS_ID" property="dsId" jdbcType="DECIMAL" />
+    <result column="COL_SEQ" property="colSeq" jdbcType="VARCHAR" />
+    <result column="COL_ID" property="colId" jdbcType="VARCHAR" />
+    <result column="COL_NM" property="colNm" jdbcType="VARCHAR" />
+    <result column="ENG_COL_NM" property="colNmEng" jdbcType="VARCHAR" />
+    <result column="UNIT_CD" property="unitCd" jdbcType="VARCHAR" />
+    <result column="V_ORDER" property="vOrder" jdbcType="DECIMAL" />
+    <result column="SRC_COL_ID" property="srcColId" jdbcType="VARCHAR" />
+    <result column="SRC_COL_TYPE" property="srcColType" jdbcType="VARCHAR" />
+    <result column="SRC_COL_SIZE" property="srcColSize" jdbcType="VARCHAR" />
+    <result column="SRC_COL_SCALE" property="srcColScale" jdbcType="VARCHAR" />
+    <result column="PK_YN" property="pkYn" jdbcType="VARCHAR" />
+    <result column="INDEX_YN" property="indexYn" jdbcType="VARCHAR" />
+    <result column="NULL_YN" property="nullYn" jdbcType="VARCHAR" />
+    <result column="NEED_YN" property="needYn" jdbcType="VARCHAR" />
+    <result column="COL_EXP" property="colExp" jdbcType="VARCHAR" />
+    <result column="ENG_COL_EXP" property="colExpEng" jdbcType="VARCHAR" />
+    <result column="USE_YN" property="useYn" jdbcType="CHAR" />
+    <result column="REG_ID" property="regId" jdbcType="VARCHAR" />
+    <result column="REG_DTTM" property="regDttm" jdbcType="TIMESTAMP" />
+    <result column="UPD_ID" property="updId" jdbcType="VARCHAR" />
+    <result column="UPD_DTTM" property="updDttm" jdbcType="TIMESTAMP" />
+    <result column="DATA_TYPE_LENG" property="dataTypeLeng" jdbcType="VARCHAR" />
+    <result column="TERM_SEQ" property="termSeq" jdbcType="DECIMAL" />
+    <result column="BBS_TIT" property="bbsTit" jdbcType="VARCHAR" />
+    <result column="COL_TAG_CD" property="addrCd" jdbcType="VARCHAR" />
+    <result column="VERIFY_ID" property="verifyId" jdbcType="DECIMAL" />
+    <result column="COL_REF_CD" property="colRefCd" jdbcType="VARCHAR" />
+  </resultMap>
+  
+  <resultMap id="BaseSrcColResultMap" class="egovframework.admin.openinf.service.OpenDscol">
+   	<result column="SRC_COL_ID" property="srcColId" jdbcType="VARCHAR" />
+    <result column="SRC_COL_TYPE" property="srcColType" jdbcType="VARCHAR" />
+    <result column="SRC_COL_SIZE" property="srcColSize" jdbcType="VARCHAR" />
+    <result column="SRC_COL_SCALE" property="srcColScale" jdbcType="VARCHAR" />
+    <result column="DATA_TYPE_LENG" property="dataTypeLeng" jdbcType="VARCHAR" />
+    <result column="COL_EXP" property="colExp" jdbcType="VARCHAR" />
+    <result column="COL_SEQ" property="colSeq" jdbcType="DECIMAL" />
+    <result column="V_ORDER" property="vOrder" jdbcType="DECIMAL" />
+    <result column="STATUS" property="status" jdbcType="VARCHAR" />
+    <result column="COL_ID" property="colId" jdbcType="VARCHAR" />
+    <result column="COL_NM" property="colNm" jdbcType="VARCHAR" />
+    <result column="ENG_COL_NM" property="colNmEng" jdbcType="VARCHAR" />
+    <result column="UNIT_CD" property="unitCd" jdbcType="VARCHAR" />
+    <result column="DS_ID" property="dsId" jdbcType="VARCHAR" />
+    <result column="USE_YN" property="useYn" jdbcType="VARCHAR" />
+    <result column="TERM_SEQ" property="termSeq" jdbcType="DECIMAL" />
+    <result column="BBS_TIT" property="bbsTit" jdbcType="VARCHAR" />
+    <result column="COL_TAG_CD" property="addrCd" jdbcType="VARCHAR" />
+    <result column="VERIFY_ID" property="verifyId" jdbcType="DECIMAL" />
+    <result column="PK_YN" property="pkYn" jdbcType="VARCHAR" />
+    <result column="NULL_YN" property="nullYn" jdbcType="VARCHAR" />
+    <result column="NEED_YN" property="needYn" jdbcType="VARCHAR" />
+  </resultMap>
+  
+  <resultMap id="BaseDbtlResultMap" class="egovframework.admin.openinf.service.OpenDtbl">
+    <result column="OWN_TAB_ID" property="ownTabId"  />
+    <result column="TB_NM" property="tbNm"  />
+    <result column="LINK_CD" property="linkCd"  />
+    <result column="LOAD_CD" property="loadCd"  />
+    <result column="STATUS" property="status"/>
+    <result column="FT_LOAD_DTTM" property="ftLoadDttm"  />
+    <result column="LT_LOAD_DTTM" property="ltLoadDttm"  />
+  </resultMap>
+  
+  <resultMap id="DsbtlResultMap" class="egovframework.admin.openinf.service.OpenDtbl">
+    <result column="OWN_TAB_ID" property="ownTabId"  />
+    <result column="TB_NM" property="tbNm"  />
+    <result column="LINK_CD" property="linkCd"  />
+    <result column="LOAD_CD" property="loadCd"  />
+    <result column="FT_LOAD_DTTM" property="ftLoadDttm"  />
+    <result column="LT_LOAD_DTTM" property="ltLoadDttm"  />
+  </resultMap>
+ 
+  
+  <resultMap id="PubCfgRefDs" class="egovframework.admin.openinf.service.OpenDs" >
+    <result column="DS_ID" property="dsId" jdbcType="VARCHAR" />
+    <result column="DS_NM" property="dsNm" jdbcType="VARCHAR" />
+    <result column="OWNER_CD" property="ownerCd" jdbcType="VARCHAR" />
+    <result column="PUB_YN" property="pubYn" jdbcType="VARCHAR" />
+  </resultMap>
+  
+   <resultMap id="SamplePop"  class="egovframework.admin.openinf.service.OpenDscol">
+	  <result column="DS_ID" property="dsId"  />
+	  <result column="OWNER_CD" property="ownerCd"  />
+	  <result column="OWN_TAB_ID" property="ownTabId"  />
+	  <result column="DS_NM" property="dsNm"  />
+	  <result column="DS_EXP" property="dsExp"  />
+	  <result column="DT_NM" property="dtNm"  />
+	  <!-- <result column="FS_YN" property="fsYn"  />
+	  <result column="FS_CD" property="fsCd"  /> -->
+	  <result column="COL_NM" property="colNm"  />
+  </resultMap>
+  
+  <select id="OpenDsDAO.selectOpenDsList" parameterClass="egovframework.admin.openinf.service.OpenDs" resultMap="BaseResultMap" >
+  	SELECT *
+  	FROM(
+  	 	SELECT ROWNUM AS RN, A.*
+  	 	FROM(
+  	 		SELECT S.DS_ID 
+		             , S.DS_NM
+		             , S.ENG_DS_NM
+		        	 , T.DT_ID
+		        	 , T.DT_NM
+		        	 <!-- , S.DS_CD -->
+		        	 , S.OWNER_CD
+		        	 , S.DS_EXP
+		        	 , S.ENG_DS_EXP
+		        	 , S.USE_YN
+		        	 , S.REG_DTTM
+		        	 , S.REG_ID
+		        	 , S.UPD_ID
+		        	 , S.UPD_DTTM
+		        	 , S.KEY_DB_YN
+		        	 , S.STDD_DS_YN
+		   	FROM TB_OPEN_DT T                           				
+		  	INNER JOIN TB_OPEN_DS S                 
+		    ON T.DT_ID = S.DT_ID  
+		    WHERE 1=1
+		    <isNotEmpty property="searchVal">
+				<isEqual property="searchGubun" compareValue="DS_NM" >
+					AND S.DS_NM LIKE '%' || #searchVal# || '%'
+				</isEqual>
+				<isEqual property="searchGubun" compareValue="ENG_DS_NM" >
+					AND S.ENG_DS_NM LIKE '%' || #searchVal# || '%'
+				</isEqual>
+				<isEqual property="searchGubun" compareValue="DS_ID" >
+					AND S.DS_ID LIKE '%' || #searchVal# || '%'
+				</isEqual>
+			</isNotEmpty>
+			<isNotEmpty property="useYn">
+				AND S.USE_YN = #useYn#
+			</isNotEmpty>
+			ORDER BY S.REG_DTTM DESC
+  	 	) A WHERE 1=1
+  	 		<!-- 주소정제 검색 추가 -->
+			<isNotEmpty property="keyDbYn">
+				AND A.KEY_DB_YN = #keyDbYn#
+			</isNotEmpty>	
+			<isNotEmpty property="stddDsYn">
+				AND A.STDD_DS_YN = #stddDsYn#
+			</isNotEmpty>	
+  	 ) 
+	<isNotEqual prepend="startPage" compareValue="0">
+		WHERE RN BETWEEN #startPage:NUMERIC# AND #endPage:NUMERIC#
+	</isNotEqual>
+  </select>
+  
+  <select id="OpenDsDAO.selectOpenDsListCnt" parameterClass="egovframework.admin.openinf.service.OpenDs" resultClass="java.lang.Integer" >
+	  	SELECT COUNT(S.DS_ID )
+	   	FROM TB_OPEN_DT T                           				
+	  	INNER JOIN TB_OPEN_DS S                 
+	    ON T.DT_ID = S.DT_ID  
+	    WHERE 1=1
+	    <isNotEmpty property="searchVal">
+			<isEqual property="searchGubun" compareValue="DS_NM" >
+				AND S.DS_NM LIKE '%' || #searchVal# || '%'
+			</isEqual>
+			<isEqual property="searchGubun" compareValue="ENG_DS_NM" >
+				AND S.ENG_DS_NM LIKE '%' || #searchVal# || '%'
+			</isEqual>
+			<isEqual property="searchGubun" compareValue="DS_ID" >
+				AND S.DS_ID LIKE '%' || #searchVal# || '%'
+			</isEqual>
+		</isNotEmpty>
+		<isNotEmpty property="useYn">
+			AND S.USE_YN = #useYn#
+		</isNotEmpty>
+	<!-- 주소정제 검색 추가 -->
+		<isNotEmpty property="keyDbYn">
+			AND S.KEY_DB_YN LIKE '%'||#keyDbYn#||'%'
+		</isNotEmpty>	
+		<isNotEmpty property="stddDsYn">
+			AND S.STDD_DS_YN LIKE '%'||#stddDsYn#||'%'
+		</isNotEmpty>	
+  </select>
+  
+  <select id="OpenDsDAO.selectOpenDsColList" parameterClass="egovframework.admin.openinf.service.OpenDscol" resultMap="BaseColResultMap">
+  SELECT A.DS_ID
+  			, A.COL_ID
+  			, A.COL_SEQ
+  			, A.COL_NM
+  			, A.ENG_COL_NM
+  			, A.TERM_SEQ
+  			, B.BBS_TIT
+  			, A.V_ORDER
+  			, A.SRC_COL_ID
+  			, A.SRC_COL_TYPE
+  			, DECODE(A.SRC_COL_SIZE, 0, NULL, A.SRC_COL_SIZE) 	AS SRC_COL_SIZE  			
+  			, DECODE(A.SRC_COL_SCALE, 0, NULL, A.SRC_COL_SCALE) AS SRC_COL_SCALE
+  			, A.SRC_COL_TYPE || '(' || A.SRC_COL_SIZE || ')' 	AS DATA_TYPE_LENG
+  			, A.PK_YN
+  			, A.INDEX_YN
+  			, A.NULL_YN
+  			, A.NEED_YN
+  			, A.UNIT_CD
+  			, A.COL_EXP
+  			, A.ENG_COL_EXP
+  			, A.USE_YN
+  			, A.REG_ID
+  			, A.REG_DTTM
+  			, A.UPD_ID
+  			, A.UPD_DTTM
+  			, A.COL_TAG_CD
+  			, A.VERIFY_ID
+  			, A.COL_REF_CD
+  		FROM TB_OPEN_DSCOL A
+  		LEFT JOIN TB_BBS_LIST B
+  		ON A.TERM_SEQ = B.SEQ
+  		AND B.BBS_CD = 'FSL1002'
+  		WHERE 1=1	
+  		AND DS_ID = #dsId#
+  		ORDER BY V_ORDER
+  </select>
+  
+   <select id="OpenDsDAO.selectOpenDsColListCnt" parameterClass="egovframework.admin.openinf.service.OpenDscol" resultClass="java.lang.Integer">
+  	SELECT COUNT(A.COL_ID)
+  	FROM TB_OPEN_DSCOL A
+  	WHERE 1=1
+  	AND DS_ID = #dsId:VARCHAR#
+  </select>
+  
+  <select id="OpenDsDAO.selectOpenDsSrcColList" parameterClass="egovframework.admin.openinf.service.OpenDscol" resultMap="BaseSrcColResultMap" >
+	SELECT
+		SRC_COL_ID
+		, SRC_COL_TYPE
+		, SRC_COL_SIZE
+		, SRC_COL_SCALE
+		, DATA_TYPE_LENG
+		, COL_EXP
+		, NVL(COL_SEQ, (NVL(MAX_COL_SEQ, 0)-RN) + ROWNUM) COL_SEQ
+		, NVL(V_ORDER, (NVL(MAX_V_ORDER, 0)-RN) + ROWNUM) V_ORDER
+		, STATUS
+		, DS_ID
+		, COL_ID
+		, COL_NM
+		, UNIT_CD
+		, ENG_COL_NM
+		, USE_YN
+		, TERM_SEQ
+		, BBS_TIT
+		, COL_TAG_CD
+		, VERIFY_ID
+		, PK_FLAG 	AS PK_YN
+		, NULL_FLAG AS NULL_YN
+		, NEED_FLAG AS NEED_YN
+	FROM (	
+		SELECT
+			SRC_COL_ID
+			, SRC_COL_TYPE
+			, SRC_COL_SIZE
+			, SRC_COL_SCALE
+			, DATA_TYPE_LENG
+			, COL_EXP
+			, COL_SEQ
+			, V_ORDER
+			, STATUS
+			, DS_ID
+			, COL_ID
+			, COL_NM
+			, UNIT_CD
+			, ENG_COL_NM
+			, USE_YN
+			, TERM_SEQ
+			, BBS_TIT
+			, MAX(MAX_COL_SEQ) OVER() MAX_COL_SEQ
+			, MAX(MAX_V_ORDER) OVER() MAX_V_ORDER
+			, RN
+			, COL_TAG_CD
+			, VERIFY_ID
+			, DECODE(PK_FLAG, 'Y', 'N', 'N', 'Y') AS PK_FLAG
+			, DECODE(NULL_FLAG, 'Y', 'N', 'N', 'Y') AS NULL_FLAG  
+			, NEED_FLAG
+		FROM (
+			SELECT 
+				A.COLUMN_NAME AS SRC_COL_ID
+				, A.DATA_TYPE AS SRC_COL_TYPE
+				, A.DATA_LENGTH AS SRC_COL_SIZE
+				, A.DATA_SCALE AS SRC_COL_SCALE
+				, CASE A.DATA_TYPE WHEN 'NUMBER' THEN A.DATA_TYPE||'('||DATA_LENGTH||DECODE(DATA_SCALE,NULL,'',','||DATA_SCALE)||')'
+				 								 ELSE A.DATA_TYPE||'('||DATA_LENGTH||')'
+				 				   END AS DATA_TYPE_LENG
+				, NVL(A.COLUMN_COMMENTS, B.COL_EXP) AS COL_EXP
+		 		, B.COL_SEQ
+				, B.V_ORDER
+				, DECODE(B.SRC_COL_ID, NULL, 'I', 'R') AS STATUS
+				, A.TABLE_NAME AS DS_ID
+				, A.COLUMN_NAME AS COL_ID
+				, NVL(A.COLUMN_COMMENTS, B.COL_NM) AS COL_NM
+				, B.UNIT_CD
+				, B.ENG_COL_NM
+				, NVL(B.USE_YN, 'Y') AS USE_YN
+				, B.TERM_SEQ
+				, C.BBS_TIT
+				, MAX(B.COL_SEQ) OVER() AS MAX_COL_SEQ
+				, MAX(B.V_ORDER) OVER() AS MAX_V_ORDER
+				, SUM(DECODE(B.SRC_COL_ID, NULL, 0, 1)) OVER() RN
+				, B.COL_TAG_CD
+				, B.VERIFY_ID
+				, A.PK_FLAG
+				, A.NULL_FLAG
+				, B.NEED_YN AS NEED_FLAG
+			FROM TV_TABLE_COLS A 
+				LEFT OUTER JOIN TB_OPEN_DSCOL B
+					ON A.TABLE_NAME = B.DS_ID
+					AND A.COLUMN_NAME = B.SRC_COL_ID
+				LEFT OUTER JOIN TB_BBS_LIST C
+	    			ON B.TERM_SEQ = C.SEQ
+			WHERE 1=1
+		<isNotEmpty property="owner">
+			AND A.OWNER = #owner#
+		</isNotEmpty>
+		<isNotEmpty property="tableName">
+			AND A.TABLE_NAME = #tableName#
+		</isNotEmpty>
+			ORDER BY STATUS DESC
+			, NVL(B.V_ORDER, A.COLUMN_ID)
+		)		
+	)		
+  </select>
+  
+  
+  <select id="OpenDsDAO.selectOpenDsSrcColListCnt" parameterClass="egovframework.admin.openinf.service.OpenDscol" resultClass="java.lang.Integer" >
+      	SELECT *
+  	FROM(
+  	 	SELECT ROWNUM AS RN, A.*
+  	 	FROM(
+		    SELECT COUNT(A.COLUMN_NAME)
+				FROM TV_TABLE_COLS A 
+				LEFT OUTER JOIN TB_OPEN_DSCOL B
+				ON A.TABLE_NAME = B.DS_ID
+				AND A.COLUMN_NAME = B.SRC_COL_ID
+				WHERE 1=1
+			<isNotEmpty property="owner">
+				AND OWNER = #owner#
+			</isNotEmpty>
+			<isNotEmpty property="tableName">
+				AND TABLE_NAME LIKE '%'||#tableName#||'%'
+			</isNotEmpty>
+			) A
+  	 ) 
+	<isNotEqual prepend="startPage" compareValue="0">
+		WHERE RN BETWEEN #startPage:NUMERIC# AND #endPage:NUMERIC#
+	</isNotEqual>
+  </select>
+  
+    <select id="OpenDsDAO.selectOpenDsPopList" parameterClass="egovframework.admin.openinf.service.OpenDs"  resultMap="BasePopResultMap" >
+		SELECT A.TABLE_NAME,  
+		       A.OWNER || '.' || A.TABLE_NAME AS OWN_TAB_ID,    
+		       A.OWNER,     
+		       A.COMMENTS as TABLE_COMMENTS
+		FROM   TV_TABLE_LIST A
+		WHERE  A.TY_CD IN ('OD', 'OF')
+		<isNotEmpty property="owner">
+		AND    A.OWNER = #owner#
+		</isNotEmpty>	
+		<isNotEmpty property="tableName">
+		AND    A.TABLE_NAME LIKE '%'||#tableName#||'%'
+		</isNotEmpty>
+		ORDER  BY A.OWNER, A.TABLE_NAME    
+  </select>
+  
+   <select id="OpenDsDAO.selectOpenDsPopListCnt" parameterClass="egovframework.admin.openinf.service.OpenDs" resultClass="java.lang.Integer" >
+		SELECT COUNT(*)
+		FROM   TV_TABLE_LIST A
+		WHERE  A.TY_CD IN ('OD', 'OF')
+		<isNotEmpty property="owner">
+		AND    A.OWNER = #owner#
+		</isNotEmpty>	
+		<isNotEmpty property="tableName">
+		AND    A.TABLE_NAME LIKE '%'||#tableName#||'%'
+		</isNotEmpty>
+		ORDER  BY A.OWNER, A.TABLE_NAME   
+  </select>
+  
+	<select id="OpenDsDAO.selectBackDsPopList" parameterClass="egovframework.admin.openinf.service.OpenDs"  resultMap="BackPopResultMap" >
+	  SELECT A.OWNER OWNER,
+	        A.TABLE_NAME TABLE_NAME,
+	        A.COMMENTS TABLE_COMMENTS
+	   FROM   TV_TABLE_LIST A
+	   WHERE  A.TY_CD IN ('OB')
+	<isNotEmpty property="backTableName">
+		AND A.TABLE_NAME LIKE '%'||#backTableName#||'%'
+	</isNotEmpty>
+  </select>
+  
+   <select id="OpenDsDAO.selectBackDsPopListCnt" parameterClass="egovframework.admin.openinf.service.OpenDs" resultClass="java.lang.Integer" >
+	  SELECT COUNT(*)
+	   FROM   TV_TABLE_LIST A
+	   WHERE  A.TY_CD IN ('OB')   
+	<isNotEmpty property="backTableName">
+		AND A.TABLE_NAME LIKE '%'||#backTableName#||'%'
+	</isNotEmpty>
+  </select>
+  
+    <select id="OpenDsDAO.selectOpenDtPopList" parameterClass="egovframework.admin.openinf.service.OpenDs"  resultMap="BasePopDtResultMap" >
+  	SELECT DT_ID
+  			, DT_NM
+  			, SRC_EXP 
+	FROM TB_OPEN_DT
+	WHERE 1=1
+	<isNotEmpty property="dtNm">
+	AND DT_NM LIKE '%'||#dtNm#||'%'
+	</isNotEmpty>
+	ORDER BY DT_ID
+  </select>
+  
+   <select id="OpenDsDAO.selectOpenDtPopListCnt" parameterClass="egovframework.admin.openinf.service.OpenDs" resultClass="java.lang.Integer" >
+	SELECT COUNT(DT_ID)
+	FROM TB_OPEN_DT
+	WHERE 1=1
+	<isNotEmpty property="dtNm">
+	AND DT_NM LIKE '%'||#dtNm#||'%'
+	</isNotEmpty>
+  </select>
+  
+   <select id="OpenDsDAO.selectOpenDsDtl"  parameterClass="egovframework.admin.openinf.service.OpenDs" resultMap="DtlResultMap">
+  	SELECT S.DS_ID 
+             , S.DS_NM
+             , S.ENG_DS_NM
+        	 , T.DT_ID
+        	 , T.DT_NM
+        	 <!-- , S.DS_CD -->
+        	 , (select count(*) from tb_open_inf where ds_id = S.DS_iD) as IS_LOCK
+        	 , S.OWNER_CD
+        	 , S.DS_EXP
+        	 , S.ENG_DS_EXP
+        	 , S.USE_YN
+        	 , S.REG_DTTM
+        	 , S.REG_ID
+        	 , S.UPD_ID
+        	 , S.UPD_DTTM
+		     , S.KEY_DB_YN
+		     , S.STDD_DS_YN
+		     , S.BCP_OWNER_CD
+		     , S.BCP_DS_ID
+		     , S.CONNTY_CD
+		     , S.LOAD_CD
+		     , S.AUTO_ACC_YN
+		     , S.LDDATA_CD
+		   	FROM TB_OPEN_DT T                           				
+		  	INNER JOIN TB_OPEN_DS S                 
+		    ON T.DT_ID = S.DT_ID  
+		    WHERE 1=1
+		    AND S.DS_ID = #dsId:NUMERIC#
+  </select>
+  
+  <insert id="OpenDsDAO.insertDs" parameterClass="egovframework.admin.openinf.service.OpenDs">
+		INSERT INTO TB_OPEN_DS
+		(DS_ID, DS_NM, ENG_DS_NM, OWNER_CD, DT_ID, DS_EXP, ENG_DS_EXP, USE_YN, REG_ID,  REG_DTTM
+		, UPD_ID
+		, UPD_DTTM
+		, STDD_DS_YN
+		, KEY_DB_YN
+		, BCP_OWNER_CD
+		, BCP_DS_ID	
+		, CONNTY_CD
+		, LOAD_CD
+		, AUTO_ACC_YN
+		, LDDATA_CD
+		)
+		VALUES
+		( #dsId:VARCHAR#, #dsNm:VARCHAR#, #dsNmEng:VARCHAR#, #ownerCd:VARCHAR#, #dtId:NUMERIC#, #dsExp:VARCHAR#, #dsExpEng:VARCHAR#, #useYn:CHAR#, #sessionUsrId:VARCHAR#, SYSDATE
+		, #sessionUsrId:VARCHAR#
+		, SYSDATE 
+		, #stddDsYn:CHAR#
+		, #keyDbYn:CHAR#
+		, #bcpOwnerCd:VARCHAR#
+		, #bcpDsId:VARCHAR#
+		, #conntyCd:VARCHAR#
+		, #loadCd:VARCHAR#
+		, NVL(#autoAccYn:CHAR#, 'N')
+		, #lddataCd:VARCHAR#
+		)
+  </insert>
+  
+  	<update id="OpenDsDAO.updateDs" parameterClass="egovframework.admin.openinf.service.OpenDs" >
+		UPDATE TB_OPEN_DS
+		SET DS_NM = #dsNm:VARCHAR#
+			, ENG_DS_NM = #dsNmEng:VARCHAR#
+			, DT_ID = #dtId:NUMERIC#
+			, DS_EXP = #dsExp:VARCHAR#
+			, ENG_DS_EXP = #dsExpEng:VARCHAR#
+			, USE_YN = #useYn:CHAR#
+			, UPD_ID = #sessionUsrId:VARCHAR#
+			, UPD_DTTM = SYSDATE
+			, STDD_DS_YN = #stddDsYn:CHAR#
+			, KEY_DB_YN = #keyDbYn:CHAR#
+			, BCP_OWNER_CD = #bcpOwnerCd:VARCHAR#
+			, BCP_DS_ID = #bcpDsId:VARCHAR#
+			, CONNTY_CD = #conntyCd:VARCHAR#
+			, LOAD_CD = #loadCd:VARCHAR#	
+			, AUTO_ACC_YN = NVL(#autoAccYn:CHAR#, 'N')
+			, LDDATA_CD = #lddataCd:VARCHAR#
+		WHERE DS_ID = #dsId:VARCHAR# 	
+	</update>
+  
+	<insert id="OpenDsDAO.insertDsCol" parameterClass="egovframework.admin.openinf.service.OpenDscol" >
+			INSERT INTO TB_OPEN_DSCOL
+			(DS_ID, COL_ID, COL_SEQ, COL_NM, ENG_COL_NM, V_ORDER, SRC_COL_ID, SRC_COL_TYPE, SRC_COL_SIZE, SRC_COL_SCALE
+			,UNIT_CD, COL_EXP, ENG_COL_EXP, USE_YN, REG_ID, REG_DTTM, UPD_ID, UPD_DTTM, TERM_SEQ, COL_TAG_CD
+			, PK_YN, NULL_YN, NEED_YN, VERIFY_ID, COL_REF_CD )
+			VALUES
+			( 
+			<![CDATA[
+			 #dsId:VARCHAR#, #colId:VARCHAR#, 
+			 (SELECT NVL(MAX(COL_SEQ), 0) + 1 FROM TB_OPEN_DSCOL WHERE DS_ID = #dsId:VARCHAR#),
+			 #colNm:VARCHAR#,		
+			 #colNmEng:VARCHAR#,		
+			 (SELECT NVL(MAX(V_ORDER), 0) + 1 FROM TB_OPEN_DSCOL WHERE DS_ID = #dsId:VARCHAR#),		
+			 #srcColId:VARCHAR#,		
+			 #srcColType:VARCHAR#,		
+			 NVL(#srcColSize:NUMERIC#, 0),		
+			 NVL(#srcColScale:NUMERIC#, 0),		
+			 #unitCd:VARCHAR#,		
+			 #colExp:VARCHAR#,		
+			 #colExpEng:VARCHAR#,		
+			 #useYn:CHAR#,		
+			 #sessionUsrId:VARCHAR#,		
+			 SYSDATE,		
+			 #sessionUsrId:VARCHAR#,		
+			 SYSDATE,
+			 #termSeq:NUMERIC#,
+			 #addrCd:VARCHAR#,
+			 #pkYn:CHAR#,
+			 #needYn:CHAR#,
+			 #needYn:CHAR#,
+			 #verifyId:NUMERIC#,
+			 #colRefCd:NUMERIC#
+			 ]]>
+			 )
+	</insert>
+	
+	<update id="OpenDsDAO.updateDsCol" parameterClass="egovframework.admin.openinf.service.OpenDscol" >
+		UPDATE TB_OPEN_DSCOL
+		SET   COL_ID = #colId:VARCHAR#
+			, COL_NM = #colNm:VARCHAR#
+			, ENG_COL_NM = #colNmEng:VARCHAR#
+			, V_ORDER = #vOrder:NUMERIC#
+			, UNIT_CD = #unitCd:VARCHAR#
+			, COL_EXP = #colExp:VARCHAR#
+			, ENG_COL_EXP = #colExpEng:VARCHAR#
+			, USE_YN = #useYn:CHAR#
+			, UPD_DTTM = SYSDATE
+			, TERM_SEQ = #termSeq:NUMERIC#
+			, COL_TAG_CD = #addrCd:VARCHAR#
+			, NEED_YN = #needYn:CHAR#
+			, VERIFY_ID = #verifyId:NUMERIC#
+			, COL_REF_CD = #colRefCd:NUMERIC#
+			, SRC_COL_SIZE = NVL(#srcColSize:NUMERIC#, 0)
+			, SRC_COL_SCALE = NVL(#srcColScale:NUMERIC#, 0)
+		WHERE DS_ID = #dsId:VARCHAR#
+		AND COL_SEQ = #colSeq:NUMERIC#
+	</update>
+	
+	<!-- 개방여부 체크 -->
+	<select id="OpenDsDAO.selectOpenCdCheck" parameterClass="egovframework.admin.openinf.service.OpenDs" resultClass="java.lang.Integer" >
+	SELECT COUNT(B.DS_ID)
+	FROM TB_OPEN_DS A 
+	LEFT OUTER JOIN TB_OPEN_INF B
+	ON A.DS_ID = B.DS_ID
+	WHERE 1=1
+	AND A.DS_ID = #dsId:VARCHAR#
+	</select>
+	
+	<update id="OpenDsDAO.deleteDs" parameterClass="egovframework.admin.openinf.service.OpenDs" >
+	DELETE FROM TB_OPEN_DS
+	WHERE DS_ID = #dsId:VARCHAR#
+	</update>
+	
+	<update id="OpenDsDAO.deleteDsCol" parameterClass="egovframework.admin.openinf.service.OpenDscol" >
+	DELETE FROM TB_OPEN_DSCOL
+	WHERE DS_ID = #dsId:VARCHAR#
+	AND COL_SEQ = #colSeq:NUMERIC#
+	</update>
+	
+	<select id="OpenDsDAO.dupDsId" parameterClass="egovframework.admin.openinf.service.OpenDs" resultClass="java.lang.Integer" >
+	SELECT COUNT(DS_ID)
+	FROM TB_OPEN_DS
+	WHERE DS_ID = #dsId:VARCHAR#
+	</select>
+  
+    <select id="OpenDsDAO.selectSamplePop"  parameterClass="egovframework.admin.openinf.service.OpenDscol" resultMap="SamplePop">
+	  SELECT A.OWNER_CD || '.' || A.DS_ID AS OWN_TAB_ID
+	  		<isEmpty property="viewLang">
+	  			, A.DS_NM
+	  		</isEmpty>
+	  		<isNotEmpty property="viewLang">
+	  			, A.ENG_DS_NM AS DS_NM
+  			</isNotEmpty>
+  			<isEmpty property="viewLang">
+	  			, A.DS_EXP
+	  		</isEmpty>
+	  		<isNotEmpty property="viewLang">	
+	  			, A.ENG_DS_EXP AS DS_EXP
+	  		</isNotEmpty>	
+	  			, A.OWNER_CD
+	  			, A.DS_ID
+	  			, B.DT_NM
+	  			, C.COL_NM
+		FROM TB_OPEN_DS A INNER JOIN TB_OPEN_DT B
+	      ON A.DT_ID = B.DT_ID
+	       , (
+	      	  SELECT SUBSTR(MAX(SYS_CONNECT_BY_PATH(COL_NM, ', ')),2) COL_NM
+				FROM ( 
+				 SELECT COL_NM,  ROW_NUMBER() OVER(ORDER BY V_ORDER) RN 
+				   FROM TB_OPEN_DSCOL
+				  WHERE 1=1
+					AND DS_ID = #dsId:VARCHAR#
+				) T 
+			   START WITH RN = 1 
+			 CONNECT BY PRIOR RN =  RN -1 
+      		) C  
+		WHERE DS_ID = #dsId:VARCHAR#
+  </select>
+  
+  <select id="OpenDsDAO.selectOpenPubCfgRefDsPopUpList" parameterClass="egovframework.admin.openinf.service.OpenDs"  resultMap="PubCfgRefDs" >
+		SELECT 
+		B.DS_ID
+		,B.DS_NM
+		,B.OWNER_CD
+		,B.PUB_YN
+		,B.USE_YN
+		FROM 
+		(SELECT DS_ID
+		FROM TB_OPEN_DSCOL
+		WHERE SRC_COL_TYPE = 'DATE') A
+		INNER JOIN TB_OPEN_DS B
+		ON A.DS_ID = B.DS_ID
+		WHERE A.DS_ID IN (
+		(SELECT C.DS_ID FROM TB_OPEN_INF C)
+		)
+		AND B.USE_YN = 'Y'
+		AND B.PUB_YN = 'N'
+		
+		
+  </select>
+	
+	<select id="OpenDsDAO.selectOpenDscolDup" parameterClass="egovframework.admin.openinf.service.OpenDscol" resultClass="java.lang.Integer">
+		SELECT COUNT(*)
+		  FROM TB_OPEN_DSCOL
+		 WHERE DS_ID = #dsId:VARCHAR#
+		   AND COL_SEQ = #colSeq:NUMERIC#
+	</select>
+	
+	<select id="OpenDsDAO.selectDsCd" parameterClass="egovframework.admin.openinf.service.OpenDscol" resultClass="java.lang.String">
+		SELECT DS_CD
+		  FROM TB_OPEN_DS
+		 WHERE DS_ID = #dsId:VARCHAR#
+	</select>
+	
+	<update id="OpenDsDAO.deleteInfScol" parameterClass="egovframework.admin.openinf.service.OpenDscol" >
+	DELETE FROM TB_OPEN_INF_SCOL
+	WHERE INF_ID IN (SELECT INF_ID FROM TB_OPEN_INF WHERE DS_ID = #dsId:VARCHAR#) 
+	AND COL_SEQ  IN(#colSeq:NUMERIC#)
+	</update>
+	
+	<update id="OpenDsDAO.deleteInfCcol" parameterClass="egovframework.admin.openinf.service.OpenDscol" >
+	DELETE FROM TB_OPEN_INF_CCOL
+	WHERE INF_ID IN (SELECT INF_ID FROM TB_OPEN_INF WHERE DS_ID = #dsId:VARCHAR#) 
+	AND COL_SEQ  IN(#colSeq:NUMERIC#)
+	</update>
+	
+	<update id="OpenDsDAO.deleteInfAcol" parameterClass="egovframework.admin.openinf.service.OpenDscol" >
+	DELETE FROM TB_OPEN_INF_ACOL
+	WHERE INF_ID IN (SELECT INF_ID FROM TB_OPEN_INF WHERE DS_ID = #dsId:VARCHAR#) 
+	AND COL_SEQ  IN(#colSeq:NUMERIC#)
+	</update>
+	
+	<update id="OpenDsDAO.deleteInfMcol" parameterClass="egovframework.admin.openinf.service.OpenDscol" >
+	DELETE FROM TB_OPEN_INF_MCOL
+	WHERE INF_ID IN (SELECT INF_ID FROM TB_OPEN_INF WHERE DS_ID = #dsId:VARCHAR#) 
+	AND COL_SEQ  IN(#colSeq:NUMERIC#)
+	</update>
+	
+	<update id="OpenDsDAO.deleteInfTcol" parameterClass="egovframework.admin.openinf.service.OpenDscol" >
+	DELETE FROM TB_OPEN_INF_TCOL
+	WHERE INF_ID IN (SELECT INF_ID FROM TB_OPEN_INF WHERE DS_ID = #dsId:VARCHAR#) 
+	AND COL_SEQ  IN(#colSeq:NUMERIC#)
+	</update>
+	
+	<resultMap id="popTermList" class="egovframework.admin.openinf.service.OpenDscol" >
+	    <result column="SEQ" property="seq"  />
+	    <result column="BBS_TIT" property="bbsTit" />
+	    <result column="BBS_CONT" property="bbsCont"  jdbcType="CLOB" javaType="java.lang.String" typeHandler="clobHandler"/>
+  	</resultMap>
+	
+	<select id="OpenDsDAO.selectOpenDsTermPopList" parameterClass="egovframework.admin.openinf.service.OpenDscol" resultMap="popTermList" >
+	  	SELECT *
+	  	FROM(
+	  	 	SELECT ROWNUM AS RN, A.*
+	  	 	FROM(
+				SELECT SEQ, BBS_TIT, BBS_CONT FROM TB_BBS_LIST
+				WHERE BBS_CD = 'FSL1002'		
+				AND DEL_YN = 'N'	
+				<isNotEmpty property="searchWord" >
+				AND BBS_TIT LIKE '%'||#searchWord#||'%'
+				</isNotEmpty>
+				ORDER BY BBS_TIT 
+			) A
+	  	 ) 
+	<isNotEqual prepend="startPage" compareValue="0">
+		WHERE RN BETWEEN #startPage:NUMERIC# AND #endPage:NUMERIC#
+	</isNotEqual>
+	</select>
+	
+	<select id="OpenDsDAO.selectOpenDsTermPopListCnt" parameterClass="egovframework.admin.openinf.service.OpenDscol" resultClass="java.lang.Integer" >
+		SELECT COUNT(SEQ) FROM TB_BBS_LIST
+		WHERE BBS_CD = 'FSL1002'		
+		AND DEL_YN = 'N'	
+		<isNotEmpty property="searchWord" >
+		AND BBS_TIT LIKE '%'||#searchWord#||'%'
+		</isNotEmpty>
+	</select>
+
+	<!-- 데이터셋 컬럼유형정보 조회 -->
+	<select id="OpenDsDAO.selectOpenDscoltyUseY" resultClass="java.util.HashMap" >
+		SELECT 
+			VERIFY_ID 	AS "code"
+			, COLTY_CD	AS "coltyCd"
+			, VERIFY_NM	AS "name"
+			, COL_SIZE  AS "colSize"
+		FROM
+			TB_OPEN_DSCOLFY
+		WHERE 
+			USE_YN = 'Y'
+		ORDER BY V_ORDER
+	</select>	
+	
+	<!-- 공공데이터 관리담당자 목록 조회 -->
+	<select id="OpenDsDAO.selectOpenDsUsrList" parameterClass="egovframework.common.base.model.Params" resultClass="egovframework.common.base.model.Record">
+		SELECT 
+			A.DS_ID 			AS "dsId"
+			, A.USR_CD			AS "usrCd"
+			, A.ORG_CD			AS "orgCd"
+			, A.PRSS_ACC_CD		AS "prssAccCd"
+			, A.USE_YN			AS "useYn"
+			, (SELECT USR_NM FROM TB_COMM_USR WHERE USR_CD = A.USR_CD) AS "usrNm"
+			, (SELECT ORG_NM FROM TB_COMM_ORG WHERE ORG_CD = A.ORG_CD) AS "orgNm"
+		FROM
+			TB_OPEN_DS_USR A
+		WHERE
+			A.DS_ID	 = #dsId:VARCHAR#
+		AND	A.USE_YN 	= 'Y'		
+	</select>	
+	
+	<!-- 공공데이터 담당직원 삭제 -->
+	<update id="OpenDsDAO.delOpenDsUsr" parameterClass="egovframework.common.base.model.Params">
+		UPDATE TB_OPEN_DS_USR
+		SET    USE_YN = 'N'
+		WHERE  DS_ID = #dsId:VARCHAR#
+	</update>
+	
+	<!-- 공공데이터 담당직원 등록/수정 -->                                                                                                       
+	<update id="OpenDsDAO.mergeOpenDsUsr" parameterClass="java.util.HashMap">
+		MERGE INTO TB_OPEN_DS_USR A
+		USING (
+			<dynamic>
+			<iterate property="pMap" conjunction="UNION ALL ">
+			SELECT 
+				#pMap[].dsId:VARCHAR# 			AS DS_ID
+				, #pMap[].usrCd:NUMERIC#		AS USR_CD
+				, #pMap[].orgCd:VARCHAR#		AS ORG_CD
+				, #pMap[].prssAccCd:VARCHAR#	AS PRSS_ACC_CD
+				, #pMap[].vOrder:NUMERIC#		AS V_ORDER
+				, #pMap[].useYn:CHAR#		AS USE_YN
+				, #pMap[].regId:VARCHAR#		AS REG_ID
+				, #pMap[].updId:VARCHAR#		AS UPD_ID
+			, SYSDATE
+			FROM DUAL
+			</iterate>
+			</dynamic>			
+		) B
+		ON (
+			A.DS_ID = B.DS_ID
+			AND A.USR_CD = B.USR_CD
+		)
+		WHEN MATCHED THEN 
+		UPDATE SET
+			A.ORG_CD = B.ORG_CD
+			, A.PRSS_ACC_CD = B.PRSS_ACC_CD
+			, A.USE_YN = B.USE_YN
+			, A.UPD_ID = B.UPD_ID
+			, A.UPD_DTTM = SYSDATE
+		WHEN NOT MATCHED THEN
+		INSERT (
+			A.DS_ID
+			, A.USR_CD
+			, A.ORG_CD
+			, A.PRSS_ACC_CD
+			, A.USE_YN
+			, A.REG_ID
+			, A.REG_DTTM
+			, A.UPD_ID
+			, A.UPD_DTTM
+		)
+		VALUES (
+			B.DS_ID
+			, B.USR_CD
+			, B.ORG_CD
+			, B.PRSS_ACC_CD
+			, B.USE_YN
+			, B.REG_ID
+			, SYSDATE
+			, B.UPD_ID
+			, SYSDATE
+		)	
+	</update>
+	
+	<!-- 데이터셋의 적재주기(D1009)에 따라 입력대장을 생성한다 -->
+	<procedure id="OpenDsDAO.execSpCreateOpenLdlist" parameterClass="egovframework.common.base.model.Params" resultClass="egovframework.common.base.model.Record" >
+	    <![CDATA[
+	      { CALL SP_CREATE_OPEN_LDLIST(#dsId:VARCHAR#)}
+	      ]]>
+	</procedure>
+	
+	<!-- 데이터셋 삭제 프로시져 -->
+	<procedure id="OpenDsDAO.execSpDelOpenDs" parameterClass="egovframework.common.base.model.Params" resultClass="egovframework.common.base.model.Record" >
+	    <![CDATA[
+	      { CALL SP_DEL_OPEN_DS(#dsId#, #regId:VARCHAR#)}
+	      ]]>
+	</procedure>
+	
+	<!-- 데이터셋 테이블이 실제 존재하는지 확인 -->
+	<select id="OpenDsDAO.selectExistSrcDsId" parameterClass="egovframework.common.base.model.Params" resultClass="java.lang.Integer" >
+		SELECT COUNT(*) AS CNT
+		FROM   TV_TABLE_LIST
+		WHERE  OWNER 		= #owner:VARCHAR#
+		AND    TABLE_NAME 	= #tableName:VARCHAR#
+	</select>
+	
+</sqlMap>

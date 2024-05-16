@@ -1,0 +1,464 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="portalBpmCmp" >
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+	
+	<!-- 위원회 종류 조회(코드) 사용안함. -->
+	<select id="bpmCmpDao.selectCmpDivCdList" parameterClass="params" resultClass="record">
+		/* sql id : bpmCmpDao.selectCmpDivCdList */
+		SELECT DISTINCT(CMT_DIV_CD) AS "code",
+      	 	   CMT_DIV_NM 			AS "codeNm"
+  		FROM   TV_COMMITTEE_LIST		
+	</select>
+	
+	<!-- 위원회명 조회(코드) 사용안함.-->
+	<select id="bpmCmpDao.selectCommitteeCdList" parameterClass="params" resultClass="record">
+		/* sql id : bpmCmpDao.selectCommitteeCdList */
+		SELECT DISTINCT(COMMITTEE_ID) AS "code",
+      	 	   COMMITTEE_NAME 		  AS "codeNm"
+  		FROM   TV_COMMITTEE_LIST
+	</select>
+	
+	<!-- 당명 리스트 조회(교섭단체, 비교섭단체 구분) -->
+	<select id="bpmCmpDao.selectPolyGroupList" parameterClass="params" resultClass="record">
+		/* sql id : bpmCmpDao.selectPolyGroupList */
+		SELECT POLY_GROUP_CD	AS "polyGroupCd", 
+		       POLY_GROUP_NM	AS "polyGroupNm", 
+		       EMP_CNT			AS "empCnt" 
+		  FROM TV_POLY_GROUP
+	</select>	
+	
+	<!-- 위원회 현황 조회 -->
+	<sql id="bpmCmp.cond.col">
+		CMT_DIV_CD		AS "cmtDivCd",
+	    CMT_DIV_NM		AS "cmtDivNm",
+	    COMMITTEE_ID	AS "committeeId",
+	    COMMITTEE_NAME	AS "committeeName",
+	    HG_NM			AS "hgNm",
+	    LINK_URL		AS "linkUrl",
+	    HG_NM_LIST		AS "hgNmList",
+	    LIMIT_CNT		AS "limitCnt",
+	    CURR_CNT		AS "currCnt",
+	    POLY1_CNT       AS "poly1Cnt",
+	    POLY2_CNT       AS "poly2Cnt",
+	    POLY3_CNT       AS "poly3Cnt",
+	    POLY4_CNT       AS "poly4Cnt",
+	    POLY5_CNT       AS "poly5Cnt",
+	    POLY6_CNT       AS "poly6Cnt",
+	    POLY7_CNT       AS "poly7Cnt",
+	    POLY8_CNT       AS "poly8Cnt",
+	    POLY9_CNT       AS "poly9Cnt",
+	    POLY99_CNT		AS "poly99Cnt"
+	</sql>
+	<sql id="bpmCmp.cond.where">
+		<dynamic prepend="WHERE">
+			<isNotEmpty property="cmtDivCd" prepend=" AND ">
+				A.CMT_DIV_CD = #cmtDivCd:VARCHAR#
+			</isNotEmpty>	
+			<isNotEmpty property="committeeName" prepend=" AND ">
+				A.COMMITTEE_NAME LIKE '%' || #committeeName:VARCHAR# || '%'
+			</isNotEmpty>
+			<isNotEmpty property="committeeId" prepend=" AND ">
+				A.COMMITTEE_ID = #committeeId:VARCHAR#
+			</isNotEmpty>
+		</dynamic>
+	</sql>
+	
+	<select id="bpmCmpDao.searchCmpCond" remapResults="true" parameterClass="params" resultClass="record">
+		/* sql id : bpmCmpDao.searchCmpCond */
+		<isEqual property="paging" compareValue="0">
+		SELECT AA.* 
+		FROM   (SELECT ROWNUM AS ROW_NUM, AA.*
+				FROM   (
+		</isEqual>
+		
+			SELECT
+			    <include refid="bpmCmp.cond.col"/>
+			FROM
+				TV_COMMITTEE_LIST A
+			<include refid="bpmCmp.cond.where"/>
+		<isEqual property="paging" compareValue="0">
+		<![CDATA[
+				) AA
+			WHERE ROWNUM <= #end:NUMERIC#
+			) AA
+		WHERE AA.ROW_NUM >= #start:NUMERIC#
+		]]>
+		</isEqual>
+	</select>
+	<select id="bpmCmpDao.searchCmpCondCount" parameterClass="params" resultClass="int">
+		/* sql id : bpmCmpDao.searchCmpCondCount */
+		SELECT
+		    COUNT(*)
+		FROM
+		    TV_COMMITTEE_LIST A
+		<include refid="bpmCmp.cond.where"/>
+	</select>
+	
+	
+	<!-- 위원회 명단 조회 -->
+	<sql id="bpmCmp.list.col">
+		   A.DEPT_CD           AS "deptCd"
+	       , A.DEPT_NM         AS "deptNm"
+	       , A.JOB_RES_NM      AS "jobResNm"
+	       , A.JOB_RES_CD      AS "jobResCD"
+	       , A.EMP_NO          AS "empNo"
+	       , A.MONA_CD		   AS "monaCd"
+	       , A.HG_NM           AS "hgNm"
+	       , A.HJ_NM           AS "hjNm"
+	       , A.POLY_CD         AS "polyCd"
+	       , A.POLY_NM         AS "polyNm"
+	       , A.ORIG_CD         AS "origCd"
+	       , A.ORIG_NM         AS "origNm"
+	       , A.TEL_NO          AS "telNo"
+	       , A.STAFF           AS "staff"
+	       , A.SECRETARY       AS "secretary"
+	       , A.SECRETARY2      AS "secretary2"
+           , A.DEPT_IMG_URL    AS "deptImgUrl"
+           , A.LINK_URL        AS "linkUrl"
+	</sql>
+	<sql id="bpmCmp.list.where">
+		<dynamic prepend="WHERE">
+			<isNotEmpty property="hgNm" prepend=" AND ">
+				A.HG_NM = #hgNm:VARCHAR#
+			</isNotEmpty>	
+			<isNotEmpty property="polyCd" prepend=" AND ">
+				A.POLY_CD = #polyCd:VARCHAR#
+			</isNotEmpty>
+			<isNotEmpty property="jobResCd" prepend=" AND ">
+				A.JOB_RES_CD = #jobResCd:VARCHAR#
+			</isNotEmpty>
+			<isNotEmpty property="deptCd" prepend=" AND ">
+				A.DEPT_CD = #deptCd:VARCHAR#
+			</isNotEmpty>
+		</dynamic>
+	</sql>
+	
+	<select id="bpmCmpDao.searchCmpList" remapResults="true" parameterClass="params" resultClass="record">
+		/* sql id : bpmCmpDao.searchCmpList */
+		<isEqual property="paging" compareValue="0">
+		SELECT AA.* 
+		FROM   (SELECT ROWNUM AS ROW_NUM, AA.*
+				FROM   (
+		</isEqual>
+		
+			SELECT
+			    <include refid="bpmCmp.list.col"/>
+			FROM
+				TV_HG_INFO A 
+			<include refid="bpmCmp.list.where"/>
+		<isEqual property="paging" compareValue="0">
+		<![CDATA[
+				) AA
+			WHERE ROWNUM <= #end:NUMERIC#
+			) AA
+		WHERE AA.ROW_NUM >= #start:NUMERIC#
+		]]>
+		</isEqual>
+	</select>
+	<select id="bpmCmpDao.searchCmpListCount" parameterClass="params" resultClass="int">
+		/* sql id : bpmCmpDao.searchCmpListCount */
+		SELECT
+		    COUNT(*)
+		FROM
+		    TV_HG_INFO A LEFT OUTER JOIN TV_THXPSN01 B 
+		    	ON  A.EMP_NO = B.EMP_NO
+		    	AND A.UNIT_CD = B.UNIT_CD
+		<include refid="bpmCmp.list.where"/>
+	</select>
+	
+	
+	<!-- 위원회 일정 조회 -->
+	<sql id="bpmCmp.date.col">
+		   MEETINGSESSION		AS "meetingsession"
+		   , CHA				AS "cha"
+		   , TITLE				AS "title"
+		   , MEETTING_DATE		AS "meettingDate"
+		   , MEETTING_TIME		AS "meettingTime"
+		   , COMMITTEE_NAME		AS "committeeName"
+		   , MEETTING_DATE || ' ' || MEETTING_TIME		AS "meettingDateTime"
+		   , LINK_URL           AS "linkUrl"
+		   , RESULT_DOWN_URL    AS "resultDownUrl"
+		   , AGENDAID           AS "agendaid"
+	</sql>
+	<sql id="bpmCmp.date.where">
+		WHERE GUBUN = 'CMMTT'
+		<isNotEmpty property="title" prepend=" AND ">
+			TITLE LIKE '%' || #title:VARCHAR# || '%'
+		</isNotEmpty>
+		<isNotEmpty property="meetingsession" prepend=" AND ">
+			MEETINGSESSION LIKE '%' || #meetingsession:VARCHAR# || '%'
+		</isNotEmpty>
+		<isNotEmpty property="cmitCd" prepend=" AND ">
+				A.AGENDAID = #cmitCd:VARCHAR#
+		</isNotEmpty>
+		<isNotEmpty property="frMeetingDate" prepend=" AND ">
+			<![CDATA[ MEETTING_DATE >= #frMeetingDate:VARCHAR# ]]>
+		</isNotEmpty>
+		<isNotEmpty property="toMeetingDate" prepend=" AND ">
+			<![CDATA[ MEETTING_DATE <= #toMeetingDate:VARCHAR# ]]> 
+		</isNotEmpty>
+	</sql>
+	
+	<select id="bpmCmpDao.searchCmpDate" remapResults="true" parameterClass="params" resultClass="record">
+		/* sql id : bpmCmpDao.searchCmpDate */
+		<isEqual property="paging" compareValue="0">
+		SELECT AA.* 
+		FROM   (SELECT ROWNUM AS ROW_NUM, AA.*
+				FROM   (
+		</isEqual>
+		
+			SELECT
+			    <include refid="bpmCmp.date.col"/>
+			FROM
+				TV_ASSEM_SCHEDULE A
+			<include refid="bpmCmp.date.where"/>
+			ORDER BY SORT_NO DESC
+		<isEqual property="paging" compareValue="0">
+		<![CDATA[
+				) AA
+			WHERE ROWNUM <= #end:NUMERIC#
+			) AA
+		WHERE AA.ROW_NUM >= #start:NUMERIC#
+		]]>
+		</isEqual>
+	</select>
+	<select id="bpmCmpDao.searchCmpDateCount" parameterClass="params" resultClass="int">
+		/* sql id : bpmCmpDao.searchCmpDateCount */
+		SELECT
+		    COUNT(*)
+		FROM
+		    TV_ASSEM_SCHEDULE A
+		<include refid="bpmCmp.date.where"/>
+	</select>
+	
+	
+	<!-- 계류의안 조회 -->
+	<sql id="bpmCmp.moob.col">
+		A.BILL_ID                              AS "billId"
+		<!-- , A.BILL_ID_REF                        AS "billIdRef" -->
+		, A.BILL_NO                            AS "billNo"
+		, A.BILL_KIND_CD                       AS "billKindCd"
+		<!-- , A.MAXAGE                             AS "maxage" -->
+		, A.UNIT_CD                            AS "unitCd"
+		, A.BILL_NAME                          AS "billName"
+		, A.PROPOSER                           AS "proposer"
+		, A.PROPOSER_KIND                      AS "proposerKind"
+		, A.PROPOSE_DT                         AS "proposeDt"
+		<!-- 
+		, A.PROPOSE_DT_BILL_SEARCH_RESULT      AS "proposeDtBillSearchResult"
+		, A.PROC_RESULT_CD                     AS "procResultCd"
+		, A.PROC_STAGE_CD                      AS "procStageCd" -->
+		, A.CMIT_CD                            AS "cmitCd"
+		, A.CMIT_NM                            AS "cmitNm"
+		<!-- 
+		, A.COMMITTEE_DT                       AS "committeeDt"
+		, A.PASS_GUBUN                         AS "passGubun"
+		, A.PROC_DT                            AS "procDt"
+		, A.PROC_SESSION                       AS "procSession"
+		, A.BILL_MEMO                          AS "billMemo"
+		, A.SUMMARY                            AS "summary" -->
+		, A.LINK_URL                           AS "linkUrl"
+	</sql>
+	<sql id="bpmCmp.moob.where">
+		<dynamic prepend="WHERE">
+			<isNotEmpty property="unitCd" prepend=" AND ">
+				A.UNIT_CD = #unitCd:VARCHAR#
+			</isNotEmpty>
+			<isNotEmpty property="billName" prepend=" AND ">
+				A.BILL_NAME LIKE '%' || #billName:VARCHAR# || '%'
+			</isNotEmpty>
+			<isNotEmpty property="cmitCd" prepend=" AND ">
+				A.CMIT_CD = #cmitCd:VARCHAR#
+			</isNotEmpty>
+			<isNotEmpty property="billKindCd" prepend=" AND ">
+				A.BILL_KIND_CD = #billKindCd:VARCHAR#
+			</isNotEmpty>
+		</dynamic>
+	</sql>
+	
+	<select id="bpmCmpDao.searchCmpMoob" remapResults="true" parameterClass="params" resultClass="record">
+		/* sql id : bpmCmpDao.searchCmpMoob */
+		<isEqual property="paging" compareValue="0">
+		SELECT AA.* 
+		FROM   (SELECT ROWNUM AS ROW_NUM, AA.*
+				FROM   (
+		</isEqual>
+		
+			SELECT
+			    <include refid="bpmCmp.moob.col"/>
+			FROM
+				TV_PAD_BILL A
+			<include refid="bpmCmp.moob.where"/>
+			ORDER BY PROPOSE_DT DESC, BILL_NO DESC 
+		<isEqual property="paging" compareValue="0">
+		<![CDATA[
+				) AA
+			WHERE ROWNUM <= #end:NUMERIC#
+			) AA
+		WHERE AA.ROW_NUM >= #start:NUMERIC#
+		]]>
+		</isEqual>
+	</select>
+	<select id="bpmCmpDao.searchCmpMoobCount" parameterClass="params" resultClass="int">
+		/* sql id : bpmCmpDao.searchCmpMoobCount */
+		SELECT
+		    COUNT(*)
+		FROM
+		    TV_PAD_BILL A
+		<include refid="bpmCmp.moob.where"/>
+	</select>
+	
+	<!-- 공통코드 조회(의안구분) -->
+	<select id="bpmCmpDao.searchCmpMoobCommCd" parameterClass="params" resultClass="record">
+		/* sql id : bpmCmpDao.searchCmpMoobCommCd */
+		SELECT DISTINCT BILL_KIND_CD AS "code"
+		  	 , BILL_KIND_CD	 AS "name"
+		FROM   TV_PAD_BILL	
+	</select>
+	<!-- 위원회 자료실 조회 -->
+	<sql id="bpmCmp.ref.col">
+		 BOARD_NO          AS "boardNo" 
+		 , WRITER_NM       AS "writerNm"
+	     , ARTICLE_TITLE   AS "articleTitle"
+	     , ARTICLE_TEXT    AS "articleText"
+	     , CREATE_DT       AS "createDt"
+	     , ARTICLE_NO      AS "articleNo"
+	     , FILE_NM         AS "fileNm"
+	     , FILE_URL        AS "fileUrl"
+	     , SITE_ID         AS "siteId"
+	     , LINK_URL        AS "linkUrl" 
+	</sql>
+	<sql id="bpmCmp.ref.where">
+		<dynamic prepend="WHERE">
+			<isNotEmpty property="articleTitle" prepend=" AND ">
+				A.ARTICLE_TITLE LIKE '%' || #articleTitle:VARCHAR# || '%'
+			</isNotEmpty>
+			<isNotEmpty property="siteId" prepend=" AND ">
+				A.SITE_ID = #siteId:VARCHAR#
+			</isNotEmpty>
+			<isNotEmpty property="frCreateDt" prepend=" AND ">
+				<![CDATA[ A.CREATE_DT >= #frCreateDt:VARCHAR# ]]>
+			</isNotEmpty>
+			<isNotEmpty property="toCreateDt" prepend=" AND ">
+				<![CDATA[ A.CREATE_DT <= #toCreateDt:VARCHAR# ]]> 
+			</isNotEmpty>
+		</dynamic>
+	</sql>
+	
+	<select id="bpmCmpDao.searchCmpRefR" remapResults="true" parameterClass="params" resultClass="record">
+		/* sql id : bpmCmpDao.searchCmpRefR */
+		<isEqual property="paging" compareValue="0">
+		SELECT AA.* 
+		FROM   (SELECT ROWNUM AS ROW_NUM, AA.*
+				FROM   (
+		</isEqual>
+		
+			SELECT
+			    <include refid="bpmCmp.ref.col"/>
+			FROM
+				TV_COMMITTEE_BOARD A
+			<include refid="bpmCmp.ref.where"/>
+			 ORDER BY A.CREATE_DT DESC, A.ARTICLE_NO DESC
+		<isEqual property="paging" compareValue="0">
+		<![CDATA[
+				) AA
+			WHERE ROWNUM <= #end:NUMERIC#
+			) AA
+		WHERE AA.ROW_NUM >= #start:NUMERIC#
+		]]>
+		</isEqual>
+	</select>
+	<select id="bpmCmpDao.searchCmpRefRCount" parameterClass="params" resultClass="int">
+		/* sql id : bpmCmpDao.searchCmpRefRCount */
+		SELECT
+		    COUNT(*)
+		FROM
+		    TV_COMMITTEE_BOARD A
+		<include refid="bpmCmp.ref.where"/>
+	</select>	
+	
+	
+	<!-- 위원회 회의록 조회 -->
+	<sql id="bpmCmp.report.col">
+		CONFER_NUM         AS "conferNum"
+		, TITLE            AS "title"
+		, CLASS_CODE       AS "classCode"
+		, CLASS_NAME       AS "className"
+		, DAE_NUM          AS "daeNum"
+		, COMM_CODE        AS "commCode"
+		, SUBCOMM_CODE     AS "subcommCode"
+		, COMM_NAME        AS "commName"
+		, VODCOMM_CODE     AS "vodcommCode"
+		, SES_NUM          AS "sesNum"
+		, DEGREE_NUM       AS "degreeNum"
+		, CONF_DATE        AS "confDate"
+		, SUB_NUM          AS "subNum"
+		, SUB_NAME         AS "subName"
+		, VOD_LINK_URL     AS "vodLinkUrl"
+		, CONF_LINK_URL    AS "confLinkUrl"
+		, HWP_LINK_URL     AS "hwpLinkUrl"
+		, PDF_LINK_URL     AS "pdfLinkUrl"
+		, HWP_FILE_ID      AS "hwpFileId"
+		, PDF_FILE_ID      AS "pdfFileId"
+		, UNIT_CD          AS "unitCd"
+	</sql>
+	<sql id="bpmCmp.report.where">
+		WHERE CLASS_CODE <![CDATA[<>]]> 1
+		<isNotEmpty property="className" prepend=" AND ">
+				A.CLASS_NAME LIKE '%' || #className:VARCHAR# || '%'
+		</isNotEmpty>
+		<isNotEmpty property="unitCd" prepend=" AND ">
+			A.UNIT_CD LIKE '%' || #unitCd:VARCHAR# || '%'
+		</isNotEmpty>
+		<isNotEmpty property="title" prepend=" AND ">
+				A.TITLE LIKE '%' || #title:VARCHAR# || '%'
+		</isNotEmpty>
+		<isNotEmpty property="subName" prepend=" AND ">
+				A.SUB_NAME LIKE '%' || #subName:VARCHAR# || '%'
+		</isNotEmpty>
+		<isNotEmpty property="commName" prepend=" AND ">
+				A.COMM_NAME LIKE '%' || #commName:VARCHAR# || '%'
+		</isNotEmpty>
+		<isNotEmpty property="frConfDate" prepend=" AND ">
+			<![CDATA[ A.CONF_DATE >= #frConfDate:VARCHAR# ]]>
+		</isNotEmpty>
+		<isNotEmpty property="toConfDate" prepend=" AND ">
+			<![CDATA[ A.CONF_DATE <= #toConfDate:VARCHAR# ]]> 
+		</isNotEmpty>
+	</sql>
+	
+	<select id="bpmCmpDao.searchCmpReport" remapResults="true" parameterClass="params" resultClass="record">
+		/* sql id : bpmCmpDao.searchCmpReport */
+		<isEqual property="paging" compareValue="0">
+		SELECT AA.* 
+		FROM   (SELECT ROWNUM AS ROW_NUM, AA.*
+				FROM   (
+		</isEqual>
+		
+			SELECT
+			    <include refid="bpmCmp.report.col"/>
+			FROM
+				TV_SEARCH A
+			<include refid="bpmCmp.report.where"/>
+			ORDER BY CONF_DATE DESC, CONFER_NUM,CLASS_CODE,DAE_NUM,SES_NUM,COMM_CODE,SUBCOMM_CODE,DEGREE_NUM,SUB_NUM
+		<isEqual property="paging" compareValue="0">
+		<![CDATA[
+				) AA
+			WHERE ROWNUM <= #end:NUMERIC#
+			) AA
+		WHERE AA.ROW_NUM >= #start:NUMERIC#
+		]]>
+		</isEqual>
+	</select>
+	<select id="bpmCmpDao.searchCmpReportCount" parameterClass="params" resultClass="int">
+		/* sql id : bpmCmpDao.searchCmpReportCount */
+		SELECT
+		    COUNT(*)
+		FROM
+		    TV_SEARCH A
+		<include refid="bpmCmp.report.where"/>
+	</select>		
+	
+</sqlMap>

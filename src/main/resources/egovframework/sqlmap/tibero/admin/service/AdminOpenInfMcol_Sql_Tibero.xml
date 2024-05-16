@@ -1,0 +1,398 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="OpenInfScol" >
+  <typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+  
+   <resultMap id="OpenInfCol" class="egovframework.admin.service.service.OpenInfMcol" >
+     <result column="STATUS"        property="status"                />
+    <result column="INF_ID"        property="infId"                />
+	<result column="INF_SEQ"       property="infSeq"               />
+	<result column="COL_SEQ"       property="colSeq"               />
+	<result column="COL_ID"        property="colId"               />
+	<result column="COL_NM"        property="colNm"            />
+	<result column="COL_CD"       property="colCd"               />
+	<result column="VIEW_YN"       property="viewYn"               />
+	<result column="USE_YN"        property="useYn"                />
+	<result column="V_ORDER"        property="vOrder"                />
+	<result column="MOPT_SET"        property="moptSet"                />
+</resultMap>
+
+<resultMap id="OpenInfColOptPop" class="egovframework.admin.service.service.OpenInfMcol" >
+		<result column="INF_NM"          property="infNm"        />            
+		<result column="INF_ID"        property="infId"                />
+		<result column="INF_SEQ"       property="infSeq"               />
+		<result column="SRV_CD"       property="srvCd"               />
+		<result column="OWNER_CD"        property="ownerCd"      />
+		<result column="DS_ID"           property="dsId"         />
+		<result column="DS_NM"           property="dsNm"         />
+		<result column="COL_ID"        property="colId"               />
+		<result column="COL_NM"        property="colNm"            />
+		<result column="COL_SEQ"       property="colSeq"               />
+		<result column="COND_YN"         property="condYn"       />           
+		<result column="COND_OP"         property="condOp"       />
+		<result column="COND_VAR"        property="condVar"      />
+		
+		<result column="FILT_YN"         property="filtYn"       />
+		<result column="FILT_CD"         property="filtCd"       />
+		<result column="FILT_MAX_DAY"    property="filtMaxDay"   />
+		<result column="FILT_TBL_CD"     property="filtTblCd"    />
+		<result column="FILT_CODE"       property="filtCode"     />
+		<result column="FILT_DEFAULT"    property="filtDefault"  />
+		<result column="FILT_NEED"       property="filtNeed"     />
+		<result column="FILT_DEFAULT1"    property="filtDefault1"  />
+		<result column="FILT_NEED1"       property="filtNeed1"     />
+		<result column="FILT_DEFAULT2"    property="filtDefault2"  />
+		<result column="FILT_NEED2"       property="filtNeed2"     />
+	</resultMap>
+	  
+	  
+	<resultMap id="OpenInfColView" class="egovframework.admin.service.service.OpenInfMcol" >
+		<result column="SRC_COL_ID"        property="srcColId"            />
+		<result column="COL_CD"        property="colCd"            />
+	</resultMap>
+	
+	<resultMap id="OpenInfColCond" class="egovframework.admin.service.service.OpenInfMcol" >
+		<result column="SRC_COL_ID"        property="srcColId"            />
+		<result column="COND_OP"       property="condOp"     />
+		<result column="COND_VAR"       property="condVar"     />
+	</resultMap>
+		
+	<select id="OpenInfMcolDAO.selectOpenInfColList" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultMap="OpenInfCol" >
+			SELECT 
+						CASE WHEN C.COL_SEQ IS NOT NULL THEN ''
+						ELSE 'I' END AS STATUS,
+		                 A.INF_ID,
+		                 A.INF_SEQ,
+		                 B.COL_SEQ,
+		                 B.COL_ID,
+		                 B.COL_NM,
+			             NVL(C.COL_CD,'ITEM') AS COL_CD,
+			             NVL(C.VIEW_YN,'N') AS VIEW_YN,
+			       		 NVL(C.USE_YN,'Y') AS USE_YN,
+			       		 CASE C.V_ORDER WHEN 0 THEN B.COL_SEQ
+			       		 					  WHEN NULL THEN B.COL_SEQ
+		                 ELSE C.V_ORDER END AS V_ORDER,
+		                 DECODE(C.FILT_YN, 'Y', '사용중', '') AS MOPT_SET 
+		           FROM TV_MNG_INF_SRV A
+		         INNER JOIN TB_OPEN_DSCOL B
+		            ON A.DS_ID = B.DS_ID
+		          AND B.USE_YN ='Y'
+		         LEFT OUTER JOIN TB_OPEN_INF_MCOL C
+		           ON A.INF_ID = C.INF_ID
+		          AND A.INF_SEQ = C.INF_SEQ
+		          AND B.COL_SEQ = C.COL_SEQ
+		        WHERE A.INF_ID= #infId:VARCHAR#
+			      AND A.SRV_CD ='M'
+			      AND A.DS_USE_YN ='Y'
+		          ORDER BY B.V_ORDER  
+	</select>
+	
+	<update id="OpenInfMcolDAO.mergeIntoCol" parameterClass="egovframework.admin.service.service.OpenInfMcol" >
+		<![CDATA[
+		MERGE INTO TB_OPEN_INF_MCOL A
+		USING(
+				SELECT #infId:VARCHAR#         	AS INF_ID
+					  ,#infSeq:NUMERIC#	       	AS INF_SEQ
+					  ,#colSeq:NUMERIC#        	AS COL_SEQ
+					  ,#colCd:VARCHAR# 	    	AS COL_CD
+					  ,#viewYn:CHAR#			AS VIEW_YN
+					  ,#vOrder:NUMERIC#			AS V_ORDER
+					  ,#useYn:CHAR#			AS USE_YN
+					  ,#sessionUsrId:VARCHAR#  	AS REG_ID 
+					  ,SYSDATE         	AS REG_DTTM
+					  ,#sessionUsrId:VARCHAR#  	AS UPD_ID
+					  ,SYSDATE         	AS UPD_DTTM  
+				  FROM DUAL
+			)B
+		ON ( A.INF_ID = B.INF_ID AND A.INF_SEQ = B.INF_SEQ AND A.COL_SEQ =B.COL_SEQ)
+		WHEN MATCHED THEN
+		UPDATE SET
+				 A.COL_CD = B.COL_CD
+				,A.VIEW_YN = B.VIEW_YN
+				,A.V_ORDER = B.V_ORDER
+				,A.USE_YN = B.USE_YN
+				,A.UPD_ID = B.UPD_ID
+				,A.UPD_DTTM = B.UPD_DTTM
+		WHEN NOT MATCHED THEN
+		INSERT 
+		(
+			A.INF_ID
+			,A.INF_SEQ
+			,A.COL_SEQ
+			,A.COL_CD
+			,A.VIEW_YN
+			,A.V_ORDER
+			,A.USE_YN
+			,A.REG_ID 
+			,A.REG_DTTM
+			,A.UPD_ID
+			,A.UPD_DTTM  
+				
+		)VALUES
+		(
+			 B.INF_ID
+			,B.INF_SEQ
+			,B.COL_SEQ
+			,B.COL_CD
+			,B.VIEW_YN
+			,B.V_ORDER
+			,B.USE_YN
+			,B.REG_ID 
+			,B.REG_DTTM
+			,B.UPD_ID
+			,B.UPD_DTTM  	
+		)
+		]]>
+	</update>
+	
+	<select id="OpenInfMcolDAO.selectOpenInfColInfo" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultMap="OpenInfColOptPop" >
+			SELECT 
+					   A.INF_ID
+					  ,A.INF_SEQ 
+					  ,A.INF_NM
+					  ,A.SRV_CD
+		              ,A.OWNER_CD
+		              ,A.DS_ID
+		              ,A.DS_NM
+		              ,B.COL_ID
+		              ,B.COL_NM
+		              ,B.COL_SEQ
+		              ,COND_YN
+		              ,COND_OP
+		              ,COND_VAR
+		              
+						,C.FILT_YN
+		              ,C.FILT_CD
+		              ,C.FILT_MAX_DAY
+		              ,C.FILT_TBL_CD
+		              ,C.FILT_CODE
+		              ,C.FILT_DEFAULT
+		              ,CASE C.FILT_CD WHEN 'CHECK' THEN C.FILT_DEFAULT
+		              					WHEN 'COMBO' THEN C.FILT_DEFAULT
+		              					WHEN 'RADIO' THEN C.FILT_DEFAULT
+		              	ELSE '' END FILT_DEFAULT1
+		              ,CASE C.FILT_CD WHEN 'POPUP' THEN C.FILT_DEFAULT
+		              	ELSE '' END FILT_DEFAULT2
+		              ,C.FILT_NEED
+		              ,CASE C.FILT_CD WHEN 'CHECK' THEN C.FILT_NEED
+		              					WHEN 'COMBO' THEN C.FILT_NEED
+		              					WHEN 'RADIO' THEN C.FILT_NEED
+		              	ELSE 'N' END FILT_NEED1
+		              ,CASE C.FILT_CD WHEN 'POPUP' THEN C.FILT_NEED
+		              	ELSE 'N' END FILT_NEED2
+		              	
+		         FROM TV_MNG_INF_SRV A
+		         INNER JOIN TB_OPEN_DSCOL B
+		            ON A.DS_ID = B.DS_ID
+		           AND B.USE_YN ='Y'   
+		         INNER JOIN TB_OPEN_INF_MCOL C
+		           ON A.INF_ID = C.INF_ID
+		          AND A.INF_SEQ = C.INF_SEQ
+		          AND B.COL_SEQ = C.COL_SEQ
+		         WHERE C.INF_ID=#infId:VARCHAR#
+		           AND C.INF_SEQ=#infSeq:NUMERIC#
+		           AND C.COL_SEQ=#colSeq:NUMERIC# 
+	</select>
+	
+	<update id="OpenInfMcolDAO.updateOpt" parameterClass="egovframework.admin.service.service.OpenInfMcol" >
+		<![CDATA[]]>
+		UPDATE TB_OPEN_INF_MCOL SET
+				COND_YN = #condYn:CHAR#
+				,COND_OP = #condOp:VARCHAR#
+				,COND_VAR =  #condVar:VARCHAR#
+				,UPD_ID = #sessionUsrId:VARCHAR#
+				,UPD_DTTM = SYSDATE
+				
+				/*필터 추가*/
+				,FILT_YN = #filtYn:CHAR#
+				,FILT_CD = #filtCd:VARCHAR#
+				,FILT_MAX_DAY = NVL(#filtMaxDay:NUMERIC#,1)
+				,FILT_TBL_CD = #filtTblCd:VARCHAR#
+				,FILT_CODE = #filtCode:VARCHAR#
+				,FILT_DEFAULT = #filtDefault1:VARCHAR#
+				<!-- ,FILT_DEFAULT_NM = #filtDefaultNm# -->
+				,FILT_NEED = NVL(#filtNeed1:CHAR#,'N')
+				
+		WHERE INF_ID=#infId:VARCHAR#
+		   AND INF_SEQ=#infSeq:NUMERIC#
+		   AND COL_SEQ=#colSeq:NUMERIC# 
+		
+	</update>
+	
+	
+	<select id="OpenInfMcolDAO.selectOpenInfColViewPopInfo" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultMap="OpenInfColView" >
+			SELECT 
+				  B.SRC_COL_ID
+				  ,C.COL_CD
+		         FROM TV_MNG_INF_SRV A
+		         INNER JOIN TB_OPEN_DSCOL B
+		            ON A.DS_ID = B.DS_ID
+		          AND B.USE_YN ='Y'
+		         INNER JOIN TB_OPEN_INF_MCOL C
+		           ON A.INF_ID = C.INF_ID
+		          AND A.INF_SEQ = C.INF_SEQ
+		          AND B.COL_SEQ = C.COL_SEQ
+		         WHERE A.INF_ID=#infId:VARCHAR#
+		           AND A.SRV_CD=#srvCd:VARCHAR#
+		           AND C.USE_YN='Y'
+		           AND C.VIEW_YN='Y'
+		           AND A.DS_USE_YN ='Y'
+		        ORDER BY C.V_ORDER             
+	</select>
+	
+	
+	<select id="OpenInfMcolDAO.selectOpenInfColViewPopInfoCond" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultMap="OpenInfColCond" >
+			SELECT 
+				  B.SRC_COL_ID
+				 ,C.COND_OP
+				 ,C.COND_VAR	 
+		         FROM TV_MNG_INF_SRV A
+		         INNER JOIN TB_OPEN_DSCOL B
+		            ON A.DS_ID = B.DS_ID
+		          AND B.USE_YN ='Y'
+		         INNER JOIN TB_OPEN_INF_MCOL C
+		           ON A.INF_ID = C.INF_ID
+		          AND A.INF_SEQ = C.INF_SEQ
+		          AND B.COL_SEQ = C.COL_SEQ
+		         WHERE A.INF_ID=#infId:VARCHAR#
+		           AND A.SRV_CD=#srvCd:VARCHAR#
+		           AND C.COND_YN='Y'
+		           AND C.USE_YN ='Y'
+		           AND A.DS_USE_YN ='Y'
+		        ORDER BY C.V_ORDER
+	</select>
+	
+	
+	<select id="OpenInfMcolDAO.selectMetaListAll" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultClass="java.util.LinkedHashMap" remapResults="true">
+		/* OpenInfMcolDAO.selectMetaListAll */
+		SELECT * FROM (
+			SELECT $selectQuery$
+			FROM $tableNm$
+			WHERE 1=1
+			$whereQuery$
+		)
+		WHERE 1=1
+		$wgsQuery$
+		AND ROWNUM BETWEEN 0 AND 500
+	</select>
+	
+	
+	
+	<resultMap id="OpenInfColFilt" class="egovframework.admin.service.service.OpenInfMcol" >
+		<result column="COL_NM"        property="colNm"               />
+		<result column="SRC_COL_ID"        property="srcColId"            />
+		<result column="FILT_YN"         property="filtYn"       />
+		<result column="FILT_CD"         property="filtCd"       />
+		<result column="FILT_MAX_DAY"    property="filtMaxDay"   />
+		<result column="FILT_TBL_CD"     property="filtTblCd"    />
+		<result column="FILT_CODE"       property="filtCode"     />
+		<result column="FILT_DEFAULT"    property="filtDefault"  />
+		<result column="FILT_NEED"       property="filtNeed"     />
+		<result column="V_ORDER"        property="vOrder"                />
+	</resultMap>
+	
+	<resultMap id="OpenInfColFiltDtl" class="egovframework.admin.service.service.OpenInfMcol" >
+		<result column="SRC_COL_ID"        property="srcColId"            />
+		<result column="COL_NM"       property="filtCode"     />
+		<result column="DITC_CD"       property="ditcCd"     />
+		<result column="DITC_NM"       property="ditcNm"     />
+	</resultMap>
+	
+	<select id="OpenInfMcolDAO.selectOpenInfColViewPopInfoFilt" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultMap="OpenInfColFilt" >
+	
+		SELECT *
+			FROM(
+					SELECT 
+						 B.COL_NM, B.SRC_COL_ID ,C.FILT_YN
+				           ,C.FILT_CD
+				           ,C.FILT_MAX_DAY
+				           ,C.FILT_TBL_CD
+				           ,C.FILT_CODE
+				           ,C.FILT_NEED
+				           ,C.FILT_DEFAULT
+				           ,B.V_ORDER
+				         FROM TV_MNG_INF_SRV A
+				         INNER JOIN TB_OPEN_DSCOL B
+				            ON A.DS_ID = B.DS_ID
+				          AND B.USE_YN ='Y'
+				         INNER JOIN TB_OPEN_INF_MCOL C
+				           ON A.INF_ID = C.INF_ID
+				          AND A.INF_SEQ = C.INF_SEQ
+				          AND B.COL_SEQ = C.COL_SEQ
+				         WHERE A.INF_ID= #infId:VARCHAR#
+				            AND A.SRV_CD= #srvCd:VARCHAR#
+				           AND C.USE_YN='Y'
+				           AND C.FILT_YN='Y'
+				           AND C.FILT_CD IN('CHECK','RADIO','COMBO')
+			    	       AND C.FILT_CODE IS NOT NULL               
+			    	       AND A.DS_USE_YN ='Y'     
+				      UNION ALL
+				      SELECT 
+							 B.COL_NM
+						   ,B.SRC_COL_ID
+						   ,C.FILT_YN
+				           ,C.FILT_CD
+				           ,C.FILT_MAX_DAY
+				           ,C.FILT_TBL_CD
+				           ,C.FILT_CODE
+				           ,C.FILT_NEED
+				           ,C.FILT_DEFAULT
+				           ,B.V_ORDER
+				         FROM TV_MNG_INF_SRV A
+				         INNER JOIN TB_OPEN_DSCOL B
+				            ON A.DS_ID = B.DS_ID
+				           AND B.USE_YN ='Y'
+				         INNER JOIN TB_OPEN_INF_MCOL C
+				           ON A.INF_ID = C.INF_ID
+				          AND A.INF_SEQ = C.INF_SEQ
+				          AND B.COL_SEQ = C.COL_SEQ
+				         WHERE A.INF_ID= #infId:VARCHAR#
+				            AND A.SRV_CD= #srvCd:VARCHAR#
+				           AND C.USE_YN='Y'
+				           AND C.FILT_YN='Y'
+				           AND A.DS_USE_YN ='Y'
+				           AND C.FILT_CD NOT IN('CHECK','RADIO','COMBO')     
+		    )ORDER BY    V_ORDER
+
+	</select>
+	<select id="OpenInfMcolDAO.selectOpenInfColViewPopInfoFiltDtl" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultMap="OpenInfColFiltDtl">
+	
+	SELECT *
+		FROM(
+			SELECT 
+					B.SRC_COL_ID
+		           ,B.COL_NM
+		           ,D.DITC_CD 
+					,D.DITC_NM
+					,decode(C.COND_YN, 'Y', FN_COND_VAR_LIMIT(B.SRC_COL_ID, D.DITC_CD, C.COND_OP, C.COND_VAR), 'Y')  as VIEW_YN
+		         FROM TV_MNG_INF_SRV A
+		         INNER JOIN TB_OPEN_DSCOL B
+		            ON A.DS_ID = B.DS_ID
+		          AND B.USE_YN ='Y'
+		         INNER JOIN TB_OPEN_INF_MCOL C
+		           ON A.INF_ID = C.INF_ID
+		          AND A.INF_SEQ = C.INF_SEQ
+		          AND B.COL_SEQ = C.COL_SEQ
+		        INNER JOIN TV_DATA_CODE D
+		           ON C.FILT_CODE =D.GRP_CD  
+		         WHERE A.INF_ID= #infId:VARCHAR#
+		            AND A.SRV_CD= #srvCd:VARCHAR#
+		           AND C.USE_YN='Y'
+		           AND C.FILT_YN='Y'
+		           AND A.DS_USE_YN ='Y'
+		           AND C.FILT_CD IN('CHECK','RADIO','COMBO')
+		      ORDER BY D.V_ORDER 
+	)
+	WHERE VIEW_YN='Y'
+	</select>
+	
+	
+	<select id="OpenInfMcolDAO.searchMcolMarkerCd" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultClass="java.util.LinkedHashMap">
+		SELECT DISTINCT(MARKER) AS MARKER
+		FROM (
+			SELECT $selectQuery$
+			FROM $tableNm$
+		)
+		ORDER BY MARKER ASC
+	</select>
+</sqlMap>

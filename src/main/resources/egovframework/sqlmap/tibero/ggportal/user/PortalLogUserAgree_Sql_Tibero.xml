@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- @(#)PortalLogUserAgree_Sql_Tibero.xml 1.0 2015/06/15                    -->
+<!--                                                                         -->
+<!-- COPYRIGHT (C) 2013 WISEITECH CO., LTD. ALL RIGHTS RESERVED.             -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- 사용자 이용약관 동의여부 이력을 관리하는 SQL 파일이다.                  -->
+<!--                                                                         -->
+<!-- @author 김은삼                                                          -->
+<!-- @version 1.0 2015/06/15                                                 -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<sqlMap namespace="PortalLogUserAgreeDao">
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Type Alias                                                          -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 사용자 이용약관 동의여부 이력을 등록한다.                           -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <insert id="PortalLogUserAgreeDao.insertLogUserAgree" parameterClass="params">
+         INSERT INTO TB_LOG_USER_AGREE
+                (
+                    SEQCE_NO, 
+                    USER_CD,
+                    USER_ID,
+                    AGREE1_YN,
+                    AGREE2_YN,
+                    AGREE_YN,
+                    SYS_TAG,
+                    REG_DTTM
+                )
+         SELECT  SQ_LOG_SEQ.NEXTVAL, 
+         		A.USER_CD     AS "userCd",
+                A.USER_ID     AS "userId",
+                A.AGREE1_YN   AS "agree1Yn",
+                A.AGREE2_YN   AS "agree2Yn",
+                A.AGREE_YN    AS "agreeYn",
+                #sysTag:CHAR#      AS "sysTag",
+                SYSDATE       AS "regDttm"
+           FROM TB_USER        A
+        <isEmpty property="userCd">
+          WHERE A.CONT_SITE_CD = #contSiteCd:VARCHAR#
+            AND A.USER_ID      = #userId:VARCHAR#
+        </isEmpty>
+        <isNotEmpty property="userCd">
+          WHERE A.USER_CD      = #userCd:NUMERIC#
+        </isNotEmpty>
+    </insert>
+    
+</sqlMap>

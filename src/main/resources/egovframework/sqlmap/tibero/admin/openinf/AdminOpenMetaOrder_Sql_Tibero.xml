@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="OpenMetaOrder">
+	<typeAlias alias="egovMap"
+		type="egovframework.rte.psl.dataaccess.util.EgovMap" />
+	<!-- <resultMap id="OpenMetaOrderListAllMainTree" class="egovframework.admin.openinf.service.OpenMetaOrder">
+		<result column="ITEM_CD" property="itemCd" />
+		<result column="ITEM_NM" property="itemNm" />
+		<result column="ITEM_LEVEL" property="itemLevel" />
+		<result column="ITEM_LEVEL"      property="Level"   	     />
+		<result column="ITEM_TYPE" property="itemType" />
+		<result column="V_ORDER" property="vOrder" />
+		<result column="ITEM_STATE" property="itemState" />
+		<result column="OPEN_SRV" property="openSrv" />
+		<result column="OPEN_DTTM" property="openDttm" />
+	</resultMap> -->
+	
+	<resultMap id="OpenMetaOrderListAllMainTree" class="egovframework.admin.openinf.service.OpenMetaOrder" >
+	    <result column="INF_ID" property="infId"  />
+	    <result column="INF_NM" property="infNm" />
+	    <result column="REG_DTTM" property="openDttm"  />
+	    <result column="CATE_NM" property="cateNm" />
+	    <result column="OPEN_SRV" property="openSrv"  />
+	    <result column="CATE_DIV_TAG" property="cateDivTag"  />
+	    <result column="CATE_ID" property="cateId2"  />
+    </resultMap>
+	
+	<select id="OpenMetaOrderDAO.selectOpenCateListAllMainTree" parameterClass="egovframework.admin.openinf.service.OpenMetaOrder" resultMap="OpenMetaOrderListAllMainTree" >
+	
+	SELECT *
+	  FROM(
+		SELECT ROWNUM AS RN, TB.*
+		  FROM
+		  (
+			SELECT A.INF_ID 
+			,B.INF_NM
+			,(SELECT DITC_NM FROM TB_COMM_CODE WHERE DITC_CD = A.CATE_ID ) AS CATE_NM
+			,TO_CHAR(A.REG_DTTM,'YYYY-MM-DD') AS REG_DTTM
+			,FN_GET_OPEN_SRV_HTML(B.OPEN_SRV) AS OPEN_SRV
+			,A.CATE_DIV_TAG
+			,A.CATE_ID
+			FROM TB_OPEN_INF_CATE A
+			INNER JOIN TB_OPEN_INF B
+			ON A.INF_ID = B.INF_ID
+		 	WHERE 1=1 		 	
+		 	AND A.USE_YN = 'Y'
+		 	<isNotEmpty property="Cd" >
+				
+			
+				
+				AND A.CATE_DIV_TAG = #Cd#
+				
+			</isNotEmpty>
+			<isNotEmpty property="cateCd" >
+				
+				AND A.CATE_ID = #cateCd#
+				
+			</isNotEmpty>
+<!-- 		 	AND B.INF_STATE = 'Y' -->
+<!-- 		 	AND A.OPEN_SRV IS NOT NULL -->
+		 	
+		 	ORDER BY A.V_ORDER
+	    )TB
+	)
+
+
+	
+	</select>
+
+	<!-- <select id="OpenMetaOrderDAO.selectOpenCateListAllMainTree"	parameterClass="egovframework.admin.openinf.service.OpenMetaOrder" resultMap="OpenMetaOrderListAllMainTree">
+		SELECT   ITEM_CD
+			sysLang을 영문으로 선택하면 ENG_ITEM_NM를 출력해줌
+		<isEqual property="sysLang" compareValue="ENG">
+		 	,ENG_ITEM_NM	AS ITEM_NM
+		</isEqual>
+		<isNotEqual property="sysLang" compareValue="ENG">
+			,ITEM_NM		
+		</isNotEqual>
+        ,LEVEL||'' AS ITEM_LEVEL
+        ,ITEM_TYPE
+        ,V_ORDER
+        ,ITEM_STATE
+        ,OPEN_SRV
+        ,OPEN_DTTM
+		FROM(				
+				SELECT A.PAR_CATE_ID AS PAR_ITEM_CD
+				      ,A.CATE_ID AS ITEM_CD
+				      ,A.CATE_NM AS ITEM_NM
+				      ,A.ENG_CATE_NM AS ENG_ITEM_NM
+				      ,A.V_ORDER
+				      ,'C' AS ITEM_TYPE
+				      ,' ' AS ITEM_STATE
+				      ,' ' AS OPEN_SRV
+				      ,' ' AS OPEN_DTTM
+				  FROM TB_OPEN_CATE A
+				WHERE A.USE_YN ='Y'
+				UNION ALL
+				SELECT A.CATE_ID AS PAR_ITEM_CD
+				      ,A.INF_ID AS ITEM_CD
+				      <![CDATA[
+				      ,'<img src=/img/icon_meta.png alt=rawSheet title=rawSheet />'||A.INF_NM AS ITEM_NM
+				      ]]>
+				      ,A.ENG_INF_NM AS ENG_ITEM_NM
+				      ,A.V_ORDER AS V_ORDER
+				      ,'Y' AS ITME_TYPE
+				      ,CASE A.INF_STATE WHEN 'Y' THEN '개방'
+						WHEN 'N' THEN '미개방'
+						WHEN 'X' THEN '개방불가'
+						WHEN 'C' THEN '개방취소'
+						ELSE A.INF_STATE END AS ITEM_STATE
+						,FN_GET_OPEN_SRV_HTML(A.OPEN_SRV) AS OPEN_SRV
+						,TO_CHAR(A.OPEN_DTTM,'YYYY-MM-DD') AS OPEN_DTTM 
+				  FROM TV_MNG_INF A
+				  WHERE 1=1
+				<isNotEmpty property="infState">
+				 	AND A.INF_STATE = #infState#
+				</isNotEmpty>
+				)
+				
+				WHERE 1 = 1
+				
+				<isNotEmpty property="cateId">
+					START WITH PAR_ITEM_CD = #cateId#
+				</isNotEmpty>
+				<isEmpty property="cateId">
+					<isNotEmpty property="sysLang">
+						START WITH PAR_ITEM_CD = #sysLang#
+					</isNotEmpty>
+					<isEmpty property="sysLang">
+						START WITH PAR_ITEM_CD IS NULL
+					</isEmpty>
+				</isEmpty>
+				CONNECT BY PRIOR ITEM_CD = PAR_ITEM_CD
+				ORDER SIBLINGS BY V_ORDER
+				
+	</select> -->
+
+
+	
+	<!-- TB_OPEN_INF_CATE 테이블 없음 -->
+	<update id="OpenMetaOrderDAO.updateOrderby" parameterClass="egovframework.admin.openinf.service.OpenMetaOrder">
+		UPDATE TB_OPEN_INF_CATE A SET A.V_ORDER=#vOrder#
+		WHERE INF_ID = #infId#
+		AND CATE_DIV_TAG = #cateDivTag#
+		AND CATE_ID = #cateId2#
+		AND USE_YN = 'Y'
+	</update>
+
+</sqlMap>

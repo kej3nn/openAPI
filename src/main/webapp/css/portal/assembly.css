@@ -1,0 +1,38 @@
+*{margin:0;padding:0;list-style-type: none;}
+button{outline:none;background: transparent;border:none;cursor:pointer;}
+.survey article,.survey2 article{width:100%;text-align: center;}
+.survey article:first-child img{width: 100%;}
+.survey article:nth-child(2),.survey2 article:nth-child(2)  {padding:50px 0;background-color: #f3f3f3;}
+.survey article:nth-child(2) ul{display: flex;justify-content: center;}
+.survey article:nth-child(2) p{padding-top:30px;font-size: 14px;letter-spacing: -0.35px;color: #000;}
+.survey article:nth-child(3) > img{padding:50px 0;}
+.survey article:nth-child(3) button {padding:30px 0;}
+.survey2 article> img{width:100%;}
+.survey2 article > div > label > img{cursor: pointer;}
+.survey2 article:nth-child(2){display: flex;justify-content: center;}
+.survey2 article:nth-child(2) input{width: 25px;height: 25px;}
+.survey2 article:nth-child(2) h2{padding:10px 0;font-size: 20px;font-weight: 700;letter-spacing: -0.5px;}
+.survey2 article:nth-child(2) p{padding-bottom: 10px;font-size: 14px;font-weight: 500;letter-spacing: -0.35px;}
+.survey2 article:nth-child(3) {max-width:800px;margin:0 auto;text-align: left;}
+.survey2 .opinion fieldset{border:none;}
+.survey2 .opinion fieldset ul{display: flex;flex-wrap:wrap;align-items:center;}
+.survey2 .opinion ul li{width:50%;}
+.survey2 dl{display: flex;align-items: center;}
+.survey2 dd input{border-radius: 3px;border: 1px solid #ccc;background-color: #fff;height: 41px;}
+.survey2 article:nth-child(3) > p{padding:40px 0 10px;font-size: 16px;}
+.survey2 article:nth-child(3) > p > strong{font-size: 16px;}
+.opinion{border-top:2px solid #000;text-align:center;}
+.opinion legend{display: none;}
+.opinion ul li{padding:10px 0;border-bottom:1px solid #ccc;}
+.opinion ul li dl dt{position: relative;width:30%;color: #000;font-weight: bold;text-align:left;}
+.opinion ul li dl dt:after{content:'';display: inline-block;position: absolute;top:50%;right:20px;width:1px;height:41px;background-color: #e4e4e4;vertical-align: middle;transform:translateY(-50%)}
+.opinion ul li dl dd{width:70%;padding-right: 50px;}
+.opinion ul li dl dd input{width:100%;}
+.opinion .textarea{padding-top:40px;}
+.opinion .textarea h3{padding-bottom: 19px;border-bottom:2px solid #000;text-align:left;}
+.opinion textarea{resize:none;width: 100%;margin-top:5px;border:1px solid #ccc;border-radius:3px;}
+
+.last_footer{height: 201px !important;}
+.last_footer > div{height: 201px !important;}
+
+.fp-tableCell > img{height: 100%;width: 100%;}

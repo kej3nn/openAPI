@@ -1,0 +1,615 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="OpenPublish">
+	<typeAlias alias="egovMap"
+		type="egovframework.rte.psl.dataaccess.util.EgovMap" />
+	<resultMap id="OpenPublishListAll" class="egovframework.admin.openinf.service.OpenPublish">
+		<result column="SEQ" property="seq" />
+		<result column="PUB_ID" property="pubId" />
+		<result column="PUB_NM" property="pubNm" />
+		<result column="DS_NM" property="dsNm" />
+		<result column="FILE_YN" property="fileYn" />
+		<result column="LANG_TAG" property="langTag" />
+		<result column="PUB_DTTM" property="pubDttm" />
+		<result column="ORG_NM" property="orgNm" />
+		<result column="USR_NM" property="usrNm" />
+		<result column="AUTO_YN" property="autoYn" />
+		<result column="PUBOK_YN" property="pubokYn" />
+		<!-- <result column="USE_YN" property="useYn" /> -->
+	</resultMap>
+
+	<resultMap id="OpenPublishOne" class="egovframework.admin.openinf.service.OpenPublish">
+		<result column="SEQ" property="seq" />
+		<result column="PUB_ID" property="pubId" />
+		<result column="PUB_YY" property="pubYy" />	
+		<result column="PUB_NM" property="pubNm" />
+		<result column="LANG_TAG" property="langTag" />
+		<result column="PUB_YMD" property="pubYmd" />
+		<result column="PUB_HHMM" property="pubHhmm" />
+		<result column="PUB_DTTM" property="pubDttm" />
+		<result column="PUB_DTTM_CHECK" property="pubDttmCheck" />
+		<result column="AUTO_YN" property="autoYn" />
+		<result column="PUB_EXP" property="pubExp" />
+		<result column="ORG_CD" property="orgCd" />
+		<result column="ORG_NM" property="orgNm" />
+		<result column="ORG_FULLNM" property="orgFullNm" />
+		<result column="USR_CD" property="usrCd" />
+		<result column="USR_NM" property="usrNm" />
+		<result column="USR_TEL" property="usrTel" />
+		<result column="REF_DS_ID" property="refDsId" />
+		<result column="REF_COL_ID" property="refColId" />
+		<result column="REF_COL_NM" property="refColNm" />
+		<result column="PUBOK_YN" property="pubokYn" />
+		<result column="PUBOK_DTTM" property="pubokDttm" />
+		<result column="VIEW_CNT" property="viewCnt" />
+		<result column="USE_YN" property="useYn" />
+		<result column="REG_ID" property="regId" />
+		<result column="REG_DTTM" property="regDttm" />
+		<result column="UPD_ID" property="updId" />
+		<result column="UPD_DTTM" property="updDttm" />
+		<result column="REF_DS_NM" property="refDsNm" />
+		
+	</resultMap>
+	
+	<resultMap id="OpenPublishFile" class="egovframework.admin.openinf.service.OpenPublish" >
+		<result column="SEQ"        		property="seq"                />
+		<result column="FILE_SEQ"       	property="fileSeq"               />
+		<result column="MST_SEQ"       	property="mstSeq"               />
+		<result column="SRC_FILE_NM"       property="srcFileNm"               />
+		<result column="SAVE_FILE_NM"        	property="saveFileNm"                />
+		<result column="VIEW_FILE_NM"        	property="viewFileNm"                />
+		<result column="FILE_SIZE"        	property="fileSize"                />               
+		<result column="FILE_EXT"        	property="fileExt"                />               
+		<result column="USE_YN"        	property="useYn"                />
+		<result column="REG_ID"        	property="regId"                />
+		<result column="REG_DTTM"        	property="regDttm"                />
+		<result column="UPD_ID"        	property="updId"                />
+		<result column="UPD_DTTM"        	property="updDttm"                />
+	</resultMap>
+	
+	<resultMap id="OpenPublishList" class="egovframework.admin.openinf.service.OpenPublish">
+		<result column="SEQ" property="seq" />
+		<result column="PUB_ID" property="pubId" />
+		<result column="PUB_NM" property="pubNm" />
+		<result column="DS_NM" property="dsNm" />
+		<result column="FILE_YN" property="fileYn" />
+		<result column="LANG_TAG" property="langTag" />
+		<result column="PUB_YMD" property="pubYmd" />
+		<result column="PUB_YY" property="pubYy" />
+		<result column="PUB_DTTM" property="pubDttm" />
+		<result column="ORG_NM" property="orgNm" />
+		<result column="USR_NM" property="usrNm" />
+		<result column="AUTO_YN" property="autoYn" />
+		<result column="USE_YN" property="useYn" />
+		<result column="VIEW_CNT" property="viewCnt" />
+	</resultMap>
+	
+	<resultMap id="RefDsList" class="egovframework.admin.openinf.service.OpenPublish">
+		<result column="REF_DS_ID" property="refDsId" />
+		<result column="INF_NM" property="infNm" />
+		<result column="INF_URL" property="infUrl" />
+	</resultMap>
+	
+	<!-- TB_OPEN_PUBLISH 테이블 없음 -->
+	<select id="OpenPublishDAO.selectOpenPublishListAll"	parameterClass="egovframework.admin.openinf.service.OpenPublish" resultMap="OpenPublishListAll">
+	SELECT *
+  	FROM(
+  	 	SELECT ROWNUM AS RN, T.*
+  	 	FROM(
+			SELECT
+			A.SEQ
+			,A.PUB_ID
+			,A.PUB_NM
+			,D.DS_NM
+			<![CDATA[
+			,CASE WHEN A.FILE_CNT > 0 THEN 'Y' 
+			ELSE 'N' END AS FILE_YN
+			]]>
+			,A.FILE_CNT
+			,DECODE(A.LANG_TAG,'K','한글전용',	'E','영문전용','B','한/영모두') AS LANG_TAG
+			, TO_CHAR(A.PUB_DTTM,'YYYY-MM-DD HH24:MI') AS PUB_DTTM
+			<!-- ,A.PUB_DTTM -->
+			,B.ORG_NM
+			,C.USR_NM
+			,A.AUTO_YN
+			,A.PUBOK_YN
+			<!-- ,A.USE_YN -->
+			FROM TB_OPEN_PUBLISH A
+			LEFT OUTER JOIN
+			TB_COMM_ORG B
+			ON A.ORG_CD = B.ORG_CD
+			LEFT OUTER JOIN TB_COMM_USR C
+			ON A.USR_CD = C.USR_CD
+			LEFT OUTER JOIN TB_OPEN_DS D
+			ON A.REF_DS_ID = D.DS_ID
+			WHERE 1 = 1
+
+			<isNotEmpty property="useYn">
+			AND A.USE_YN = #useYn#
+		</isNotEmpty>
+				
+			<isNotEmpty property="pubDttmTo">
+			AND A.PUB_YMD BETWEEN  TO_DATE(#pubDttmFrom:VARCHAR#,'YYYY-MM-DD') AND TO_DATE(#pubDttmTo:VARCHAR#,'YYYY-MM-DD') +1
+			</isNotEmpty>
+			
+			<isNotEmpty property="serVal">
+				<isEqual property="serSel" compareValue="NM">
+					AND A.PUB_NM LIKE '%'||#serVal#||'%'
+				</isEqual>
+				<isEqual property="serSel" compareValue="DS">
+					AND D.DS_NM LIKE '%'||#serVal#||'%'
+				</isEqual>
+				<isEqual property="serSel" compareValue="ALL">
+					AND
+					(
+					A.PUB_NM LIKE '%'||#serVal#||'%'
+					OR D.DS_NM LIKE '%'||#serVal#||'%'
+					)
+				</isEqual>
+			</isNotEmpty>
+					
+			<isNotEmpty property="langTag">
+				<isNotEqual property="langTag" compareValue="A">
+					AND A.LANG_TAG = #langTag#
+				</isNotEqual>
+			</isNotEmpty>
+			
+			<isNotEmpty property="orgNm">
+					AND B.ORG_NM = #orgNm#
+			</isNotEmpty>
+			ORDER BY A.PUB_DTTM DESC, A.SEQ ASC
+			
+			) T
+  	 )			 
+	<isNotEqual prepend="startPage" compareValue="0">
+		WHERE RN BETWEEN #startPage:NUMERIC# AND #endPage:NUMERIC#
+	</isNotEqual>
+	
+	
+	</select>
+	
+	<!-- TB_OPEN_PUBLISH 테이블없음 -->
+	<select id="OpenPublishDAO.selectOpenPublishListAllCnt" parameterClass="egovframework.admin.openinf.service.OpenPublish" resultClass="java.lang.Integer">
+		SELECT
+	COUNT(A.SEQ)
+
+		FROM TB_OPEN_PUBLISH A
+			LEFT OUTER JOIN
+			TB_COMM_ORG B
+			ON A.ORG_CD = B.ORG_CD
+			LEFT OUTER JOIN TB_COMM_USR C
+			ON
+			A.USR_CD = C.USR_CD
+			WHERE 1 = 1
+		<isNotEmpty property="useYn">
+			AND A.USE_YN = #useYn#
+		</isNotEmpty>
+				
+			<isNotEmpty property="pubDttmTo">
+			AND A.PUB_YMD BETWEEN  TO_DATE(#pubDttmFrom:VARCHAR#,'YYYY-MM-DD') AND TO_DATE(#pubDttmTo:VARCHAR#,'YYYY-MM-DD') +1
+			</isNotEmpty>
+			
+			<isNotEmpty property="serVal">
+				<isEqual property="serSel" compareValue="NM">
+					AND A.PUB_NM LIKE '%'||#serVal#||'%'
+				</isEqual>
+				<isEqual property="serSel" compareValue="DM">
+					AND D.DS_NM LIKE '%'||#serVal#||'%'
+				</isEqual>
+				<isEqual property="serSel" compareValue="ALL">
+					AND
+					(
+					AND A.PUB_NM LIKE '%'||#serVal#||'%'
+					OR D.DS_NM LIKE '%'||#serVal#||'%'
+					)
+				</isEqual>
+			</isNotEmpty>
+					
+			<isNotEmpty property="langTag">
+				<isNotEqual property="langTag" compareValue="A">
+					AND A.LANG_TAG = #langTag#
+				</isNotEqual>
+			</isNotEmpty>
+			
+			<isNotEmpty property="orgNm">
+					AND B.ORG_NM = #orgNm#
+			</isNotEmpty>
+			
+	</select>
+	
+	<!-- TB_OPEN_PUBLISH 테이블 없음 -->
+	<select id="OpenPublishDAO.selectOpenPublishOne" parameterClass="egovframework.admin.openinf.service.OpenPublish"	resultMap="OpenPublishOne">
+	SELECT
+	A.SEQ
+	,A.PUB_ID
+	,A.PUB_YY
+	,A.PUB_NM
+	,DECODE(A.LANG_TAG,'K','한글전용',	'E','영문전용','B','한/영모두') AS LANG_TAG
+	,A.PUB_YMD
+	,A.PUB_HHMM
+	,A.AUTO_YN
+	,A.PUB_EXP
+	<![CDATA[
+	,CASE WHEN TO_NUMBER(SUBSTR(A.PUB_HHMM,0,2)) < 10 THEN SUBSTR(A.PUB_HHMM,2,1) ELSE SUBSTR(A.PUB_HHMM,0,1) END AS PUB_HHMM 
+	]]>
+	,C.ORG_CD
+	,C.ORG_NM
+	,C.ORG_FULLNM
+	,D.USR_CD
+	,D.USR_NM
+	,D.USR_TEL
+	,A.REF_DS_ID
+	,A.REF_COL_ID
+	,F.COL_NM || ' (' || A.REF_COL_ID || ')' AS REF_COL_NM
+	,A.PUBOK_YN
+	,A.PUBOK_DTTM
+	,A.VIEW_CNT
+	, TO_CHAR(A.PUB_DTTM,'YYYY-MM-DD') AS PUB_DTTM
+	<![CDATA[
+	,CASE WHEN PUB_DTTM < SYSDATE THEN 'Y' ELSE 'N' END AS PUB_DTTM_CHECK 
+	]]>
+	,A.USE_YN
+	,A.REG_ID
+	,A.REG_DTTM
+	,A.UPD_ID
+	,A.UPD_DTTM
+	,E.DS_NM || ' (' || A.REF_DS_ID || ')' AS REF_DS_NM
+	FROM TB_OPEN_PUBLISH A
+	LEFT OUTER JOIN TB_COMM_ORG C
+	ON A.ORG_CD = C.ORG_CD
+	LEFT OUTER JOIN TB_COMM_USR D
+	ON A.USR_CD = D.USR_CD
+	LEFT OUTER JOIN TB_OPEN_DS E
+	ON A.REF_DS_ID = E.DS_ID
+	LEFT OUTER JOIN TB_OPEN_DSCOL F
+	ON A.REF_DS_ID = F.DS_ID
+	AND A.REF_COL_ID = F.COL_ID
+	WHERE F.SRC_COL_TYPE = 'DATE'
+	AND A.SEQ = #seq:NUMERIC#
+	
+	
+	</select>
+	
+	<!-- 담당자 확인 -->
+	<!-- TB_OPEN_PUBLISH 테이블없음 -->
+	<update id="OpenPublishDAO.openPublishPubOk" parameterClass="egovframework.admin.openinf.service.OpenPublish">
+		UPDATE TB_OPEN_PUBLISH SET 
+		PUB_NM = #pubNm#
+		,PUB_EXP = #pubExp#
+		,PUB_HHMM = #pubHhmm#
+		,PUB_DTTM = TO_DATE(#pubDttm#, 'YYYY-MM-DD')
+		,USE_YN = #useYn#
+		,PUBOK_YN = 'Y'
+		,PUBOK_DTTM = SYSDATE
+		,UPD_ID = #sessionUsrId#
+		,UPD_DTTM = SYSDATE
+		WHERE
+		PUB_ID = #pubId# AND 
+		PUB_YMD = #pubYmd#
+	</update>
+	
+	<!-- 공표자료 수정 -->
+	<!-- TB_OPEN_PUBLISH 테이블없음 -->
+	<update id="OpenPublishDAO.updateOpenPublish" parameterClass="egovframework.admin.openinf.service.OpenPublish">
+		UPDATE TB_OPEN_PUBLISH SET 
+		PUB_NM = #pubNm#
+		,PUB_EXP = #pubExp#
+		,PUB_HHMM = #pubHhmm#
+		,PUB_DTTM = TO_DATE(#pubDttm#, 'YYYY-MM-DD')
+		,USE_YN = #useYn#
+		,ORG_CD = #orgCd#
+		,USR_CD = #usrCd#
+		,UPD_ID = #sessionUsrId#
+		,UPD_DTTM = SYSDATE
+		WHERE
+		PUB_ID = #pubId# AND 
+		PUB_YMD = #pubYmd#
+	</update>
+	
+	
+	<!-- TB_OPEN_PUBLISH_FILE 테이블 없음 -->
+	<select id="OpenPublishDAO.openPublishFileList" parameterClass="egovframework.admin.openinf.service.OpenPublish" resultMap="OpenPublishFile" >
+		 SELECT A.SEQ,
+        A.FILE_SEQ,
+        A.SRC_FILE_NM,
+        A.SAVE_FILE_NM,
+        A.VIEW_FILE_NM,
+        A.FILE_EXT,
+        ROUND(A.FILE_SIZE/1024,0) AS FILE_SIZE,
+        A.USE_YN,
+        A.REG_ID,
+        A.REG_DTTM,
+        A.UPD_ID,
+        A.UPD_DTTM,
+        (SELECT NVL(MAX(FILE_SEQ),0) FROM TB_OPEN_PUBLISH_FILE WHERE SEQ=#seq#)AS MST_SEQ
+   FROM TB_OPEN_PUBLISH_FILE A LEFT OUTER JOIN TB_OPEN_PUBLISH B ON A.SEQ = B.SEQ
+		WHERE A.SEQ=#seq#
+	</select>  
+	  
+	 <!-- TB_OPEN_PUBLISH_FILE 테이블 없음 -->  
+	 <select id="OpenPublishDAO.openPublishFileListCnt" parameterClass="egovframework.admin.openinf.service.OpenPublish" resultClass="java.lang.Integer" >
+			SELECT COUNT(A.SEQ)
+		FROM TB_OPEN_PUBLISH_FILE A
+		LEFT OUTER JOIN
+		TB_OPEN_PUBLISH B
+		ON A.SEQ = B.SEQ
+	
+		WHERE A.SEQ=#seq#
+	</select>
+	
+	
+		<!-- 공표일정 리스트 조회 - 포털에서 사용 -->
+		<!-- TB_OPEN_PUBLISH_FILE 테이블 없음 -->
+	<select id="OpenPublishDAO.selectOpenPublishList"	parameterClass="egovframework.admin.openinf.service.OpenPublish" resultMap="OpenPublishList">
+			SELECT *
+  	FROM(
+  	 	SELECT ROWNUM AS RN, T.*
+  	 	FROM(
+			SELECT
+			A.SEQ
+			,A.PUB_ID
+			,A.PUB_NM
+			,D.DS_NM
+			<![CDATA[
+			,CASE WHEN A.FILE_CNT > 0 THEN 'Y' 
+			ELSE 'N' END AS FILE_YN
+			]]>
+			,A.FILE_CNT
+			,DECODE(A.LANG_TAG,'K','한글전용',	'E','영문전용','B','한/영모두') AS LANG_TAG
+			,TO_CHAR(A.PUB_DTTM,'YYYY-MM-DD hh24') AS PUB_DTTM
+			<!-- ,A.PUB_DTTM -->
+			,B.ORG_NM
+			,C.USR_NM
+			,A.AUTO_YN
+			,A.USE_YN
+			,A.VIEW_CNT
+			,A.PUB_YMD
+			,A.PUB_YY
+			FROM TB_OPEN_PUBLISH A
+			LEFT OUTER JOIN
+			TB_COMM_ORG B
+			ON A.ORG_CD = B.ORG_CD
+			LEFT OUTER JOIN TB_COMM_USR C
+			ON A.USR_CD = C.USR_CD
+			LEFT OUTER JOIN TB_OPEN_DS D
+			ON A.REF_DS_ID = D.DS_ID
+			WHERE 1 = 1
+			AND A.USE_YN = 'Y'
+			<!-- AND A.PUB_OK = 'Y' -->
+			
+			<isNotEmpty property="pubYy">
+			AND TO_CHAR(A.PUB_DTTM,'YYYY') = #pubYy#
+			</isNotEmpty>
+			<isEmpty property="pubYy">
+			AND TO_CHAR(A.PUB_DTTM,'YYYY') = SUBSTR(SYSDATE,0,4) 
+			</isEmpty>
+			
+			<isNotEmpty property="pubDttm">
+			<![CDATA[
+			AND	TO_DATE(A.PUB_DTTM,'YYYY-MM-DD hh24miss') <= TO_DATE(SYSDATE,'YYYY-MM-DD hh24miss')
+			]]>
+			</isNotEmpty>
+			
+			<isNotEmpty property="serVal">
+					AND A.PUB_NM LIKE '%'||#serVal#||'%'
+			</isNotEmpty>
+					
+			ORDER BY A.PUB_DTTM DESC, A.SEQ ASC
+		
+			) T
+  	 )			
+	
+	</select>
+	
+	<!-- TB_OPEN_PUBLISH_FILE 테이블 없음 -->
+	<select id="OpenPublishDAO.selectOpenPublishYearsList"	parameterClass="egovframework.admin.openinf.service.OpenPublish" resultClass="java.lang.String">
+	SELECT 
+	DISTINCT(SUBSTR(PUB_DTTM,0,4)) AS YEARS
+	FROM TB_OPEN_PUBLISH
+	ORDER BY YEARS
+	</select>
+		
+		
+		<!-- 관련 데이터셋과 동일한 ID를 가진 재정정보 목록 조회 -->	
+		<!-- TB_OPEN_PUBLISH_FILE 테이블 없음 -->
+	<select id="OpenPublishDAO.selectRefDsList"	parameterClass="egovframework.admin.openinf.service.OpenPublish" resultMap="RefDsList">
+	SELECT A.REF_DS_ID,
+	B.INF_NM,
+	B.INF_URL
+	FROM TB_OPEN_PUBLISH A
+	LEFT OUTER JOIN TV_OPEN_INF B
+	ON A.REF_DS_ID = B.DS_ID
+	WHERE A.SEQ = #seq#
+	</select>
+		
+		
+		<!-- 공표자료 조회수 증가 -->
+		<!-- TB_OPEN_PUBLISH_FILE 테이블 없음 -->
+	<update id="OpenPublishDAO.updateViewCnt" parameterClass="egovframework.admin.openinf.service.OpenPublish">
+		UPDATE TB_OPEN_PUBLISH SET 
+		VIEW_CNT = VIEW_CNT +1
+		WHERE
+		SEQ = #seq#
+	</update>
+		
+		 <!-- 공표자로 상세 조회 - 포탈에서 사용 -->
+		 <!-- TB_OPEN_PUBLISH_FILE 테이블 없음 -->
+		<select id="OpenPublishDAO.selectOpenPublishDetail" parameterClass="egovframework.admin.openinf.service.OpenPublish"	resultMap="OpenPublishOne">
+	SELECT
+	A.SEQ
+	,A.PUB_ID
+	,A.PUB_YY
+	,A.PUB_NM
+	,DECODE(A.LANG_TAG,'K','한글전용',	'E','영문전용','B','한/영모두') AS LANG_TAG
+	,A.PUB_YMD
+	,A.PUB_HHMM
+	,A.AUTO_YN
+	,A.PUB_EXP
+	<![CDATA[
+	,CASE WHEN TO_NUMBER(SUBSTR(A.PUB_HHMM,0,2)) < 10 THEN SUBSTR(A.PUB_HHMM,2,1) ELSE SUBSTR(A.PUB_HHMM,0,1) END AS PUB_HHMM 
+	]]>
+	,C.ORG_CD
+	,C.ORG_NM
+	,C.ORG_FULLNM
+	,D.USR_CD
+	,D.USR_NM
+	,D.USR_TEL
+	,A.REF_DS_ID
+	,A.REF_COL_ID
+	,F.COL_NM || ' (' || A.REF_COL_ID || ')' AS REF_COL_NM
+	,A.PUBOK_YN
+	,A.PUBOK_DTTM
+	,A.VIEW_CNT
+	, TO_CHAR(A.PUB_DTTM,'YYYY-MM-DD') AS PUB_DTTM
+	<![CDATA[
+	,CASE WHEN PUB_DTTM < SYSDATE THEN 'Y' ELSE 'N' END AS PUB_DTTM_CHECK 
+	]]>
+	,A.USE_YN
+	,A.REG_ID
+	,A.REG_DTTM
+	,A.UPD_ID
+	,A.UPD_DTTM
+	,E.DS_NM || ' (' || A.REF_DS_ID || ')' AS REF_DS_NM
+	,E.DS_NM AS REF_DS_NM
+	FROM TB_OPEN_PUBLISH A
+	LEFT OUTER JOIN TB_COMM_ORG C
+	ON A.ORG_CD = C.ORG_CD
+	LEFT OUTER JOIN TB_COMM_USR D
+	ON A.USR_CD = D.USR_CD
+	LEFT OUTER JOIN TB_OPEN_DS E
+	ON A.REF_DS_ID = E.DS_ID
+	LEFT OUTER JOIN TB_OPEN_DSCOL F
+	ON A.REF_DS_ID = F.DS_ID
+	AND A.REF_COL_ID = F.COL_ID
+	
+	<![CDATA[
+	WHERE	TO_DATE(A.PUB_DTTM,'YYYY-MM-DD hh24miss') <= TO_DATE(SYSDATE,'YYYY-MM-DD hh24miss')
+	]]>
+	
+	
+	AND A.SEQ = #seq#
+			
+	
+	</select>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		<!-- TB_OPEN_PUBLISH_FILE 테이블 없음 -->
+		<select id="OpenPublishDAO.getPublishFileSeq" parameterClass="egovframework.admin.openinf.service.OpenPublish" resultClass="java.lang.Integer">
+		SELECT NVL(MAX(FILE_SEQ),0)+1  
+		FROM TB_OPEN_PUBLISH_FILE
+	</select>
+	<!-- TB_OPEN_PUBLISH_FILE 테이블 없음 -->
+	<insert id="OpenPublishDAO.insertPublishFile" parameterClass="egovframework.admin.openinf.service.OpenPublish">
+		INSERT INTO TB_OPEN_PUBLISH_FILE
+			( SEQ, FILE_SEQ	, FILE_SIZE, SRC_FILE_NM, SAVE_FILE_NM, VIEW_FILE_NM, FILE_EXT,  REG_DTTM, UPD_ID, UPD_DTTM )
+		 VALUES 
+		 (#mstSeq#, #fileSeq#, #fileSize#, #srcFileNm#, #saveFileNm#, #viewFileNm#, #fileExt#, SYSDATE, #sessionUsrId#, SYSDATE			)
+	</insert>
+	<!-- TB_OPEN_PUBLISH_FILE 테이블 없음 -->
+	<update id="OpenPublishDAO.updatePublishFile" parameterClass="egovframework.admin.openinf.service.OpenPublish">
+		UPDATE TB_OPEN_PUBLISH_FILE
+		SET VIEW_FILE_NM = #viewFileNm#
+		WHERE SEQ = #mstSeq#
+		AND FILE_SEQ = #fileSeq#
+	</update>
+	<!-- TB_OPEN_PUBLISH_FILE 테이블 없음 -->
+	<update id="OpenPublishDAO.deletePublishFile" parameterClass="egovframework.admin.openinf.service.OpenPublish">
+		DELETE FROM TB_OPEN_PUBLISH_FILE
+		WHERE SEQ = #mstSeq#
+		AND FILE_SEQ = #fileSeq#
+	</update>
+		<!-- TB_OPEN_PUBLISH_FILE 테이블 없음 -->
+	<select id="OpenPublishDAO.getPublishFileCnt" parameterClass="egovframework.admin.openinf.service.OpenPublish" resultClass="java.lang.Integer">
+		SELECT COUNT(FILE_SEQ) 
+		FROM TB_OPEN_PUBLISH_FILE
+		WHERE SEQ = #mstSeq#
+	</select>
+		<!-- TB_OPEN_PUBLISH 테이블 없음 -->
+	<update id = "OpenPublishDAO.updatePublishFileCnt" parameterClass="egovframework.admin.openinf.service.OpenPublish">
+		UPDATE TB_OPEN_PUBLISH
+		SET FILE_CNT = #fileCnt#
+		WHERE SEQ = #mstSeq#
+	</update>
+	<!-- TB_OPEN_PUBLISH_FILE 테이블 없음 -->
+	<insert id="OpenPublishDAO.insertOpenpublishFile" parameterClass="egovframework.admin.openinf.service.OpenPublish">
+		INSERT INTO TB_OPEN_PUBLISH_FILE
+			(	SEQ, FILE_SEQ	, FILE_SIZE, SRC_FILE_NM, SAVE_FILE_NM, VIEW_FILE_NM, FILE_EXT, USE_YN, REG_ID, REG_DTTM, UPD_ID, UPD_DTTM )
+		 VALUES 
+		 ( #mstSeq#, #fileSeq#, #fileSize#, #srcFileNm#, #saveFileNm#, #viewFileNm#, #fileExt#, 'Y', #sessionUsrId#, SYSDATE, #sessionUsrId#, SYSDATE			)
+	</insert>
+	<!-- TB_OPEN_PUBLISH_FILE 테이블 없음 -->
+	<update id="OpenPublishDAO.updateOpenpublishFile" parameterClass="egovframework.admin.openinf.service.OpenPublish">
+		UPDATE TB_OPEN_PUBLISH_FILE
+		SET VIEW_FILE_NM = #viewFileNm#
+		WHERE 1=1
+		AND SEQ = #mstSeq#
+		AND FILE_SEQ = #fileSeq#
+	</update>
+	<!-- TB_OPEN_PUBLISH_FILE 테이블 없음 -->
+	<update id="OpenPublishDAO.deleteUpdateOpenPublishFile" parameterClass="egovframework.admin.openinf.service.OpenPublish">
+		UPDATE TB_OPEN_PUBLISH_FILE
+		SET DEL_YN = 'Y'
+		WHERE 1=1
+		AND SEQ = #mstSeq#
+		AND FILE_SEQ = #fileSeq#
+	</update>
+	<!-- TB_OPEN_PUBLISH_FILE 테이블 없음 -->
+	<select id="OpenPublishDAO.getFileCnt" parameterClass="egovframework.admin.openinf.service.OpenPublish" resultClass="java.lang.Integer">
+		SELECT COUNT(FILE_SEQ) 
+		FROM TB_OPEN_PUBLISH_FILE
+		WHERE USE_YN = 'Y'
+		AND SEQ = #mstSeq#
+	</select>
+	<!-- TB_OPEN_PUBLISH 테이블 없음 -->
+	<update id = "OpenPublishDAO.updateFileCnt" parameterClass="egovframework.admin.openinf.service.OpenPublish">
+		UPDATE TB_OPEN_PUBLISH
+		SET FILE_CNT = #fileCnt#
+		WHERE 1=1	
+		AND SEQ = #mstSeq#
+	</update>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<!-- TB_OPEN_PUBLISH_FILE 테이블 없음 -->
+	<select id="OpenPublishDAO.getFileSeq" parameterClass="egovframework.admin.openinf.service.OpenPublish" resultClass="java.lang.Integer">
+		SELECT NVL(MAX(FILE_SEQ),0)+1  
+		FROM TB_OPEN_PUBLISH_FILE
+	</select>
+		
+</sqlMap>
+

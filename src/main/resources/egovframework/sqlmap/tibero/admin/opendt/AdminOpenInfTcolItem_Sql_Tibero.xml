@@ -1,0 +1,353 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="InfTcolItem">
+	<typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+	<resultMap id="OpenInfTcolItemParList" class="egovframework.admin.opendt.service.OpenInfTcolItem">
+		<result column="ITEM_CD" property="itemCd" />
+		<result column="ITEM_NM" property="itemNm" />
+		<result column="ENG_ITEM_NM" property="itemNmEng" />
+		<result column="DT_NM" property="dtNm" />
+		<result column="DT_ID" property="dtId" />
+		<result column="USE_YN" property="useYn" />
+		<result column="ITEM_CD" property="itemCdCheck" />
+		<result column="V_ORDER" property="vOrder" />
+	</resultMap>
+	
+	<resultMap id="OpenInfTcolItemListTree" class="egovframework.admin.opendt.service.OpenInfTcolItem">
+		<result column="ITEM_CD" property="itemCd" />
+		<result column="ITEM_NM" property="itemNm" />
+		<result column="ITEM_LEVEL"      property="Level"   	     />
+		<result column="V_ORDER"      property="vOrder"   	     />
+		<result column="ITEM_CDPAR_ITEM_CD" property="itemCdPar" />
+		<result column="ITEM_NAV" property="itemNav" />
+		<result column="ITEM_LEVEL" property="itemLevel" />
+	</resultMap>
+	
+	<resultMap id="OpenInfTcolItemInfo" class="egovframework.admin.opendt.service.OpenInfTcolItem">
+		<result column="ITEM_CD" property="itemCd" />
+		<result column="ITEM_NM" property="itemNm" />
+		<result column="PAR_ITEM_CD" property="itemCdPar" />
+		<result column="ENG_ITEM_NM" property="itemNmEng" />
+		<result column="DUMMY_YN" property="dummyYn" />
+		<result column="UNIT_CD" property="unitCd" />
+		<result column="UNIT_SUB_CD" property="unitSubCd" />
+		<result column="ITEM_EXP" property="itemExp" />
+		<result column="ENG_ITEM_EXP" property="itemExpEng" />
+		<result column="USE_YN" property="useYn" />
+		<result column="DEFAULT_CHECK_YN" property="defaultCheckYn" />
+	</resultMap>
+	
+	<resultMap id="OpenInfTcolItemInfoPrnItemNm" class="egovframework.admin.opendt.service.OpenInfTcolItem">
+		<result column="ITEM_LVL" property="itemLvl" />                        
+		<result column="PRN_ITEM_NM" property="prnItemNm" />
+		<result column="PRN_ENG_ITEM_NM" property="prnItemNmEng" />
+	</resultMap>
+	
+	<!-- TB_OPEN_INF_TCOL_ITEM 안쓰는 테이블(DB에 없음 -->
+	
+	<select id="OpenInfTcolItemDAO.selectTcolItemParListAll" parameterClass="egovframework.admin.opendt.service.OpenInfTcolItem" resultMap="OpenInfTcolItemParList" >
+		SELECT *
+		  FROM(
+			SELECT ROWNUM AS RN, TB.*  
+			  FROM
+			  (           
+				SELECT    A.ITEM_CD
+							,A.ITEM_NM
+							,A.ENG_ITEM_NM
+							,B.DT_NM
+							,B.DT_ID
+							,A.USE_YN
+							,A.ITEM_CD AS ITEM_CD_CHECK
+							,A.V_ORDER
+				 FROM TB_OPEN_INF_TCOL_ITEM A
+				 LEFT OUTER JOIN TB_OPEN_DT B
+				   ON A.DT_ID = B.DT_ID
+				WHERE A.PAR_ITEM_CD IS NULL
+					<isNotEmpty property="useYn">
+						AND A.USE_YN = #useYn:CHAR#
+					</isNotEmpty>	
+					<isNotEmpty property="serVal">
+						<isEqual property="serSel" compareValue="DT">
+							 AND B.DT_NM LIKE '%'||#serVal#||'%'
+						</isEqual> 
+						<isEqual property="serSel" compareValue="NM">
+							 AND A.ITEM_NM LIKE '%'||#serVal#||'%'
+						</isEqual> 
+						<isEqual property="serSel" compareValue="ENG">
+							 AND A.ENG_ITEM_NM LIKE '%'||#serVal#||'%'      
+						</isEqual> 
+						<isEqual property="serSel" compareValue="ALL">
+							 AND
+							  (
+							 		B.DT_NM LIKE '%'||#serVal#||'%'      
+							 		OR A.ITEM_NM LIKE '%'||#serVal#||'%'
+							 		OR A.ENG_ITEM_NM LIKE '%'||#serVal#||'%'
+							 )
+						</isEqual>
+					</isNotEmpty>
+						ORDER  BY A.V_ORDER 	
+			)TB
+		)
+		<isNotEqual prepend="startPage" compareValue="0">
+			WHERE RN BETWEEN #startPage:NUMERIC# AND #endPage:NUMERIC#
+		</isNotEqual>
+	</select>
+	
+	<select id="OpenInfTcolItemDAO.selectTcolItemParListAllCnt" parameterClass="egovframework.admin.opendt.service.OpenInfTcolItem" resultClass="java.lang.Integer">
+				SELECT    COUNT(1) AS CNT
+				 FROM TB_OPEN_INF_TCOL_ITEM A
+				 LEFT OUTER JOIN TB_OPEN_DT B
+				   ON A.DT_ID = B.DT_ID
+				WHERE A.PAR_ITEM_CD IS NULL
+					<isNotEmpty property="useYn">
+						AND A.USE_YN = #useYn:CHAR#
+					</isNotEmpty>	
+					<isNotEmpty property="serVal">
+						<isEqual property="serSel" compareValue="DT">
+							 AND B.DT_NM LIKE '%'||#serVal#||'%'
+						</isEqual> 
+						<isEqual property="serSel" compareValue="NM">
+							 AND A.ITEM_NM LIKE '%'||#serVal#||'%'
+						</isEqual> 
+						<isEqual property="serSel" compareValue="ENG">
+							 AND A.ENG_ITEM_NM LIKE '%'||#serVal#||'%'      
+						</isEqual> 
+						<isEqual property="serSel" compareValue="ALL">
+							 AND
+							  (
+							 		B.DT_NM LIKE '%'||#serVal#||'%'      
+							 		OR A.ITEM_NM LIKE '%'||#serVal#||'%'
+							 		OR A.ENG_ITEM_NM LIKE '%'||#serVal#||'%'
+							 )
+						</isEqual>
+					</isNotEmpty>
+	</select>
+	
+	
+	<update id="OpenInfTcolItemDAO.mergeInto" parameterClass="egovframework.admin.opendt.service.OpenInfTcolItem" >
+		MERGE INTO TB_OPEN_INF_TCOL_ITEM A
+		USING(
+				SELECT #itemCd#         AS ITEM_CD
+					  ,#itemCdPar#	    AS PAR_ITEM_CD
+					  ,#itemNm#    	   	AS ITEM_NM
+					  ,#itemNmEng#		AS ENG_ITEM_NM
+					  ,#dtId# 	  		AS DT_ID
+					  <isNotEmpty property="vOrder">
+							,#vOrder#		  	AS V_ORDER
+						</isNotEmpty>	
+					   <isNotEmpty property="dummyYn">
+						  	,#dummyYn# 		AS DUMMY_YN
+						</isNotEmpty>	
+					  ,#unitCd#			AS UNIT_CD
+					  ,#unitSubCd#      AS UNIT_SUB_CD
+					  ,#itemExp#  		AS ITEM_EXP 
+					  ,#itemExpEng#   	AS ENG_ITEM_EXP
+					  ,#useYn#			AS USE_YN
+					  ,#sessionUsrId#  	AS REG_ID 
+					  ,SYSDATE         	AS REG_DTTM
+					  ,#sessionUsrId#  	AS UPD_ID
+					  ,SYSDATE         	AS UPD_DTTM  
+					  ,#prnItemNm#     AS PRN_ITEM_NM
+					  ,#prnItemNmEng# AS PRN_ENG_ITEM_NM
+					  ,#itemLvl#           AS ITEM_LVL
+					  <isNotEmpty property="defaultCheckYn">
+					  	 ,#defaultCheckYn# AS DEFAULT_CHECK_YN
+					  </isNotEmpty>
+				  FROM DUAL
+			)B
+		ON ( A.ITEM_CD = B.ITEM_CD)
+		WHEN MATCHED THEN
+		UPDATE SET
+				 A.PAR_ITEM_CD 	= B.PAR_ITEM_CD              
+				,A.ITEM_NM		= B.ITEM_NM
+				,A.ENG_ITEM_NM	= B.ENG_ITEM_NM
+				,A.DT_ID		= B.DT_ID
+				<isNotEmpty property="vOrder">
+						,A.V_ORDER		= B.V_ORDER
+				</isNotEmpty>
+				<isNotEmpty property="dummyYn">
+						,A.DUMMY_YN		= B.DUMMY_YN
+				</isNotEmpty>
+				,A.UNIT_CD		= B.UNIT_CD
+				,A.UNIT_SUB_CD = B.UNIT_SUB_CD
+				,A.ITEM_EXP 	= B.ITEM_EXP 
+				,A.ENG_ITEM_EXP	= B.ENG_ITEM_EXP
+				,A.USE_YN		= B.USE_YN
+				,A.UPD_ID 		= B.UPD_ID
+				,A.UPD_DTTM 	= B.UPD_DTTM
+				,A.PRN_ITEM_NM = B.PRN_ITEM_NM
+				,A.PRN_ENG_ITEM_NM = B.PRN_ENG_ITEM_NM
+				,A.ITEM_LVL = B.ITEM_LVL
+				<isNotEmpty property="defaultCheckYn">
+						,A.DEFAULT_CHECK_YN = B.DEFAULT_CHECK_YN
+				</isNotEmpty>
+		WHEN NOT MATCHED THEN
+		INSERT 
+		(
+			 A.ITEM_CD
+            ,A.PAR_ITEM_CD
+            ,A.ITEM_NM
+            ,A.ENG_ITEM_NM
+            ,A.DT_ID
+            <isNotEmpty property="vOrder">
+				,A.V_ORDER
+			</isNotEmpty>
+            <isNotEmpty property="dummyYn">
+				,A.DUMMY_YN
+			</isNotEmpty>
+            ,A.UNIT_CD
+            ,A.UNIT_SUB_CD
+            ,A.ITEM_EXP 
+            ,A.ENG_ITEM_EXP
+            ,A.USE_YN
+            ,A.REG_ID 
+            ,A.REG_DTTM	
+            ,A.UPD_ID 
+            ,A.UPD_DTTM	
+            ,A.PRN_ITEM_NM
+            ,A.PRN_ENG_ITEM_NM
+            ,A.ITEM_LVL
+            <isNotEmpty property="defaultCheckYn">
+					 ,A.DEFAULT_CHECK_YN
+			</isNotEmpty>
+		)VALUES
+		(
+			B.ITEM_CD
+            ,B.PAR_ITEM_CD
+            ,B.ITEM_NM
+            ,B.ENG_ITEM_NM
+            ,B.DT_ID
+           <isNotEmpty property="vOrder">
+				,B.V_ORDER
+			</isNotEmpty>
+            <isNotEmpty property="dummyYn">
+				,B.DUMMY_YN
+			</isNotEmpty>
+            ,B.UNIT_CD
+            ,B.UNIT_SUB_CD
+            ,B.ITEM_EXP          
+            ,B.ENG_ITEM_EXP
+            ,B.USE_YN
+            ,B.REG_ID 
+            ,B.REG_DTTM		
+            ,B.UPD_ID 
+            ,B.UPD_DTTM	
+            ,B.PRN_ITEM_NM
+            ,B.PRN_ENG_ITEM_NM
+            ,B.ITEM_LVL	
+            <isNotEmpty property="defaultCheckYn">
+				 ,B.DEFAULT_CHECK_YN
+			</isNotEmpty>
+		)
+	</update>
+	
+	<select id="OpenInfTcolItemDAO.selectOpenInfTcolOrderBy" parameterClass="egovframework.admin.opendt.service.OpenInfTcolItem" resultClass="java.lang.Integer" >
+		SELECT  
+				 NVL(MAX(V_ORDER),0)+1 AS V_ORDER
+		  FROM TB_OPEN_INF_TCOL_ITEM
+		 WHERE PAR_ITEM_CD= #itemCdPar#
+	</select>
+	
+	<select id="OpenInfTcolItemDAO.selectOpenInfTcolParOrderBy" parameterClass="egovframework.admin.opendt.service.OpenInfTcolItem" resultClass="java.lang.Integer" >
+		SELECT  
+				 NVL(MAX(V_ORDER),0)+1 AS V_ORDER
+		  FROM TB_OPEN_INF_TCOL_ITEM
+		 WHERE PAR_ITEM_CD IS NULL
+	</select>
+	
+	<update id="OpenInfTcolItemDAO.delete" parameterClass="egovframework.admin.opendt.service.OpenInfTcolItem" >
+		<![CDATA[
+		DELETE FROM TB_OPEN_INF_TCOL_ITEM A
+		WHERE EXISTS
+		(
+			SELECT 1
+			  FROM TB_OPEN_INF_TCOL_ITEM B
+			 WHERE 1=1 
+			   AND A.ITEM_CD = B.ITEM_CD
+			  START WITH ITEM_CD = #itemCd#
+			CONNECT BY PRIOR ITEM_CD = PAR_ITEM_CD
+		)
+		]]>
+	</update>
+	
+	<select id="OpenInfTcolItemDAO.selectCheckDup" parameterClass="egovframework.admin.opendt.service.OpenInfTcolItem" resultClass="java.lang.Integer">
+				SELECT COUNT(1) AS CNT
+			     FROM TB_OPEN_INF_TCOL_ITEM
+ 			   WHERE ITEM_CD = #itemCd#
+	</select>
+	
+	<select id="OpenInfTcolItemDAO.selectTcolItemListTree" parameterClass="egovframework.admin.opendt.service.OpenInfTcolItem" resultMap="OpenInfTcolItemListTree" >
+		SELECT ITEM_CD
+		        ,ITEM_NM
+		        ,LEVEL-1 AS ITEM_LEVEL
+		        ,V_ORDER
+		        ,PAR_ITEM_CD
+		        ,SUBSTR(SYS_CONNECT_BY_PATH(ITEM_NM, ' > '),4) AS ITEM_NAV
+		  FROM TB_OPEN_INF_TCOL_ITEM
+		 WHERE 1=1		
+		 <isNotEmpty property="useYn">
+			AND USE_YN = #useYn#
+		</isNotEmpty>	             
+		  START WITH ITEM_CD = #itemCd#
+		CONNECT BY PRIOR ITEM_CD = PAR_ITEM_CD
+		ORDER SIBLINGS BY V_ORDER
+	</select>
+	
+	<update id="OpenInfTcolItemDAO.updateOrderby" parameterClass="egovframework.admin.opendt.service.OpenInfTcolItem" >
+		<![CDATA[
+		UPDATE TB_OPEN_INF_TCOL_ITEM A SET A.V_ORDER=#vOrder#
+		WHERE ITEM_CD = #itemCd#        
+		]]>
+	</update>
+	
+	<update id="OpenInfTcolItemDAO.updateUseYn" parameterClass="egovframework.admin.opendt.service.OpenInfTcolItem" >
+		<![CDATA[
+		UPDATE TB_OPEN_INF_TCOL_ITEM A SET A.USE_YN=#useYn#
+		WHERE EXISTS
+		(
+			SELECT 1
+			  FROM TB_OPEN_INF_TCOL_ITEM B
+			 WHERE 1=1 
+			   AND A.ITEM_CD = B.ITEM_CD
+			  START WITH ITEM_CD = #itemCd#
+			CONNECT BY PRIOR ITEM_CD = PAR_ITEM_CD
+		)
+		]]>
+	</update>
+	
+	<select id="OpenInfTcolItemDAO.selectOpenInfTcolItemList" parameterClass="egovframework.admin.opendt.service.OpenInfTcolItem" resultMap="OpenInfTcolItemInfo" >
+		SELECT  
+				 ITEM_CD
+		        ,ITEM_NM
+		        ,PAR_ITEM_CD
+		        ,ENG_ITEM_NM
+		        ,DUMMY_YN
+		        ,UNIT_CD
+		        ,UNIT_SUB_CD
+		        ,ITEM_EXP
+		        ,ENG_ITEM_EXP
+				,USE_YN
+				,DEFAULT_CHECK_YN
+		  FROM TB_OPEN_INF_TCOL_ITEM
+		 WHERE ITEM_CD=#itemCd#
+	</select>
+	
+	
+	<select id="OpenInfTcolItemDAO.selectOpenInfTcolItemPrnItemNm" parameterClass="egovframework.admin.opendt.service.OpenInfTcolItem" resultMap="OpenInfTcolItemInfoPrnItemNm" >
+		SELECT  
+				 PRN_ITEM_NM
+                ,PRN_ENG_ITEM_NM
+                ,ITEM_LVL+1 AS ITEM_LVL
+		  FROM TB_OPEN_INF_TCOL_ITEM
+		 WHERE ITEM_CD=#itemCdPar#
+	</select>
+	
+	<update id="OpenInfTcolItemDAO.updateParItemNm" parameterClass="egovframework.admin.opendt.service.OpenInfTcolItem" >
+		<![CDATA[
+		UPDATE TB_OPEN_INF_TCOL_ITEM A SET PRN_ITEM_NM=#prnItemNm#, PRN_ENG_ITEM_NM =#prnItemNmEng# 
+		WHERE ITEM_CD=#itemCd#
+		]]>
+	</update>
+	
+</sqlMap>

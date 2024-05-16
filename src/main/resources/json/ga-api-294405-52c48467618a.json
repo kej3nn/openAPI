@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "ga-api-294405",
+  "private_key_id": "52c48467618af14ff7f2d06ea2300144a086543e",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDPdY7KJEowy28O\nUkjBSF5oVOtlJRJjz01qa5Isx8NJc69BommJRkyVLx3cplIvqKAL6CLhAA4l7wwv\nXha5fKvNv+AU/Scasj0l8BnrzNpsPXSianGibYf1jAbgrfHxUoAyXoVBzDU3UzsW\nyPMWzgNX/Akrpkzk/vU7FGaacJ+u8vGV7XcSw+ikZehy0g1DJxJe1Pv7pyZn02BC\nTIj0viDUVGvv8WldpJejsZmaWsfXDm1iukTmhuV5HLcSOLI/k/xLI8zu/POScPQ5\nuJ5JQ9fbqzsZxtmLK2wdcjkr4pm76OjM2d42if+lhfqS5aMYFoMnDAMfI/I2aNJJ\n7kES4mvdAgMBAAECggEAOZCsK2kAcSOx0C6C46b6E0ck/i7YOHvIRnRM3kIb7SC9\ni5/OWvn3vBmT1qsL+Q94QXWLYBWM13fKUMZx1cxDO9c3DXvlQuIcV4+VEboJDanL\n2Fli6Kgt5rORIP0DOmwjCFbz8PsB9TUSG1NtKHHHub1Eqij+Azi/wUH66nW/yWI9\nrwpD8+oNw60roFKUxgA+P1cS4bZjTdcuCSA3iS2miazqjnsEaKA8MH7wvSTlNfQd\nXwMda+2l+OrE0IzPbvbtleg4yoUuw05X0BzRdsqx7I3GfxrSoUUhKquEr9oPk/xp\nLz7/XtM9jbCa1m93MuD5yqsGtz7wjMnLNQuoVF31XQKBgQD9gxyIpbWYRqptnRAz\nfryD3FRy4Tqp3KEvjZHzilEbIeuzJZr1YfsLrOii+OmluAp1rZZQObZzKSqh5dcg\nHigL1KRaqWjs3jjLEjuvxBkfm9m9PYYyTcetLq2PG2EahVdz0wzdxqXI7449AKjo\nNAGH3kY3KI+v0eZk7tgfNiDzEwKBgQDRfr/TxlJMgz/5LIc6/hsSSAiXge6ed6ZN\ns46Ny1GlO6id04lNfGui5mzSl0h47OUXS7iUjZNAvMEqw4lz5SopS9TfhGDkgLVL\nV5idNr0aGUc8Rlm3DC2OJIyBBfOE1/Br7cMN5c91Rbmt5wIEjcjBoLB99KtgpimK\nquE82T8TTwKBgQDFQamIIfhk3kdqNxYOG4UvzNbg9KOi3AuHZs60A2IMjJ5LrO0g\nFfczJH13odqbmdJ5snINRnrSrKuBgcecNBrQ6cpgyQTdmiPyzuMmZp1t3OTVvPOY\nXLEL7hAaFCHAcxSTCRsvzYveB5hTmxnSY/T09V0JOkRjeB2fV8FOt913hQKBgCan\nOEWexfiQDvGuoZTk5aHN4KfztU9PzENx6c+HwBy4kTftm9vMJR/9W/7PIvQM4YgW\n1Iu0Q4MiUJHPWkEj+097Sl+jUS1YAhtQojv/qYxzNY2NfWgkuxMK81GrA29zWEzR\npbeeu1Rr9QJ9KQYmEvCG8YmL50MB5ZBMTxqnCthJAoGAdzLr0ol83RgmvZcvDbgI\nIG06Y+EhmwK9PKtrF5/gE4zi4QzkbWrhEqtNHRd4vq88WvOztlFwmQEzE/QRUfF8\nUtzY3C3hbQBes8Jy4Sw0QHf9QP3Luu/E2fva7dtf8HIAj9LErtjZq6Sb0X+MzBZy\ni6Q4s3U9r/Z0+7L5sxgJuSA=\n-----END PRIVATE KEY-----\n",
+  "client_email": "openassembly@ga-api-294405.iam.gserviceaccount.com",
+  "client_id": "107103820653859237766",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/openassembly%40ga-api-294405.iam.gserviceaccount.com"
+}

@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="portalMailing">
+	<typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+	
+	<!-- 인기공개정보 조회 -->
+	<select id="portalMailingDao.selectPplrInfoRank" parameterClass="Params" resultClass="record">
+		/* sql id : portalMainDao.selectPplrInfoRank */
+		SELECT INFA_NM		AS "infaNm",
+			   OPENTY_TAG	AS "opentyTag",
+			   INFA_ID		AS "infaId"
+		FROM   (
+				SELECT INFA_NM, OPENTY_TAG, INFA_ID,
+					RANK() OVER(ORDER BY VIEW_CNT DESC) VIEW_CNT_RANK
+					, VIEW_CNT
+				FROM  TV_INFA_LIST
+				)
+		<![CDATA[
+		WHERE VIEW_CNT_RANK <= 10
+		]]>	
+	</select>
+	
+	<!-- 국회문화 행사 리스트 조회 -->
+	<select id="portalMailingDao.selectCultureList" parameterClass="Params" resultClass="record">
+		/* sql id : portalMailingDao.selectCultureList */
+		  SELECT AA.*
+			FROM
+				(
+					SELECT
+						ROWNUM AS RN
+					   , ARTICLE_TITLE     AS "articleTitle"
+	                   , DT                AS "dt"
+	                   , ETC_CHAR11        AS "place"
+	                   , LINK_URL          AS "linkUrl" 
+	                   , IMAGE_URL         AS "imageUrl"	
+					FROM
+						TV_NACULTURE A
+				) AA
+			WHERE RN <![CDATA[<= ]]> 3	
+	</select>
+	
+	<!-- 날짜 조회 -->
+	<select id="portalMailingDao.selectWeekDateList" parameterClass="Params" resultClass="record">		
+		/* sql id : portalMailingDao.selectWeekDateList */
+		SELECT   MIN(DAY) AS "strDt"
+			     , MAX(DAY) AS "endDt"
+			FROM 
+			<![CDATA[
+			  (SELECT TO_CHAR(TO_DATE(BB.DAY, 'YYYYMMDD') + NUM-1, 'YYYY-MM-DD') AS DAY 
+			    FROM 
+			         (SELECT ROWNUM AS NUM 
+			           FROM DICTIONARY A,
+			                (SELECT B.DAY AS BDAY, 
+			                       C.DAY AS CDAY 
+			                  FROM 
+			                       (SELECT TO_CHAR(SYSDATE - TO_NUMBER(TO_CHAR(SYSDATE,'D')) + 1,'YYYYMMDD') AS DAY 
+			                         FROM DUAL 
+			                       ) B, 
+			                       (SELECT TO_CHAR(SYSDATE - TO_NUMBER(TO_CHAR(SYSDATE,'D')) + 7,'YYYYMMDD') AS DAY 
+			                         FROM DUAL 
+			                       ) C 
+			                ) B 
+			          WHERE ROWNUM <= TO_DATE(B.CDAY, 'YYYYMMDD') - TO_DATE(B.BDAY, 'YYYYMMDD') + 1
+			         ) AA, 
+			         (SELECT TO_CHAR(SYSDATE - TO_NUMBER(TO_CHAR(SYSDATE,'D')) + 1,'YYYYMMDD') AS DAY 
+			           FROM DUAL 
+			         ) BB
+			 ) 
+			 ]]>
+	</select>	
+	
+	<!-- 국회 일정 조회 -->
+	<select id="portalMailingDao.selectNaScheduleList" parameterClass="Params" resultClass="record">
+		/* sql id : portalMailingDao.selectNaScheduleList */
+		SELECT GUBUN AS "gubun" , 
+		       GUBUN_NM "gubunNm", 
+		       COUNT(MEETINGSESSION) AS "cnt"
+		  FROM TV_ASSEM_SCHEDULE A 
+		 WHERE 1=1
+ 		<isNotEmpty property="strDt" prepend=" AND ">
+			<![CDATA[ MEETTING_DATE >= #strDt:VARCHAR# ]]>
+		</isNotEmpty>
+		<isNotEmpty property="endDt" prepend=" AND ">
+			<![CDATA[ MEETTING_DATE <= #endDt:VARCHAR# ]]> 
+		</isNotEmpty> 
+		 GROUP BY GUBUN, GUBUN_NM 
+	</select>	
+	
+</sqlMap>

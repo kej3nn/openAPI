@@ -1,0 +1,1573 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="OpenInfScol" >
+  <typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+  
+   <resultMap id="OpenInfCol" class="egovframework.admin.service.service.OpenInfScol" >
+     <result column="STATUS"        property="status"                />
+    <result column="INF_ID"        property="infId"                />
+	<result column="INF_SEQ"       property="infSeq"               />
+	<result column="COL_SEQ"       property="colSeq"               />
+	<result column="COL_ID"        property="colId"               />
+	<result column="COL_NM"        property="colNm"            />
+	<result column="VIEW_CD"       property="viewCd"               />
+	<result column="ALIGN_TAG"     property="alignTag"             />
+	<result column="VIEW_SIZE"     property="viewSize"             />
+	<result column="SORT_TAG"      property="sortTag"             />
+	<result column="VIEW_YN"       property="viewYn"               />
+	<result column="USE_YN"        property="useYn"                />               
+	<result column="V_ORDER"        property="vOrder"                />
+	<result column="DOWN_YN"        property="downYn"                />
+	<result column="SOPT_SET"        property="soptSet"                />
+	</resultMap>
+	
+				 
+	 <resultMap id="OpenInfColOptPop" class="egovframework.admin.service.service.OpenInfScol" >
+		<result column="INF_NM"          property="infNm"        />            
+		<result column="INF_ID"        property="infId"                />
+		<result column="INF_SEQ"       property="infSeq"               />
+		<result column="SRV_CD"       property="srvCd"               />
+		<result column="OWNER_CD"        property="ownerCd"      />
+		<result column="DS_ID"           property="dsId"         />
+		<result column="DS_NM"           property="dsNm"         />
+		<result column="COL_ID"        property="colId"               />
+		<result column="SRC_COL_ID"        property="srcColId"               />
+		<result column="COL_NM"        property="colNm"            />
+		<result column="COL_SEQ"       property="colSeq"               />
+		<result column="COND_YN"         property="condYn"       />           
+		<result column="COND_OP"         property="condOp"       />
+		<result column="COND_VAR"        property="condVar"      />
+		<result column="FILT_YN"         property="filtYn"       />
+		<result column="FILT_CD"         property="filtCd"       />
+		<result column="FILT_MAX_DAY"    property="filtMaxDay"   />
+		<result column="FILT_TBL_CD"     property="filtTblCd"    />
+		<result column="FILT_CODE"       property="filtCode"     />
+		<result column="FILT_DEFAULT"    property="filtDefault"  />
+		<result column="FILT_NEED"       property="filtNeed"     />
+		<result column="FILT_DEFAULT1"    property="filtDefault1"  />
+		<result column="FILT_NEED1"       property="filtNeed1"     />
+		<result column="FILT_DEFAULT2"    property="filtDefault2"  />
+		<result column="FILT_NEED2"       property="filtNeed2"     />
+	</resultMap>
+	
+	 <resultMap id="OpenInfColView" class="egovframework.admin.service.service.OpenInfScol" >
+	 	<result column="INF_SEQ"        property="infSeq"               />
+		<result column="COL_NM"        property="colNm"               />
+		<result column="SRC_COL_ID"        property="srcColId"            />
+		<result column="VIEW_CD"       property="viewCd"               />
+		<result column="ALIGN_TAG"     property="alignTag"             />
+		<result column="VIEW_SIZE"     property="viewSize"             />
+		<result column="SORT_TAG"      property="sortTag"             />
+		<result column="FORMAT_TEXT"      property="formatText"          />                     
+		<result column="ELLIPSIS_TEXT"      property="ellipsisText"             />
+		<result column="ALLOW_NULL"      property="allowNull"             />
+		</resultMap>
+		
+		<resultMap id="OpenInfColView2" class="egovframework.admin.service.service.OpenInfScol" >
+		<result column="SRC_COL_ID"        property="srcColId"            />
+		<result column="VIEW_CD"       property="viewCd"               />
+		<result column="VIEW_SIZE"       property="viewSize"               />
+		<result column="ALIGN_TAG"     property="alignTag"             />
+		</resultMap>
+		
+	<resultMap id="OpenInfColFilt" class="egovframework.admin.service.service.OpenInfScol" >
+		<result column="COL_NM"        property="colNm"               />
+		<result column="SRC_COL_ID"        property="srcColId"            />
+		<result column="FILT_YN"         property="filtYn"       />
+		<result column="FILT_CD"         property="filtCd"       />
+		<result column="FILT_MAX_DAY"    property="filtMaxDay"   />
+		<result column="FILT_TBL_CD"     property="filtTblCd"    />
+		<result column="FILT_CODE"       property="filtCode"     />
+		<result column="FILT_DEFAULT"    property="filtDefault"  />
+		<result column="FILT_DEFAULT_NM"    property="filtDefaultNm"  />
+		<result column="FILT_NEED"       property="filtNeed"     />
+		<result column="V_ORDER"        property="vOrder"                />
+	</resultMap>
+	
+	<resultMap id="OpenInfColFiltDtl" class="egovframework.admin.service.service.OpenInfScol" >
+		<result column="SRC_COL_ID"        property="srcColId"            />
+		<result column="COL_NM"       property="filtCode"     />
+		<result column="DITC_CD"       property="ditcCd"     />
+		<result column="DITC_NM"       property="ditcNm"     />
+	</resultMap>
+	
+	<resultMap id="OpenInfColCond" class="egovframework.admin.service.service.OpenInfScol" >
+		<result column="SRC_COL_ID"        property="srcColId"            />
+		<result column="COND_OP"       property="condOp"     />
+		<result column="COND_VAR"       property="condVar"     />
+	</resultMap>
+	
+	<resultMap id="OpenInfColOrderby" class="egovframework.admin.service.service.OpenInfScol" >
+		<result column="SRC_COL_ID"        property="srcColId"            />
+		<result column="SORT_TAG"       property="sortTag"     />
+	</resultMap>
+	 
+	 <resultMap id="OpenInfColOFsYn" class="egovframework.admin.service.service.OpenInfScol" >
+		<result column="FS_YN"        property="fsYn"            />
+		<result column="FS_CD"       property="fsCd"     />
+	</resultMap>
+	
+	<select id="OpenInfScolDAO.selectOpenInfColList" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultMap="OpenInfCol" >
+			SELECT 
+						CASE WHEN C.COL_SEQ IS NOT NULL THEN ''
+						ELSE 'I' END AS STATUS,
+		                 A.INF_ID,
+		                 A.INF_SEQ,
+		                 B.COL_SEQ,
+		                 <!-- 
+		                 CASE C.V_ORDER WHEN 0 THEN B.V_ORDER
+			       		 					  WHEN NULL THEN B.V_ORDER
+		                 ELSE B.V_ORDER END AS V_ORDER, -->
+		                 DECODE(C.V_ORDER, 0, B.V_ORDER, C.V_ORDER) AS V_ORDER,
+		                 B.COL_ID,
+		                 B.COL_NM,
+			             NVL(C.VIEW_CD,'Text') AS VIEW_CD,
+			       		 C.ALIGN_TAG,
+			       		 NVL(C.VIEW_SIZE,100) AS VIEW_SIZE,
+			       		 C.SORT_TAG,           
+			       		 NVL(C.VIEW_YN,'N') AS VIEW_YN,
+			       		 NVL(C.USE_YN,'Y') AS USE_YN,
+			       		 NVL(C.DOWN_YN,'N') AS DOWN_YN,
+			       		 DECODE(C.FILT_YN, 'Y', '사용중', '') AS SOPT_SET 
+		           FROM TV_MNG_INF_SRV A
+		         INNER JOIN TB_OPEN_DSCOL B
+		            ON A.DS_ID = B.DS_ID
+		          AND B.USE_YN ='Y'
+		         LEFT OUTER JOIN TB_OPEN_INF_SCOL C
+		           ON A.INF_ID = C.INF_ID
+		          AND A.INF_SEQ = C.INF_SEQ
+		          AND B.COL_SEQ = C.COL_SEQ
+		        WHERE A.INF_ID= #infId:VARCHAR#
+			      AND A.SRV_CD =#srvCd:VARCHAR#
+			      AND A.DS_USE_YN ='Y'
+		        ORDER BY C.V_ORDER  
+	</select>
+	
+	<update id="OpenInfScolDAO.mergeIntoCol" parameterClass="egovframework.admin.service.service.OpenInfScol" >
+		<![CDATA[
+		MERGE INTO TB_OPEN_INF_SCOL A
+		USING(
+				SELECT #infId:VARCHAR#         	AS INF_ID
+					  ,#infSeq:NUMERIC#	       	AS INF_SEQ
+					  ,#colSeq:NUMERIC#        	AS COL_SEQ
+					  ,#vOrder:NUMERIC#			AS V_ORDER
+					  ,#viewCd:VARCHAR# 	  	AS VIEW_CD
+					  ,#alignTag:CHAR#	  	AS ALIGN_TAG
+					  ,#viewSize:NUMERIC# 		AS VIEW_SIZE
+					  ,#sortTag:CHAR#		AS SORT_TAG
+					  ,#viewYn:CHAR#			AS VIEW_YN
+					  ,#useYn:CHAR#			AS USE_YN
+					  ,#sessionUsrId:VARCHAR#  	AS REG_ID 
+					  ,SYSDATE         	AS REG_DTTM
+					  ,#sessionUsrId:VARCHAR#  	AS UPD_ID
+					  ,SYSDATE         	AS UPD_DTTM  
+					  ,#downYn:CHAR#			AS DOWN_YN
+				  FROM DUAL
+			)B
+		ON ( A.INF_ID = B.INF_ID AND A.INF_SEQ = B.INF_SEQ AND A.COL_SEQ =B.COL_SEQ)
+		WHEN MATCHED THEN
+		UPDATE SET
+				A.V_ORDER = B.V_ORDER
+				,A.VIEW_CD = B.VIEW_CD
+				,A.ALIGN_TAG = B.ALIGN_TAG
+				,A.VIEW_SIZE = B.VIEW_SIZE
+				,A.SORT_TAG = B.SORT_TAG
+				,A.VIEW_YN = B.VIEW_YN
+				,A.USE_YN = B.USE_YN
+				,A.UPD_ID = B.UPD_ID
+				,A.UPD_DTTM = B.UPD_DTTM
+				,A.DOWN_YN = B.DOWN_YN
+		WHEN NOT MATCHED THEN
+		INSERT 
+		(
+			A.INF_ID
+			,A.INF_SEQ
+			,A.COL_SEQ
+			,A.V_ORDER
+			,A.VIEW_CD
+			,A.ALIGN_TAG
+			,A.VIEW_SIZE
+			,A.SORT_TAG
+			,A.VIEW_YN
+			,A.USE_YN
+			,A.REG_ID 
+			,A.REG_DTTM
+			,A.UPD_ID
+			,A.UPD_DTTM  
+			,A.DOWN_YN	
+		)VALUES
+		(
+			 B.INF_ID
+			,B.INF_SEQ
+			,B.COL_SEQ
+			,B.V_ORDER
+			,B.VIEW_CD
+			,B.ALIGN_TAG
+			,B.VIEW_SIZE
+			,B.SORT_TAG
+			,B.VIEW_YN
+			,B.USE_YN
+			,B.REG_ID 
+			,B.REG_DTTM
+			,B.UPD_ID
+			,B.UPD_DTTM  	
+			,B.DOWN_YN
+		)
+		]]>
+	</update>
+	
+	<select id="OpenInfScolDAO.selectOpenInfColInfo" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultMap="OpenInfColOptPop" >
+			SELECT 
+					   A.INF_ID
+					  ,A.INF_SEQ 
+					  ,A.INF_NM
+					  ,A.SRV_CD
+		              ,A.OWNER_CD
+		              ,A.DS_ID
+		              ,A.DS_NM
+		              ,B.COL_ID
+		              ,B.SRC_COL_ID
+		              ,B.COL_NM
+		              ,B.COL_SEQ
+		              ,COND_YN
+		              ,COND_OP
+		              ,COND_VAR
+		              ,FILT_YN
+		              ,FILT_CD
+		              ,FILT_MAX_DAY
+		              ,FILT_TBL_CD
+		              ,FILT_CODE
+		              ,FILT_DEFAULT
+		              ,CASE FILT_CD WHEN 'CHECK' THEN FILT_DEFAULT
+		              					WHEN 'COMBO' THEN FILT_DEFAULT
+		              					WHEN 'RADIO' THEN FILT_DEFAULT
+		              	ELSE '' END FILT_DEFAULT1
+		              ,CASE FILT_CD WHEN 'POPUP' THEN FILT_DEFAULT
+		              	ELSE '' END FILT_DEFAULT2
+		              ,FILT_NEED
+		              ,CASE FILT_CD WHEN 'CHECK' THEN FILT_NEED
+		              					WHEN 'COMBO' THEN FILT_NEED
+		              					WHEN 'RADIO' THEN FILT_NEED
+		              	ELSE 'N' END FILT_NEED1
+		              ,CASE FILT_CD WHEN 'POPUP' THEN FILT_NEED
+		              	ELSE 'N' END FILT_NEED2
+		         FROM TV_MNG_INF_SRV A
+		         INNER JOIN TB_OPEN_DSCOL B
+		            ON A.DS_ID = B.DS_ID
+		           AND B.USE_YN ='Y'   
+		         LEFT OUTER JOIN TB_OPEN_INF_SCOL C
+		           ON A.INF_ID = C.INF_ID
+		          AND A.INF_SEQ = C.INF_SEQ
+		          AND B.COL_SEQ = C.COL_SEQ
+		         WHERE C.INF_ID=#infId:VARCHAR#
+		           AND C.INF_SEQ=#infSeq:NUMERIC#
+		           AND C.COL_SEQ=#colSeq# 
+	</select>
+	
+	<update id="OpenInfScolDAO.updateOpt" parameterClass="egovframework.admin.service.service.OpenInfScol" >
+		<![CDATA[
+		UPDATE TB_OPEN_INF_SCOL SET
+				COND_YN = #condYn:CHAR#
+				,COND_OP = #condOp:VARCHAR#
+				,COND_VAR =  #condVar:VARCHAR#
+				,FILT_YN = #filtYn:CHAR#
+				,FILT_CD = #filtCd:VARCHAR#
+				,FILT_MAX_DAY = NVL(#filtMaxDay:NUMERIC#,1)
+				,FILT_TBL_CD = #filtTblCd:VARCHAR#
+				,FILT_CODE = #filtCode:VARCHAR#
+				,FILT_DEFAULT = #filtDefault:VARCHAR#
+				,FILT_DEFAULT_NM = #filtDefaultNm:VARCHAR#
+				,FILT_NEED = NVL(#filtNeed:CHAR#,'N')
+				,UPD_ID = #sessionUsrId:VARCHAR#
+				,UPD_DTTM = SYSDATE
+		WHERE INF_ID=#infId:VARCHAR#
+		   AND INF_SEQ=#infSeq:NUMERIC#
+		   AND COL_SEQ=#colSeq:NUMERIC# 
+		]]>
+	</update>
+	
+	<select id="OpenInfScolDAO.selectOpenInfColViewPopInfo" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultMap="OpenInfColView" >
+				SELECT 
+					<isEmpty property="viewLang"> 
+						 B.COL_NM||FN_GET_COMM_CODE_NM('D1013',UNIT_CD) AS COL_NM
+					</isEmpty>
+					<isNotEmpty property="viewLang">
+						B.ENG_COL_NM||FN_GET_COMM_CODE_ENM('D1013',UNIT_CD) AS COL_NM
+					</isNotEmpty>
+					 ,B.SRC_COL_ID
+					  ,CASE WHEN C.VIEW_CD ='Float' THEN 'Float'
+					 ELSE C.VIEW_CD END AS VIEW_CD
+					 ,C.SORT_TAG
+					 ,CASE WHEN C.ALIGN_TAG ='C' THEN 'Center' 
+					       WHEN C.ALIGN_TAG ='R' THEN 'Right'
+					       WHEN C.ALIGN_TAG ='L' THEN 'Left'
+					  END AS ALIGN_TAG
+					 ,NVL(C.VIEW_SIZE,100) AS VIEW_SIZE	
+					 ,A.INF_SEQ   
+					 ,CASE WHEN C.VIEW_CD = 'Float' THEN<![CDATA[ '##,####0.####' ]]>
+					  ELSE '' END AS FORMAT_TEXT 
+					 ,CASE WHEN C.VIEW_CD = 'Text' THEN 1
+					  ELSE 0 END AS ELLIPSIS_TEXT 	
+					 ,1 AS ALLOW_NULL
+			         FROM TV_MNG_INF_SRV A
+			         INNER JOIN TB_OPEN_DSCOL B
+			            ON A.DS_ID = B.DS_ID
+			          AND B.USE_YN ='Y'
+			         INNER JOIN TB_OPEN_INF_SCOL C
+			           ON A.INF_ID = C.INF_ID
+			          AND A.INF_SEQ = C.INF_SEQ
+			          AND B.COL_SEQ = C.COL_SEQ
+			         WHERE A.INF_ID=#infId:VARCHAR#
+			           AND A.SRV_CD=#srvCd:VARCHAR#
+			           AND C.USE_YN='Y'
+			           AND C.VIEW_YN='Y'
+			           AND A.DS_USE_YN ='Y'
+			           <isNotEmpty property="gridItem">
+			             AND B.SRC_COL_ID = #gridItem#
+			           </isNotEmpty>
+			        ORDER BY C.V_ORDER     
+	</select>
+	
+	<select id="OpenInfScolDAO.selectOpenInfColViewPopInfoType" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultMap="OpenInfColView2" >
+				SELECT 
+					  B.SRC_COL_ID
+					 ,C.VIEW_CD
+					 ,NVL(C.VIEW_SIZE,100) AS VIEW_SIZE
+					 ,B.ALIGN_TAG 
+			         FROM TV_MNG_INF_SRV A
+			         INNER JOIN TB_OPEN_DSCOL B
+			            ON A.DS_ID = B.DS_ID
+			          AND B.USE_YN ='Y'
+			         INNER JOIN TB_OPEN_INF_SCOL C
+			           ON A.INF_ID = C.INF_ID
+			          AND A.INF_SEQ = C.INF_SEQ
+			          AND B.COL_SEQ = C.COL_SEQ
+			         WHERE A.INF_ID=#infId:VARCHAR#
+			           AND A.SRV_CD=#srvCd:VARCHAR#
+			           AND C.USE_YN='Y'
+			           AND C.VIEW_YN='Y'
+			           AND A.DS_USE_YN ='Y'
+			        ORDER BY C.V_ORDER     
+	</select>
+	
+	<select id="OpenInfScolDAO.selectOpenInfColViewPopInfoIbs" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultClass="egovMap" remapResults="true">
+			
+			
+			SELECT 'RN'  AS R_Save_Name
+			      ,'Seq' AS R_Type
+			      ,'Center' AS R_Align
+			      ,50 AS R_Width
+			      ,'false' AS R_Edit
+			      ,'' AS R_Format 
+			      ,0 AS R_Ellipsis
+			      ,0 AS R_Sort
+			      ,1 AS R_Allow_Null
+			FROM DUAL
+			UNION ALL
+			SELECT *
+			FROM(
+				SELECT 
+					 B.SRC_COL_ID AS R_Save_Name
+					 ,CASE WHEN C.VIEW_CD ='Float' THEN 'Float'
+					 ELSE C.VIEW_CD END AS R_Type
+					 ,CASE WHEN C.ALIGN_TAG ='C' THEN 'Center' 
+					       WHEN C.ALIGN_TAG ='R' THEN 'Right'
+					       WHEN C.ALIGN_TAG ='L' THEN 'Left'
+					  END AS R_Align
+					 ,NVL(C.VIEW_SIZE,100) AS R_Width
+					 ,'false' AS R_Edit	 
+					  ,CASE WHEN C.VIEW_CD = 'Float' THEN <![CDATA[ '##,####0.####' ]]>
+					   ELSE '' END AS R_Format 
+					  ,CASE WHEN C.VIEW_CD = 'Text' THEN 1
+					   ELSE 0 END AS R_Ellipsis 	
+					  ,1 AS R_Sort
+					  ,1 AS R_Allow_Null
+			         FROM TV_MNG_INF_SRV A
+			         INNER JOIN TB_OPEN_DSCOL B
+			            ON A.DS_ID = B.DS_ID
+			          AND B.USE_YN ='Y'
+			         INNER JOIN TB_OPEN_INF_SCOL C
+			           ON A.INF_ID = C.INF_ID
+			          AND A.INF_SEQ = C.INF_SEQ
+			          AND B.COL_SEQ = C.COL_SEQ
+			         WHERE A.INF_ID=#infId:VARCHAR#
+			           AND A.SRV_CD=#srvCd:VARCHAR#
+			           AND C.USE_YN='Y'
+			           AND C.VIEW_YN='Y'
+			           AND A.DS_USE_YN ='Y'
+			           <isNotEmpty property="gridItem">
+			             AND B.SRC_COL_ID = #gridItem#
+			           </isNotEmpty>
+			        ORDER BY C.V_ORDER
+			  )
+	</select>
+	
+	
+	<select id="OpenInfScolDAO.selectOpenInfColViewPopInfoFilt" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultMap="OpenInfColFilt" >
+			SELECT *
+			FROM(
+					SELECT 
+							<isEmpty property="viewLang"> 
+								 B.COL_NM
+							</isEmpty>
+							<isNotEmpty property="viewLang">
+								B.ENG_COL_NM AS COL_NM
+							</isNotEmpty>
+						   ,B.SRC_COL_ID
+						   ,C.FILT_YN
+				           ,C.FILT_CD
+				           ,C.FILT_MAX_DAY
+				           ,C.FILT_TBL_CD
+				           ,C.FILT_CODE
+				           ,C.FILT_NEED
+				           ,C.FILT_DEFAULT
+				           ,C.V_ORDER
+				           ,C.FILT_DEFAULT_NM
+				         FROM TV_MNG_INF_SRV A
+				         INNER JOIN TB_OPEN_DSCOL B
+				            ON A.DS_ID = B.DS_ID
+				          AND B.USE_YN ='Y'
+				         INNER JOIN TB_OPEN_INF_SCOL C
+				           ON A.INF_ID = C.INF_ID
+				          AND A.INF_SEQ = C.INF_SEQ
+				          AND B.COL_SEQ = C.COL_SEQ
+				         WHERE A.INF_ID= #infId:VARCHAR#
+				            AND A.SRV_CD= #srvCd:VARCHAR#
+				           AND C.USE_YN='Y'
+				           AND C.FILT_YN='Y'
+				           AND C.FILT_CD IN('CHECK','RADIO','COMBO')
+			    	       AND C.FILT_CODE IS NOT NULL               
+			    	       AND A.DS_USE_YN ='Y'     
+				      UNION ALL
+				      SELECT 
+							<isEmpty property="viewLang"> 
+								 B.COL_NM
+							</isEmpty>
+							<isNotEmpty property="viewLang">
+								B.ENG_COL_NM AS COL_NM
+							</isNotEmpty>
+						   ,B.SRC_COL_ID
+						   ,C.FILT_YN
+				           ,C.FILT_CD
+				           ,C.FILT_MAX_DAY
+				           ,C.FILT_TBL_CD
+				           ,C.FILT_CODE
+				           ,C.FILT_NEED
+				           ,C.FILT_DEFAULT
+				           ,C.V_ORDER
+				           ,C.FILT_DEFAULT_NM
+				         FROM TV_MNG_INF_SRV A
+				         INNER JOIN TB_OPEN_DSCOL B
+				            ON A.DS_ID = B.DS_ID
+				           AND B.USE_YN ='Y'
+				         INNER JOIN TB_OPEN_INF_SCOL C
+				           ON A.INF_ID = C.INF_ID
+				          AND A.INF_SEQ = C.INF_SEQ
+				          AND B.COL_SEQ = C.COL_SEQ
+				         WHERE A.INF_ID= #infId:VARCHAR#
+				            AND A.SRV_CD= #srvCd:VARCHAR#
+				           AND C.USE_YN='Y'
+				           AND C.FILT_YN='Y'
+				           AND A.DS_USE_YN ='Y'
+				           AND C.FILT_CD NOT IN('CHECK','RADIO','COMBO')     
+		    )ORDER BY    V_ORDER
+	</select>
+	
+	<select id="OpenInfScolDAO.selectOpenInfColViewPopInfoFiltDtl" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultMap="OpenInfColFiltDtl" >
+	SELECT *
+		FROM(
+			SELECT 
+					B.SRC_COL_ID
+		           ,B.COL_NM
+		           ,D.DITC_CD 
+		           <isEmpty property="viewLang"> 
+					,D.DITC_NM
+					</isEmpty>
+					<isNotEmpty property="viewLang">
+					 ,D.ENG_DITC_NM AS DITC_NM
+					</isNotEmpty>
+					,decode(C.COND_YN, 'Y', FN_COND_VAR_LIMIT(B.SRC_COL_ID, D.DITC_CD, C.COND_OP, C.COND_VAR), 'Y')  as VIEW_YN
+		         FROM TV_MNG_INF_SRV A
+		         INNER JOIN TB_OPEN_DSCOL B
+		            ON A.DS_ID = B.DS_ID
+		          AND B.USE_YN ='Y'
+		         INNER JOIN TB_OPEN_INF_SCOL C
+		           ON A.INF_ID = C.INF_ID
+		          AND A.INF_SEQ = C.INF_SEQ
+		          AND B.COL_SEQ = C.COL_SEQ
+		        INNER JOIN TV_DATA_CODE D
+		           ON C.FILT_CODE =D.GRP_CD  
+		         WHERE A.INF_ID= #infId:VARCHAR#
+		            AND A.SRV_CD= #srvCd:VARCHAR#
+		           AND C.USE_YN='Y'
+		           AND C.FILT_YN='Y'
+		           AND A.DS_USE_YN ='Y'
+		           AND C.FILT_CD IN('CHECK','RADIO','COMBO')
+		      ORDER BY D.V_ORDER 
+	)
+	WHERE VIEW_YN='Y'
+	</select>
+	
+	<select id="OpenInfScolDAO.selectOpenInfColViewPopInfoCond" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultMap="OpenInfColCond" >
+			SELECT 
+				  B.SRC_COL_ID
+				 ,C.COND_OP
+				 ,C.COND_VAR	 
+		         FROM TV_MNG_INF_SRV A
+		         INNER JOIN TB_OPEN_DSCOL B
+		            ON A.DS_ID = B.DS_ID
+		          AND B.USE_YN ='Y'
+		         INNER JOIN TB_OPEN_INF_SCOL C
+		           ON A.INF_ID = C.INF_ID
+		          AND A.INF_SEQ = C.INF_SEQ
+		          AND B.COL_SEQ = C.COL_SEQ
+		         WHERE A.INF_ID=#infId:VARCHAR#
+		           AND A.SRV_CD=#srvCd:VARCHAR#
+		           AND C.COND_YN='Y'
+		           AND C.USE_YN ='Y'
+		           AND A.DS_USE_YN ='Y'
+		        ORDER BY C.V_ORDER
+	</select>
+	<select id="OpenInfScolDAO.selectOpenInfColViewPopInfoOrderBy" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultMap="OpenInfColOrderby" >
+			SELECT 
+				  B.SRC_COL_ID
+				 ,C.SORT_TAG	 
+		         FROM TV_MNG_INF_SRV A
+		         INNER JOIN TB_OPEN_DSCOL B
+		            ON A.DS_ID = B.DS_ID
+		          AND B.USE_YN ='Y'
+		         INNER JOIN TB_OPEN_INF_SCOL C
+		           ON A.INF_ID = C.INF_ID
+		          AND A.INF_SEQ = C.INF_SEQ
+		          AND B.COL_SEQ = C.COL_SEQ
+		         WHERE A.INF_ID=#infId:VARCHAR#
+		           AND A.SRV_CD=#srvCd:VARCHAR#
+		           AND C.USE_YN ='Y'
+		           AND SORT_TAG IS NOT NULL
+		           AND A.DS_USE_YN ='Y'
+		        ORDER BY C.V_ORDER
+	</select>
+	
+	
+	<select id="OpenInfScolDAO.selectMetaListAll" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultClass="java.util.LinkedHashMap" remapResults="true">
+			 <isNotEqual  property="startPage" compareValue="0">
+				SELECT $selectQuery$
+				         ,WISEOPEN_CNT
+				FROM(
+				SELECT ROWNUM AS RN, TB.*
+				 FROM 
+				 (
+				 	SELECT 
+						$selectQuery$
+						,COUNT(*) OVER() WISEOPEN_CNT
+					  FROM $tableNm$
+					 WHERE 1=1
+					 $whereQuery$
+					 $pubDttmQuery$
+					 $condQuery$
+					$orderByQuery$
+				)TB
+				)
+				WHERE RN BETWEEN #startPage:NUMERIC# AND #endPage:NUMERIC#
+			</isNotEqual>
+			 <isEqual property="startPage" compareValue="0">
+					SELECT 
+						$selectQuery$
+					  FROM $tableNm$
+					 WHERE 1=1
+					 $whereQuery$
+					 $pubDttmQuery$
+					 $condQuery$
+					$orderByQuery$
+			</isEqual>
+	</select>
+	
+	
+	<select id="OpenInfScolDAO.selectMetaListAll2" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultClass="java.util.LinkedHashMap" remapResults="true">
+			 
+					SELECT 
+						$selectQuery$
+					  FROM $tableNm$
+					 WHERE 1=1
+					 $whereQuery$
+					 $pubDttmQuery$
+					 $condQuery$
+					$orderByQuery$
+	</select>
+	
+	
+	<select id="OpenInfScolDAO.selectTvPopupCode" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultClass="String" >
+		SELECT 'SELECT '|| COL_ID||' AS COL_ID,'||COL_NM||' AS COL_NM FROM ' ||TBL_ID ||' WHERE 1=1 '||
+				  CASE 
+				  	WHEN TRIM(COND_WHERE) = '' THEN ''
+				  	WHEN TRIM(COND_WHERE) IS NULL THEN ''
+				  ELSE  'AND '||COND_WHERE  END 
+		          <isNotEmpty property="popupSerach">
+		          || ' AND (UPPER(' || COL_ID || ') LIKE ''%'||#popupSerach#||'%'' OR UPPER( '|| COL_NM||') LIKE ''%' || #popupSerach# || '%'')'
+		          </isNotEmpty>
+			 AS queryString
+		 FROM TV_POPUP_CODE
+		WHERE TBL_ID = #tblId:VARCHAR#
+ 	</select>  
+ 	
+ 	<select id="OpenInfScolDAO.selectTvPopupWhere" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultClass="String" >
+		SELECT CASE 
+				  	WHEN TRIM(COND_WHERE) = '' THEN ''
+				  	WHEN TRIM(COND_WHERE) IS NULL THEN ''
+				  ELSE  'AND '||COND_WHERE  END AS connWhere
+		 FROM TV_POPUP_CODE
+		WHERE TBL_ID = #tblId:VARCHAR#
+ 	</select>  
+ 	<select id="OpenInfScolDAO.selectTvPopupCodeDate" parameterClass="egovframework.admin.service.service.OpenInfSrv"  resultClass="java.util.LinkedHashMap" remapResults="true">
+ 	SELECT *
+	  FROM ( SELECT (TRUNC(ROWNUM / #pageSize:NUMERIC# - 0.1) +1) RN,
+		                TB.*
+		           FROM (
+						$queryString$
+		        	)TB
+          )
+	WHERE RN = #currPage:NUMERIC#
+ 	</select> 
+ 	
+	<select id="OpenInfScolDAO.selectTvPopupCodeDateCnt" parameterClass="egovframework.admin.service.service.OpenInfSrv"  resultClass="Integer"  remapResults="true">
+	SELECT COUNT(1) AS CNT
+	FROM(
+		$queryString$
+	)
+ 	</select> 
+ 	
+ 	<select id="OpenInfScolDAO.selectTvPopupCodeOffcCd" parameterClass="egovframework.admin.service.service.OpenInfSrv"  resultClass="java.util.LinkedHashMap" remapResults="true">
+ 	SELECT *
+	  FROM ( SELECT (TRUNC(ROWNUM / #pageSize:NUMERIC# - 0.1) +1) RN,
+		                TB.*
+		           FROM (
+						SELECT OFFC_CD AS COL_ID
+								<isEmpty property="viewLang"> 
+									,OFFC_NM AS COL_NM
+								</isEmpty>
+								<isNotEmpty property="viewLang">
+									,OFFC_ENG_NM AS COL_NM
+								</isNotEmpty>
+						  FROM $tblId$
+						WHERE 1=1
+						   AND FSCL_YY = #fsclYy:NUMERIC#
+						   <isNotEmpty property="connWhere">
+						   		 $connWhere$
+						   </isNotEmpty>
+						    <isNotEmpty property="popupSerach">
+						    	<isEmpty property="viewLang"> 
+									AND (OFFC_NM LIKE  '%'|| #popupSerach#||'%' or OFFC_CD LIKE  '%'|| #popupSerach#||'%')
+								</isEmpty>
+								<isNotEmpty property="viewLang">
+									AND (OFFC_ENG_NM LIKE  '%'|| #popupSerach#||'%' or OFFC_CD LIKE  '%'|| #popupSerach#||'%')
+								</isNotEmpty>
+						    </isNotEmpty>
+		        	)TB
+          )
+	WHERE RN = #currPage:NUMERIC#
+ 	</select> 
+ 	
+	<select id="OpenInfScolDAO.selectTvPopupCodeOffcCdCnt" parameterClass="egovframework.admin.service.service.OpenInfSrv"  resultClass="Integer" remapResults="true">
+		SELECT COUNT(1) AS CNT
+		FROM $tblId$
+		WHERE 1=1
+			AND FSCL_YY = #fsclYy:NUMERIC#
+			<isNotEmpty property="connWhere">
+				 $connWhere$
+			</isNotEmpty>
+			<isNotEmpty property="popupSerach">
+				<isEmpty property="viewLang"> 
+						AND (OFFC_NM LIKE  '%'|| #popupSerach#||'%' or OFFC_CD LIKE  '%'|| #popupSerach#||'%')
+				</isEmpty>
+				<isNotEmpty property="viewLang">
+						AND (OFFC_ENG_NM LIKE  '%'|| #popupSerach#||'%' or OFFC_CD LIKE  '%'|| #popupSerach#||'%')
+				</isNotEmpty>
+			</isNotEmpty>
+ 	</select> 
+ 	
+ 	
+ 	<select id="OpenInfScolDAO.selectTvPopupCodeFgoCd" parameterClass="egovframework.admin.service.service.OpenInfSrv"  resultClass="java.util.LinkedHashMap" remapResults="true">
+ 	SELECT *
+	  FROM ( SELECT (TRUNC(ROWNUM / #pageSize:NUMERIC# - 0.1) +1) RN,
+		                TB.*
+		           FROM (
+						SELECT FGO_CD AS COL_ID
+								<isEmpty property="viewLang"> 
+									,FGO_NM AS COL_NM
+								</isEmpty>
+								<isNotEmpty property="viewLang">
+										,FGO_ENG_NM AS COL_NM
+								</isNotEmpty>
+						  FROM $tblId$
+						WHERE 1=1
+						   AND FSCL_YY = #fsclYy:NUMERIC#
+						   AND GOF_DIV_CD = #gofDivCd:VARCHAR#
+						   AND OFFC_CD =#offcCd:VARCHAR#
+						   AND FSCL_CD =#fsclCd:VARCHAR#
+						   AND ACCT_CD =#acctCd:VARCHAR#
+						   <isNotEmpty property="connWhere">
+								 $connWhere$
+							</isNotEmpty>
+						   <isNotEmpty property="popupSerach">
+						   		<isEmpty property="viewLang"> 
+									AND (FGO_NM LIKE  '%'|| #popupSerach#||'%' or FGO_CD LIKE  '%'|| #popupSerach#||'%')
+								</isEmpty>
+								<isNotEmpty property="viewLang">
+									AND (FGO_ENG_NM LIKE  '%'|| #popupSerach#||'%' or FGO_CD LIKE  '%'|| #popupSerach#||'%')
+								</isNotEmpty>
+						    </isNotEmpty>
+		        	)TB
+          )
+	WHERE RN = #currPage:NUMERIC#
+ 	</select> 
+ 	
+	<select id="OpenInfScolDAO.selectTvPopupCodeFgoCdCnt" parameterClass="egovframework.admin.service.service.OpenInfSrv"  resultClass="Integer"  remapResults="true">
+		SELECT COUNT(1) AS CNT
+		FROM $tblId$
+		WHERE 1=1
+			AND FSCL_YY = #fsclYy:NUMERIC#
+			AND GOF_DIV_CD = #gofDivCd:VARCHAR#
+			AND OFFC_CD =#offcCd:VARCHAR#
+			AND FSCL_CD =#fsclCd:VARCHAR#
+			AND ACCT_CD =#acctCd:VARCHAR#
+			 <isNotEmpty property="connWhere">
+								 $connWhere$
+							</isNotEmpty>
+			<isNotEmpty property="popupSerach">
+						 <isEmpty property="viewLang"> 
+							AND (FGO_NM LIKE  '%'|| #popupSerach#||'%' or FGO_CD LIKE  '%'|| #popupSerach#||'%')
+						</isEmpty>
+						<isNotEmpty property="viewLang">
+							AND (FGO_ENG_NM LIKE  '%'|| #popupSerach#||'%' or FGO_CD LIKE  '%'|| #popupSerach#||'%')
+						</isNotEmpty>
+			</isNotEmpty>
+			
+ 	</select> 
+ 	
+ 	<select id="OpenInfScolDAO.selectTvPopupCodeFsclCd" parameterClass="egovframework.admin.service.service.OpenInfSrv"  resultClass="java.util.LinkedHashMap" remapResults="true">
+	 	SELECT *
+		  FROM ( SELECT (TRUNC(ROWNUM / #pageSize:NUMERIC# - 0.1) +1) RN,
+			                TB.*
+			           FROM (
+							SELECT FSCL_CD AS COL_ID
+									<isEmpty property="viewLang"> 
+									 ,FSCL_NM AS COL_NM
+									</isEmpty>
+									<isNotEmpty property="viewLang">
+									 ,FSCL_ENG_NM AS COL_NM
+									</isNotEmpty>
+							  FROM $tblId$
+							WHERE 1=1
+							   AND FSCL_YY = #fsclYy:NUMERIC#
+							   AND OFFC_CD = #offcCd:VARCHAR#
+							    <isNotEmpty property="connWhere">
+								 $connWhere$
+							</isNotEmpty>
+							   <isNotEmpty property="popupSerach">
+							   		<isEmpty property="viewLang"> 
+									AND (FSCL_NM LIKE  '%'|| #popupSerach#||'%' or FSCL_CD LIKE  '%'|| #popupSerach#||'%')
+									</isEmpty>
+									<isNotEmpty property="viewLang">
+									 AND (FSCL_ENG_NM LIKE  '%'|| #popupSerach#||'%' or FSCL_CD LIKE  '%'|| #popupSerach#||'%')
+									</isNotEmpty>
+								</isNotEmpty>
+			        	)TB
+	          )
+		WHERE RN = #currPage:NUMERIC#
+ 	</select> 
+ 	
+	<select id="OpenInfScolDAO.selectTvPopupCodeFsclCdCnt" parameterClass="egovframework.admin.service.service.OpenInfSrv"  resultClass="Integer"  remapResults="true">
+		SELECT COUNT(1) AS CNT
+		FROM $tblId$
+		WHERE 1=1
+			AND FSCL_YY = #fsclYy:NUMERIC#
+			AND OFFC_CD = #offcCd:VARCHAR#
+			 <isNotEmpty property="connWhere">
+								 $connWhere$
+							</isNotEmpty>
+			<isNotEmpty property="popupSerach">
+					<isEmpty property="viewLang"> 
+						AND (FSCL_NM LIKE  '%'|| #popupSerach#||'%' or FSCL_CD LIKE  '%'|| #popupSerach#||'%')
+					</isEmpty>
+					<isNotEmpty property="viewLang">
+						AND (FSCL_ENG_NM LIKE  '%'|| #popupSerach#||'%' or FSCL_CD LIKE  '%'|| #popupSerach#||'%')
+					</isNotEmpty>
+			</isNotEmpty>
+ 	</select>
+ 	
+ 	
+ 	<select id="OpenInfScolDAO.selectTvPopupCodeFsclCd2" parameterClass="egovframework.admin.service.service.OpenInfSrv"  resultClass="java.util.LinkedHashMap" remapResults="true">
+	 	SELECT *
+		  FROM ( SELECT (TRUNC(ROWNUM / #pageSize:NUMERIC# - 0.1) +1) RN,
+			                TB.*
+			           FROM (
+							SELECT FSCL2_CD AS COL_ID
+									<isEmpty property="viewLang"> 
+									 ,FSCL2_NM AS COL_NM
+									</isEmpty>
+									<isNotEmpty property="viewLang">
+									 ,FSCL_ENG2_NM AS COL_NM
+									</isNotEmpty>
+							  FROM $tblId$
+							WHERE 1=1
+							   AND FSCL_YY = #fsclYy:NUMERIC#
+							    <isNotEmpty property="connWhere">
+								 $connWhere$
+							</isNotEmpty>
+							   <isNotEmpty property="popupSerach">
+							   		<isEmpty property="viewLang"> 
+									AND (FSCL2_NM LIKE  '%'|| #popupSerach#||'%' or FSCL2_CD LIKE  '%'|| #popupSerach#||'%')
+									</isEmpty>
+									<isNotEmpty property="viewLang">
+									 AND (FSCL_ENG2_NM LIKE  '%'|| #popupSerach#||'%' or FSCL2_CD LIKE  '%'|| #popupSerach#||'%')
+									</isNotEmpty>
+								</isNotEmpty>
+			        	)TB
+	          )
+		WHERE RN = #currPage:NUMERIC#
+ 	</select> 
+ 	
+	<select id="OpenInfScolDAO.selectTvPopupCodeFsclCdCnt2" parameterClass="egovframework.admin.service.service.OpenInfSrv"  resultClass="Integer"  remapResults="true">
+		SELECT COUNT(1) AS CNT
+		FROM $tblId$
+		WHERE 1=1
+			AND FSCL_YY = #fsclYy:NUMERIC#
+			 <isNotEmpty property="connWhere">
+								 $connWhere$
+							</isNotEmpty>
+			<isNotEmpty property="popupSerach">
+					<isEmpty property="viewLang"> 
+						AND (FSCL2_NM LIKE  '%'|| #popupSerach#||'%' or FSCL2_CD LIKE  '%'|| #popupSerach#||'%')
+					</isEmpty>
+					<isNotEmpty property="viewLang">
+						AND (FSCL_ENG2_NM LIKE  '%'|| #popupSerach#||'%' or FSCL2_CD LIKE  '%'|| #popupSerach#||'%')
+					</isNotEmpty>
+			</isNotEmpty>
+ 	</select>
+ 	
+ 	<select id="OpenInfScolDAO.selectTvPopupCodeAcctCd" parameterClass="egovframework.admin.service.service.OpenInfSrv"  resultClass="java.util.LinkedHashMap" remapResults="true">
+	 	SELECT *
+		  FROM ( SELECT (TRUNC(ROWNUM / #pageSize:NUMERIC# - 0.1) +1) RN,
+			                TB.*
+			           FROM (
+							SELECT ACCT_CD AS COL_ID
+									<isEmpty property="viewLang"> 
+										 ,ACCT_NM AS COL_NM
+									</isEmpty>
+									<isNotEmpty property="viewLang">
+										 ,ACCT_ENG_NM AS COL_NM
+									</isNotEmpty>
+							  FROM $tblId$
+							WHERE 1=1
+							   AND FSCL_YY = #fsclYy:NUMERIC#
+							   AND FSCL_CD = #fsclCd:VARCHAR#
+							    <isNotEmpty property="connWhere">
+								 $connWhere$
+							</isNotEmpty>
+							   <isNotEmpty property="popupSerach">
+							 	  <isEmpty property="viewLang"> 
+										   AND (ACCT_NM LIKE  '%'|| #popupSerach#||'%' or ACCT_CD LIKE  '%'|| #popupSerach#||'%' )
+									</isEmpty>
+									<isNotEmpty property="viewLang">
+										   AND (ACCT_ENG_NM LIKE  '%'|| #popupSerach#||'%' or ACCT_CD LIKE  '%'|| #popupSerach#||'%' )
+									</isNotEmpty>
+								</isNotEmpty>
+			        	)TB
+	          )
+		WHERE RN = #currPage:NUMERIC#
+ 	</select> 
+ 	
+	<select id="OpenInfScolDAO.selectTvPopupCodeAcctCdCnt" parameterClass="egovframework.admin.service.service.OpenInfSrv"  resultClass="Integer"  remapResults="true">
+		SELECT COUNT(1) AS CNT
+		FROM $tblId$
+		WHERE 1=1
+			AND FSCL_YY = #fsclYy:NUMERIC#
+			AND FSCL_CD = #fsclCd:VARCHAR#
+			 <isNotEmpty property="connWhere">
+								 $connWhere$
+							</isNotEmpty>
+			<isNotEmpty property="popupSerach">
+				<isEmpty property="viewLang"> 
+					 AND (ACCT_NM LIKE  '%'|| #popupSerach#||'%' or ACCT_CD LIKE  '%'|| #popupSerach#||'%' )
+				</isEmpty>
+				<isNotEmpty property="viewLang">
+					 AND (ACCT_ENG_NM LIKE  '%'|| #popupSerach#||'%' or ACCT_CD LIKE  '%'|| #popupSerach#||'%' )
+				</isNotEmpty>
+			</isNotEmpty>
+ 	</select>
+ 	
+ 	<select id="OpenInfScolDAO.selectTvPopupCodeFldCd" parameterClass="egovframework.admin.service.service.OpenInfSrv"  resultClass="java.util.LinkedHashMap" remapResults="true">
+	 	SELECT *
+		  FROM ( SELECT (TRUNC(ROWNUM / #pageSize:NUMERIC# - 0.1) +1) RN,
+			                TB.*
+			           FROM (
+							SELECT FLD_CD AS COL_ID
+								<isEmpty property="viewLang"> 
+									 ,FLD_NM AS COL_NM
+								</isEmpty>
+								<isNotEmpty property="viewLang">
+									 ,FLD_ENG_NM AS COL_NM
+								</isNotEmpty>
+							  FROM $tblId$
+							WHERE 1=1
+							   AND FSCL_YY = #fsclYy:NUMERIC#
+							    <isNotEmpty property="connWhere">
+								 $connWhere$
+							</isNotEmpty>
+							   <isNotEmpty property="popupSerach">
+								   <isEmpty property="viewLang"> 
+										  AND (FLD_NM LIKE  '%'|| #popupSerach#||'%' or FLD_CD LIKE  '%'|| #popupSerach#||'%') 
+									</isEmpty>
+									<isNotEmpty property="viewLang">
+										 AND (FLD_ENG_NM LIKE  '%'|| #popupSerach#||'%' or FLD_CD LIKE  '%'|| #popupSerach#||'%') 
+									</isNotEmpty>
+								</isNotEmpty>
+			        	)TB
+	          )
+		WHERE RN = #currPage:NUMERIC#
+ 	</select> 
+ 	
+	<select id="OpenInfScolDAO.selectTvPopupCodeFldCdCnt" parameterClass="egovframework.admin.service.service.OpenInfSrv"  resultClass="Integer"  remapResults="true">
+		SELECT COUNT(1) AS CNT
+		FROM $tblId$
+		WHERE 1=1
+			AND FSCL_YY = #fsclYy:NUMERIC#
+			 <isNotEmpty property="connWhere">
+								 $connWhere$
+							</isNotEmpty>
+			<isNotEmpty property="popupSerach">
+					<isEmpty property="viewLang"> 
+						 AND (FLD_NM LIKE  '%'|| #popupSerach#||'%' or FLD_CD LIKE  '%'|| #popupSerach#||'%') 
+					</isEmpty>
+					<isNotEmpty property="viewLang">
+						AND (FLD_ENG_NM LIKE  '%'|| #popupSerach#||'%' or FLD_CD LIKE  '%'|| #popupSerach#||'%') 
+					</isNotEmpty>
+			</isNotEmpty>
+ 	</select>
+ 	
+ 	
+ 	<select id="OpenInfScolDAO.selectTvPopupCodeSectCd" parameterClass="egovframework.admin.service.service.OpenInfSrv"  resultClass="java.util.LinkedHashMap" remapResults="true">
+	 	SELECT *
+		  FROM ( SELECT (TRUNC(ROWNUM / #pageSize:NUMERIC# - 0.1) +1) RN,
+			                TB.*
+			           FROM (
+							SELECT SECT_CD AS COL_ID
+									<isEmpty property="viewLang"> 
+										 ,SECT_NM AS COL_NM
+									</isEmpty>
+									<isNotEmpty property="viewLang">
+										,SECT_ENG_NM AS COL_NM
+									</isNotEmpty>
+							  FROM $tblId$
+							WHERE 1=1
+							   AND FSCL_YY = #fsclYy:NUMERIC#
+							   AND FLD_CD = #fldCd:VARCHAR#
+							    <isNotEmpty property="connWhere">
+								 $connWhere$
+							</isNotEmpty>
+							   <isNotEmpty property="popupSerach">
+							   		<isEmpty property="viewLang"> 
+										 AND (SECT_NM LIKE  '%'|| #popupSerach#||'%' or SECT_CD LIKE  '%'|| #popupSerach#||'%')
+									</isEmpty>
+									<isNotEmpty property="viewLang">
+										 AND (SECT_ENG_NM LIKE  '%'|| #popupSerach#||'%' or SECT_CD LIKE  '%'|| #popupSerach#||'%')
+									</isNotEmpty>
+								</isNotEmpty>
+			        	)TB
+	          )
+		WHERE RN = #currPage:NUMERIC#
+ 	</select> 
+ 	
+	<select id="OpenInfScolDAO.selectTvPopupCodeSectCdCnt" parameterClass="egovframework.admin.service.service.OpenInfSrv"  resultClass="Integer"  remapResults="true">
+		SELECT COUNT(1) AS CNT
+		FROM $tblId$
+		WHERE 1=1
+			AND FSCL_YY = #fsclYy:NUMERIC#
+			AND FLD_CD = #fldCd:VARCHAR#
+			 <isNotEmpty property="connWhere">
+								 $connWhere$
+							</isNotEmpty>
+			<isNotEmpty property="popupSerach">
+				<isEmpty property="viewLang"> 
+					AND (SECT_NM LIKE  '%'|| #popupSerach#||'%' or SECT_CD LIKE  '%'|| #popupSerach#||'%')
+				</isEmpty>
+				<isNotEmpty property="viewLang">
+					 AND (SECT_ENG_NM LIKE  '%'|| #popupSerach#||'%' or SECT_CD LIKE  '%'|| #popupSerach#||'%')
+				</isNotEmpty>
+			</isNotEmpty>
+ 	</select>
+ 	
+ 	<select id="OpenInfScolDAO.selectTvPopupCodePgmCd" parameterClass="egovframework.admin.service.service.OpenInfSrv"  resultClass="java.util.LinkedHashMap" remapResults="true">
+	 	SELECT *
+		  FROM ( SELECT (TRUNC(ROWNUM / #pageSize:NUMERIC# - 0.1) +1) RN,
+			                TB.*
+			           FROM (
+							SELECT PGM_CD AS COL_ID
+							<isEmpty property="viewLang"> 
+								  ,PGM_NM AS COL_NM
+							</isEmpty>
+							<isNotEmpty property="viewLang">
+								   ,PGM_ENG_NM AS COL_NM
+							</isNotEmpty>
+							  FROM $tblId$
+							WHERE 1=1
+							   AND FSCL_YY = #fsclYy:NUMERIC#
+							   AND FLD_CD = #fldCd:VARCHAR#
+							   AND SECT_CD =#sectCd:VARCHAR#
+							    <isNotEmpty property="connWhere">
+								 $connWhere$
+							</isNotEmpty>
+							   <isNotEmpty property="popupSerach">
+								   	<isEmpty property="viewLang"> 
+									  AND (PGM_NM LIKE  '%'|| #popupSerach#||'%' or PGM_CD LIKE  '%'|| #popupSerach#||'%')
+									</isEmpty>
+									<isNotEmpty property="viewLang">
+									  AND (PGM_ENG_NM LIKE  '%'|| #popupSerach#||'%' or PGM_CD LIKE  '%'|| #popupSerach#||'%')
+									</isNotEmpty>
+								</isNotEmpty>
+			        	)TB
+	          )
+		WHERE RN = #currPage:NUMERIC#
+ 	</select> 
+ 	
+	<select id="OpenInfScolDAO.selectTvPopupCodePgmCdCnt" parameterClass="egovframework.admin.service.service.OpenInfSrv"  resultClass="Integer"  remapResults="true">
+		SELECT COUNT(1) AS CNT
+		FROM $tblId$
+		WHERE 1=1
+			AND FSCL_YY = #fsclYy:NUMERIC#
+			AND FLD_CD = #fldCd:VARCHAR#
+		   AND SECT_CD =#sectCd:VARCHAR#
+		    <isNotEmpty property="connWhere">
+								 $connWhere$
+							</isNotEmpty>
+		    <isNotEmpty property="popupSerach">
+			    <isEmpty property="viewLang"> 
+					 AND (PGM_NM LIKE  '%'|| #popupSerach#||'%' or PGM_CD LIKE  '%'|| #popupSerach#||'%')
+				</isEmpty>
+				<isNotEmpty property="viewLang">
+					 AND (PGM_ENG_NM LIKE  '%'|| #popupSerach#||'%' or PGM_CD LIKE  '%'|| #popupSerach#||'%')
+				</isNotEmpty>
+			</isNotEmpty>
+ 	</select>
+ 	
+ 	<select id="OpenInfScolDAO.selectTvPopupCodeActvCd" parameterClass="egovframework.admin.service.service.OpenInfSrv"  resultClass="java.util.LinkedHashMap" >
+	 	SELECT *
+		  FROM ( SELECT (TRUNC(ROWNUM / #pageSize:NUMERIC# - 0.1) +1) RN,
+			                TB.*
+			           FROM (
+								SELECT ACTV_CD AS COL_ID
+									<isEmpty property="viewLang"> 
+										 ,ACTV_NM AS COL_NM
+									</isEmpty>
+									<isNotEmpty property="viewLang">
+										,ACTV_ENG_NM AS COL_NM
+									</isNotEmpty>
+							  FROM $tblId$
+							WHERE 1=1
+							   AND FSCL_YY = #fsclYy:NUMERIC#
+							   AND FLD_CD = #fldCd:VARCHAR#
+							   AND SECT_CD =#sectCd:VARCHAR#
+							   AND PGM_CD = #pgmCd:VARCHAR#
+							    <isNotEmpty property="connWhere">
+								 $connWhere$
+							</isNotEmpty>
+							    <isNotEmpty property="popupSerach">
+							    	<isEmpty property="viewLang"> 
+										  AND (ACTV_NM LIKE  '%'|| #popupSerach#||'%' or ACTV_CD LIKE  '%'|| #popupSerach#||'%' )
+									</isEmpty>
+									<isNotEmpty property="viewLang">
+										 AND (ACTV_ENG_NM LIKE  '%'|| #popupSerach#||'%' or ACTV_CD LIKE  '%'|| #popupSerach#||'%' )
+									</isNotEmpty>
+								</isNotEmpty>
+			        	)TB
+	          )
+		WHERE RN = #currPage:NUMERIC#
+ 	</select> 
+ 	
+	<select id="OpenInfScolDAO.selectTvPopupCodeActvCdCnt" parameterClass="egovframework.admin.service.service.OpenInfSrv"  resultClass="Integer"  >
+		SELECT COUNT(1) AS CNT
+		 FROM $tblId$
+		WHERE 1=1
+			AND FSCL_YY = #fsclYy:NUMERIC#
+			AND FLD_CD = #fldCd:VARCHAR#
+			AND SECT_CD =#sectCd:VARCHAR#
+			AND PGM_CD = #pgmCd:VARCHAR#
+			 <isNotEmpty property="connWhere">
+								 $connWhere$
+							</isNotEmpty>
+			<isNotEmpty property="popupSerach">
+				<isEmpty property="viewLang"> 
+					 AND (ACTV_NM LIKE  '%'|| #popupSerach#||'%' or ACTV_CD LIKE  '%'|| #popupSerach#||'%' )
+				</isEmpty>
+				<isNotEmpty property="viewLang">
+					 AND (ACTV_ENG_NM LIKE  '%'|| #popupSerach#||'%' or ACTV_CD LIKE  '%'|| #popupSerach#||'%' )
+				</isNotEmpty>
+			</isNotEmpty>
+		
+ 	</select>
+ 	
+ 	
+ 	<select id="OpenInfScolDAO.selectTvPopupCodeIkwanCd" parameterClass="egovframework.admin.service.service.OpenInfSrv"  resultClass="java.util.LinkedHashMap" >
+	 	SELECT *
+		  FROM ( SELECT (TRUNC(ROWNUM / #pageSize:NUMERIC# - 0.1) +1) RN,
+			                TB.*
+			           FROM (
+								SELECT IKWAN_CD AS COL_ID
+									<isEmpty property="viewLang"> 
+										  ,IKWAN_NM AS COL_NM
+									</isEmpty>
+									<isNotEmpty property="viewLang">
+										 ,IKWAN_ENG_NM AS COL_NM
+									</isNotEmpty>
+							  FROM $tblId$
+							WHERE 1=1
+							   AND FSCL_YY = #fsclYy:NUMERIC#
+							    <isNotEmpty property="connWhere">
+								 $connWhere$
+							</isNotEmpty>
+							    <isNotEmpty property="popupSerach">
+								    	<isEmpty property="viewLang"> 
+											  AND (IKWAN_NM LIKE  '%'|| #popupSerach#||'%' or IKWAN_CD LIKE  '%'|| #popupSerach#||'%' )
+										</isEmpty>
+										<isNotEmpty property="viewLang">
+											AND (IKWAN_ENG_NM LIKE  '%'|| #popupSerach#||'%' or IKWAN_CD LIKE  '%'|| #popupSerach#||'%' )
+										</isNotEmpty>
+								</isNotEmpty>
+			        	)TB
+	          )
+		WHERE RN = #currPage:NUMERIC#
+ 	</select> 
+ 	
+	<select id="OpenInfScolDAO.selectTvPopupCodeIkwanCdCnt" parameterClass="egovframework.admin.service.service.OpenInfSrv"  resultClass="Integer"  >
+		SELECT COUNT(1) AS CNT
+		 FROM $tblId$
+		WHERE 1=1
+			AND FSCL_YY = #fsclYy:NUMERIC#
+			 <isNotEmpty property="connWhere">
+								 $connWhere$
+							</isNotEmpty>
+			<isNotEmpty property="popupSerach">
+				<isEmpty property="viewLang"> 
+					 AND (IKWAN_NM LIKE  '%'|| #popupSerach#||'%' or IKWAN_CD LIKE  '%'|| #popupSerach#||'%' )
+				</isEmpty>
+				<isNotEmpty property="viewLang">
+					AND (IKWAN_ENG_NM LIKE  '%'|| #popupSerach#||'%' or IKWAN_CD LIKE  '%'|| #popupSerach#||'%' )
+				</isNotEmpty>
+			</isNotEmpty>
+		
+ 	</select>
+ 	
+ 	
+ 	<select id="OpenInfScolDAO.selectTvPopupCodeIhangCd" parameterClass="egovframework.admin.service.service.OpenInfSrv"  resultClass="java.util.LinkedHashMap" >
+	 	SELECT *
+		  FROM ( SELECT (TRUNC(ROWNUM / #pageSize:NUMERIC# - 0.1) +1) RN,
+			                TB.*
+			           FROM (
+								SELECT IHANG_CD AS COL_ID
+									<isEmpty property="viewLang"> 
+										  ,IHANG_NM AS COL_NM
+									</isEmpty>
+									<isNotEmpty property="viewLang">
+										  ,IHANG_ENG_NM AS COL_NM
+									</isNotEmpty>
+							  FROM $tblId$
+							WHERE 1=1
+							   AND FSCL_YY = #fsclYy:NUMERIC#
+							   AND IKWAN_CD =#ikwanCd:VARCHAR#
+							    <isNotEmpty property="connWhere">
+								 $connWhere$
+							</isNotEmpty>
+							    <isNotEmpty property="popupSerach">
+							    	<isEmpty property="viewLang"> 
+										  AND (IHANG_NM LIKE  '%'|| #popupSerach#||'%' or IHANG_CD LIKE  '%'|| #popupSerach#||'%')
+									</isEmpty>
+									<isNotEmpty property="viewLang">
+										  AND (IHANG_ENG_NM LIKE  '%'|| #popupSerach#||'%' or IHANG_CD LIKE  '%'|| #popupSerach#||'%')
+									</isNotEmpty>
+								</isNotEmpty>
+			        	)TB
+	          )
+		WHERE RN = #currPage:NUMERIC#
+ 	</select> 
+ 	
+	<select id="OpenInfScolDAO.selectTvPopupCodeIhangCdCnt" parameterClass="egovframework.admin.service.service.OpenInfSrv"  resultClass="Integer"  >
+		SELECT COUNT(1) AS CNT
+		 FROM $tblId$
+		WHERE 1=1
+			AND FSCL_YY = #fsclYy:NUMERIC#
+			AND IKWAN_CD =#ikwanCd:VARCHAR#
+			 <isNotEmpty property="connWhere">
+								 $connWhere$
+							</isNotEmpty>
+			<isNotEmpty property="popupSerach">
+				<isEmpty property="viewLang"> 
+					AND (IHANG_NM LIKE  '%'|| #popupSerach#||'%' or IHANG_CD LIKE  '%'|| #popupSerach#||'%')
+				</isEmpty>
+				<isNotEmpty property="viewLang">
+					 AND (IHANG_ENG_NM LIKE  '%'|| #popupSerach#||'%' or IHANG_CD LIKE  '%'|| #popupSerach#||'%')
+				</isNotEmpty>
+			</isNotEmpty>
+		
+ 	</select>
+ 	
+ 	<select id="OpenInfScolDAO.selectTvPopupCodeImokCd" parameterClass="egovframework.admin.service.service.OpenInfSrv"  resultClass="java.util.LinkedHashMap" >
+	 	SELECT *
+		  FROM ( SELECT (TRUNC(ROWNUM / #pageSize:NUMERIC# - 0.1) +1) RN,
+			                TB.*
+			           FROM (
+								SELECT IMOK_CD AS COL_ID
+								<isEmpty property="viewLang"> 
+									,IMOK_NM AS COL_NM
+								</isEmpty>
+								<isNotEmpty property="viewLang">
+									,IMOK_ENG_NM AS COL_NM
+								</isNotEmpty>
+							  FROM $tblId$
+							WHERE 1=1
+							   AND FSCL_YY = #fsclYy:NUMERIC#
+							   AND IKWAN_CD =#ikwanCd:VARCHAR#
+							   AND IHANG_CD =#ihangCd:VARCHAR#
+							    <isNotEmpty property="connWhere">
+								 $connWhere$
+							</isNotEmpty>
+							    <isNotEmpty property="popupSerach">
+								    <isEmpty property="viewLang"> 
+										 AND (IMOK_NM LIKE  '%'|| #popupSerach#||'%' or IMOK_CD LIKE  '%'|| #popupSerach#||'%')
+									</isEmpty>
+									<isNotEmpty property="viewLang">
+										 AND (IMOK_ENG_NM LIKE  '%'|| #popupSerach#||'%' or IMOK_CD LIKE  '%'|| #popupSerach#||'%')
+									</isNotEmpty>
+								</isNotEmpty>
+			        	)TB
+	          )
+		WHERE RN = #currPage:NUMERIC#
+ 	</select> 
+ 	
+	<select id="OpenInfScolDAO.selectTvPopupCodeImokCdCnt" parameterClass="egovframework.admin.service.service.OpenInfSrv"  resultClass="Integer"  >
+		SELECT COUNT(1) AS CNT
+		 FROM $tblId$
+		WHERE 1=1
+			AND FSCL_YY = #fsclYy:NUMERIC#
+			AND IKWAN_CD =#ikwanCd:VARCHAR#
+			AND IHANG_CD =#ihangCd:VARCHAR#
+			 <isNotEmpty property="connWhere">
+								 $connWhere$
+							</isNotEmpty>
+			<isNotEmpty property="popupSerach">
+					 <isEmpty property="viewLang"> 
+							 AND (IMOK_NM LIKE  '%'|| #popupSerach#||'%' or IMOK_CD LIKE  '%'|| #popupSerach#||'%')
+					</isEmpty>
+					<isNotEmpty property="viewLang">
+							 AND (IMOK_ENG_NM LIKE  '%'|| #popupSerach#||'%' or IMOK_CD LIKE  '%'|| #popupSerach#||'%')
+					</isNotEmpty>
+			</isNotEmpty>
+		
+ 	</select>
+ 	
+ 	
+ 	<select id="OpenInfScolDAO.selectTvPopupCodeCitmCd" parameterClass="egovframework.admin.service.service.OpenInfSrv"  resultClass="java.util.LinkedHashMap" >
+	 	SELECT *
+		  FROM ( SELECT (TRUNC(ROWNUM / #pageSize:NUMERIC# - 0.1) +1) RN,
+			                TB.*
+			           FROM (
+								SELECT CITM_CD AS COL_ID
+									 <isEmpty property="viewLang"> 
+								 		 ,CITM_NM AS COL_NM
+									</isEmpty>
+									<isNotEmpty property="viewLang">
+										  ,CITM_ENG_NM AS COL_NM
+									</isNotEmpty>
+							  FROM $tblId$
+							WHERE 1=1
+							   AND FSCL_YY = #fsclYy:NUMERIC#
+							    <isNotEmpty property="connWhere">
+								 $connWhere$
+							</isNotEmpty>
+							    <isNotEmpty property="popupSerach">
+							    	<isEmpty property="viewLang"> 
+								 		 AND (CITM_NM LIKE  '%'|| #popupSerach#||'%' or CITM_CD LIKE  '%'|| #popupSerach#||'%')
+									</isEmpty>
+									<isNotEmpty property="viewLang">
+										  AND (CITM_ENG_NM LIKE  '%'|| #popupSerach#||'%' or CITM_CD LIKE  '%'|| #popupSerach#||'%')
+									</isNotEmpty>
+								</isNotEmpty>
+			        	)TB
+	          )
+		WHERE RN = #currPage:NUMERIC#
+ 	</select> 
+ 	
+	<select id="OpenInfScolDAO.selectTvPopupCodeCitmCdCnt" parameterClass="egovframework.admin.service.service.OpenInfSrv"  resultClass="Integer"  >
+		SELECT COUNT(1) AS CNT
+		 FROM $tblId$
+		WHERE 1=1
+			AND FSCL_YY = #fsclYy:NUMERIC#
+			 <isNotEmpty property="connWhere">
+								 $connWhere$
+							</isNotEmpty>
+			<isNotEmpty property="popupSerach">
+				<isEmpty property="viewLang"> 
+					 AND (CITM_NM LIKE  '%'|| #popupSerach#||'%' or CITM_CD LIKE  '%'|| #popupSerach#||'%')
+				</isEmpty>
+				<isNotEmpty property="viewLang">
+						AND (CITM_ENG_NM LIKE  '%'|| #popupSerach#||'%' or CITM_CD LIKE  '%'|| #popupSerach#||'%')
+				</isNotEmpty>
+			</isNotEmpty>
+ 	</select>
+ 	
+ 	<select id="OpenInfScolDAO.selectTvPopupCodeEitmCd" parameterClass="egovframework.admin.service.service.OpenInfSrv"  resultClass="java.util.LinkedHashMap" >
+	 	SELECT *
+		  FROM ( SELECT (TRUNC(ROWNUM / #pageSize:NUMERIC# - 0.1) +1) RN,
+			                TB.*
+			           FROM (
+								SELECT EITM_CD AS COL_ID
+									<isEmpty property="viewLang"> 
+										  ,EITM_NM AS COL_NM
+									</isEmpty>
+									<isNotEmpty property="viewLang">
+										 ,EITM_ENG_NM AS COL_NM
+									</isNotEmpty>
+							  FROM $tblId$
+							WHERE 1=1
+							   AND FSCL_YY = #fsclYy:NUMERIC#
+							   AND CITM_CD = #citmCd:VARCHAR#
+							    <isNotEmpty property="connWhere">
+								 $connWhere$
+							</isNotEmpty>
+							    <isNotEmpty property="popupSerach">
+							    	<isEmpty property="viewLang"> 
+										 AND (EITM_NM LIKE  '%'|| #popupSerach#||'%' or EITM_CD LIKE  '%'|| #popupSerach#||'%) 
+									</isEmpty>
+									<isNotEmpty property="viewLang">
+										AND (EITM_ENG_NM LIKE  '%'|| #popupSerach#||'%' or EITM_CD LIKE  '%'|| #popupSerach#||'%) 
+									</isNotEmpty>
+								</isNotEmpty>
+			        	)TB
+	          )
+		WHERE RN = #currPage:NUMERIC#
+ 	</select> 
+ 	
+	<select id="OpenInfScolDAO.selectTvPopupCodeEitmCdCnt" parameterClass="egovframework.admin.service.service.OpenInfSrv"  resultClass="Integer"  >
+		SELECT COUNT(1) AS CNT
+		 FROM $tblId$
+		WHERE 1=1
+			AND FSCL_YY = #fsclYy:NUMERIC#
+			AND CITM_CD = #citmCd:VARCHAR#
+			 <isNotEmpty property="connWhere">
+								 $connWhere$
+							</isNotEmpty>
+			<isNotEmpty property="popupSerach">
+				<isEmpty property="viewLang"> 
+					 AND (EITM_NM LIKE  '%'|| #popupSerach#||'%' or EITM_CD LIKE  '%'|| #popupSerach#||'%) 
+				</isEmpty>
+				<isNotEmpty property="viewLang">
+					AND (EITM_ENG_NM LIKE  '%'|| #popupSerach#||'%' or EITM_CD LIKE  '%'|| #popupSerach#||'%) 
+				</isNotEmpty>
+			</isNotEmpty>
+ 	</select>
+ 	
+ 	<select id="OpenInfScolDAO.selectTvPopupCodeFsclYm" parameterClass="egovframework.admin.service.service.OpenInfSrv"  resultClass="java.util.LinkedHashMap" >
+	 	SELECT *
+		  FROM ( SELECT (TRUNC(ROWNUM / #pageSize:NUMERIC# - 0.1) +1) RN,
+			                TB.*
+			           FROM (
+								SELECT YYYYMM AS COL_ID
+							         ,MM AS COL_NM
+							  FROM $tblId$
+							WHERE 1=1
+							   AND FSCL_YY = #fsclYy:NUMERIC#
+							    <isNotEmpty property="connWhere">
+								 $connWhere$
+							</isNotEmpty>
+							    <isNotEmpty property="popupSerach">
+											  AND (MM LIKE  '%'|| #popupSerach#||'%' or YYYYMM LIKE  '%'|| #popupSerach#||'%' )
+								</isNotEmpty>
+			        	)TB
+	          )
+		WHERE RN = #currPage:NUMERIC#
+ 	</select> 
+ 	
+	<select id="OpenInfScolDAO.selectTvPopupCodeFsclYmCnt" parameterClass="egovframework.admin.service.service.OpenInfSrv"  resultClass="Integer"  >
+		SELECT COUNT(1) AS CNT
+		 FROM $tblId$
+		WHERE 1=1
+			AND FSCL_YY = #fsclYy:NUMERIC#
+			 <isNotEmpty property="connWhere">
+								 $connWhere$
+							</isNotEmpty>
+			<isNotEmpty property="popupSerach">
+					  AND (MM LIKE  '%'|| #popupSerach#||'%' or YYYYMM LIKE  '%'|| #popupSerach#||'%' )
+			</isNotEmpty>
+ 	</select>
+ 	
+ 	<select id="OpenInfScolDAO.selectTvPopupCodeOrgCd" parameterClass="egovframework.admin.service.service.OpenInfSrv"  resultClass="java.util.LinkedHashMap" >
+	 	SELECT *
+		  FROM ( SELECT (TRUNC(ROWNUM / #pageSize:NUMERIC# - 0.1) +1) RN,
+			                TB.*
+			           FROM (
+								SELECT ORG_CD AS COL_ID
+									<isEmpty property="viewLang"> 
+										  ,OFFC_NM AS COL_NM
+									</isEmpty>
+									<isNotEmpty property="viewLang">
+										 ,OFFC_ENG_NM AS COL_NM
+									</isNotEmpty>
+							  FROM $tblId$
+							WHERE 1=1
+							   AND FSCL_YY = #fsclYy:NUMERIC#
+							    <isNotEmpty property="connWhere">
+								 $connWhere$
+							</isNotEmpty>
+							    <isNotEmpty property="popupSerach">
+							    	<isEmpty property="viewLang"> 
+										 AND (ORG_CD LIKE  '%'|| #popupSerach#||'%' or OFFC_NM LIKE  '%'|| #popupSerach#||'%' )
+									</isEmpty>
+									<isNotEmpty property="viewLang">
+										AND (ORG_CD LIKE  '%'|| #popupSerach#||'%' or OFFC_ENG_NM LIKE  '%'|| #popupSerach#||'%' )
+									</isNotEmpty>
+								</isNotEmpty>
+			        	)TB
+	          )
+		WHERE RN = #currPage:NUMERIC#
+ 	</select> 
+ 	
+	<select id="OpenInfScolDAO.selectTvPopupCodeOrgCdCnt" parameterClass="egovframework.admin.service.service.OpenInfSrv"  resultClass="Integer"  >
+		SELECT COUNT(1) AS CNT
+		 FROM $tblId$
+		WHERE 1=1
+			AND FSCL_YY = #fsclYy:NUMERIC#
+			 <isNotEmpty property="connWhere">
+								 $connWhere$
+							</isNotEmpty>
+			<isNotEmpty property="popupSerach">
+				<isEmpty property="viewLang"> 
+						AND (ORG_CD LIKE  '%'|| #popupSerach#||'%' or OFFC_NM LIKE  '%'|| #popupSerach#||'%' )
+				</isEmpty>
+				<isNotEmpty property="viewLang">
+						AND (ORG_CD LIKE  '%'|| #popupSerach#||'%' or OFFC_ENG_NM LIKE  '%'|| #popupSerach#||'%' )
+				</isNotEmpty>
+			</isNotEmpty>
+ 	</select>
+ 	
+ 	<select id="OpenInfScolDAO.selectTvPopupCodeMpbFsclCd" parameterClass="egovframework.admin.service.service.OpenInfSrv"  resultClass="java.util.LinkedHashMap" >
+	 	SELECT *
+		  FROM ( SELECT (TRUNC(ROWNUM / #pageSize:NUMERIC# - 0.1) +1) RN,
+			                TB.*
+			           FROM (
+								SELECT MPB_FSCL_CD AS COL_ID
+									<isEmpty property="viewLang"> 
+										 ,FSCL_NM AS COL_NM
+									</isEmpty>
+									<isNotEmpty property="viewLang">
+										 ,FSCL_ENG_NM AS COL_NM
+									</isNotEmpty>
+							  FROM $tblId$
+							WHERE 1=1
+							   AND FSCL_YY = #fsclYy:NUMERIC#
+							   AND ORG_CD =#orgCd:VARCHAR#
+							    <isNotEmpty property="connWhere">
+								 $connWhere$
+							</isNotEmpty>
+							    <isNotEmpty property="popupSerach">
+							    	<isEmpty property="viewLang"> 
+										AND (MPB_FSCL_CD LIKE  '%'|| #popupSerach#||'%' or FSCL_NM LIKE  '%'|| #popupSerach#||'%' )
+									</isEmpty>
+									<isNotEmpty property="viewLang">
+										AND (MPB_FSCL_CD LIKE  '%'|| #popupSerach#||'%' or FSCL_ENG_NM LIKE  '%'|| #popupSerach#||'%' )
+									</isNotEmpty>
+								</isNotEmpty>
+			        	)TB
+	          )
+		WHERE RN = #currPage:NUMERIC#
+ 	</select> 
+ 	
+	<select id="OpenInfScolDAO.selectTvPopupCodeMpbFsclCdCnt" parameterClass="egovframework.admin.service.service.OpenInfSrv"  resultClass="Integer"  >
+		SELECT COUNT(1) AS CNT
+		 FROM $tblId$
+		WHERE 1=1
+			AND FSCL_YY = #fsclYy:NUMERIC#
+			AND ORG_CD =#orgCd:VARCHAR#
+			 <isNotEmpty property="connWhere">
+								 $connWhere$
+							</isNotEmpty>
+			<isNotEmpty property="popupSerach">
+				<isEmpty property="viewLang"> 
+					AND (MPB_FSCL_CD LIKE  '%'|| #popupSerach#||'%' or FSCL_NM LIKE  '%'|| #popupSerach#||'%' )
+				</isEmpty>
+				<isNotEmpty property="viewLang">
+					AND (MPB_FSCL_CD LIKE  '%'|| #popupSerach#||'%' or FSCL_ENG_NM LIKE  '%'|| #popupSerach#||'%' )
+				</isNotEmpty>
+			</isNotEmpty>
+ 	</select>
+ 	
+ 	<select id="OpenInfScolDAO.selectTvPopupCodeMpbAcctCd" parameterClass="egovframework.admin.service.service.OpenInfSrv"  resultClass="java.util.LinkedHashMap" >
+	 	SELECT *
+		  FROM ( SELECT (TRUNC(ROWNUM / #pageSize:NUMERIC# - 0.1) +1) RN,
+			                TB.*
+			           FROM (
+								SELECT MPB_ACCT_CD AS COL_ID
+									<isEmpty property="viewLang"> 
+										,ACCT_NM AS COL_NM
+									</isEmpty>
+									<isNotEmpty property="viewLang">
+										,ACCT_ENG_NM AS COL_NM
+									</isNotEmpty>
+							  FROM $tblId$
+							WHERE 1=1
+							   AND FSCL_YY = #fsclYy:NUMERIC#
+							   AND ORG_CD =#orgCd:VARCHAR#
+							   AND MPB_FSCL_CD = #mpbFsclCd:VARCHAR#
+							    <isNotEmpty property="connWhere">
+								 $connWhere$
+							</isNotEmpty>
+							    <isNotEmpty property="popupSerach">
+							   		 <isEmpty property="viewLang"> 
+										AND (MPB_ACCT_CD LIKE  '%'|| #popupSerach#||'%' or ACCT_NM LIKE  '%'|| #popupSerach#||'%' )
+									</isEmpty>
+									<isNotEmpty property="viewLang">
+										AND (MPB_ACCT_CD LIKE  '%'|| #popupSerach#||'%' or ACCT_ENG_NM LIKE  '%'|| #popupSerach#||'%' )
+									</isNotEmpty>
+								</isNotEmpty>
+			        	)TB
+	          )
+		WHERE RN = #currPage:NUMERIC#
+ 	</select> 
+ 	
+	<select id="OpenInfScolDAO.selectTvPopupCodeMpbAcctCdCnt" parameterClass="egovframework.admin.service.service.OpenInfSrv"  resultClass="Integer"  >
+		SELECT COUNT(1) AS CNT
+		 FROM $tblId$
+		WHERE 1=1
+			 AND FSCL_YY = #fsclYy:NUMERIC#
+			 AND ORG_CD =#orgCd:VARCHAR#
+			 AND MPB_FSCL_CD = #mpbFsclCd:VARCHAR#
+			  <isNotEmpty property="connWhere">
+								AND DEL_YN='N'
+			  </isNotEmpty>
+			<isNotEmpty property="popupSerach">
+				<isEmpty property="viewLang"> 
+					AND (MPB_ACCT_CD LIKE  '%'|| #popupSerach#||'%' or ACCT_NM LIKE  '%'|| #popupSerach#||'%' )
+				</isEmpty>
+				<isNotEmpty property="viewLang">
+					AND (MPB_ACCT_CD LIKE  '%'|| #popupSerach#||'%' or ACCT_ENG_NM LIKE  '%'|| #popupSerach#||'%' )
+				</isNotEmpty>
+			</isNotEmpty>
+ 	</select>
+ 	
+ 	
+ 	
+ 	<select id="OpenInfScolDAO.selectOpenInfFsYn" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultMap="OpenInfColOFsYn" >
+				SELECT 
+					  A.FS_YN
+					 ,A.FS_CD	 
+		         FROM TV_MNG_INF_SRV A
+		         WHERE A.INF_ID=#infId:VARCHAR#
+		           AND A.SRV_CD=#srvCd:VARCHAR#
+	</select>
+ 	
+ 	
+ 	<select id="OpenInfScolDAO.selectOptFiltNm" parameterClass="egovframework.admin.service.service.OpenInfScol"  resultClass="String" remapResults="true">
+		SELECT $srcColNm$
+		  FROM $filtTblCd$
+		 WHERE ROWNUM = 1
+		   AND $srcColId$ = #filtDefaultVal:VARCHAR#
+ 	</select>
+</sqlMap>

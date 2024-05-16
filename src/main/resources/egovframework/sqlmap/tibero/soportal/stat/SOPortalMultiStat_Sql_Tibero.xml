@@ -1,0 +1,1413 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="MultiStatList" >
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+
+	<!-- 통계표 옵션정보 조회 -->
+	<select id="multiStatListDao.selectMultiStatDtlOpt" parameterClass="params" resultClass="java.util.HashMap">
+		/* sql id : multiStatListDao.selectMultiStatDtlOpt */
+		SELECT
+			STATBL_ID	AS "statblId"
+			, OPT_CD	AS "optCd"
+			, OPT_VAL	AS "optVal"
+		FROM 
+			TB_STTS_TBL_OPT 
+		WHERE 1 = 1
+		AND STATBL_ID = #statblId:VARCHAR#
+		AND USE_YN = 'Y'	
+	</select>
+	
+	<!-- 통계자료 작성일정 조회 -->
+	<select id="multiStatListDao.selectMultiStatDtlSchl" parameterClass="params" resultClass="java.util.HashMap">
+		/* sql id : multiStatListDao.selectMultiStatDtlSchl */
+		 SELECT Z.DTACYCLE_CD AS "dtacycleCd"
+		 	,	Z.WRTTIME_IDTFR AS "wrttimeIdtfr"
+		 	, 	Z.WRTSTDD_CD AS "wrtstddCd"
+		 	, 	MAX(Z.WRT_START_MD) AS "wrtStartMd"
+		 	, 	MAX(Z.WRT_END_MD) AS "wrtEndMd"
+		   FROM (
+				SELECT
+					 DTACYCLE_CD
+					, WRTTIME_IDTFR
+					, WRTSTDD_CD
+					, SUBSTR(WRT_START_MD, 1, 2) || '-' || SUBSTR(WRT_START_MD, 3, 4) 	AS WRT_START_MD
+		         	, SUBSTR(WRT_END_MD, 1, 2) || '-' || SUBSTR(WRT_END_MD, 3, 4) 		AS WRT_END_MD
+				FROM 
+					TB_STTS_TBL_SCHL
+				WHERE 1 = 1
+				<isNotEmpty property="iterChkStats">
+			       	<iterate property="iterChkStats" prepend="AND STATBL_ID IN " open="(" close=")" conjunction=", ">
+			       		#iterChkStats[]#
+			       	</iterate>
+			    </isNotEmpty>
+			    <isEmpty  property="iterChkStats">
+			      AND STATBL_ID = #statblId:VARCHAR#
+			    </isEmpty>
+			) Z
+		 GROUP BY Z.DTACYCLE_CD, Z.WRTTIME_IDTFR, Z.WRTSTDD_CD
+	</select>
+
+	<!-- 통계표 주석 리스트 조회 -->
+	<select id="multiStatListDao.selectMultiStatCmmtList" parameterClass="params" resultClass="java.util.HashMap">
+		/* sql id : multiStatListDao.selectMultiStatCmmtList */
+		SELECT B.STATBL_ID AS "statblId"
+			 <isEmpty property="langGb">
+			 , B.STATBL_NM AS "statblNm"
+			 </isEmpty>
+			 <isNotEmpty property="langGb">
+			 , B.ENG_STATBL_NM AS "statblNm"
+			 </isNotEmpty>
+			 , FN_GET_CMMT_IDTFR(A.CMMT_IDTFR) AS "cmmtIdtfr" 
+			 , A.STATBL_CMMT AS "cmmtCont" 
+			 , A.CMMT_TAG AS "cmmtGubun"
+			 , A.V_ORDER AS "order"
+		  FROM
+		       (
+		       SELECT 1 AS V_ORDER, STATBL_ID
+		       		 , CMMT_IDTFR 
+			   		<isEmpty property="langGb">
+			   		, STATBL_CMMT AS STATBL_CMMT
+			   		</isEmpty>
+			   		<isNotEmpty property="langGb">
+			   		, ENG_STATBL_CMMT AS STATBL_CMMT
+			   		</isNotEmpty>
+		       		 , 'TBL' AS CMMT_TAG
+		         FROM TB_STTS_TBL
+		        WHERE 1 = 1
+       			<iterate property="iterChkStats" prepend="AND STATBL_ID IN " open="(" close=")" conjunction=", ">
+       				#iterChkStats[]:VARCHAR#
+       			</iterate>
+		          AND USE_YN = 'Y'
+		          AND STATBL_CMMT IS NOT NULL
+		        UNION ALL
+		        SELECT 1 AS V_ORDER, STATBL_ID
+		       		 , CMMT_IDTFR 
+			   		<isEmpty property="langGb">
+			   		, CMMT_CONT AS STATBL_CMMT
+			   		</isEmpty>
+			   		<isNotEmpty property="langGb">
+			   		, ENG_CMMT_CONT AS STATBL_CMMT
+			   		</isNotEmpty>
+		       		 , 'WRT' AS CMMT_TAG
+		         FROM TB_STTS_TBL_DIF
+		        WHERE 1 = 1
+		            AND WRTSTATE_CD = 'AC'
+       			<iterate property="iterChkStats" prepend="AND STATBL_ID IN " open="(" close=")" conjunction=", ">
+       				#iterChkStats[]:VARCHAR#
+       			</iterate>
+		          AND CMMT_IDTFR IS NOT NULL  
+		        UNION ALL
+		        SELECT 1  AS V_ORDER, STATBL_ID
+		             , CMMT_IDTFR
+					<isEmpty property="langGb">
+					, MAX(CMMT_CONT) AS CMMT_CONT
+					</isEmpty>
+					<isNotEmpty property="langGb">
+					, MAX(ENG_CMMT_CONT) AS CMMT_CONT
+					</isNotEmpty>
+					 , 'ITM' AS CMMT_TAG
+		          FROM TB_STTS_TBL_ITM
+        		 WHERE 1 = 1
+					<isNotEmpty property="wheresMultiData">
+					AND ( 
+						<iterate property="wheresMultiData" conjunction="OR ">
+							(
+							<iterate property="wheresMultiData[].statblList" prepend=" STATBL_ID IN " open="(" close=")" conjunction=",">
+								#wheresMultiData[].statblList[]#
+							</iterate>
+							<isNotEmpty property="wheresMultiData[].allList">		
+								<iterate property="wheresMultiData[].allList" prepend=" AND DATANO IN " open="(" close=")" conjunction=",">
+									#wheresMultiData[].allList[]#
+								</iterate>
+							</isNotEmpty>
+							)
+						</iterate>
+					)
+					</isNotEmpty>				   
+              	   AND USE_YN = 'Y'
+              	   AND CMMT_IDTFR IS NOT NULL
+        		 GROUP BY STATBL_ID, CMMT_IDTFR , V_ORDER
+           		UNION ALL
+		        SELECT 1 AS V_ORDER, STATBL_ID
+		             , CMMT_IDTFR
+					<isEmpty property="langGb">
+					, MAX(CMMT_CONT) AS CMMT_CONT
+					</isEmpty>
+					<isNotEmpty property="langGb">
+					, MAX(ENG_CMMT_CONT) AS CMMT_CONT
+					</isNotEmpty>
+		             , 'DATA' AS CMMT_TAG
+		          FROM TB_STTSDATA_01
+		         WHERE 1 = 1
+					<isNotEmpty property="wheresMultiData">
+					AND ( 
+						<iterate property="wheresMultiData" conjunction="OR ">
+							(
+							<iterate property="wheresMultiData[].statblList" prepend=" STATBL_ID IN " open="(" close=")" conjunction=",">
+								#wheresMultiData[].statblList[]#
+							</iterate>
+							<isNotEmpty property="wheresMultiData[].grpList">		
+								<iterate property="wheresMultiData[].grpList" prepend=" AND GRP_DATANO IN " open="(" close=")" conjunction=",">
+									#wheresMultiData[].grpList[]#
+								</iterate>
+							</isNotEmpty>
+							<isNotEmpty property="wheresMultiData[].clsList">		
+								<iterate property="wheresMultiData[].clsList" prepend=" AND CLS_DATANO IN " open="(" close=")" conjunction=",">
+									#wheresMultiData[].clsList[]#
+								</iterate>
+							</isNotEmpty>
+							<iterate property="wheresMultiData[].itmList" prepend=" AND ITM_DATANO IN " open="(" close=")" conjunction=",">
+								#wheresMultiData[].itmList[]#
+							</iterate>
+							)
+						</iterate>
+					)
+					</isNotEmpty>
+		           AND DTACYCLE_CD = #dtacycleCd:VARCHAR#
+		           AND DTADVS_CD = 'OD'
+		           AND WRTTIME_IDTFR_ID >= '190000'
+		           AND WRTSTATE_CD = 'AC'
+		           AND CMMT_IDTFR IS NOT NULL
+		         GROUP BY STATBL_ID, CMMT_IDTFR
+		        UNION ALL
+		        SELECT 10000000 + 999 AS V_ORDER , '' STATBL_ID, '' AS CMMT_IDTFR
+				  		<isEmpty property="langGb">
+				  		<!-- , '통계기호 : ' || LTRIM(SYS_CONNECT_BY_PATH(A.DITC_NM, ' | '),' | ') AS CMMT_CONT -->
+				  		, '' AS CMMT_CONT
+				  		</isEmpty>
+				  		<isNotEmpty property="langGb">
+				  		<!-- , 'Statistical Symbol : ' || LTRIM(SYS_CONNECT_BY_PATH(A.DITC_NM, ' | '), ' | ') AS CMMT_CONT -->
+				  		, '' AS CMMT_CONT
+				  		</isNotEmpty>
+		             , 'SIGN' AS CMMT_TAG
+		          FROM
+		              (SELECT DITC_NM AS DITC_NM ,
+		                     ROW_NUMBER() OVER(PARTITION BY GRP_CD ORDER BY V_ORDER ) RN ,
+		                     COUNT(*) OVER(PARTITION BY GRP_CD) CNT
+		                FROM TB_COMM_CODE
+		               WHERE GRP_CD = 'S1011'
+		                     AND USE_YN = 'Y'
+		                     AND DITC_CD != 'x'
+		              ) A
+		         WHERE RN = CNT
+		         START    WITH RN = 1 CONNECT BY RN = PRIOR RN + 1
+		 )  A LEFT JOIN TB_STTS_TBL B ON A.STATBL_ID = B.STATBL_ID
+		 ORDER BY B.STATBL_ID, A.V_ORDER, TO_NUMBER( NVL(A.CMMT_IDTFR,0) )
+	</select>
+
+	<!-- 통계표 작성주기 검색  -->
+	<select id="multiStatListDao.statMultiDtacycleList" parameterClass="params" resultClass="record">
+		/* sql id : multiStatListDao.statMultiDtacycleList */
+		SELECT 
+			A.DITC_CD 	AS "code"
+			, A.DITC_NM	AS "name"
+		FROM
+			TB_COMM_CODE A
+				INNER JOIN (
+					SELECT DISTINCT DTACYCLE_CD
+					FROM   TB_STTS_TBL_SCHL
+					WHERE  1 = 1
+				<isNotEmpty property="iterChkStats">
+			       	<iterate property="iterChkStats" prepend="AND STATBL_ID IN " open="(" close=")" conjunction=", ">
+			       		#iterChkStats[]#
+			       	</iterate>
+			    </isNotEmpty>
+			    <isEmpty  property="iterChkStats">
+			      AND STATBL_ID = #statblId:VARCHAR#
+			    </isEmpty>
+				) B
+				ON  A.DITC_CD = B.DTACYCLE_CD
+		WHERE
+			A.GRP_CD = 'S1103'
+		AND A.USE_YN = 'Y'
+		ORDER BY V_ORDER	
+	</select>	
+	
+	<!-- 통계표 통계자료유형 조회 -->
+	<select id="multiStatListDao.selectMultiStatTblDtadvs" parameterClass="params" resultClass="record">
+		/* sql id : multiStatListDao.selectMultiStatTblDtadvs */
+		SELECT 
+			B.OPT_CD		AS "optCd"
+			<isEmpty property="langGb">
+			, C.DITC_NM 	AS "optNm"
+			</isEmpty>
+			<isNotEmpty property="langGb">
+			, C.ENG_DITC_NM AS "optNm"
+			</isNotEmpty>
+			, B.OPT_VAL		AS "optVal"
+		FROM
+			TB_STTS_TBL A
+			INNER JOIN TB_STTS_TBL_OPT B
+				ON  A.STATBL_ID = B.STATBL_ID
+				AND B.OPT_CD = 'DD'
+				AND B.USE_YN = 'Y'
+			INNER JOIN TB_COMM_CODE C
+				ON  C.GRP_CD = 'S1102'
+				AND B.OPT_VAL = C.DITC_CD
+				AND C.USE_YN = 'Y'
+		WHERE 1 = 1
+		<isNotEmpty property="iterChkStats">
+	       	<iterate property="iterChkStats" prepend="AND A.STATBL_ID IN " open="(" close=")" conjunction=", ">
+	       		#iterChkStats[]#
+	       	</iterate>
+	    </isNotEmpty>
+	    <isEmpty  property="iterChkStats">
+	      AND A.STATBL_ID = #statblId:VARCHAR#
+	    </isEmpty>
+		GROUP BY  B.OPT_CD,  
+			<isEmpty property="langGb">
+			C.DITC_NM,
+			</isEmpty>
+			<isNotEmpty property="langGb">
+			C.ENG_DITC_NM,
+			</isNotEmpty>
+			B.OPT_VAL,  C.V_ORDER
+		ORDER BY C.V_ORDER	
+	</select>
+	
+	<!-- 통계표 상세조회 -->
+	<select id="multiStatListDao.selectMultiStatDtl" parameterClass="params" resultClass="java.util.HashMap">
+		/* sql id : multiStatListDao.selectMultiStatDtl */
+		SELECT
+			A.STATBL_ID 							AS "statblId"
+			<isEmpty property="langGb">
+			, A.STATBL_NM							AS "statblNm"
+			</isEmpty>
+			<isNotEmpty property="langGb">
+			, A.ENG_STATBL_NM						AS "statblNm"
+			</isNotEmpty>
+			, A.STAT_ID								AS "statId"
+			, B.STAT_NM								AS "statNm"
+			, A.CATE_ID								AS "cateId"
+			, C.CATE_NM								AS "cateNm"
+			, A.DSCN_ID								AS "dscnId"
+			, A.RPSTUI_NM							AS "rpstuiNm"
+			/*, A.STATBL_CMMT							AS "statblCmmt"
+			, A.ENG_STATBL_CMMT						AS "engStatblCmmt"  */
+			, A.SCHW_TAG_CONT						AS "schwTagCont"
+			, A.ENG_SCHW_TAG_CONT					AS "engSchwTagCont"
+			, A.OPEN_STATE							AS "openState"
+			, A.FVT_DATA_ORDER						AS "fvtDataOrder"
+			, TO_CHAR(A.OPEN_DTTM, 'YYYY-MM-DD')	AS "openDttm"
+			, A.USE_YN								AS "useYn"
+			, TO_CHAR(A.UPD_DTTM, 'YYYY-MM-DD')     AS "updDttm"
+			, ( SELECT ORG_NM
+			    FROM   TB_COMM_ORG
+			    WHERE  ORG_CD = A.ORG_CD
+			    AND    ROWNUM = 1
+			) AS "orgNm"
+		FROM 
+			TB_STTS_TBL A
+			INNER JOIN TB_STTS_STAT B
+				ON  A.STAT_ID = B.STAT_ID
+			INNER JOIN TB_STTS_CATE C
+				ON  A.CATE_ID = C.CATE_ID
+		WHERE
+			A.USE_YN = 'Y'	
+		AND A.OPEN_STATE = 'Y'
+		<![CDATA[
+		AND A.OPEN_DTTM < TRUNC (SYSDATE + 1)
+		]]>
+		<isNotEmpty property="iterChkStats">
+	       	<iterate property="iterChkStats" prepend="AND A.STATBL_ID IN " open="(" close=")" conjunction=", ">
+	       		#iterChkStats[]#
+	       	</iterate>
+	    </isNotEmpty>
+	    <isEmpty  property="iterChkStats">
+	      AND A.STATBL_ID = #statblId:VARCHAR#
+	    </isEmpty>
+	</select>
+
+    <!-- 시트 표두/표측 설정 -->
+    <select id="multiStatListDao.selectMultiStatTblItm" remapResults="true"  parameterClass="params" resultClass="record">
+    	/* sql id : multiStatListDao.selectMultiStatTblItm */
+		WITH TMP_STATTBL_ITM AS
+		(
+			SELECT 
+				I.STATBL_ID
+				, Y.WRTTIME_IDTFR_ID
+				, Y.WRTTIME_IDTFR_NM
+        		, Y.CMMT_IDTFR AS WRTTIME_CMMT_IDTFR
+       		    , G.GRP_DATANO
+				, G.GRP_FULLNM
+				, G.GRP_LEVEL
+				, MAX(G.GRP_LEVEL) OVER ( ) AS MAX_GRP_LEVEL
+				, G.GRP_ORDER
+				, G.GRP_FULL_CMMT_IDTFR
+				, C.CLS_DATANO
+				, C.CLS_FULLNM
+				, C.CLS_LEVEL
+				, MAX(C.CLS_LEVEL) OVER ( ) AS MAX_CLS_LEVEL
+				, C.CLS_ORDER
+				, C.CLS_FULL_CMMT_IDTFR
+				, I.ITM_FULL_CMMT_IDTFR
+				, I.ITM_DATANO
+				, I.ITM_FULLNM
+				, I.ITM_LEVEL
+				, MAX(I.ITM_LEVEL) OVER ( ) AS MAX_ITM_LEVEL
+				, (CASE WHEN I.GRP_UI_ID = U.GRP_UI_ID THEN  
+		  	 				FN_GET_DTADVS_UI(O.DTADVS_CD, 'UI_ID', U.UI_ID)
+		 	   	    	ELSE 
+		 	 	   			FN_GET_DTADVS_UI(O.DTADVS_CD, 'UI_ID', I.UI_ID)
+			 	   		END)  AS UI_ID
+				, (CASE WHEN I.GRP_UI_ID = U.GRP_UI_ID THEN  
+		  	 				FN_GET_DTADVS_UI(O.DTADVS_CD, 'UI_NM', U.UI_NM)
+		 	   	    	ELSE 
+		 	 	   			FN_GET_DTADVS_UI(O.DTADVS_CD, 'UI_NM', I.UI_NM)
+			 	   		END)  AS UI_NM				
+				
+				, I.ITM_ORDER
+				, O.DTADVS_CD
+				, O.DTADVS_NM
+				, O.DTADVS_ORDER
+				, TO_NUMBER(V.V_ORDER) AS SELECTED_ORDER
+				<isEmpty property="langGb"> , TBL.STATBL_NM AS STATBL_NM</isEmpty>      
+				<isNotEmpty property="langGb"> , TBL.ENG_STATBL_NM AS STATBL_NM</isNotEmpty>
+                , TBL.CMMT_IDTFR  
+                , V.ALPHA_OPRT   
+			FROM  
+				TB_STTS_TBL TBL	INNER JOIN 
+				(
+					SELECT 
+						STATBL_ID
+						, DATANO AS ITM_DATANO
+						, PAR_DATANO AS PAR_ITM_DATANO
+						<isEmpty property="langGb">
+						, VIEW_ITM_FULLNM AS ITM_FULLNM
+						, UI_NM
+						</isEmpty>
+						<isNotEmpty property="langGb">
+						, ENG_VIEW_ITM_FULLNM AS ITM_FULLNM
+						, ENG_UI_NM AS UI_NM
+						</isNotEmpty>
+						, DUMMY_YN
+						<![CDATA[
+						, SUBSTR(SYS_CONNECT_BY_PATH(FN_GET_CMMT_IDTFR(SI.CMMT_IDTFR), '>'), 2) AS ITM_FULL_CMMT_IDTFR
+						]]>
+						, GRP_UI_ID
+						, UI_ID
+						, ROWNUM AS ITM_ORDER
+						, LEVEL AS ITM_LEVEL
+						, SI.ITM_START_YM
+						, SI.ITM_END_YM
+					FROM 
+						TV_STTS_TBL_ITM SI
+					WHERE DUMMY_YN = 'N'
+					<isNotEmpty property="iterChkStats">	<!-- 선택한 항목 in 조회 -->
+						START WITH
+		            	<iterate property="iterChkStats" prepend="STATBL_ID IN " open="(" close=")" conjunction=", ">
+		            		#iterChkStats[]#
+		            	</iterate>
+		            		AND ITM_TAG = 'I'  AND PAR_DATANO = 0
+		            </isNotEmpty>
+						CONNECT BY PRIOR DATANO = PAR_DATANO AND PRIOR STATBL_ID = STATBL_ID
+		            	<iterate property="iterChkStats" prepend="AND STATBL_ID IN " open="(" close=")" conjunction=", ">
+		            		#iterChkStats[]#
+		            	</iterate>
+		            	    AND USE_YN = 'Y'
+                 		  ORDER SIBLINGS BY V_ORDER
+          		) I 
+          		ON      TBL.STATBL_ID = I.STATBL_ID
+          		LEFT OUTER JOIN ( 
+          			SELECT 
+          				STATBL_ID
+          				, DATANO AS CLS_DATANO
+          				, PAR_DATANO AS PAR_CLS_DATANO
+          				<isEmpty property="langGb">
+          				, VIEW_ITM_FULLNM AS CLS_FULLNM
+          				</isEmpty>
+          				<isNotEmpty property="langGb">
+          				, ENG_VIEW_ITM_FULLNM AS CLS_FULLNM
+          				</isNotEmpty>
+          				, DUMMY_YN
+						<![CDATA[
+						, SUBSTR(SYS_CONNECT_BY_PATH (FN_GET_CMMT_IDTFR(SC.CMMT_IDTFR),  '>'),  2) AS CLS_FULL_CMMT_IDTFR
+						]]>
+          				, '' GRP_UI_ID
+          				, '' UI_ID
+          				, '' UI_NM
+          				, V_ORDER
+          				, ROWNUM AS CLS_ORDER
+          				, LEVEL AS CLS_LEVEL
+          				, SC.ITM_START_YM
+						, SC.ITM_END_YM
+					FROM 
+						TV_STTS_TBL_ITM SC
+					WHERE DUMMY_YN = 'N' 
+					<isNotEmpty property="iterChkStats">	<!-- 선택한 항목 in 조회 -->
+						START WITH
+		            	<iterate property="iterChkStats" prepend="STATBL_ID IN " open="(" close=")" conjunction=", ">
+		            		#iterChkStats[]#
+		            	</iterate>
+		            		AND ITM_TAG = 'C'  AND PAR_DATANO = 0
+		            </isNotEmpty>
+						CONNECT BY PRIOR DATANO = PAR_DATANO AND PRIOR STATBL_ID = STATBL_ID
+		            	<iterate property="iterChkStats" prepend="AND STATBL_ID IN " open="(" close=")" conjunction=", ">
+		            		#iterChkStats[]#
+		            	</iterate>
+		            	    AND USE_YN = 'Y'
+						  ORDER SIBLINGS BY V_ORDER
+				) C ON I.STATBL_ID = C.STATBL_ID
+          		LEFT OUTER JOIN ( 
+          			SELECT STATBL_ID
+          				, DATANO AS GRP_DATANO
+          				, PAR_DATANO AS PAR_GRP_DATANO
+          				<isEmpty property="langGb">
+          				, VIEW_ITM_FULLNM AS GRP_FULLNM
+          				</isEmpty>
+          				<isNotEmpty property="langGb">
+          				, ENG_VIEW_ITM_FULLNM AS GRP_FULLNM
+          				</isNotEmpty>
+          				, DUMMY_YN
+						<![CDATA[
+						, SUBSTR(SYS_CONNECT_BY_PATH (FN_GET_CMMT_IDTFR(SG.CMMT_IDTFR),  '>'),  2) AS GRP_FULL_CMMT_IDTFR
+						]]>
+          				, '' GRP_UI_ID
+          				, '' UI_ID
+          				, '' UI_NM
+          				, V_ORDER
+          				, ROWNUM AS GRP_ORDER
+          				, LEVEL AS GRP_LEVEL
+          				, SG.ITM_START_YM
+						, SG.ITM_END_YM
+					FROM 
+						TV_STTS_TBL_ITM SG
+					WHERE DUMMY_YN = 'N' 
+					<isNotEmpty property="iterChkStats">	<!-- 선택한 항목 in 조회 -->
+						START WITH
+		            	<iterate property="iterChkStats" prepend="STATBL_ID IN " open="(" close=")" conjunction=", ">
+		            		#iterChkStats[]#
+		            	</iterate>
+		            		AND ITM_TAG = 'G'  AND PAR_DATANO = 0
+		            </isNotEmpty>
+						CONNECT BY PRIOR DATANO = PAR_DATANO AND PRIOR STATBL_ID = STATBL_ID
+		            	<iterate property="iterChkStats" prepend="AND STATBL_ID IN " open="(" close=")" conjunction=", ">
+		            		#iterChkStats[]:VARCHAR#
+		            	</iterate>
+		            	    AND USE_YN = 'Y'
+						  ORDER SIBLINGS BY V_ORDER
+				) G ON I.STATBL_ID = G.STATBL_ID
+				INNER JOIN
+  				(
+  				<isNotEmpty property="multiDataList">
+  					<iterate property="multiDataList" conjunction=" UNION ">
+						SELECT #multiDataList[].statblId# 	AS STATBL_ID
+						     , #multiDataList[].itmNo# 		AS ITM_DATANO
+						     , #multiDataList[].clsNo# 		AS CLS_DATANO
+						     , #multiDataList[].grpNo# 		AS GRP_DATANO
+						     , #multiDataList[].vOrder# 	AS V_ORDER
+						     , #multiDataList[].alphaOprt# 	AS ALPHA_OPRT 
+						FROM DUAL
+  					</iterate>
+  				</isNotEmpty>
+  				) V
+				ON  I.STATBL_ID = V.STATBL_ID  
+					AND I.ITM_DATANO = V.ITM_DATANO 
+					AND NVL(C.CLS_DATANO,0) = NVL(V.CLS_DATANO,0)
+					AND NVL(G.GRP_DATANO, 0) = NVL(V.GRP_DATANO, 0)
+				LEFT OUTER JOIN 
+					TB_STTS_STDDUI U  ON U.GRP_UI_ID = I.GRP_UI_ID 
+		    	 	<isEmpty property="uiChgVal">		<!-- 단위 변환 default -->
+		    	 		AND U.UI_ID = I.UI_ID
+		    	 	</isEmpty>
+		    	 	<isNotEmpty property="uiChgVal">	<!-- 단위 변환 시 -->
+		    	 		AND U.UI_ID = #uiChgVal#
+		    	 	</isNotEmpty>	
+					CROSS JOIN ( 
+						SELECT  DITC_CD AS DTADVS_CD
+				                <isEmpty property="langGb">
+				                , DITC_NM 	AS DTADVS_NM
+				                </isEmpty>
+								<isNotEmpty property="langGb">
+				                , ENG_DITC_NM AS DTADVS_NM  
+				                </isNotEmpty>
+							    , V_ORDER AS DTADVS_ORDER
+					  	  FROM TB_COMM_CODE
+					<isEmpty property="multiStatType">
+					  	 WHERE GRP_CD = 'S1102'
+					</isEmpty>
+					<isNotEmpty property="multiStatType">
+						<isEqual property="multiStatType" compareValue="BP">
+					  	 WHERE GRP_CD = 'S1251'
+					  	</isEqual>
+					  	<isNotEqual property="multiStatType" compareValue="BP">
+					  	 WHERE GRP_CD = 'S1102'
+					  	</isNotEqual>
+					</isNotEmpty> 
+					  	 	AND DITC_CD IN 
+							<isEmpty property="iterDtadvsVal">	<!-- 통계자료유형 default(통계표 설정된 대로 조회) -->
+							('OD')
+							</isEmpty>
+							<isNotEmpty property="iterDtadvsVal">	<!-- 통계자료유형 선택된 항목 조회 -->
+				            	<iterate property="iterDtadvsVal" open="(" close=")" conjunction=", ">
+				            		#iterDtadvsVal[]#
+				            	</iterate>
+				            </isNotEmpty>
+					) O
+					CROSS JOIN
+			        (
+				       SELECT WRTTIME_IDTFR_ID, WRTTIME_IDTFR_NM, CMMT_IDTFR, F_WRTTIME_IDTFR_ID
+		        		FROM (
+				        	SELECT 
+				        		<isEqual property="viewLocOpt" compareValue="T">	<!-- 보기형식이 표로 보기일 경우 -->
+				       				<isEqual property="SheetLoc" compareValue="H">		<!-- 헤더 정보 세팅할 경우 -->
+						       		SUBSTR(WRTTIME_IDTFR_ID,5,2) AS WRTTIME_IDTFR_ID
+					       			, FN_GET_WRTTIME_IDTFR_NM(#dtacycleCd:VARCHAR#, SUBSTR(WRTTIME_IDTFR_ID,5,2)) AS WRTTIME_IDTFR_NM
+					       			, CMMT_IDTFR
+					       			</isEqual>
+				       				<isEqual property="SheetLoc" compareValue="L">		<!-- 표측 정보 세팅할 경우 -->
+					       			SUBSTR(WRTTIME_IDTFR_ID,0,4) AS WRTTIME_IDTFR_ID
+					       			, FN_GET_WRTTIME_IDTFR_NM('YY', SUBSTR(WRTTIME_IDTFR_ID,0,4))	AS WRTTIME_IDTFR_NM
+					       			, CMMT_IDTFR
+					       			</isEqual>
+					       		</isEqual>
+					       		<isNotEqual property="viewLocOpt" compareValue="T">	<!-- 보기형식이 표로 보기가 아닐 경우 -->
+					       		WRTTIME_IDTFR_ID
+					       		, FN_GET_WRTTIME_IDTFR_NM(#dtacycleCd:VARCHAR#,  WRTTIME_IDTFR_ID)	AS WRTTIME_IDTFR_NM
+					       		, CMMT_IDTFR
+					       		</isNotEqual>
+					       		, WRTTIME_IDTFR_ID AS F_WRTTIME_IDTFR_ID
+					       		, RN, MAX(RN) OVER() AS MAX_RN
+		                      FROM (
+		                      			<!-- TB_STTS_TBL_DIF 에 데이터가 없으면 기본 시계열 정보를 전달하여 항목/분류를 출력한다.  -->
+          							 SELECT CONCAT(#wrttimeMinYear:VARCHAR#, #wrttimeMinQt:VARCHAR#) AS WRTTIME_IDTFR_ID ,
+          							        NULL AS CMMT_IDTFR, 
+                							0 AS RN 
+          							 FROM DUAL
+          							UNION ALL     
+		                             SELECT WRTTIME_IDTFR_ID
+		                                 <!-- 10G 라면 XMLAGG -->
+		                             	 , LISTAGG(CMMT_IDTFR,',') within group(order by WRTTIME_IDTFR_ID) AS CMMT_IDTFR 
+		                                 , ROW_NUMBER() OVER(ORDER BY WRTTIME_IDTFR_ID DESC) AS RN
+		                              FROM TB_STTS_TBL_DIF
+		                             WHERE 1=1
+		                                 AND WRTSTATE_CD = 'AC'
+		                            <iterate property="iterChkStats" prepend="AND STATBL_ID IN " open="(" close=")" conjunction=", ">
+								            #iterChkStats[]:VARCHAR#
+								    </iterate>
+		                               AND DTACYCLE_CD = #dtacycleCd:VARCHAR#
+		                            <isNotEmpty property="dtaWrttimeYear">
+		                            	<isEqual property="wrttimeType" compareValue="B">	<!-- 주기가 기간 검색인 경우 -->
+										   AND (WRTTIME_IDTFR_ID BETWEEN CONCAT(#wrttimeStartYear:VARCHAR#, #wrttimeStartQt:VARCHAR#) AND CONCAT(#wrttimeEndYear:VARCHAR#, #wrttimeEndQt:VARCHAR#)
+										   		OR WRTTIME_IDTFR_ID = #dtaWrttimeYear:VARCHAR# || #dtaWrttimeQt:VARCHAR# )
+										</isEqual>
+										<isEqual property="wrttimeType" compareValue="L">	<!-- 주기가 최근 시점인 경우 -->
+										   AND (WRTTIME_IDTFR_ID BETWEEN CONCAT(#wrttimeMinYear:VARCHAR#, #wrttimeMinQt:VARCHAR#) AND CONCAT(#wrttimeMaxYear:VARCHAR#, #wrttimeMaxQt:VARCHAR#)
+										   		OR WRTTIME_IDTFR_ID = #dtaWrttimeYear:VARCHAR# || #dtaWrttimeQt:VARCHAR# ) 
+										</isEqual>
+		                            </isNotEmpty>
+		                            <isEmpty property="dtaWrttimeYear">
+										<isEqual property="wrttimeType" compareValue="B">	<!-- 주기가 기간 검색인 경우 -->
+										   AND WRTTIME_IDTFR_ID BETWEEN CONCAT(#wrttimeStartYear:VARCHAR#, #wrttimeStartQt:VARCHAR#) AND CONCAT(#wrttimeEndYear:VARCHAR#, #wrttimeEndQt:VARCHAR#)
+										</isEqual>
+										<isEqual property="wrttimeType" compareValue="L">	<!-- 주기가 최근 시점인 경우 -->
+										   AND WRTTIME_IDTFR_ID BETWEEN CONCAT(#wrttimeMinYear:VARCHAR#, #wrttimeMinQt:VARCHAR#) AND CONCAT(#wrttimeMaxYear:VARCHAR#, #wrttimeMaxQt:VARCHAR#)
+										</isEqual>
+		                            </isEmpty>
+									   GROUP BY WRTTIME_IDTFR_ID
+									   
+		                            <isNotEmpty property="dtaWrttimeYear">	<!-- 기준시점대비 검색인경우 검색갯수에 기준시점이 포함되지 않은경우에도 기준시점 데이터가 나와야함 -->
+		                             	UNION
+		                             	SELECT #dtaWrttimeYear:VARCHAR# || #dtaWrttimeQt:VARCHAR# , NULL, 1 FROM DUAL
+		                            </isNotEmpty>
+				        		)
+				        	<isEqual property="wrttimeType" compareValue="L">
+				        	<![CDATA[	
+				        	WHERE  RN <= #wrttimeLastestVal:NUMERIC#
+				        	]]>
+				        	</isEqual>
+				        ) A WHERE RN >= (CASE WHEN MAX_RN = 0 THEN 0 ELSE 1 END)
+			        ) Y		
+	        <!-- 시계열별 유효한 지표만 가져오기(표로 보기일때) -->
+	        <isEqual property="viewLocOpt" compareValue="T">
+	        	<isEqual property="SheetLoc" compareValue="H">
+			        WHERE Y.WRTTIME_IDTFR_ID BETWEEN NVL(I.ITM_START_YM, '01')   AND NVL(I.ITM_END_YM, '12')
+	                AND   Y.WRTTIME_IDTFR_ID BETWEEN NVL(C.ITM_START_YM , '01')  AND NVL(C.ITM_END_YM , '12')
+	                AND   Y.WRTTIME_IDTFR_ID BETWEEN NVL(G.ITM_START_YM , '01')  AND NVL(G.ITM_END_YM , '12')
+	        	</isEqual>
+	        	<isEqual property="SheetLoc" compareValue="L">
+	        		WHERE Y.WRTTIME_IDTFR_ID BETWEEN NVL(I.ITM_START_YM, '190000')   AND NVL(I.ITM_END_YM, '999912')
+	                AND   Y.WRTTIME_IDTFR_ID BETWEEN NVL(C.ITM_START_YM , '190000')  AND NVL(C.ITM_END_YM , '999912')
+	                AND   Y.WRTTIME_IDTFR_ID BETWEEN NVL(G.ITM_START_YM , '190000')  AND NVL(G.ITM_END_YM , '999912')
+	        	</isEqual>
+	        </isEqual>
+	        <isNotEqual property="viewLocOpt" compareValue="T">
+		        WHERE Y.WRTTIME_IDTFR_ID BETWEEN NVL(I.ITM_START_YM, '190000')   AND NVL(I.ITM_END_YM, '999912')
+                AND   Y.WRTTIME_IDTFR_ID BETWEEN NVL(C.ITM_START_YM , '190000')  AND NVL(C.ITM_END_YM , '999912')
+                AND   Y.WRTTIME_IDTFR_ID BETWEEN NVL(G.ITM_START_YM , '190000')  AND NVL(G.ITM_END_YM , '999912')
+	        </isNotEqual>
+			)
+		 SELECT 
+		<isEqual property="viewLocOpt" compareValue="H">  <!-- 가로보기 H -->
+			<isEqual property="SheetLoc" compareValue="H">		<!-- 가로보기의 표두(H)일 경우 키 값 접두어 -->
+			  	WRTTIME_IDTFR_ID AS  "wrttimeId"	
+			  	, MAX(WRTTIME_IDTFR_NM)	AS "wrttimeNm"
+				, 'COL_' || WRTTIME_IDTFR_ID AS "sheetKey"
+				, MAX(WRTTIME_CMMT_IDTFR) AS "cmmtIdtfr" 
+			</isEqual>
+			<isEqual property="SheetLoc" compareValue="L">		<!-- 세로보기의 표측(L)일 경우 키 값 접두어 -->
+			 	STATBL_ID		AS "statblId"
+			 	, STATBL_NM		AS "statblNm"
+			 	, MAX(CMMT_IDTFR) AS "cmmtIdtfr"
+			    , 'ROW_' || STATBL_ID || GRP_DATANO ||  CLS_DATANO || ITM_DATANO || DTADVS_CD AS "sheetKey"
+			    , GRP_DATANO AS "grpDatano"
+	            , MAX(GRP_FULLNM) AS "grpFullnm"
+	            , MAX(GRP_LEVEL) AS "grpLevel"
+	            , MAX(GRP_ORDER) AS "grpOrder"
+	            , MAX(GRP_FULL_CMMT_IDTFR) AS "grpFullCmmtIdtfr"
+			    , CLS_DATANO AS "clsDatano"
+	            , MAX(CLS_FULLNM) AS "clsFullnm"
+	            , MAX(CLS_LEVEL) AS "clsLevel"
+	            , MAX(CLS_ORDER) AS "clsOrder"
+	            , MAX(CLS_FULL_CMMT_IDTFR) AS "clsFullCmmtIdtfr"
+	            , ITM_DATANO AS "itmDatano"
+	            , MAX(ITM_FULLNM) AS "itmFullnm"
+	            , MAX(ITM_LEVEL) AS "itmLevel"
+	            , MAX(UI_ID) AS "uiId"
+	            , MAX(UI_NM) AS "uiNm"
+	            , MAX(ITM_ORDER) AS "itmOrder"
+	            , DTADVS_CD AS "dtadvsCd"
+	            , MAX(DTADVS_NM) AS "dtadvsNm"
+	            , MAX(DTADVS_ORDER) AS "dtadvsOrder"
+	            , MAX(ITM_FULL_CMMT_IDTFR) AS "itmFullCmmtIdtfr"
+			</isEqual>
+		</isEqual>
+		<isEqual property="viewLocOpt" compareValue="V">  <!-- 세로보기 V -->
+			<isEqual property="SheetLoc" compareValue="H">		<!-- 세로보기의 표두일 경우 키 값 접두어 -->
+			 	STATBL_ID		AS "statblId"
+			 	, STATBL_NM		AS "statblNm"
+			 	, MAX(CMMT_IDTFR) AS "cmmtIdtfr"
+			    , 'COL_' || STATBL_ID || GRP_DATANO || CLS_DATANO || ITM_DATANO || DTADVS_CD AS "sheetKey"
+			    , GRP_DATANO AS "grpDatano"
+	            , MAX(GRP_FULLNM) AS "grpFullnm"
+	            , MAX(GRP_LEVEL) AS "grpLevel"
+	            , MAX(GRP_ORDER) AS "grpOrder"
+	            , MAX(GRP_FULL_CMMT_IDTFR) AS "grpFullCmmtIdtfr"
+			    , CLS_DATANO AS "clsDatano"
+	            , MAX(CLS_FULLNM) AS "clsFullnm"
+	            , MAX(CLS_LEVEL) AS "clsLevel"
+	            , MAX(CLS_ORDER) AS "clsOrder"
+	            , MAX(CLS_FULL_CMMT_IDTFR) AS "clsFullCmmtIdtfr"
+	            , ITM_DATANO AS "itmDatano"
+	            , MAX(ITM_FULLNM) AS "itmFullnm"
+	            , MAX(ITM_LEVEL) AS "itmLevel"
+	            , MAX(UI_ID) AS "uiId"
+	            , MAX(UI_NM) AS "uiNm"
+	            , MAX(ITM_ORDER) AS "itmOrder"
+	            , DTADVS_CD AS "dtadvsCd"
+	            , MAX(DTADVS_NM) AS "dtadvsNm"
+	            , MAX(DTADVS_ORDER) AS "dtadvsOrder"
+	            , MAX(ITM_FULL_CMMT_IDTFR) AS "itmFullCmmtIdtfr"
+			</isEqual>
+			<isEqual property="SheetLoc" compareValue="L">		<!-- 세로보기의 표측(L)일 경우 키 값 접두어 -->
+			  	WRTTIME_IDTFR_ID AS  "wrttimeId"	
+			  	, MAX(WRTTIME_IDTFR_NM)	AS "wrttimeNm"
+				, 'ROW_' || WRTTIME_IDTFR_ID AS "sheetKey"
+				, MAX(WRTTIME_CMMT_IDTFR) AS "cmmtIdtfr"
+			</isEqual>
+		</isEqual>
+		<isEqual property="viewLocOpt" compareValue="T">  <!-- 년월보기 T -->
+			<isEqual property="SheetLoc" compareValue="H">		<!-- 년월보기의 표두(H)일 경우 키 값 접두어 -->
+			  	WRTTIME_IDTFR_ID AS  "wrttimeId"	
+			  	, MAX(WRTTIME_IDTFR_NM)	AS "wrttimeNm"
+				, 'COL_' || WRTTIME_IDTFR_ID AS "sheetKey"
+			</isEqual>
+			<isEqual property="SheetLoc" compareValue="L">		<!-- 년월보기의 표측(L)일 경우 키 값 접두어 -->
+			 	STATBL_ID		AS "statblId"
+			 	, STATBL_NM		AS "statblNm"
+			 	, MAX(CMMT_IDTFR) AS "cmmtIdtfr"
+			    , 'ROW_' || STATBL_ID || WRTTIME_IDTFR_ID || GRP_DATANO || CLS_DATANO || ITM_DATANO || DTADVS_CD AS "sheetKey"
+			    , GRP_DATANO AS "grpDatano"
+	            , MAX(GRP_FULLNM) AS "grpFullnm"
+	            , MAX(GRP_LEVEL) AS "grpLevel"
+	            , MAX(GRP_ORDER) AS "grpOrder"
+	            , MAX(GRP_FULL_CMMT_IDTFR) AS "grpFullCmmtIdtfr"
+			    , CLS_DATANO AS "clsDatano"
+	            , MAX(CLS_FULLNM) AS "clsFullnm"
+	            , MAX(CLS_LEVEL) AS "clsLevel"
+	            , MAX(CLS_ORDER) AS "clsOrder"
+	            , MAX(CLS_FULL_CMMT_IDTFR) AS "clsFullCmmtIdtfr"
+	            , ITM_DATANO AS "itmDatano"
+	            , MAX(ITM_FULLNM) AS "itmFullnm"
+	            , MAX(ITM_LEVEL) AS "itmLevel"
+	            , MAX(UI_ID) AS "uiId"
+	            , MAX(UI_NM) AS "uiNm"
+	            , MAX(ITM_ORDER) AS "itmOrder"
+	            , DTADVS_CD AS "dtadvsCd"
+	            , MAX(DTADVS_NM) AS "dtadvsNm"
+	            , MAX(DTADVS_ORDER) AS "dtadvsOrder"
+	            , MAX(ITM_FULL_CMMT_IDTFR) AS "itmFullCmmtIdtfr"
+	            , WRTTIME_IDTFR_ID AS "wrttimeIdtfrYear"
+	            , WRTTIME_IDTFR_ID 
+	            <isEmpty property="langGb">
+	              || '년' 
+	            </isEmpty>
+	              AS "wrttimeNm"
+			</isEqual>
+		</isEqual>
+				, MAX(SELECTED_ORDER) AS "selectOrder"
+				, MAX(MAX_GRP_LEVEL) AS "maxGrpLevel"
+				, MAX(MAX_CLS_LEVEL) AS "maxClsLevel"
+	            , MAX(MAX_ITM_LEVEL) AS "maxItmLevel"
+				, MAX(ALPHA_OPRT)	 AS "alphaOprt"
+   		FROM TMP_STATTBL_ITM
+		GROUP BY 
+		<isEqual property="viewLocOpt" compareValue="H">  <!-- 가로보기 H -->
+			<isEqual property="SheetLoc" compareValue="H">		<!-- 가로보기의 표두(H)일 경우 키 값 접두어 -->
+				WRTTIME_IDTFR_ID
+			</isEqual>
+			<isEqual property="SheetLoc" compareValue="L">		<!-- 가로보기의 표측(L)일 경우 키 값 접두어 -->
+				STATBL_ID, STATBL_NM, GRP_DATANO, CLS_DATANO, ITM_DATANO, DTADVS_CD 
+			</isEqual>
+		</isEqual>
+		<isEqual property="viewLocOpt" compareValue="V">  <!-- 세로보기 V -->
+			<isEqual property="SheetLoc" compareValue="H">		<!-- 세로보기의 표두(H)일 경우 키 값 접두어 -->
+				STATBL_ID, STATBL_NM, GRP_DATANO, CLS_DATANO, ITM_DATANO, DTADVS_CD 
+			</isEqual>
+			<isEqual property="SheetLoc" compareValue="L">		<!-- 세로보기의 표측(L)일 경우 키 값 접두어 -->
+				WRTTIME_IDTFR_ID
+			</isEqual>
+		</isEqual>
+		<isEqual property="viewLocOpt" compareValue="T">  <!-- 년월보기 H -->
+			<isEqual property="SheetLoc" compareValue="H">		<!-- 년월보기의 표두(H)일 경우 키 값 접두어 -->
+				WRTTIME_IDTFR_ID
+			</isEqual>
+			<isEqual property="SheetLoc" compareValue="L">		<!-- 년월보기의 표측(L)일 경우 키 값 접두어 -->
+				STATBL_ID, STATBL_NM, WRTTIME_IDTFR_ID, GRP_DATANO, CLS_DATANO, ITM_DATANO, DTADVS_CD 
+			</isEqual>
+		</isEqual>
+		
+		ORDER BY "selectOrder",
+		<isEqual property="viewLocOpt" compareValue="H">  <!-- 가로보기 H -->
+			<isEqual property="SheetLoc" compareValue="H">		<!-- 가로보기의 표두(H)일 경우 키 값 접두어 -->
+				<isEqual property="wrttimeOrder" compareValue="A">			
+					"wrttimeId"
+				</isEqual>
+				<isEqual property="wrttimeOrder" compareValue="D">
+					"wrttimeId" DESC
+				</isEqual>
+			</isEqual>
+			<isEqual property="SheetLoc" compareValue="L">		<!-- 가로보기의 표측(L)일 경우 키 값 접두어 -->
+				"statblId", "grpOrder", "clsOrder", "itmOrder", "dtadvsOrder"
+			</isEqual>
+		</isEqual>
+		<isEqual property="viewLocOpt" compareValue="V">  <!-- 세로보기 V -->
+			<isEqual property="SheetLoc" compareValue="H">		<!-- 세로보기의 표두(H)일 경우 키 값 접두어 -->
+				"statblId", "grpOrder", "clsOrder", "itmOrder", "dtadvsOrder"
+			</isEqual>
+			<isEqual property="SheetLoc" compareValue="L">		<!-- 세로보기의 표측(L)일 경우 키 값 접두어 -->
+				<isEqual property="wrttimeOrder" compareValue="A">			
+					"wrttimeId"
+				</isEqual>
+				<isEqual property="wrttimeOrder" compareValue="D">
+					"wrttimeId" DESC
+				</isEqual>
+			</isEqual>
+		</isEqual>
+		<isEqual property="viewLocOpt" compareValue="T">  <!-- 년월보기 H -->
+			<isEqual property="SheetLoc" compareValue="H">		<!-- 년월보기의 표두(H)일 경우 키 값 접두어 -->
+				"wrttimeId"
+			</isEqual>
+			<isEqual property="SheetLoc" compareValue="L">		<!-- 년월보기의 표측(L)일 경우 키 값 접두어 -->
+				"statblId", "grpOrder", "clsOrder", "itmOrder", 
+				<isEqual property="wrttimeOrder" compareValue="A">			
+					"wrttimeNm",
+				</isEqual>
+				<isEqual property="wrttimeOrder" compareValue="D">
+					"wrttimeNm" DESC,
+				</isEqual>
+				"dtadvsOrder"
+			</isEqual>
+		</isEqual>
+		
+    </select>
+
+	<!-- 복수통계 통계표 목록 조회(항목 검색용 > 조회전 승인건수 확인) -->
+	<select id="multiStatListDao.selectMultiStatItmACCount" parameterClass="params" resultClass="int">
+		/* sql id : multiStatListDao.selectMultiStatItmACCount */
+		SELECT 
+			COUNT(*) 
+		FROM 
+			TV_STTSDATA_ALL
+		WHERE 1 = 1
+       	<iterate property="iterChkStats" prepend="AND STATBL_ID IN " open="(" close=")" conjunction=", ">
+       		#iterChkStats[]:VARCHAR#
+       	</iterate>
+		AND WRTSTATE_CD = 'AC' 
+		AND DTACYCLE_CD = #dtacycleCd:VARCHAR#
+		AND WRTTIME_IDTFR_ID BETWEEN CONCAT(#wrttimeStartYear:VARCHAR#, #wrttimeStartQt:VARCHAR#) AND CONCAT(#wrttimeEndYear:VARCHAR#, #wrttimeEndQt:VARCHAR#)
+	</select>  
+
+	<!-- 시트 데이터 조회 -->    
+    <select id="multiStatListDao.selectMultiStatSheetData" remapResults="true"  parameterClass="params" resultClass="record">
+		/* sql id : multiStatListDao.selectMultiStatSheetData */
+		WITH TMP_STTSDATA AS
+		(
+			SELECT 
+				D.STATBL_ID			AS STATBL_ID
+			<isNotEqual property="viewLocOpt" compareValue="T">	<!-- 보기형식이 표로 보기가 아닐 경우 -->
+				, D.WRTTIME_IDTFR_ID	AS WRTTIME_IDTFR_ID
+			</isNotEqual>
+			<isEqual property="viewLocOpt" compareValue="T">	<!-- 보기형식이 표로 보기일 경우 -->
+				, SUBSTR(D.WRTTIME_IDTFR_ID, 1, 4)	AS WRTTIME_IDTFR_ID
+				, SUBSTR(D.WRTTIME_IDTFR_ID, 5, 2)	AS IDTFR	
+			</isEqual>	
+				, D.CLS_DATANO
+				, D.ITM_DATANO
+				, D.GRP_DATANO
+				, V.ALPHA_OPRT
+				, I.SUMAVG_YN 	AS I_SUMAVG_YN
+				, NVL(C.SUMAVG_YN, 'N') AS C_SUMAVG_YN
+				, NVL(G.SUMAVG_YN, 'N') AS G_SUMAVG_YN
+				, D.DTADVS_CD
+				, D.WRTSTATE_CD
+				, FN_GET_CMMT_IDTFR(D.CMMT_IDTFR) AS CMMT_IDTFR
+				, (CASE  WHEN D.DTA_SVAL IS NOT NULL THEN D.DTA_SVAL
+				   ELSE 
+						(CASE WHEN (I.GRP_UI_ID = U.GRP_UI_ID AND I.UI_ID != U.UI_ID AND I.GRP_UI_ID = FN_GET_DTADVS_UI (D.DTADVS_CD, 'UI_GRP_ID', I.GRP_UI_ID))
+						  	  <isEmpty property="dmPointVal">	<!-- 소숫점변경 기본호출 인 경우 -->		
+							  THEN FN_GET_DMPOINT(D.DTA_VAL * I.UI_CVSN_VAL / FN_GET_DTADVS_UI(D.DTADVS_CD, 'UI_CVSN_VAL', U.UI_CVSN_VAL), NVL(NULL, I.DMPOINT_CD))	
+							  ELSE FN_GET_DMPOINT(D.DTA_VAL, NVL(NULL, I.DMPOINT_CD))
+							  </isEmpty>
+							  <isNotEmpty property="dmPointVal">	<!-- 소숫점변경 호출 인 경우 -->
+							  THEN FN_GET_DMPOINT(D.DTA_VAL * I.UI_CVSN_VAL / FN_GET_DTADVS_UI(D.DTADVS_CD, 'UI_CVSN_VAL', U.UI_CVSN_VAL), #dmPointVal:VARCHAR#)	
+							  ELSE FN_GET_DMPOINT(D.DTA_VAL, #dmPointVal:VARCHAR#)
+							  </isNotEmpty>							  	
+						END)
+					END)  AS DTA_VAL
+				, (CASE WHEN I.GRP_UI_ID = U.GRP_UI_ID AND I.UI_ID != U.UI_ID AND I.GRP_UI_ID = FN_GET_DTADVS_UI (D.DTADVS_CD, 'UI_GRP_ID', I.GRP_UI_ID) THEN
+					FN_GET_DTADVS_UI(D.DTADVS_CD, 'UI_NM', U.UI_NM)
+				 	    ELSE 
+				 			FN_GET_DTADVS_UI(D.DTADVS_CD, 'UI_NM', I.UI_NM)
+					END) AS UI_NM
+			<isEqual property="viewLocOpt" compareValue="H">  <!-- 가로보기 H -->
+				, 'COL_' || D.WRTTIME_IDTFR_ID AS H_KEY
+				, 'ROW_' || D.STATBL_ID || D.GRP_DATANO || D.CLS_DATANO || D.ITM_DATANO || D.DTADVS_CD AS L_KEY
+			</isEqual>
+	
+			<isEqual property="viewLocOpt" compareValue="V">  <!-- 세로보기 V -->
+				, 'COL_' || D.STATBL_ID || D.GRP_DATANO || D.CLS_DATANO || D.ITM_DATANO || D.DTADVS_CD AS H_KEY
+				, 'ROW_' || D.WRTTIME_IDTFR_ID AS L_KEY
+			</isEqual>
+			<isEqual property="viewLocOpt" compareValue="T">  <!-- 년월보기 T -->
+				, 'COL_' || SUBSTR(D.WRTTIME_IDTFR_ID, 5, 2) AS H_KEY
+				, 'ROW_' || D.STATBL_ID || SUBSTR(D.WRTTIME_IDTFR_ID, 1, 4) || D.GRP_DATANO || D.CLS_DATANO || D.ITM_DATANO || D.DTADVS_CD AS L_KEY
+			</isEqual>
+         	FROM TV_STTSDATA_ALL D
+          		INNER JOIN TV_STTS_TBL_ITM I
+              		ON  D.STATBL_ID = I.STATBL_ID
+              		AND D.ITM_DATANO = I.DATANO
+              		AND I.ITM_TAG = 'I'
+              		AND I.DUMMY_YN = 'N'
+              		AND I.SUMAVG_YN = 'N'
+		       	<iterate property="iterChkStats" prepend="AND D.STATBL_ID IN " open="(" close=")" conjunction=", ">
+		       		#iterChkStats[]:VARCHAR#
+		       	</iterate>
+              		AND D.WRTSTATE_CD = 'AC'
+				LEFT OUTER JOIN TV_STTS_TBL_ITM C 
+					ON  D.STATBL_ID = C.STATBL_ID 
+					AND D.CLS_DATANO = C.DATANO 
+					AND C.ITM_TAG = 'C'
+					AND C.USE_YN = 'Y'	
+				LEFT OUTER JOIN TV_STTS_TBL_ITM G 
+					ON  D.STATBL_ID = G.STATBL_ID 
+					AND D.GRP_DATANO = G.DATANO 
+					AND G.ITM_TAG = 'G'
+					AND G.USE_YN = 'Y'						
+				LEFT OUTER JOIN TB_STTS_STDDUI U
+					ON  U.GRP_UI_ID = I.GRP_UI_ID 
+	    	 	<isEmpty property="uiChgVal">		<!-- 단위 변환 default -->
+	    	 		AND U.UI_ID = I.UI_ID
+	    	 	</isEmpty>
+	    	 	<isNotEmpty property="uiChgVal">	<!-- 단위 변환 시 -->
+	    	 		AND U.UI_ID = #uiChgVal#
+	    	 	</isNotEmpty>		        
+			    CROSS JOIN 
+			    (
+					SELECT A.STATBL_ID
+						,  NVL(MAX(DECODE(OPT_CD, 'ST', OPT_VAL, '') ), 'N') AS ST_OPT_VAL
+						,  NVL(MAX(DECODE(OPT_CD, 'SI', OPT_VAL, '') ), 'N') AS SI_OPT_VAL
+						,  CASE WHEN COUNT(C.DATANO) > 0 THEN NVL(MAX(DECODE(OPT_CD, 'SC', OPT_VAL, '') ), 'N') ELSE 'N' END AS SC_OPT_VAL
+						,  CASE WHEN COUNT(G.DATANO) > 0 THEN NVL(MAX(DECODE(OPT_CD, 'SG', OPT_VAL, '') ), 'N') ELSE 'N' END AS SG_OPT_VAL
+                      FROM TB_STTS_TBL_OPT A 
+	                      	INNER JOIN TB_COMM_CODE B 
+	                      		ON A.OPT_CD = B.DITC_CD
+	                           AND B.GRP_CD = 'S1101'
+	                           AND B.REF_CD = 'S1106'
+	                           AND B.USE_YN = 'Y' 
+	                        LEFT OUTER JOIN TB_STTS_TBL_ITM C 
+	                        	ON A.STATBL_ID = C.STATBL_ID
+	                           AND C.ITM_TAG = 'C'
+	                           AND C.USE_YN = 'Y'
+	                           AND C.DUMMY_YN = 'N'
+	                        LEFT OUTER JOIN TB_STTS_TBL_ITM G
+	                        	ON A.STATBL_ID = G.STATBL_ID
+	                           AND G.ITM_TAG = 'G'
+	                           AND G.USE_YN = 'Y'
+	                           AND G.DUMMY_YN = 'N'   
+                     WHERE 1 = 1
+		            <iterate property="iterChkStats" prepend=" AND A.STATBL_ID IN " open="(" close=")" conjunction=", ">
+		            	#iterChkStats[]:VARCHAR#
+		            </iterate>
+                       AND A.USE_YN = 'Y' 
+                     GROUP BY A.STATBL_ID 
+			    ) O	
+			    <isNotEmpty property="multiDataList">
+			    INNER JOIN (
+  					<iterate property="multiDataList" conjunction=" UNION ">
+						SELECT #multiDataList[].statblId# 	AS STATBL_ID
+						     , #multiDataList[].itmNo# 		AS ITM_DATANO
+						     , #multiDataList[].clsNo# 		AS CLS_DATANO
+						     , #multiDataList[].grpNo# 		AS GRP_DATANO
+						     , #multiDataList[].alphaOprt# 	AS ALPHA_OPRT
+						FROM DUAL
+  					</iterate>
+  				) V
+  				ON      D.STATBL_ID      	 = V.STATBL_ID
+		        AND     D.ITM_DATANO     	 = V.ITM_DATANO
+		        AND     NVL(D.CLS_DATANO, 0) = NVL(V.CLS_DATANO, 0)
+		        AND     NVL(D.GRP_DATANO, 0) = NVL(V.GRP_DATANO, 0) 
+  				</isNotEmpty>	        
+			WHERE D.STATBL_ID = O.STATBL_ID
+				AND D.DTACYCLE_CD = #dtacycleCd:VARCHAR#
+				AND D.DTADVS_CD IN 
+				<isEmpty property="iterDtadvsVal">	<!-- 통계자료유형 default(통계표 설정된 대로 조회) -->
+				('OD')
+				</isEmpty>
+				<isNotEmpty property="iterDtadvsVal">	<!-- 통계자료유형 선택된 항목 조회 -->
+	            	<iterate property="iterDtadvsVal" open="(" close=")" conjunction=", ">
+	            		#iterDtadvsVal[]#
+	            	</iterate>
+	            </isNotEmpty>
+				AND (C.DUMMY_YN = 'N' OR C.DUMMY_YN IS NULL)
+				AND (G.DUMMY_YN = 'N' OR G.DUMMY_YN IS NULL)
+				AND D.WRTTIME_IDTFR_ID IN (
+						SELECT	WRTTIME_IDTFR_ID
+						FROM (
+                          		SELECT WRTTIME_IDTFR_ID, ROW_NUMBER() OVER(ORDER BY WRTTIME_IDTFR_ID DESC) AS RN
+                          		  FROM TB_STTS_TBL_DIF
+                          		 WHERE 1 = 1
+                          		     AND WRTSTATE_CD = 'AC'
+								 <iterate property="iterChkStats" prepend=" AND STATBL_ID IN " open="(" close=")" conjunction=", ">
+           							#iterChkStats[]:VARCHAR#
+           						 </iterate>
+                          		   AND DTACYCLE_CD = #dtacycleCd:VARCHAR#
+                          		   <isEqual property="wrttimeType" compareValue="B">	<!-- 주기가 기간 검색인 경우 -->
+                          		   AND WRTTIME_IDTFR_ID BETWEEN CONCAT(#wrttimeStartYear:VARCHAR#, #wrttimeStartQt:VARCHAR#) AND CONCAT(#wrttimeEndYear:VARCHAR#, #wrttimeEndQt:VARCHAR#)
+                          		   </isEqual>
+                          		   <isEqual property="wrttimeType" compareValue="L">	<!-- 주기가 최근 시점인 경우 -->
+                         		   AND WRTTIME_IDTFR_ID BETWEEN CONCAT(#wrttimeMinYear:VARCHAR#, #wrttimeMinQt:VARCHAR#) AND CONCAT(#wrttimeMaxYear:VARCHAR#, #wrttimeMaxQt:VARCHAR#)
+                         		   </isEqual>
+                         		   GROUP BY WRTTIME_IDTFR_ID
+						)
+						<isEqual property="wrttimeType" compareValue="L">
+						<![CDATA[
+						WHERE  RN <= #wrttimeLastestVal:NUMERIC#
+						]]>
+						</isEqual>
+					)				
+				AND D.WRTTIME_IDTFR_ID BETWEEN NVL(I.ITM_START_YM , '190000')  AND NVL(I.ITM_END_YM , '999912')
+				AND D.WRTTIME_IDTFR_ID BETWEEN NVL(C.ITM_START_YM , '190000') AND NVL(C.ITM_END_YM , '999912')
+				AND D.WRTTIME_IDTFR_ID BETWEEN NVL(G.ITM_START_YM , '190000') AND NVL(G.ITM_END_YM , '999912')
+		)
+		SELECT
+			0 		 					AS "gId"
+			, STATBL_ID			AS "statblId"
+			, WRTTIME_IDTFR_ID		AS "wrttimeIdtfrId"
+			<isEqual property="viewLocOpt" compareValue="T">
+			, IDTFR					AS "idtfr"
+			</isEqual>
+			, GRP_DATANO			AS "grpDatano"
+			, CLS_DATANO			AS "clsDatano"
+			, ITM_DATANO			AS "itmDatano"
+			, ALPHA_OPRT			AS "alphaOprt"
+			, DTADVS_CD				AS "dtadvsCd"
+			, WRTSTATE_CD			AS "wrtstateCd"
+			, CMMT_IDTFR 			AS "cmmtIdtfr"
+			, DTA_VAL 				AS "dtaVal"
+			, UI_NM					AS "uiNm"
+			, H_KEY					AS "hKey"
+			, L_KEY					AS "lKey"
+		FROM  TMP_STTSDATA
+		<isNotEmpty property="multiStatType">	<!-- 복수통계 화면구분 - 사칙연산 -->
+			<isEqual property="multiStatType" compareValue="FC">
+			ORDER BY WRTTIME_IDTFR_ID
+			</isEqual>
+		</isNotEmpty>
+    </select>
+
+	<!-- 통계표 자료시점 조회(시계열 조건 검색) -->
+	<select id="multiStatListDao.selectMultiStatWrtTimeOption" parameterClass="params" resultClass="record">
+		/* sql id : multiStatListDao.selectMultiStatWrtTimeOption */
+		SELECT 
+			TO_CHAR(NVL(S_YYYY, TO_CHAR(SYSDATE, 'YYYY')) + LEVEL - 1) AS "code" 
+			, FN_GET_WRTTIME_IDTFR_NM('YY', TO_CHAR(NVL(S_YYYY, TO_CHAR(SYSDATE, 'YYYY')) + LEVEL - 1) || '00') AS "name"
+			
+  		FROM
+       		(
+       			SELECT MIN(DATA_START_YY) AS S_YYYY, MAX(DATA_END_YY) AS E_YYYY
+         		  FROM TB_STTS_TBL A
+        		 WHERE 1 = 1
+				 <iterate property="iterChkStats" prepend=" AND STATBL_ID IN " open="(" close=")" conjunction=", ">
+					#iterChkStats[]:VARCHAR#
+				</iterate>
+       )
+		<![CDATA[
+		CONNECT BY LEVEL <= E_YYYY - S_YYYY + 1 
+		]]>
+	</select>
+
+	<!-- 통계표 단위 조회 -->
+	<select id="multiStatListDao.selectMultiStatTblUi" parameterClass="params" resultClass="record">		
+		/* sql id : multiStatListDao.selectMultiStatTblUi */
+		SELECT L.UI_ID AS "code", UI_CVSN_VAL, L.UI_NM AS "name"		  
+		FROM (		  
+			 SELECT 
+			 		count(*) over(partition by  A.GRP_UI_ID) cnt, 
+			 		A.UI_ID, A.UI_CVSN_VAL,
+			 		<isEmpty property="langGb">
+			        A.UI_NM	     AS UI_NM        
+			        </isEmpty>
+			        <isNotEmpty property="langGb">
+			        A.ENG_UI_NM  AS UI_NM
+			        </isNotEmpty>
+			   FROM TB_STTS_STDDUI A 
+			   INNER JOIN ( 
+			   		SELECT DISTINCT GRP_UI_ID
+			        FROM TV_STTS_TBL_ITM
+			        WHERE ITM_TAG = 'I' AND USE_YN = 'Y' AND DUMMY_YN = 'N'
+				   <isNotEmpty property="wheresMultiData">
+					AND ( 
+						<iterate property="wheresMultiData" conjunction="OR ">
+							(
+							<iterate property="wheresMultiData[].statblList" prepend=" STATBL_ID IN " open="(" close=")" conjunction=",">
+								#wheresMultiData[].statblList[]#
+							</iterate>
+							<isNotEmpty property="wheresMultiData[].allList">		
+								<iterate property="wheresMultiData[].allList" prepend=" AND DATANO IN " open="(" close=")" conjunction=",">
+									#wheresMultiData[].allList[]#
+								</iterate>
+							</isNotEmpty>
+							)
+						</iterate>
+					)
+					</isNotEmpty>		
+				) B ON A.GRP_UI_ID = B.GRP_UI_ID AND  A.USE_YN = 'Y' AND A.UI_CVSN_YN = 'Y'
+			  ORDER BY A.GRP_UI_ID DESC,     A.V_ORDER 
+		) L
+		WHERE CNT <![CDATA[ > ]]> 1
+	</select>
+	
+    <!-- 통계표 시계열/분류/항목 위치 조회 -->
+	<select id="multiStatListDao.selectMultiStatTblOptLocation" parameterClass="params" resultClass="java.util.HashMap">
+		/* sql id : multiStatListDao.selectMultiStatTblOptLocation */
+		SELECT 
+			NVL(MAX(DECODE(OPT_CD, 'ST', OPT_VAL, '')), 'N') 	AS "STOptVal"
+			, NVL(MAX(DECODE(OPT_CD, 'SI', OPT_VAL, '')), 'N')	AS "SIOptVal"
+			, CASE WHEN COUNT(C.DATANO) > 0 THEN NVL(MAX(DECODE(OPT_CD, 'SC', OPT_VAL, '')), 'N')
+				ELSE 'N'
+			END AS "SCOptVal"
+			, CASE WHEN COUNT(G.DATANO) > 0 THEN NVL(MAX(DECODE(OPT_CD, 'SG', OPT_VAL, '') ), 'N') 
+				ELSE 'N' 
+			END AS "SGOptVal"
+		FROM
+			TB_STTS_TBL_OPT A
+			INNER JOIN TB_COMM_CODE B
+				ON  A.OPT_CD = B.DITC_CD
+				AND B.GRP_CD = 'S1101' 
+				AND B.REF_CD = 'S1106'
+				AND B.USE_YN = 'Y'
+				AND B.DITC_CD in ('ST', 'SG', 'SC','SI')
+			LEFT OUTER JOIN TB_STTS_TBL_ITM C
+				ON  A.STATBL_ID = C.STATBL_ID
+				AND C.ITM_TAG = 'C'
+				AND C.USE_YN = 'Y'
+				AND C.DUMMY_YN = 'N'
+			LEFT OUTER JOIN TB_STTS_TBL_ITM G
+				ON  A.STATBL_ID = G.STATBL_ID
+				AND G.ITM_TAG = 'G'
+				AND G.USE_YN = 'Y'
+				AND G.DUMMY_YN = 'N'
+		WHERE 1 =1
+		<isNotEmpty property="iterChkStats">
+			<iterate property="iterChkStats" prepend=" AND A.STATBL_ID IN " open="(" close=")" conjunction=", ">
+		    	#iterChkStats[]#
+		    </iterate>
+		</isNotEmpty>
+			AND A.USE_YN = 'Y'
+	</select>
+
+	<!-- 통계스크랩 마스터 정보 등록 -->
+	<insert id="multiStatListDao.insertStatMultiUserTbl" parameterClass="params">
+		<selectKey keyProperty="seqceNo" resultClass="integer">
+			SELECT SQ_USER_TBL_SEQ.NEXTVAL FROM DUAL
+		</selectKey>
+		INSERT INTO TB_USER_TBL(
+			SEQCE_NO
+			, USER_CD
+			, SIMMIX_TAG
+			, STATBL_NM
+			, STATBL_EXP
+			, CALL_TAG
+			, DTACYCLE_CD
+			, SEARCH_TAG
+			, START_WRTTIME_IDTFR_ID
+			, END_WRTTIME_IDTFR_ID
+			, LATEST_CNT
+			, SORT_TAG
+			, DD_TAG_CONT
+			, PIVOT_CD
+		<isEqual property="viewLocOpt" compareValue="B">	
+			, PIVOT_DC_CD
+			, PIVOT_ITM_CD
+			, PIVOT_CLS_CD
+		</isEqual>
+			, UI_ID
+			, DMPOINT_CD
+			, LS_WRTTIME_IDTFR_ID
+			, LE_WRTTIME_IDTFR_ID
+			, SYS_TAG
+			, REG_DTTM
+			, UPD_DTTM
+			, NULL2ZERO_YN
+		<isNotEmpty property="dtaWrttime">
+			, COND_WRTTIME_IDTFR_ID
+		</isNotEmpty>
+		<isNotEmpty property="calcAqn">
+			, CALC_AQN
+		</isNotEmpty>
+		<isNotEmpty property="calcAqnNm">	
+			, CALC_AQN_NM
+		</isNotEmpty>
+		)
+		VALUES(
+			#seqceNo:NUMERIC#
+			, #regId:NUMERIC#
+			, #simmixTag:VARCHAR#
+			, #statTitle:VARCHAR#
+			, #statblExp:VARCHAR#
+			, #callTag:CHAR#
+			, #dtacycleCd:VARCHAR#
+			, #wrttimeType:VARCHAR#
+			, #wrtStartYmd:VARCHAR#
+			, #wrtEndYmd:VARCHAR#
+			, #wrttimeLastestVal:NUMERIC#
+			, #wrttimeOrder:CHAR#
+			, #dtadvsVal:VARCHAR#
+			, #viewLocOpt:VARCHAR#
+		<isEqual property="viewLocOpt" compareValue="B">
+			, #optST:VARCHAR#
+			, #optSI:VARCHAR#
+			, #optSC:VARCHAR#
+		</isEqual>	
+			, #uiChgVal:VARCHAR#
+			, #dmPointVal:VARCHAR#
+			, #lsWrttimeIdtfrId:VARCHAR#
+			, #leWrttimeIdtfrId:VARCHAR#
+			, 'K'
+			, SYSDATE
+			, SYSDATE
+			, NVL(#dtaCalcNullToZero:VARCHAR#, 'N')
+		<isNotEmpty property="dtaWrttime">	
+			, #dtaWrttime:VARCHAR#
+		</isNotEmpty>
+		<isNotEmpty property="calcAqn">
+			, #calcAqn:VARCHAR#
+		</isNotEmpty>
+		<isNotEmpty property="calcAqnNm">
+			, #calcAqnNm:VARCHAR#
+		</isNotEmpty>
+		)
+	</insert>
+	
+	<!-- 통계스크랩 마스터 정보 수정-->
+	<update id="multiStatListDao.updateStatMultiUserTbl" parameterClass="params">
+		UPDATE TB_USER_TBL A
+		SET
+			STATBL_NM 					= #statTitle:VARCHAR#
+			, STATBL_EXP 				= #statblExp:VARCHAR#
+			, CALL_TAG 					= #callTag:CHAR#
+			, DTACYCLE_CD 				= #dtacycleCd:VARCHAR#
+			, SEARCH_TAG 				= #wrttimeType:CHAR#
+			, START_WRTTIME_IDTFR_ID 	= #wrtStartYmd:VARCHAR#
+			, END_WRTTIME_IDTFR_ID 		= #wrtEndYmd:VARCHAR#
+			, LATEST_CNT 				= #wrttimeLastestVal:NUMERIC#
+			, SORT_TAG 					= #wrttimeOrder:CHAR#
+			, DD_TAG_CONT 				= #dtadvsVal:VARCHAR#
+			, PIVOT_CD 					= #viewLocOpt:VARCHAR#
+		<isEqual property="viewLocOpt" compareValue="B">	
+			, PIVOT_DC_CD 				= #optST:VARCHAR#
+			, PIVOT_ITM_CD 				= #optSI:VARCHAR#
+			, PIVOT_CLS_CD 				= #optSC:VARCHAR#
+		</isEqual>
+			<![CDATA[
+			, LS_WRTTIME_IDTFR_ID		= (CASE WHEN LS_WRTTIME_IDTFR_ID > #lsWrttimeIdtfrId:VARCHAR# THEN #lsWrttimeIdtfrId:VARCHAR# ELSE LS_WRTTIME_IDTFR_ID END)
+			, LE_WRTTIME_IDTFR_ID		= (CASE WHEN LE_WRTTIME_IDTFR_ID < #leWrttimeIdtfrId:VARCHAR# THEN #leWrttimeIdtfrId:VARCHAR# ELSE LE_WRTTIME_IDTFR_ID END)
+			]]>
+			, UI_ID 					= #uiChgVal:VARCHAR#
+			, DMPOINT_CD 				= #dmPointVal:VARCHAR#
+			, UPD_DTTM 					= SYSDATE
+			, NULL2ZERO_YN = NVL(#dtaCalcNullToZero:VARCHAR#, 'N')
+		<isNotEmpty property="dtaWrttime">
+			, COND_WRTTIME_IDTFR_ID = #dtaWrttime:VARCHAR#
+		</isNotEmpty>
+		<isNotEmpty property="calcAqn">
+			, CALC_AQN = #calcAqn:VARCHAR#
+		</isNotEmpty>
+		<isNotEmpty property="calcAqn">
+			, CALC_AQN_NM 	= #calcAqnNm#
+		</isNotEmpty>
+		WHERE  SEQCE_NO = #seqceNo:NUMERIC#
+	</update>
+
+	<!-- 통계스크랩 항목, 분류 정보 등록 -->
+	<insert id="multiStatListDao.insertStatMultiUserTblItm" parameterClass="params">
+		INSERT INTO TB_USER_TBL_ITM_M
+		(
+			SEQCE_NO
+			, STATBL_ID
+			, ITM_DATANO
+			, CLS_DATANO
+			, GRP_DATANO
+			, ITM_SBL
+			, V_ORDER
+			, REG_DTTM
+			, UPD_DTTM
+		)
+		<isNotEmpty property="multiDataList">
+			<iterate property="multiDataList" conjunction=" UNION ALL">
+				SELECT #seqceNo:NUMERIC#
+					 , #multiDataList[].statblId#
+				     , NVL(#multiDataList[].itmNo#, 0)
+				     , NVL(#multiDataList[].clsNo#, 0)
+				     , NVL(#multiDataList[].grpNo#, 0)
+				     , #multiDataList[].alphaOprt#
+				     , #multiDataList[].vOrder# 
+				     , SYSDATE
+				     , SYSDATE
+				FROM DUAL
+			</iterate>
+		</isNotEmpty>
+	</insert>	
+
+	<!-- 통계 스크랩 마스터 정보 조회 -->
+	<select id="multiStatListDao.selectStatMultiUserTbl" parameterClass="params" resultClass="record">
+		SELECT 
+			SIMMIX_TAG			AS "simmixTag"
+			, STATBL_NM			AS "statblNm"
+			, STATBL_EXP		AS "statblExp"
+			, CALL_TAG			AS "callTag"
+			, DTACYCLE_CD		AS "dtacycleCd"
+			, SEARCH_TAG		AS "searchTag"
+			, LATEST_CNT		AS "latestCnt"
+			, SORT_TAG			AS "sortTag"
+			, DD_TAG_CONT		AS "ddTagCont"
+			, PIVOT_CD			AS "pivotCd"
+			, PIVOT_DC_CD		AS "pivotDcCd"
+			, PIVOT_ITM_CD		AS "pivotItmCd"
+			, PIVOT_CLS_CD		AS "pivotClsCd"
+			, UI_ID				AS "uiId"
+			, DMPOINT_CD		AS "dmpointCd"
+			, SYS_TAG			AS "sysTag"
+			, START_WRTTIME_IDTFR_ID	AS "startWrttimeIdtfrId"
+			, END_WRTTIME_IDTFR_ID		AS "endWrttimeIdtfrId"
+			, LS_WRTTIME_IDTFR_ID		AS "lsWrttimeIdtfrId"
+			, LE_WRTTIME_IDTFR_ID		AS "leWrttimeIdtfrId"
+			, (SELECT STATBL_ID FROM TB_USER_TBL_ITM_M 
+			   WHERE SEQCE_NO = A.SEQCE_NO AND V_ORDER = 1
+			) AS "statblId"
+			, CALC_AQN				AS "calcAqn"
+			, CALC_AQN_NM			AS "calcAqnNm"
+			, NULL2ZERO_YN			AS "null2zeroYn"
+			, COND_WRTTIME_IDTFR_ID	AS "dtaWrttime"
+		FROM 
+			TB_USER_TBL A 	
+		WHERE
+			SEQCE_NO = #seqceNo:NUMERIC#
+	</select>
+	
+	<!-- 통계 스크랩 항목 분류 정보 조회 -->
+	<select id="multiStatListDao.selectStatMultiUserTblItm" parameterClass="params" resultClass="record">
+		SELECT STATBL_ID 	AS "statblId"
+			 , ITM_DATANO 	AS "itmDataNo"
+			 , CLS_DATANO 	AS "clsDataNo"
+			 , GRP_DATANO 	AS "grpDataNo"
+			 , ITM_SBL		AS "itmSbl"
+		FROM   TB_USER_TBL_ITM_M
+		WHERE  SEQCE_NO = #seqceNo:NUMERIC#
+		ORDER BY V_ORDER ASC
+	</select>
+	
+	<!-- 통계표 상세조회 -->
+	<select id="multiStatListDao.selectMultiName" parameterClass="params" resultClass="record">
+		/* sql id : multiStatListDao.selectMultiName */
+		SELECT
+			STATBL_NM 	AS "sStat"
+			, UI_NM 	AS "sDanwi"
+			, S_MIN		AS "sMin"
+			, S_MAX		AS "sMax"
+			, S_PERIOD	AS "sPeriod"
+			, S_ITM		AS "sItm"
+			, S_CLS		AS "sCls"
+			, S_GRP		AS "sGrp"
+			, STATBL_ID || '-' || #grpDatano:VARCHAR# || '-' || #clsDatano:VARCHAR# || '-' || #itmDatano:VARCHAR#	AS "sMixval"
+			, #alphaOprt:VARCHAR#	AS "sAlphaOprt"
+		FROM
+			(	SELECT
+					STATBL_NM
+					, A.STATBL_ID
+					, C.UI_NM
+					, SUBSTR(D.MIN_WRT_ID, 1, 4)	AS S_MIN
+					, SUBSTR(D.MAX_WRT_ID, 1, 4)	AS S_MAX
+					, SUBSTR(D.MIN_WRT_ID, 1, 4) || '~' || SUBSTR(D.MAX_WRT_ID, 1, 4)	AS S_PERIOD
+					, B.VIEW_ITM_NM 	AS S_ITM
+					, (SELECT VIEW_ITM_NM FROM TB_STTS_TBL_ITM 
+						WHERE A.STATBL_ID = STATBL_ID
+						  AND ITM_TAG = 'G' 
+						  AND DATANO = #grpDatano:NUMERIC#
+						  AND USE_YN = 'Y'
+						) AS S_GRP
+					, (SELECT VIEW_ITM_NM FROM TB_STTS_TBL_ITM 
+						WHERE A.STATBL_ID = STATBL_ID
+						  AND ITM_TAG = 'C' 
+						  AND DATANO = #clsDatano:NUMERIC#
+						  AND USE_YN = 'Y'
+						) AS S_CLS
+				FROM
+					TB_STTS_TBL A
+					INNER JOIN TB_STTS_TBL_ITM B
+						ON  A.STATBL_ID = B.STATBL_ID
+						AND B.ITM_TAG = 'I'
+						AND B.DATANO = #itmDatano:NUMERIC#
+					INNER JOIN TB_STTS_STDDUI C
+						ON  B.UI_ID = C.UI_ID
+						AND C.USE_YN = 'Y'
+					INNER JOIN (SELECT MAX(STATBL_ID) AS STATBL_ID, 
+									   MIN(WRTTIME_IDTFR_ID) AS MIN_WRT_ID,
+									   MAX(WRTTIME_IDTFR_ID) AS MAX_WRT_ID
+							      FROM TB_STTS_TBL_DIF
+							     WHERE STATBL_ID = #statblId:VARCHAR#
+							       AND DTACYCLE_CD = #dtacycleCd:VARCHAR#) D
+						ON A.STATBL_ID = D.STATBL_ID
+			)		
+	</select>
+	
+	<!-- 통계스크랩 항목, 분류 정보 삭제 -->
+	<delete id="multiStatListDao.deleteStatMultiUserTblItm" parameterClass="params">
+		/* sql id : multiStatListDao.deleteStatMultiUserTblItm */
+		DELETE TB_USER_TBL_ITM_M
+		WHERE  SEQCE_NO = #seqceNo:NUMERIC#
+	</delete>
+	
+	<!-- 사칙연산 데이터 수식 입력 조회  -->
+	<select id="multiStatListDao.selectMultiStatCalcRslt" parameterClass="params" resultClass="record">
+		/* sql id : multiStatListDao.selectMultiStatCalcRslt */
+		<iterate property="calcSqlGenerate" conjunction=" UNION ALL ">
+			SELECT #calcSqlGenerate[].hKey:VARCHAR# 	AS "hKey"
+			     , #calcSqlGenerate[].lKey:VARCHAR# 	AS "lKey"
+			     , FN_CALC_STTS_FOUR(#calcSqlGenerate[].calcAqn#, #dmPointVal#, #calcSqlGenerate[].calcNull2Zero#) AS "dtaVal"
+			FROM DUAL
+		</iterate>		
+	</select>
+</sqlMap>

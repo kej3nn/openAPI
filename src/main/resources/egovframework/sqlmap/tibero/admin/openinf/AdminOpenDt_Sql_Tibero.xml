@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="OpenDt" >
+<typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+
+<resultMap id="BaseResultMap" class="egovframework.admin.openinf.service.OpenDt" >
+	<result column="DT_ID" property="dtId" jdbcType="DECIMAL" />
+    <result column="DT_NM" property="dtNm" jdbcType="VARCHAR" />
+    <result column="ENG_DT_NM" property="dtNmEng" jdbcType="VARCHAR" />
+    <result column="SRC_YN" property="srcYn" jdbcType="VARCHAR" />
+    <result column="SRC_URL" property="srcUrl" jdbcType="VARCHAR" />
+    <result column="SRC_EXP" property="srcExp" jdbcType="VARCHAR" />
+    <result column="ENG_SRC_EXP" property="srcExpEng" jdbcType="VARCHAR" />
+	<result column="REG_ID" property="regId" jdbcType="VARCHAR" />
+    <result column="REG_DTTM" property="regDttm" jdbcType="TIMESTAMP" />
+    <result column="UPD_ID" property="updId" jdbcType="VARCHAR" />
+    <result column="UPD_DTTM" property="updDttm" jdbcType="TIMESTAMP" />
+    <result column="USE_YN" property="useYn" jdbcType="VARCHAR" />
+</resultMap>
+ 
+<resultMap id="BaseTblResultMap" class="egovframework.admin.openinf.service.OpenDtbl" >
+	<result column="DT_ID" property="dtId" jdbcType="DECIMAL" />
+    <result column="OWNER_CD" property="ownerCd" jdbcType="VARCHAR" />
+    <result column="TB_ID" property="tbId" jdbcType="VARCHAR" />
+    <result column="TB_NM" property="tbNm" jdbcType="VARCHAR" />
+    <result column="SRC_TBL_CD" property="srcTblCd" jdbcType="VARCHAR" />
+    <result column="LINK_CD" property="linkCd" jdbcType="VARCHAR" />
+    <result column="PRSS_CD" property="prssCd" jdbcType="VARCHAR" />
+    <result column="CREATE_CD" property="createCd" jdbcType="VARCHAR" />
+    <result column="LOAD_CD" property="loadCd" jdbcType="VARCHAR" />
+    <result column="LINK_CD" property="linkCd" jdbcType="VARCHAR" />
+    <result column="OWN_TAB_ID" property="ownTabId" jdbcType="VARCHAR" />
+    <result column="FT_LOAD_DTTM" property="ftLoadDttm" jdbcType="TIMESTAMP" />
+    <result column="LT_LOAD_DTTM" property="ltLoadDttm" jdbcType="TIMESTAMP" />
+    <result column="PR_LOAD_DTTM" property="prLoadDttm" jdbcType="TIMESTAMP" />
+    <result column="REG_ID" property="regId" jdbcType="VARCHAR" />
+    <result column="REG_DTTM" property="regDttm" jdbcType="TIMESTAMP" />
+    <result column="UPD_ID" property="updId" jdbcType="VARCHAR" />
+    <result column="UPD_DTTM" property="updDttm" jdbcType="TIMESTAMP" />
+</resultMap>
+ 
+<resultMap id="BaseSrcPopResultMap" class="egovframework.admin.openinf.service.OpenDtbl">
+<!-- 	<result column="TABLE_NAME" property="tableName" jdbcType="VARCHAR" /> -->
+  	<result column="TB_NM" property="tbNm" jdbcType="VARCHAR" />
+  	<result column="TB_ID" property="tbId" jdbcType="VARCHAR" />
+  	<result column="OWNER_CD" property="ownerCd" jdbcType="VARCHAR" />
+  	<result column="OWN_TAB_ID" property="ownTabId" jdbcType="VARCHAR" />
+</resultMap>
+
+
+
+<select id="OpenDtDAO.selectOpenDtList" parameterClass="egovframework.admin.openinf.service.OpenDt" resultMap="BaseResultMap" >
+  	SELECT *
+  	FROM(
+  	 	SELECT ROWNUM AS RN, A.*
+  	 	FROM(
+			SELECT A.DT_ID, A.DT_NM, A.ENG_DT_NM,A.SRC_YN, A.SRC_URL, A.SRC_EXP, A.ENG_SRC_EXP, A.REG_ID, A.REG_DTTM, A.UPD_ID, A.UPD_DTTM, A.USE_YN
+			FROM TB_OPEN_DT A
+			WHERE 1=1
+			<isNotEmpty property="searchWord" >
+				<isEqual property="searchWd" compareValue="00" >
+				AND 
+				(
+				A.DT_NM LIKE '%'||#searchWord#||'%'
+				OR UPPER(A.ENG_DT_NM) LIKE '%'|| UPPER(#searchWord#) ||'%'
+				OR A.SRC_EXP LIKE '%'||#searchWord#||'%'
+				)
+				</isEqual>
+				<isEqual property="searchWd" compareValue="0" >
+				AND A.DT_NM LIKE '%'||#searchWord#||'%'
+				</isEqual>
+				<isEqual property="searchWd" compareValue="1" >
+				AND UPPER(A.ENG_DT_NM) LIKE '%'||UPPER(#searchWord#)||'%'
+				</isEqual>
+				<isEqual property="searchWd" compareValue="2" >
+				AND A.SRC_EXP LIKE '%'||#searchWord#||'%'
+				</isEqual>
+			</isNotEmpty>
+			ORDER BY A.DT_ID DESC
+		) A
+  	 ) 
+	<isNotEqual prepend="startPage" compareValue="0">
+	WHERE RN BETWEEN #startPage:NUMERIC# AND #endPage:NUMERIC#
+	</isNotEqual>
+</select>
+
+<select id="OpenDtDAO.selectOpenDtListCnt" parameterClass="egovframework.admin.openinf.service.OpenDt" resultClass="java.lang.Integer" >
+	SELECT COUNT(A.DT_ID)
+	FROM TB_OPEN_DT A 
+	WHERE 1=1
+	<isNotEmpty property="searchWord" >
+		<isEqual property="searchWd" compareValue="0" >
+		AND A.DT_NM LIKE '%'||#searchWord#||'%'
+		</isEqual>
+		<isEqual property="searchWd" compareValue="1" >
+				AND A.ENG_DT_NM LIKE '%'||#searchWord#||'%'
+				</isEqual>
+		<isEqual property="searchWd" compareValue="2" >
+		AND A.SRC_EXP LIKE '%'||#searchWord#||'%'
+		</isEqual>
+	</isNotEmpty>
+</select>
+
+<select id="OpenDtDAO.selectOpenDtDtl" parameterClass="egovframework.admin.openinf.service.OpenDt" resultMap="BaseResultMap" >
+	SELECT A.DT_ID, A.DT_NM, A.ENG_DT_NM, A.SRC_YN, A.SRC_URL, A.SRC_EXP, A.ENG_SRC_EXP, A.REG_ID, A.REG_DTTM, A.UPD_ID, A.UPD_DTTM
+	FROM TB_OPEN_DT A
+	WHERE A.DT_ID = #dtId:NUMERIC#
+</select>
+
+<select id="OpenDtDAO.selectOpenDtSrcPopList" parameterClass="egovframework.admin.openinf.service.OpenDtbl" resultMap="BaseSrcPopResultMap" >
+  	SELECT *
+  	FROM(
+  	 	SELECT ROWNUM AS RN, A.*
+  	 	FROM(
+			SELECT TABLE_NAME
+					, REPLACE(TABLE_COMMENTS, '[Open]','') AS TB_NM
+					, OWNER || '.' || TABLE_NAME AS OWN_TAB_ID 
+					, OWNER AS OWNER_CD
+					, TABLE_NAME AS TB_ID
+			FROM TV_TABLE_LIST
+			WHERE 1=1
+			AND TY_CD IN ('OD')
+			<isNotEmpty property="owner">
+			AND OWNER = #owner#
+			</isNotEmpty>
+			<isNotEmpty property="tableName">
+			AND TABLE_NAME LIKE '%'||#tableName#||'%'
+			</isNotEmpty>
+			ORDER BY OWNER
+	) A
+  	 ) 
+	<isNotEqual prepend="startPage" compareValue="0">
+	WHERE RN BETWEEN #startPage:NUMERIC# AND #endPage:NUMERIC#
+	</isNotEqual>
+</select>
+
+<select id="OpenDtDAO.selectOpenDtSrcPopListCnt" parameterClass="egovframework.admin.openinf.service.OpenDtbl" resultClass="java.lang.Integer" >
+  	SELECT COUNT(TABLE_NAME)
+  	FROM TV_TABLE_LIST
+  	WHERE 1=1
+  	AND TY_CD IN ('OD')
+  	<isNotEmpty property="owner">
+	AND OWNER = #owner#
+	</isNotEmpty>
+	<isNotEmpty property="tableName">
+	AND TABLE_NAME LIKE '%'||#tableName#||'%'
+	</isNotEmpty>
+  </select>
+
+
+<select id="OpenDtDAO.selectOpenDtblList" parameterClass="egovframework.admin.openinf.service.OpenDtbl" resultMap="BaseTblResultMap" >
+	SELECT DT_ID
+		, OWNER_CD
+		, TB_ID
+		, TB_NM
+		, OWNER_CD || '.' || TB_ID AS OWN_TAB_ID 
+		, SRC_TBL_CD
+		, LINK_CD
+		, PRSS_CD
+		, CREATE_CD
+		, LOAD_CD
+		, FT_LOAD_DTTM
+		, LT_LOAD_DTTM
+		, PR_LOAD_DTTM
+		, REG_ID
+		, REG_DTTM
+		, UPD_ID
+		, UPD_DTTM
+	FROM TB_OPEN_DTBL
+	WHERE 1=1
+	AND DT_ID = #dtId:NUMERIC#
+</select>
+
+
+<select id="OpenDtDAO.selectOpenDtblListCnt" parameterClass="egovframework.admin.openinf.service.OpenDtbl" resultClass="java.lang.Integer" >
+	SELECT COUNT(DT_ID)
+	FROM TB_OPEN_DTBL
+	WHERE 1=1
+	AND DT_ID = #dtId:NUMERIC#
+</select>
+
+<select id="OpenDtDAO.getDtId" parameterClass="egovframework.admin.openinf.service.OpenDt" resultClass="java.lang.Integer">
+	SELECT NVl(MAX(DT_ID)+1,10000001)
+	FROM TB_OPEN_DT
+</select>
+
+<insert id="OpenDtDAO.insertDt" parameterClass="egovframework.admin.openinf.service.OpenDt">
+	INSERT INTO TB_OPEN_DT
+		(DT_ID, DT_NM, ENG_DT_NM, SRC_YN, SRC_URL, SRC_EXP, ENG_SRC_EXP, REG_ID, REG_DTTM, UPD_ID, UPD_DTTM, USE_YN)
+	VALUES( #dtId:NUMERIC#, #dtNm:VARCHAR#, #dtNmEng:VARCHAR#
+	<isNotEmpty property = "srcYn">
+	, #srcYn#
+	</isNotEmpty>
+	<isEmpty property = "srcYn">
+	, 'N'
+	</isEmpty>
+	, #srcUrl:VARCHAR#, 
+	#srcExp:VARCHAR#, #srcExpEng:VARCHAR#, #sessionUsrId:VARCHAR#, SYSDATE, #sessionUsrId:VARCHAR#, SYSDATE, #useYn:CHAR# )
+</insert>
+
+<!--TB_OPEN_DTBL 테이블 없음  -->
+<insert id="OpenDtDAO.insertDtbl" parameterClass="egovframework.admin.openinf.service.OpenDtbl">
+	INSERT INTO TB_OPEN_DTBL
+		(DT_ID, OWNER_CD, TB_ID, TB_NM, PRSS_CD, LOAD_CD, SRC_TBL_CD, LINK_CD, LT_LOAD_DTTM, REG_ID, REG_DTTM, UPD_ID, UPD_DTTM )
+	VALUES
+		(<![CDATA[#dtId:NUMERIC#, #ownerCd#, #tbId#, #tbNm#, #prssCd#, #loadCd#, #srcTblCd#, #linkCd#, TO_DATE(#ltLoadDttm#, 'YYYY-MM-DD'), #sessionUsrId#, SYSDATE, #sessionUsrId#, SYSDATE ]]>)
+</insert>
+
+<update id="OpenDtDAO.updateDt" parameterClass="egovframework.admin.openinf.service.OpenDt" >
+	UPDATE TB_OPEN_DT
+	SET DT_NM = #dtNm:VARCHAR#
+		, ENG_DT_NM = #dtNmEng:VARCHAR#
+		<isNotEmpty property = "srcYn">
+		, SRC_YN = #srcYn:CHAR#
+		</isNotEmpty>
+		, SRC_EXP = #srcExp:VARCHAR#
+		, SRC_URL = #srcUrl:VARCHAR#
+		, ENG_SRC_EXP = #srcExpEng:VARCHAR#
+		, UPD_ID =#sessionUsrId:VARCHAR#
+		, UPD_DTTM = SYSDATE
+		, USE_YN = #useYn:CHAR#  
+	WHERE DT_ID = #dtId:NUMERIC#
+</update>
+
+<update id="OpenDtDAO.deleteDt" parameterClass="egovframework.admin.openinf.service.OpenDt" >
+	DELETE FROM TB_OPEN_DT
+	WHERE DT_ID = #dtId:NUMERIC#
+</update>
+
+<!--TB_OPEN_DTBL 테이블 없음  -->
+<update id="OpenDtDAO.deleteDtbl" parameterClass="egovframework.admin.openinf.service.OpenDtbl" >
+	DELETE FROM TB_OPEN_DTBL
+	WHERE DT_ID = #dtId#
+	AND OWNER_CD = #ownerCd#
+	AND TB_ID = #tbId#
+</update>
+
+<!--TB_OPEN_DTBL 테이블 없음  -->
+<update id="OpenDtDAO.updateDtbl" parameterClass="egovframework.admin.openinf.service.OpenDtbl" >
+	UPDATE TB_OPEN_DTBL
+	SET PRSS_CD = #prssCd#
+		, LOAD_CD = #loadCd#
+		, SRC_TBL_CD = #srcTblCd#
+		, LINK_CD = #linkCd#
+		, LT_LOAD_DTTM = TO_DATE(#ltLoadDttm#, 'YYYY-MM-DD')
+		, UPD_ID = #sessionUsrId#
+		, UPD_DTTM = SYSDATE	
+	WHERE DT_ID = #dtId#
+	AND OWNER_CD = #ownerCd#
+	AND TB_ID = #tbId#
+</update>
+
+<select id="OpenDtDAO.getUseDtInf" parameterClass="egovframework.admin.openinf.service.OpenDt" resultClass="java.lang.Integer">
+	SELECT COUNT(B.DT_ID)
+	FROM TB_OPEN_DT A
+	LEFT OUTER JOIN TB_OPEN_INF B
+	ON A.DT_ID = B.DT_ID
+	WHERE A.DT_ID = #dtId:NUMERIC#
+</select>
+
+<select id="OpenDtDAO.selectReg" parameterClass="egovframework.admin.openinf.service.OpenDt" resultClass="java.lang.Integer" >
+	SELECT A.CNT1 + B.CNT2 AS CNT
+	  FROM (
+		  SELECT COUNT(*) AS CNT1
+		    FROM TB_OPEN_DT A
+		   INNER JOIN TB_OPEN_DS B ON A.DT_ID = B.DT_ID 
+		  WHERE A.DT_ID = #dtId:NUMERIC#
+	  ) A,
+	  (
+		   SELECT COUNT(*) AS CNT2
+		    FROM TB_OPEN_DT A
+		   INNER JOIN TB_OPEN_INF C ON A.DT_ID = C.DT_ID
+		  WHERE A.DT_ID = #dtId:NUMERIC#
+	  )B
+</select>
+
+
+</sqlMap>

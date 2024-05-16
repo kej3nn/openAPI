@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="StatOpenStats" >
+	<typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+	<resultMap id="StatsAll" class="egovframework.admin.stat.service.StatOpenStats">
+		<result property="orgCd" column="ORG_CD"/>
+		<result property="orgNm" column="ORG_NM"/>
+		<result property="dtCnt" column="DT_CNT"/>
+		<result property="infCnt" column="INF_CNT"/>
+		<result property="srvTot" column="SRV_TOT"/>
+		<result property="sheetCnt" column="SHEET_CNT"/>
+		<result property="chartCnt" column="CHART_CNT"/>
+		<result property="mapCnt" column="MAP_CNT"/>
+		<result property="fileCnt" column="FILE_CNT"/>
+		<result property="linkCnt" column="LINK_CNT"/>
+		<result property="openApiCnt" column="OPENAPI_CNT"/>
+		<result property="vCnt" column="V_CNT"/>
+	</resultMap>
+	
+	<!-- 공공데이터 개방 총 건수 구한다.  -->
+	<select id="StatOpenStatsDao.openInfTotalCnt" resultClass="java.lang.Integer" >
+		SELECT NVL( COUNT(*),0) AS TOTAL_CNT 
+		  FROM TV_OPEN_INF
+	</select>
+	
+	
+	<!-- 공공데이터 개방기관 건수 -->
+	<select id="StatOpenStatsDao.openOrgCnt" resultClass="java.lang.Integer" >
+		SELECT NVL( COUNT(DISTINCT(TOP_ORG_CD)) ,0) AS ORG_CNT
+		  FROM TV_OPEN_INF
+	</select>
+	
+	
+	<!-- 개방서비스 유형.. 개방한 서비스에서 총유형들의 sum -->
+	<select id="StatOpenStatsDao.openSrvCnt" resultClass="java.lang.Integer" >
+		SELECT NVL( COUNT(*) ,0) AS SRV_CNT  
+		  FROM TV_OPEN_INF A
+			   INNER JOIN TB_OPEN_INF_SRV B 
+			ON A.INF_ID = B.INF_ID
+		 WHERE 1=1
+		   AND B.SRV_YN = 'Y'
+	</select>
+	
+	
+	<!-- 사용중인? 보유데이터 총 건수 -->
+	<select id="StatOpenStatsDao.openDtCnt" resultClass="java.lang.Integer" >
+		SELECT NVL( COUNT(DISTINCT A.DT_ID), 0) AS DT_CNT  
+		  FROM TV_OPEN_INF A
+			   INNER JOIN TB_OPEN_DT B 
+			ON A.DT_ID = B.DT_ID
+		 WHERE 1=1
+	</select>
+	
+	
+	<!-- 공공데이터 활용 총 건수 (통계)  -->
+	<select id="StatOpenStatsDao.openStatUseDtCnt" resultClass="java.lang.Integer" >
+		SELECT NVL( SUM(TOT_USE_CNT), 0 ) AS STAT_DT_CNT
+		   FROM TB_STAT_USE
+	</select>
+	
+	
+	<!-- 활용 피드백 총 건수 (통계)  -->
+	<select id="StatOpenStatsDao.openFeedBackCnt" resultClass="java.lang.Integer" >
+		SELECT NVL( SUM(USER_CNT+ KEY_CNT+RE_CNT+QA_CNT+GA_CNT), 0 ) AS FEEDBACK_CNT
+		   FROM TB_STAT_USE_ACT
+	</select>
+	
+	<!-- 개방 및 활용 통계 sheet 조회  -->
+	<!--  전체 보유데이터 (부분)개방이면서 등록중인 상태 제외하고 전체 -->										
+	<select id="StatOpenStatsDao.getStatsSheetAll" parameterClass="egovframework.admin.stat.service.StatOpenStats" resultMap="StatsAll">
+	   
+	   SELECT     A.TOP_ORG_CD AS ORG_CD 
+	 			, MAX(A.TOP_ORG_NM) AS ORG_NM
+				, COUNT(DISTINCT A.DT_ID) AS DT_CNT
+				, COUNT(DISTINCT A.INF_ID) AS INF_CNT
+				, COUNT(*) AS SRV_TOT
+				, SUM(DECODE(S.SRV_CD, 'S',1,0)) AS SHEET_CNT
+				, SUM(DECODE(S.SRV_CD, 'C',1,0)) AS CHART_CNT
+				, SUM(DECODE(S.SRV_CD, 'M',1,0)) AS MAP_CNT
+				, SUM(DECODE(S.SRV_CD, 'F',1,0)) AS FILE_CNT
+				, SUM(DECODE(S.SRV_CD, 'L',1,0)) AS LINK_CNT
+				, SUM(DECODE(S.SRV_CD, 'A',1,0)) AS OPENAPI_CNT
+				, SUM(DECODE(S.SRV_CD, 'V',1,0)) AS V_CNT		
+		FROM TV_OPEN_INF A INNER JOIN TB_OPEN_DT D 
+		  ON A.DT_ID = D.DT_ID 
+		   	 INNER JOIN TB_OPEN_INF_SRV S 
+		  ON A.INF_ID = S.INF_ID 
+		 AND S.SRV_YN = 'Y'
+	   GROUP BY A.TOP_ORG_CD
+	</select>
+	
+	
+</sqlMap>

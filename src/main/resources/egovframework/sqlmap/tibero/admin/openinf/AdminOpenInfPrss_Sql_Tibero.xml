@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="OpenInfPrss" >
+  <typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+  
+  <resultMap id="OpenInfPrssListAll" class="egovframework.admin.openinf.service.OpenInf" >
+    <result column="INF_ID" property="infId"  />
+    <result column="INF_NM" property="infNm" />
+    <result column="DT_NM" property="dtNm"  />
+    <result column="INF_STATE" property="infState" />
+    <result column="PRSS_STATE" property="prssState" />
+    <result column="OPEN_DTTM" property="openDttm"  />
+     <result column="ORG_NM" property="orgNm" />
+     <result column="CATE_FULLNM" property="cateFullnm" />
+     <result column="CATE_NM" property="cateNm" />
+     <result column="USR_NM" property="usrNm"  />
+     <result column="OPEN_SRV" property="openSrv"  />
+  </resultMap>
+  
+  <resultMap id="OpenInfPrssDtl" class="egovframework.admin.openinf.service.OpenInf" >
+	   <result column="SEQ" property="seq"  />
+	   <result column="INF_ID" property="infId"  />
+	   <result column="INF_NM" property="infNm" />
+	   <result column="DT_NM" property="dtNm"  />
+	   <result column="DT_ID" property="dtId"  />
+	   <result column="CCL_NM" property="cclNm"  />
+	   <result column="INF_STATE" property="infState" />
+	   <result column="INF_STATE_NM" property="infStateNm" />
+	   <result column="OPEN_DTTM" property="openDttm"  />
+	   <result column="ORG_NM" property="orgNm" />
+	   <result column="CATE_NM" property="cateNm" />
+	   <result column="USR_NM" property="usrNm"  />
+	   <result column="ENG_INF_NM" property="infNmEng"  />
+	   <result column="CCL_CD" property="cclCd"  />
+	   <result column="CATE_ID" property="cateId"  />
+	   <result column="CATE_FULLNM" property="cateFullnm"  />
+	   <result column="ORG_CD" property="orgCd"  />
+	   <result column="USR_CD" property="usrCd"  />
+	   <result column="DS_ID" property="dsId"  />
+	   <result column="DS_NM" property="dsNm"  />
+	   <result column="OPEN_CD" property="openCd"  />
+	   <result column="CAUSE_CD" property="causeCd"  />
+	   <result column="CAUSE_INFO" property="causeInfo"  />
+	   <result column="SCHW_TAG_CONT" property="infTag"  />
+	   <result column="ENG_SCHW_TAG_CONT" property="infTagEng"  />
+	   <result column="INF_EXP" property="infExp"  />
+	   <result column="ENG_INF_EXP" property="infExpEng"  />
+	   <result column="LOAD_CD" property="loadCd"  />
+	   <result column="KOR_YN" property="korYn"  />
+	   <result column="ENG_YN" property="engYn"  />
+	   <result column="KOR_MOBILE_YN" property="korMobileYn"  />
+	   <result column="ORG_FULLNM" property="orgFullnm"  />
+	   <result column="SRV_CD" property="srvCd"  />
+	   <result column="SRV_YN" property="srvYn"  />
+	   <result column="PRSS_STATE" property="prssState" />
+	   <result column="PRSS_STATE_NM" property="prssStateNm" />
+	   <result column="API_RES" property="apiRes"  />
+	   <result column="SGRP_CD" property="sgrpCd"  />
+	   <result column="PRSS_ACC_CD" property="prssAccCd"  />
+	   
+  </resultMap>
+  
+  <resultMap id="OpenInfPrssLog" class="egovframework.admin.openinf.service.OpenInf" >
+   		<result column="NEW_STATE" property="newState"  />
+   		<result column="PRSS_EXP" property="prssExp"  />
+   		<result column="ORG_CD" property="orgCd"  />
+   		<result column="ORG_FULLNM" property="orgFullnm"  />
+   		<result column="REG_ID" property="regId"  />
+   		<result column="REG_DTTM" property="regDttm"  />
+  </resultMap>
+  
+	<select id="OpenInfPrssDAO.selectOpenInfPrssListAll" parameterClass="egovframework.admin.openinf.service.OpenInf" resultMap="OpenInfPrssListAll" >
+	SELECT *
+	  FROM(
+		SELECT ROWNUM AS RN, TB.*
+		  FROM
+		  (
+			SELECT A.INF_ID, A.DT_NM, A.INF_NM, A.CATE_NM, A.ORG_NM, A.CATE_FULLNM, A.USR_NM, B.PRSS_STATE
+			,A.INF_STATE
+			,TO_CHAR(A.OPEN_DTTM,'YYYY-MM-DD') AS OPEN_DTTM
+			,FN_GET_OPEN_SRV_HTML(A.OPEN_SRV) AS OPEN_SRV
+			FROM TV_MNG_INF A
+			INNER JOIN TB_OPEN_INF B
+			ON A.INF_ID = B.INF_ID
+		 	WHERE 1=1 
+		<isNotEmpty property="accCd" prepend="AND">
+			<isNotEqual property="accCd" compareValue="SYS">
+				EXISTS (SELECT 1 FROM TB_OPEN_INF_USR 
+						WHERE  INF_ID = A.INF_ID
+						AND    USE_YN = 'Y' 
+						<![CDATA[
+						AND    PRSS_ACC_CD > 0
+						]]> 
+						AND    USR_CD = #sessionUsrCd:NUMERIC# )
+			</isNotEqual>
+		</isNotEmpty>			 	
+	    <isNotEmpty property="searchWord" >
+			<isEqual property="searchWd" compareValue="0" >
+			AND A.INF_NM LIKE '%'||#searchWord#||'%'
+			</isEqual>
+			<isEqual property="searchWd" compareValue="1">
+			AND A.DT_NM LIKE '%'||#searchWord#||'%'
+			</isEqual>
+			<isEqual property="searchWd" compareValue="2">
+			AND A.SCHW_TAG_CONT LIKE '%'||#searchWord#||'%'
+			</isEqual>
+		</isNotEmpty>
+		<isNotEmpty property="orgCd">
+			AND A.ORG_CD = #orgCd#
+		</isNotEmpty>
+		<isNotEmpty property="cateId">
+<!-- 			AND A.CATE_ID = #cateId# -->
+			AND A.CATE_ID IN	 (SELECT 
+									CATE_ID
+									FROM TB_OPEN_CATE A
+									WHERE 1 = 1
+									START WITH CATE_ID = #cateId#
+									CONNECT BY PRIOR CATE_ID = PAR_CATE_ID)		
+		</isNotEmpty>
+		<isNotEmpty property="openDttmFrom" prepend="AND">
+			A.OPEN_DTTM <![CDATA[>=]]> TO_DATE(#openDttmFrom#,'YYYY-MM-DD')
+		</isNotEmpty>
+		<isNotEmpty property="openDttmTo" prepend="AND">
+			A.OPEN_DTTM <![CDATA[<]]> TO_DATE(#openDttmTo#,'YYYY-MM-DD') + 1
+		</isNotEmpty>			
+		
+<!-- 		<isNotEmpty property="infState">
+				 AND A.INF_STATE = #infState#
+		</isNotEmpty> -->
+	<isNotEmpty property = "searchGubun">
+		<isEqual property = "searchGubun" compareValue="Y">
+			AND A.INF_STATE NOT IN ('Y')
+		</isEqual>
+		<isEqual property = "searchGubun" compareValue="N">
+			AND A.INF_STATE = 'Y'
+		</isEqual>
+	</isNotEmpty>
+			ORDER  BY A.SEQ 	
+		)TB
+	)
+	<isNotEqual prepend="startPage" compareValue="0">
+		WHERE RN BETWEEN #startPage:NUMERIC# AND #endPage:NUMERIC#
+	</isNotEqual>
+	</select>
+	
+	<select id="OpenInfPrssDAO.selectOpenInfPrssListAllCnt" parameterClass="egovframework.admin.openinf.service.OpenInf" resultClass="java.lang.Integer">
+			SELECT   COUNT(A.INF_ID)
+		  	FROM TV_MNG_INF A
+			INNER JOIN TB_OPEN_INF B
+			ON A.INF_ID = B.INF_ID
+		 	WHERE 1=1 
+		<isNotEmpty property="accCd" prepend="AND">
+			<isNotEqual property="accCd" compareValue="SYS">
+				EXISTS (SELECT 1 FROM TB_OPEN_INF_USR 
+						WHERE  INF_ID = A.INF_ID
+						AND    USE_YN = 'Y' 
+						<![CDATA[
+						AND    PRSS_ACC_CD > 0
+						]]> 
+						AND    USR_CD = #sessionUsrCd:NUMERIC# )
+			</isNotEqual>
+		</isNotEmpty>			 	
+		 <isNotEmpty property="searchWord" >
+			<isEqual property="searchWd" compareValue="0" >
+			AND A.INF_NM LIKE '%'||#searchWord#||'%'
+			</isEqual>
+			<isEqual property="searchWd" compareValue="1">
+			AND A.DT_NM LIKE '%'||#searchWord#||'%'
+			</isEqual>
+			<isEqual property="searchWd" compareValue="2">
+			AND A.SCHW_TAG_CONT LIKE '%'||#searchWord#||'%'
+			</isEqual>
+		</isNotEmpty>
+		<isNotEmpty property="orgCd">
+			AND A.ORG_CD = #orgCd#
+		</isNotEmpty>
+		<isNotEmpty property="cateId">
+<!-- 			AND A.CATE_ID = #cateId# -->
+			AND A.CATE_ID IN	 (SELECT 
+									CATE_ID
+									FROM TB_OPEN_CATE A
+									WHERE 1 = 1
+									START WITH CATE_ID = #cateId#
+									CONNECT BY PRIOR CATE_ID = PAR_CATE_ID)	
+		</isNotEmpty>
+		<isNotEmpty property="openDttmFrom">
+			AND A.OPEN_DTTM BETWEEN  TO_DATE(#openDttmFrom#,'YYYY-MM-DD') AND TO_DATE(#openDttmTo#,'YYYY-MM-DD')
+		</isNotEmpty>
+<!-- 		<isNotEmpty property="infState">
+				 AND A.INF_STATE = #infState#
+		</isNotEmpty> -->
+		<isNotEmpty property = "searchGubun">
+			<isEqual property = "searchGubun" compareValue="Y">
+				AND A.INF_STATE NOT IN ('Y')
+			</isEqual>
+			<isEqual property = "searchGubun" compareValue="N">
+				AND A.INF_STATE = 'Y'
+			</isEqual>
+		</isNotEmpty>
+			ORDER  BY A.SEQ 	
+	</select>
+	
+	<select id="OpenInfPrssDAO.selectOpenInfPrssDtl" parameterClass="egovframework.admin.openinf.service.OpenInf" resultMap="OpenInfPrssDtl">
+			SELECT A.INF_ID, A.INF_NM, A.ENG_INF_NM, A.DT_ID, A.DT_NM, A.DS_ID, B.DS_NM, A.CCL_CD, A.CCL_NM, A.CATE_ID, A.CATE_NM, A.CATE_FULLNM 
+					, A.ORG_CD, A.ORG_NM, C.USR_CD, A.USR_NM, A.ORG_FULLNM, A.INF_STATE, A.SCHW_TAG_CONT, C.ENG_SCHW_TAG_CONT
+					, TO_CHAR(A.OPEN_DTTM,'YYYY-MM-DD') AS OPEN_DTTM
+					, A.ENG_INF_NM, C.OPEN_CD, C.CAUSE_CD, C.CAUSE_INFO, C.INF_EXP, C.ENG_INF_EXP
+					, C.KOR_YN, C.ENG_YN, C.KOR_MOBILE_YN, C.LOAD_CD, C.SEQ, D.SRV_YN, D.SRV_CD, C.PRSS_STATE, D.API_RES, D.SGRP_CD
+					, CASE A.INF_STATE WHEN 'Y' THEN '개방'
+						WHEN 'N' THEN '미개방'
+						WHEN 'X' THEN '개방불가'
+						WHEN 'C' THEN '개방취소'
+						ELSE A.INF_STATE END AS INF_STATE_NM
+					, CASE C.PRSS_STATE WHEN 'AO' THEN '등록중'
+ 					 	WHEN 'AE' THEN '등록완료'
+ 					 	WHEN 'AA' THEN '개방요청'
+ 					 	WHEN 'AK' THEN '개방승인'
+ 					 	WHEN 'AC' THEN '개방승인불가'
+ 					 	WHEN 'CA' THEN '개방취소요청'
+ 					 	WHEN 'CK' THEN '개방취소승인'
+ 					 	WHEN 'CC' THEN '개방취소승인불가'
+	                 	ELSE C.PRSS_STATE END AS PRSS_STATE_NM
+				<!-- 관리자면 전체 권한 준다. -->		           	
+				<isNotEmpty property="accCd">
+					<isEqual property="accCd" compareValue="SYS">
+						,'50' AS PRSS_ACC_CD
+					</isEqual>
+					<isNotEqual property="accCd" compareValue="SYS">
+						,NVL(E.PRSS_ACC_CD, 0) AS PRSS_ACC_CD
+					</isNotEqual>
+				</isNotEmpty>	                 	
+			FROM TV_MNG_INF A
+			LEFT OUTER JOIN TB_OPEN_DS B
+			ON A.DS_ID = B.DS_ID
+			AND B.USE_YN ='Y'
+			LEFT OUTER JOIN TB_OPEN_INF C
+			ON A.INF_ID = C.INF_ID	
+			LEFT OUTER JOIN TB_OPEN_INF_SRV D
+			ON A.INF_ID = D.INF_ID
+		<isNotEmpty property="accCd">
+			<isNotEqual property="accCd" compareValue="SYS">
+				LEFT OUTER JOIN TB_OPEN_INF_USR E
+   				ON  A.INF_ID = E.INF_ID
+   		   		AND E.USR_CD = #sessionUsrCd:NUMERIC#  
+			</isNotEqual>
+		</isNotEmpty>   			
+		WHERE A.INF_ID =#infId:VARCHAR#
+	</select>
+	
+	<insert id="OpenInfPrssDAO.insertLog" parameterClass="egovframework.admin.openinf.service.OpenInf" >
+		INSERT INTO TB_LOG_OPEN_INF_PRSS
+			(INF_ID, SEQCE_NO, OLD_STATE, NEW_STATE, PRSS_EXP, OPEN_DTTM, ORG_CD, ORG_FULLNM, REG_ID, REG_DTTM)
+			SELECT #infId:VARCHAR#, NVL(MAX(SEQCE_NO),0)+1, #prssState:CHAR#, #newState:CHAR#, #prssExp:VARCHAR#, TO_DATE(#openDttm:VARCHAR#,'YYYY-MM-DD HH24:MI:SS'), #orgCd:VARCHAR#, #orgFullnm:VARCHAR#, #sessionUsrId:VARCHAR#, SYSDATE	
+		FROM TB_LOG_OPEN_INF_PRSS
+	</insert>
+	
+	<update id="OpenInfPrssDAO.updateOpenInfPrss" parameterClass="egovframework.admin.openinf.service.OpenInf" >
+		UPDATE TB_OPEN_INF
+		SET PRSS_STATE = #newState:CHAR#
+		<isNotEmpty property="openDttm">
+			, OPEN_DTTM = TO_DATE(#openDttm:VARCHAR#,'YYYY-MM-DD HH24:MI:SS')
+		</isNotEmpty>
+		<isEqual property="newState" compareValue="AK" >
+			, INF_STATE = 'Y'
+		</isEqual>
+		<isEqual property="newState" compareValue="AC" >
+			, INF_STATE = 'X'
+		</isEqual>
+		<isEqual property="newState" compareValue="CK" >
+			, INF_STATE = 'C'
+		</isEqual>
+		WHERE INF_ID = #infId:VARCHAR#
+		AND SEQ = #seq:NUMERIC#
+	</update>
+	
+	<select id="OpenInfPrssDAO.selectOpenInfPrssLogList" parameterClass="egovframework.admin.openinf.service.OpenInf" resultMap="OpenInfPrssLog">
+		SELECT PRSS_EXP, ORG_CD, ORG_FULLNM, REG_ID, REG_DTTM
+					, CASE NEW_STATE WHEN 'AO' THEN '등록중'
+ 					 	WHEN 'AE' THEN '등록완료'
+ 					 	WHEN 'AA' THEN '개방요청'
+ 					 	WHEN 'AK' THEN '개방승인'
+ 					 	WHEN 'AC' THEN '개방승인불가'
+ 					 	WHEN 'CA' THEN '개방취소요청'
+ 					 	WHEN 'CK' THEN '개방취소승인'
+ 					 	WHEN 'CC' THEN '개방취소승인불가'
+	                 	ELSE NEW_STATE END AS NEW_STATE
+		FROM TB_LOG_OPEN_INF_PRSS
+		WHERE INF_ID = #infId:VARCHAR#
+		ORDER BY REG_DTTM DESC
+	</select>
+	
+	<select id="OpenInfPrssDAO.selectOpenInfPrssLogListCnt" parameterClass="egovframework.admin.openinf.service.OpenInf" resultClass="java.lang.Integer">
+		SELECT COUNT(NEW_STATE)
+		FROM TB_LOG_OPEN_INF_PRSS
+		WHERE INF_ID = #infId:VARCHAR#
+	</select>
+	
+</sqlMap>

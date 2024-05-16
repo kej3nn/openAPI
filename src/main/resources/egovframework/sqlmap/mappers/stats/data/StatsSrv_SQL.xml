@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="StatsDataMapper">
+	
+	<!-- tree 조회 -->
+	<select id="searchStatsTree" parameterType="egovframework.common.base.model.Params" resultType="egovframework.common.base.model.Record">
+		/* sqlId : StatsDataMapper.searchStatsTree */
+		SELECT 
+			MENU_ID AS 			"id"
+			, PAR_MENU_ID AS 	"pId"
+			, MENU_NM as 		"name"
+			, V_ORDER as 		"order"
+		FROM   
+			TB_COMM_MENU A
+		WHERE  
+			A.USE_YN = 'Y'
+		START WITH A.PAR_MENU_ID = 0
+		CONNECT BY PRIOR 
+			A.MENU_ID = A.PAR_MENU_ID
+		ORDER SIBLINGS BY A.V_ORDER	
+	</select>
+	
+	<select id="searchStatsTreeTest" parameterType="egovframework.common.base.model.Params" resultType="egovframework.common.base.model.Record">
+		 SELECT B.SEQ AS SEQ,
+		        A.INF_ID AS INF_ID,
+		        A.SCOL_INF_SEQ AS SCOL_INF_SEQ,
+		        B.INF_NM AS INF_NM,
+		        B.INF_EXP AS INF_EXP,
+		        C.CATE_ID,
+		        C.CATE_NM,
+		        C.PAR_CATE_ID,
+		        D.CATE_ID AS TOP_CATE_ID,
+		        D.CATE_NM AS TOP_CATE_NM
+		   FROM ( SELECT A.INF_ID AS INF_ID,
+		                 MIN(CASE A.SRV_CD WHEN 'S' THEN A.INF_SEQ END ) AS SCOL_INF_SEQ,
+		                 SUM(A.VIEW_CNT) AS VIEW_CNT
+		            FROM TB_OPEN_INF_SRV A JOIN TB_OPEN_INF B ON B.INF_ID = A.INF_ID JOIN TB_OPEN_CATE C ON C.CATE_ID = B.CATE_ID JOIN TB_OPEN_CATE D ON D.CATE_ID = C.TOP_CATE_ID LEFT JOIN TB_OPEN_DS E ON E.DS_ID = B.DS_ID
+		           WHERE A.SRV_YN = 'Y'
+		             AND A.SRV_CD IN('S')
+		             AND B.INF_STATE = 'Y'
+		             <![CDATA[
+		             AND B.OPEN_DTTM <= SYSDATE
+		             ]]>
+		             AND C.USE_YN = 'Y'
+		             AND D.USE_YN = 'Y'
+		           GROUP BY A.INF_ID) A 
+			JOIN TB_OPEN_INF B 
+				ON B.INF_ID = A.INF_ID 
+			JOIN TB_OPEN_CATE C 
+				ON C.CATE_ID = B.CATE_ID 
+			JOIN TB_OPEN_CATE D 
+				ON D.CATE_ID = C.TOP_CATE_ID
+		  ORDER BY B.V_ORDER ASC	
+	</select>
+</mapper>

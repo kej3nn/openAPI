@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="StatList" >
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+	
+	<!-- 게시판 통계표 컨텐츠를 가져온다. -->
+	<select id="statListDao.selectContBbsTbl" parameterClass="params" resultClass="record">
+		/* sql id : statListDao.selectContBbsTbl */
+		SELECT A.SEQ      AS "seq",
+		       A.BBS_TIT  AS "bbsTit",
+		       A.BBS_CONT AS "bbsCont",
+		       A.ANS_CONT AS "ansCont",
+		       A.FILE_CNT AS "fileCnt",
+		       A.LINK_CNT AS "linkCnt", 
+		       (
+		       CASE
+		              WHEN B.ANS_TAG <![CDATA[ <> ]]> 'N'
+		              THEN FN_GET_BBSANS_NM ( B.ANS_TAG, 'ZS')
+		              ELSE ''
+		       END) AS "procStartNm", 
+		       (
+		       CASE
+		              WHEN B.ANS_TAG <![CDATA[ <> ]]> 'N'
+		              THEN FN_GET_BBSANS_NM ( B.ANS_TAG, 'ZD')
+		              ELSE ''
+		       END) AS "procEndNm",
+		       FN_GET_BBS_LIST_CD_NM(B.LIST_CD) 						AS "listCdNm",
+           	   NVL(FN_GET_COMM_CODE_NM(B.LIST_CD, A.LIST_SUB_CD), ' ') 	AS "listSubCdNm"
+		FROM   TB_BBS_LIST A
+		       INNER JOIN TB_BBS_ADMIN B
+		       ON     A.BBS_CD = B.BBS_cD
+		WHERE  A.SEQ    = #seq:NUMERIC#
+		AND    A.BBS_CD = #bbsCd:VARCHAR#
+		AND    A.DEL_YN        = 'N'		
+	</select>
+	
+	<!-- 게시판 통계표 컨텐츠 목록을 가져온다(용어설명) -->
+	<select id="statListDao.selectContBbsTblList" parameterClass="params" resultClass="record">
+		/* sql id : statListDao.selectContBbsTblList */
+		SELECT   B.SEQ			AS "seq",
+		         A.STATBL_ID	AS "statblId",
+		         B.BBS_TIT		AS "bbsTit",
+		         B.BBS_CONT		AS "bbsCont"
+		FROM     TB_BBS_TBL A
+		         INNER JOIN TB_BBS_LIST B
+		         ON       A.SEQ = B.SEQ
+		WHERE    A.STATBL_ID    = #statblId:VARCHAR#
+		AND      A.BBS_CD       = #bbsCd:VARCHAR#
+		AND      A.DEL_YN       = 'N'
+		ORDER BY A.SEQ DESC	
+  	</select>
+  	
+  	<!-- 게시판 통계표 컨텐츠 파일목록을 가져온다. -->
+	<select id="statListDao.selectContBbsFileList" parameterClass="params" resultClass="record">
+		/* sql id : statListDao.selectContBbsFileList */
+		SELECT B.SEQ			AS "seq",
+		       B.BBS_CD			AS "bbsCd",
+		       B.FILE_SEQ		AS "fileSeq",
+		       B.SRC_FILE_NM	AS "srcFileNm",
+		       B.VIEW_FILE_NM	AS "viewFileNm",
+		       B.FILE_CONT		AS "fileCont"
+		FROM   TB_BBS_TBL A
+		       INNER JOIN TB_BBS_FILE B
+		       ON     A.SEQ = B.SEQ
+		WHERE  A.STATBL_ID  = #statblId:VARCHAR#
+		AND    A.BBS_CD     = #bbsCd:VARCHAR#
+		AND    A.DEL_YN     = 'N'
+  	</select> 
+  	
+  	<!-- 게시판 통계표 컨텐츠 링크목록을 가져온다. -->
+  	<select id="statListDao.selectContBbsLinkList" parameterClass="params" resultClass="record">
+		/* sql id : statListDao.selectContBbsLinkList */
+		SELECT B.SEQ			AS "seq",
+		       B.LINK_SEQ		AS "linkSeq",
+		       B.LINK_NM		AS "linkNm",
+		       B.URL			AS "linkUrl"
+		FROM   TB_BBS_TBL A
+		       INNER JOIN TB_BBS_LINK B
+		       ON     A.SEQ = B.SEQ
+		WHERE  A.STATBL_ID  = #statblId:VARCHAR#
+		AND    A.BBS_CD     = #bbsCd:VARCHAR#
+		AND    A.DEL_YN     = 'N'
+  	</select>
+  	
+</sqlMap>

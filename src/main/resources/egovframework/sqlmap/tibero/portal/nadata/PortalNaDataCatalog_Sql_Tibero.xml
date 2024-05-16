@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="portalNaDataCatalog" >
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+	
+	<!-- 디렉토리 조회 컬럼 SQL -->
+	<sql id="naCmps.dir.col">
+		A.INFO_ID		AS "infoId",
+		A.INFO_NM		AS "infoNm",
+		A.CATE_ID		AS "cateId",
+		A.ORG_CD		AS "orgCd",
+		A.MENU_FULLNM	AS "menuFullnm",
+		B.TOP_CATE_ID	AS "topCateId"
+	</sql>
+	<!-- 디렉토리 조회 조회조건 SQL -->
+	<sql id="naCmps.dir.where">
+		WHERE A.USE_YN = 'Y'
+		 AND A.VIEW_YN = 'Y'
+		AND   B.TOP_CATE_ID = #topCateId:VARCHAR#
+		<isNotEmpty property="searchVal">
+			AND A.INFO_NM LIKE REPLACE('%' || UPPER(#searchVal:VARCHAR#) || '%', ' ', '')
+		</isNotEmpty>
+	</sql>	
+	
+	<!-- 목록 조회 컬럼 SQL -->
+	<sql id="naCmps.list.col">
+		A.INFO_ID		AS "infoId",
+		A.INFO_NM		AS "infoNm",
+		A.CATE_ID		AS "cateId",
+		B.CATE_NM 		AS "cateNm",
+		A.ORG_CD		AS "orgCd",
+		INFO_SMRY_EXP	AS "infoSmryExp",
+		A.SRC_URL 		AS "srcUrl",
+		B.CATE_FULLNM 	AS "cateFullnm",
+		A.MENU_FULLNM	AS "menuFullnm",
+		B.TOP_CATE_ID	AS "topCateId",
+		(SELECT CATE_NM FROM TB_NA_CATE C WHERE B.TOP_CATE_ID = C.CATE_ID AND C.USE_YN = 'Y') 						AS "topCateNm",
+		(SELECT ORG_NM FROM TB_COMM_ORG B WHERE B.ORG_CD = A.ORG_CD AND B.USE_YN = 'Y')   							AS "orgNm",
+        (SELECT DITC_NM FROM TB_COMM_CODE C WHERE GRP_CD = 'A8011' AND DITC_CD = SRV_INFO_CD AND C.USE_YN = 'Y') 	AS "srvInfoNm",
+        (SELECT DITC_NM FROM TB_COMM_CODE C WHERE GRP_CD = 'A8010' AND DITC_CD = SRC_SYS_CD AND C.USE_YN = 'Y') 	AS "srcSysNm"
+	</sql>
+	<!-- 목록 조회 조회조건 SQL -->
+	<sql id="naCmps.list.where">
+		WHERE A.USE_YN = 'Y'
+		<isNotEmpty property="infoNm" prepend=" AND ">
+			A.INFO_NM LIKE REPLACE('%' || UPPER(#infoNm:VARCHAR#) || '%', ' ', '')
+		</isNotEmpty>
+		<isNotEmpty property="topCateId" prepend=" AND ">
+			B.TOP_CATE_ID = #topCateId:VARCHAR#
+		</isNotEmpty>
+		<isNotEmpty property="orgCd" prepend=" AND ">
+			A.ORG_CD = #orgCd:VARCHAR#
+		</isNotEmpty>
+		<isNotEmpty property="srvInfoCd" prepend=" AND ">
+			A.SRV_INFO_CD = #srvInfoCd:VARCHAR#
+		</isNotEmpty>
+		<isNotEmpty property="srcSysCd" prepend=" AND ">
+			A.SRC_SYS_CD = #srcSysCd:VARCHAR#
+		</isNotEmpty>
+	</sql>
+	
+	<!-- 정보카달로그 상위분류 리스트 조회 -->
+  	<select id="portalNaDataCatalogDao.selectNaTopCateList" parameterClass="params" resultClass="record">
+  		/* sql id : portalNaDataCatalogDao.selectNaTopCateList */
+  		SELECT
+			A.CATE_ID					AS "cateId"
+			, A.PAR_CATE_ID				AS "parCateId"
+			, A.TOP_CATE_ID				AS "topCateId"
+			, A.CATE_NM					AS "cateNm"
+			, A.ENG_CATE_NM				AS "engCateNm"
+			, A.CATE_FULLNM				AS "cateFullNm"
+			, A.SAVE_FILE_NM			AS "saveFileNm"
+			, A.VIEW_FILE_NM			AS "viewFileNm"
+			, A.V_ORDER					AS "vOrder"
+			, A.USE_YN					AS "useYn"
+			, A.CATE_LVL				AS "Level"
+			, A.CATE_TAG				AS "cateTag"
+		FROM 
+			TB_NA_CATE A
+            WHERE A.PAR_CATE_ID = 'T'
+              AND A.USE_YN = 'Y'
+              AND A.CATE_TAG = #cateTag#
+            ORDER BY 	A.V_ORDER
+  	</select>
+  	
+  		
+	<!-- 정보카탈로그 분류 트리 목록을 조회 -->
+	<select id="portalNaDataCatalogDao.selectNaDataCateTree" parameterClass="params" resultClass="record">
+		/* sql id : portalNaDataCatalogDao.selectNaDataCateTree */
+		WITH
+		    TMP_INFO_SET AS (
+		        SELECT
+		            'C' AS GUBUN_TAG,
+		            C.CATE_ID AS INFO_ID,
+		            C.PAR_CATE_ID AS PAR_INFO_ID,
+		            C.CATE_NM AS INFO_NM,
+		            C.V_ORDER AS V_ORDER
+		        FROM
+		            TB_NA_CATE C
+		        WHERE
+		            C.USE_YN = 'Y'
+		          	<isNotEmpty property="cateTag">
+						AND C.CATE_TAG = #cateTag# 
+					</isNotEmpty>  
+		        UNION ALL
+		        SELECT
+		            'T' AS GUBUN_TAG,
+		            A.INFO_ID,
+		            B.CATE_ID AS PAR_INFO_ID,
+		            A.INFO_NM,
+		            A.V_ORDER
+		        FROM
+		            TB_NA_CMPS A
+		            INNER JOIN TB_NA_CATE B ON A.CATE_ID = B.CATE_ID AND B.USE_YN = 'Y'
+		        WHERE
+		            A.USE_YN = 'Y'
+		        AND  A.VIEW_YN = 'Y'
+		    )
+		SELECT
+		    LEVEL-1 			AS "Level",
+		    CONNECT_BY_ISLEAF 	AS "leaf",
+		    'false' 			AS "open",
+		    L.GUBUN_TAG 		AS "gubunTag",
+		    L.INFO_ID 			AS "infoId",
+		    CASE WHEN LEVEL = 2 THEN 'T' ELSE L.PAR_INFO_ID END  AS "parInfoId",
+		    L.INFO_NM 			AS "infoNm",
+		    L.V_ORDER 			AS "vOrder",
+		    SUBSTR(SYS_CONNECT_BY_PATH(INFO_NM, '>'), 2) AS "fullPath"
+		FROM
+		    TMP_INFO_SET L
+		WHERE
+		    1 = 1
+		    AND L.PAR_INFO_ID <![CDATA[<>]]> 'T'
+		    <!-- 분류에 정보셋이 들어있는것만 표시하고싶을경우 --> 
+		    AND EXISTS (
+		        SELECT 1
+		        FROM   TMP_INFO_SET E
+		        WHERE  E.GUBUN_TAG = 'T'
+		        START WITH E.INFO_ID = L.INFO_ID
+		        CONNECT BY PRIOR E.INFO_ID = E.PAR_INFO_ID
+		    )
+		START WITH
+		    L.PAR_INFO_ID = 'T'
+		    AND L.GUBUN_TAG = 'C'
+		    <isNotEmpty property="parCateId" prepend=" AND ">
+		    L.INFO_ID = #parCateId:VARCHAR#
+		    </isNotEmpty>
+		CONNECT BY
+		    PRIOR L.INFO_ID = L.PAR_INFO_ID
+		ORDER SIBLINGS BY
+		    L.V_ORDER	
+	</select>
+	
+	<!-- 정보카달로그 분류 상세 조회 -->
+	<select id="portalNaDataCatalogDao.selectNaSetCateDtl" parameterClass="params" resultClass="record">
+		SELECT
+			A.CATE_ID					AS "cateId"
+			, A.PAR_CATE_ID				AS "parCateId"
+			, A.TOP_CATE_ID				AS "topCateId"
+			, A.CATE_NM					AS "cateNm"
+			, A.ENG_CATE_NM				AS "engCateNm"
+			, NVL(B.CATE_NM, '최상위')	AS "parCateNm"
+			, A.CATE_FULLNM				AS "cateFullNm"
+			, A.SAVE_FILE_NM			AS "saveFileNm"
+			, A.VIEW_FILE_NM			AS "viewFileNm"
+			, A.V_ORDER					AS "vOrder"
+			, A.USE_YN					AS "useYn"
+			, A.CATE_LVL				AS "Level"
+		FROM 
+			TB_NA_CATE A
+			LEFT JOIN TB_NA_CATE B
+				ON  A.PAR_CATE_ID = B.CATE_ID
+		WHERE
+			A.CATE_ID = #cateId:VARCHAR#	
+    </select>
+    
+    <!-- 정보카달로그 사이트 이미지 조회 -->
+	<select id="portalNaDataCatalogDao.selectNaDataImgPath" parameterClass="params" resultClass="record">
+		SELECT A.TMNL_IMG_FILE    AS "saveFileNm"    
+		       , A.USE_YN         AS "useYn"  
+		  FROM TB_NA_CMPS A  
+		 WHERE A.USE_YN = 'Y' 
+		   AND A.VIEW_YN = 'Y'
+		   AND A.INFO_ID =  #cateId:VARCHAR#
+	</select>
+	
+    <!-- 정보카달로그 상세 조회 -->
+	<select id="portalNaDataCatalogDao.selectInfoDtl" parameterClass="params" resultClass="record">
+		/* sql id : portalNaDataCatalogDao.selectInfoDtl */
+		SELECT A.INFO_ID          AS "infoId"            
+		      , A.INFO_NM         AS "infoNm"
+		      , A.CATE_ID         AS "cateId"
+		      , B.CATE_NM         AS "cateNm"
+		      , A.ORG_CD          AS "orgCd"
+		      , (SELECT ORG_NM FROM TB_COMM_ORG B WHERE B.ORG_CD = A.ORG_CD)   AS "orgNm"
+		      , A.SRV_INFO_CD     AS "srvInfoCd"
+		      , (SELECT DITC_NM FROM TB_COMM_CODE WHERE GRP_CD = 'A8011' AND DITC_CD = SRV_INFO_CD) AS "srvInfoNm" 
+		      , A.INFO_SMRY_EXP   AS "infoSmryExp"
+		      , A.SRC_SYS_CD      AS "srcSysCd"
+		      ,(SELECT DITC_NM FROM TB_COMM_CODE WHERE GRP_CD = 'A8010' AND DITC_CD = SRC_SYS_CD) || ' ( ' || A.MENU_FULLNM || ' )' AS "menuFullnm" 
+		      , A.SRC_URL         AS "srcUrl"
+		      , A.TMNL_IMG_FILE   AS "tmnlImgFile"
+		      , A.V_ORDER         AS "vOrder"
+		      , B.CATE_FULLNM     AS "cateFullnm"
+		      , A.VIEW_CNT        AS "viewCnt"
+		      , A.USE_YN          AS "useYn"
+		      , A.REG_ID          AS "regId"
+		      , A.REG_DTTM        AS "regDttm"
+		      , A.UPD_ID          AS "updId"
+		      , A.UPD_DTTM        AS "updDttm" 
+		FROM TB_NA_CMPS A 
+	   INNER JOIN TB_NA_CATE B 
+		  ON A.CATE_ID = B.CATE_ID 
+		 AND B.USE_YN = 'Y' 
+       WHERE A.USE_YN = 'Y'
+         AND A.VIEW_YN = 'Y'
+	     AND INFO_ID = #infoId:VARCHAR# 
+	</select>	 
+	
+	<!-- 정보카달로그 서비스 조회수 증가 -->
+	<update id="portalNaDataCatalogDao.updateNaDataCatalogViewCnt" parameterClass="params">
+		/* sql id : portalNaDataCatalogDao.updateNaDataCatalogViewCnt */
+		UPDATE TB_NA_CMPS A
+		   SET    VIEW_CNT 	= VIEW_CNT + 1
+		 WHERE  A.INFO_ID 	= #infoId:VARCHAR#
+		  AND    A.USE_YN 	= 'Y'
+		  AND    A.VIEW_YN = 'Y'
+	</update>
+	
+	<select id="portalNaDataCatalogDao.selectNaSetDirPaging" remapResults="true" parameterClass="params" resultClass="record">
+		/* sql id : portalNaDataCatalogDao.selectNaSetDirPaging */
+		<isEqual property="paging" compareValue="0">
+		SELECT AA.* 
+		FROM   (SELECT ROWNUM AS ROW_NUM, AA.*
+				FROM   (
+		</isEqual>
+		
+			SELECT
+			    <include refid="naCmps.dir.col"/>
+			FROM
+			    TB_NA_CMPS A
+			    INNER JOIN TB_NA_CATE B ON A.CATE_ID = B.CATE_ID AND B.USE_YN = 'Y'
+			<include refid="naCmps.dir.where"/>
+			<isEmpty property="orderBy">
+		    	ORDER BY A.V_ORDER
+			</isEmpty>
+			<isNotEmpty property="orderBy">
+				<isEqual property="orderBy" compareValue="A">
+					ORDER BY INFO_NM
+				</isEqual>
+				<isEqual property="orderBy" compareValue="D">
+					ORDER BY INFO_NM DESC
+				</isEqual>
+			</isNotEmpty>
+		<isEqual property="paging" compareValue="0">
+		<![CDATA[
+				) AA
+			WHERE ROWNUM <= #end:NUMERIC#
+			) AA
+		WHERE AA.ROW_NUM >= #start:NUMERIC#
+		]]>
+		</isEqual>
+	</select>
+	<select id="portalNaDataCatalogDao.selectNaSetDirPagingCount" parameterClass="params" resultClass="int">
+		/* sql id : portalNaDataCatalogDao.selectNaSetDirPagingCount */
+		SELECT
+		    COUNT(*)
+		FROM
+		    TB_NA_CMPS A
+		    INNER JOIN TB_NA_CATE B ON A.CATE_ID = B.CATE_ID AND B.USE_YN = 'Y'
+		<include refid="naCmps.list.where"/>
+	</select>
+	
+	<select id="portalNaDataCatalogDao.selectNaSetTopCateId" parameterClass="string" resultClass="string">
+		SELECT B.TOP_CATE_ID
+		FROM   TB_NA_CMPS A 
+			   INNER JOIN TB_NA_CATE B ON A.CATE_ID = B.CATE_ID AND B.USE_YN = 'Y' 
+		WHERE A.INFO_ID = #infoId:VARCHAR#
+	</select>
+	
+	
+	<select id="portalNaDataCatalogDao.selectNaSetListPaging" remapResults="true" parameterClass="params" resultClass="record">
+		/* sql id : portalNaDataCatalogDao.selectNaSetListPaging */
+		<isEqual property="paging" compareValue="0">
+		SELECT AA.* 
+		FROM   (SELECT ROWNUM AS ROW_NUM, AA.*
+				FROM   (
+		</isEqual>
+		
+			SELECT
+			    <include refid="naCmps.list.col"/>
+			FROM
+			    TB_NA_CMPS A
+			    INNER JOIN TB_NA_CATE B ON A.CATE_ID = B.CATE_ID AND B.USE_YN = 'Y'
+			    INNER JOIN  TB_NA_CATE T
+                 	ON T.CATE_ID = B.TOP_CATE_ID AND T.USE_YN = 'Y' 
+			<include refid="naCmps.list.where"/>
+		    	ORDER BY T.V_ORDER,A.INFO_NM, A.INFO_ID
+		<isEqual property="paging" compareValue="0">
+		<![CDATA[
+				) AA
+			WHERE ROWNUM <= #end:NUMERIC#
+			) AA
+		WHERE AA.ROW_NUM >= #start:NUMERIC#
+		]]>
+		</isEqual>
+	</select>
+	<select id="portalNaDataCatalogDao.selectNaSetListPagingCount" parameterClass="params" resultClass="int">
+		/* sql id : portalNaDataCatalogDao.selectNaSetListPagingCount */
+		SELECT
+		    COUNT(*)
+		FROM
+		    TB_NA_CMPS A
+		    INNER JOIN TB_NA_CATE B ON A.CATE_ID = B.CATE_ID AND B.USE_YN = 'Y'
+		<include refid="naCmps.list.where"/>
+	</select>
+	
+</sqlMap>

@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="SurveyAns">
+	<typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+
+	<resultMap id="selectSurveyAnsAll" class="egovframework.admin.bbs.service.Survey">
+		<result property="surveyId" column="SURVEY_ID"/>
+		<result property="surveyNm" column="SURVEY_NM"/>
+		<result property="langTag" column="LANG_TAG"/>
+		<result property="ipDupYn" column="IP_DUP_YN"/>
+		<result property="startDttm" column="START_DTTM"/>
+		<result property="endDttm" column="END_DTTM"/>
+		<result property="orgCd" column="ORG_CD"/>
+		<result property="usrCd" column="USR_CD"/>
+		<result property="useYn" column="USE_YN"/>
+	</resultMap>
+	
+	<resultMap id="selectSurveyAnsListMap" class="egovframework.admin.bbs.service.SurveyAns">
+		<result property="surveyId" column="SURVEY_ID"/>
+		<result property="surveyNm" column="SURVEY_NM"/>
+		<result property="surveyPpose" column="SURVEY_PPOSE"/>
+		<result property="startDttm" column="START_DTTM"/>
+		<result property="endDttm" column="END_DTTM"/>
+		<result property="orgCd" column="ORG_CD"/>
+		<result property="orgNm" column="ORG_NM"/>
+	</resultMap>
+	
+	<resultMap id="selectSurveyAnsCnt" class="egovframework.admin.bbs.service.SurveyAns">
+		<result property="ditcCnt" column="DITC_CNT"/>
+		<result property="ditcNm" column="DITC_NM"/>
+	</resultMap>
+	
+	<resultMap id="selectSurveyQuestCntMap" class="egovframework.admin.bbs.service.SurveyAns">
+		<result property="questSeq" column="QUEST_SEQ"/>
+		<result property="questNm" column="QUEST_NM"/>
+	</resultMap>
+	<resultMap id="selectSurveyAnsPersonGubunMap" class="egovframework.admin.bbs.service.SurveyAns">
+		<result property="colId" column="COL_ID"/>
+		<result property="colNm" column="COL_NM"/>
+	</resultMap>
+	
+	<resultMap id="surveyAnsListPopupExportMap" class="egovframework.admin.bbs.service.SurveyAns">
+		<result property="ansSeq" column="ANS_SEQ"/>
+		<result property="ansNm" column="ANS_NM"/>
+		<result property="questNo" column="QUEST_NO"/>
+		<result property="examNm" column="EXAM_NM"/>
+		<result property="questNm" column="QUEST_NM"/>
+		<result property="examAns" column="EXAM_ANS"/>
+	</resultMap>	
+
+
+	<select id="SurveyAnsDao.selectSurveyAnsAll" parameterClass="egovframework.admin.bbs.service.Survey" resultMap="selectSurveyAnsAll">
+	
+		SELECT   A.SURVEY_ID
+			   , A.SURVEY_NM
+			   , A.LANG_TAG
+			   , A.IP_DUP_YN
+			   , A.START_DTTM
+			   , A.END_DTTM
+			   , A.ORG_CD
+			   , A.USR_CD
+			   , A.USE_YN
+		 FROM    TB_SURVEY A
+	 	 WHERE   1=1
+		<isNotEmpty property="searchWord">
+	 		<isEqual property="searchWd" compareValue="1">
+	 		AND ( A.SURVEY_NM LIKE '%' || #searchWord#  || '%' 
+	 			 OR  A.SURVEY_NM LIKE '%' || UPPER(#searchWord#)  || '%'
+	 			 OR  A.SURVEY_NM LIKE '%' || LOWER(#searchWord#)  || '%'
+	 		 )
+	 		</isEqual>
+	 	</isNotEmpty>
+	 	<![CDATA[
+			 	 AND A.START_DTTM < SYSDATE
+		]]>	 	 
+			 	 AND A.USE_YN = 'Y'
+				 ORDER BY A.END_DTTM DESC
+	
+	</select>
+	<select id="SurveyAnsDao.selectSurveyAnsList" parameterClass="egovframework.admin.bbs.service.Survey" resultMap="selectSurveyAnsListMap">
+		SELECT SURVEY_ID
+			  ,SURVEY_NM
+			  ,SURVEY_PPOSE
+			  ,TO_CHAR(START_DTTM, 'YYYY.MM.DD') START_DTTM
+			  ,TO_CHAR(END_DTTM, 'YYYY.MM.DD') END_DTTM
+			  ,ORG_CD
+			  ,(SELECT NVL(ORG_NM, '') FROM TB_COMM_ORG WHERE ORG_CD = A.ORG_CD) AS ORG_NM
+		 FROM TB_SURVEY A
+		WHERE SURVEY_ID = #surveyId#
+	</select>
+	<select id="SurveyAnsDao.selectSurveyAnsCnt" parameterClass="egovframework.admin.bbs.service.Survey" resultMap="selectSurveyAnsCnt">
+		SELECT   C.DITC_NM, COUNT(*) AS DITC_CNT
+		  FROM   TB_SURVEY A INNER JOIN TB_SURVEY_ANS B 
+		  					 ON A.SURVEY_ID = B.SURVEY_ID
+		                     INNER JOIN TB_COMM_CODE C 
+		                     ON B.ANS_CD = C.DITC_CD
+		                     AND C.GRP_CD = 'C1012'
+		                     AND C.USE_YN = 'Y'  					 
+		 WHERE   A.SURVEY_ID = #surveyId#  					 
+		GROUP BY C.DITC_NM	  
+	</select>
+	
+	<select id="SurveyAnsDao.selectSurveyAnsIpdup" parameterClass="egovframework.admin.bbs.service.SurveyAns" resultClass="java.lang.Integer">
+		SELECT COUNT(*)
+		  FROM TB_SURVEY A
+		 INNER JOIN TB_SURVEY_ANS B
+				 ON A.SURVEY_ID = B.SURVEY_ID
+				AND B.ANS_IP = #ansIp#
+		 WHERE A.SURVEY_ID = #surveyId#
+	</select>
+	
+	<insert id="SurveyAnsDao.insertSurveyAns" parameterClass="egovframework.admin.bbs.service.SurveyAns">
+		INSERT INTO TB_SURVEY_ANS 
+			(  SURVEY_ID
+			 , ANS_SEQ
+			 , USER_CD
+			 , ANS_CD
+			 , ANS_NM
+			 <isEqual property="user1Yn" compareValue="Y">
+			 , ANS_SEX
+			 , ANS_AGE_CD
+			 , ANS_JOB_CD
+			 , ANS_IP
+			 , AGREE_DTTM
+			 , AGREE_YN
+			 </isEqual>
+			 <isEqual property="user2Yn" compareValue="Y">
+			 , ANS_TEL
+			 , ANS_EMAIL
+			 </isEqual>
+			) 
+		VALUES
+			(
+				  #surveyId#
+				, #ansSeq#
+				<isNotNull property="userId">
+				, (SELECT USER_CD FROM TB_USER WHERE USER_ID = #userId#)
+				, (SELECT MEMBER_CD FROM TB_USER WHERE USER_ID = #userId#)
+				, (SELECT USER_NM FROM TB_USER WHERE USER_ID = #userId#)
+				</isNotNull>
+				<isNull property="userId">
+				, NULL
+				, #ansCd#
+				, NULL
+				</isNull>
+				<isEqual property="user1Yn" compareValue="Y">
+				, #ansSex#
+				, #ansAgeCd#
+				, #ansJobCd#
+				, #ansIp#
+				, SYSDATE
+				, #agreeYn#
+				</isEqual>
+				<isEqual property="user2Yn" compareValue="Y">
+				, FN_SCP_EDC_STR('E',replace(#ansTel#, ',' , '-'))
+				, FN_SCP_EDC_STR('E',replace(#ansEmail#, ',' , '@'))
+				</isEqual>
+			)
+	</insert>
+	
+	<select id="SurveyAnsDao.getSurveyAnsSeq" parameterClass="egovframework.admin.bbs.service.SurveyAns" resultClass="java.lang.Integer">
+		SELECT NVL(MAX(ANS_SEQ)+1,1) 
+		  FROM TB_SURVEY_ANS 
+		 WHERE SURVEY_ID = #surveyId#
+	</select>
+
+	<select id="SurveyAnsDao.selectSurveyQuestCnt" parameterClass="egovframework.admin.bbs.service.Survey" resultMap="selectSurveyQuestCntMap">
+		SELECT QUEST_SEQ, QUEST_NM
+		  FROM TB_SURVEY_QUEST A
+		  	   INNER JOIN TB_COMM_CODE C ON  C.GRP_CD = 'C1011'
+        						  AND C.DITC_CD = A.EXAM_CD
+		 WHERE SURVEY_ID = #surveyId#
+		   AND A.USE_YN = 'Y'
+		   AND C.VALUE_CD IS NOT NULL
+</select>	
+	<select id="SurveyAnsDao.selectSurveyAnsPersonGubun" parameterClass="egovframework.admin.bbs.service.Survey" resultMap="selectSurveyAnsPersonGubunMap">
+		SELECT 'EXAM_NM' AS COL_ID
+		      , '지문' AS COL_NM
+		  FROM DUAL
+		UNION ALL
+		SELECT 'RATE' || ROWNUM AS COL_ID
+		      , DITC_NM
+		  FROM TB_COMM_CODE 
+		 WHERE GRP_CD = 'C1012' 
+		   AND USE_YN = 'Y'
+	</select>	
+	
+	
+	<select id="SurveyAnsDao.selectSurveyAnsPopupListAll" parameterClass="egovframework.admin.bbs.service.Survey" resultClass="java.util.LinkedHashMap" remapResults="true">
+		SELECT *
+		FROM ( 
+		  SELECT S.SURVEY_ID, S.SURVEY_NM, Q.QUEST_SEQ, Q.GRP_EXP, Q.QUEST_NO, Q.QUEST_NM, Q.EXAM_CD 
+		    , I.EXAM_SEQ, I.EXAM_NM, C.DITC_CD, C.DITC_NM, C.RNUM 
+		  FROM TB_SURVEY S 
+		    , TB_SURVEY_QUEST Q 
+		    , TB_SURVEY_EXAM I 
+		    , (SELECT GRP_CD, DITC_CD, DITC_NM, ROWNUM RNUM FROM TB_COMM_CODE WHERE GRP_CD = 'C1012' AND USE_YN = 'Y') C 
+		  WHERE S.SURVEY_ID = Q.SURVEY_ID 
+		    AND S.SURVEY_ID = I.SURVEY_ID 
+		    AND Q.QUEST_SEQ = I.QUEST_SEQ 
+		    AND S.SURVEY_ID = #surveyId#
+		    AND Q.QUEST_SEQ = #questSeq#
+		) A 
+		  , ( 
+		     SELECT B.SURVEY_ID, B.QUEST_SEQ, B.EXAM_SEQ, B.ANS_VAL, B.EXAM_VAL, A.ANS_CD 
+		       , COUNT(B.ANS_SEQ) ANS_CNT 
+		       , SUM(COUNT(B.ANS_SEQ)) OVER(PARTITION BY B.SURVEY_ID, B.QUEST_SEQ) TOT_ANS_CNT 
+		     FROM TB_SURVEY_ANS A 
+		       , TB_SURVEY_ANS_EXAM B 
+		     WHERE A.SURVEY_ID = B.SURVEY_ID 
+		       AND A.ANS_SEQ = B.ANS_SEQ 
+		     GROUP BY B.SURVEY_ID, B.QUEST_SEQ, B.EXAM_SEQ, B.ANS_VAL, B.EXAM_VAL, A.ANS_CD 
+		     ) B 
+		WHERE A.SURVEY_ID = B.SURVEY_ID(+) 
+		  AND A.QUEST_SEQ = B.QUEST_SEQ(+) 
+		  AND A.EXAM_SEQ  = B.EXAM_SEQ(+) 
+		  AND A.DITC_CD   = B.ANS_CD(+) 
+		GROUP BY A.SURVEY_ID 
+		  , A.SURVEY_NM 
+		  , A.QUEST_SEQ 
+		  , A.QUEST_NM 
+		  , A.EXAM_NM 
+		  , A.EXAM_SEQ 
+		ORDER BY A.QUEST_SEQ, A.EXAM_SEQ 
+ 
+	</select>
+	
+	
+	<select id="SurveyAnsDao.selectSurveyAnsRegCheck" parameterClass="egovframework.admin.bbs.service.SurveyAns" resultClass="java.lang.Integer">
+		SELECT COUNT(*)
+		  FROM TB_SURVEY A
+		 INNER JOIN TB_SURVEY_ANS B
+		    ON A.SURVEY_ID = B.SURVEY_ID
+		 WHERE A.SURVEY_ID = #surveyId#
+	</select>
+
+
+	<select id="SurveyAnsDao.surveyAnsListPopupExport" parameterClass="egovframework.admin.bbs.service.SurveyAns" resultMap="surveyAnsListPopupExportMap">
+			SELECT   SA.ANS_SEQ
+			       , CC1.DITC_NM ANS_NM
+			       , SQ.QUEST_NO
+			       , CC.DITC_NM EXAM_NM
+			       , SQ.QUEST_NM       
+			       , NVL(SE.EXAM_NM, SA.EXAM_ANS) EXAM_ANS
+			  FROM   TB_SURVEY_ANS_EXAM SA
+			  	 	 INNER JOIN TB_SURVEY_QUEST SQ ON  SA.SURVEY_ID = SQ.SURVEY_ID
+			  	 	 							   AND SA.QUEST_SEQ = SQ.QUEST_SEQ
+			  		 LEFT OUTER JOIN TB_SURVEY_EXAM SE ON  SA.SURVEY_ID = SE.SURVEY_ID
+			  		 							   AND SA.EXAM_SEQ = SE.EXAM_SEQ
+			  		 							   AND SA.QUEST_SEQ = SE.QUEST_SEQ
+			  	     INNER JOIN TB_COMM_CODE CC ON  SQ.EXAM_CD = CC.DITC_CD
+			  	     						    AND CC.GRP_CD = 'C1011'
+			  	     						    AND CC.USE_YN = 'Y'
+			  	     INNER JOIN TB_SURVEY_ANS CA ON  CA.SURVEY_ID = SA.SURVEY_ID
+			  	     				             AND CA.ANS_SEQ = SA.ANS_SEQ
+					 INNER JOIN TB_COMM_CODE CC1 ON  CC1.DITC_CD = CA.ANS_CD
+					 						     AND CC1.GRP_CD= 'C1012'
+					 						     AND CC1.USE_YN = 'Y'
+			 WHERE   SA.SURVEY_ID = #surveyId#	  	     						    
+		    ORDER BY SA.ANS_SEQ,
+		  		     CASE WHEN TO_NUMBER(INSTR(SQ.QUEST_NO, '-')) > 0
+				          THEN TO_NUMBER(SUBSTR(SQ.QUEST_NO, 1, INSTR(SQ.QUEST_NO, '-')-1) 
+				          || '.' 
+				          || SUBSTR(SQ.QUEST_NO, INSTR(SQ.QUEST_NO, '-')+1, LENGTH(SQ.QUEST_NO)) )
+				          ELSE TO_NUMBER(SUBSTR(SQ.QUEST_NO, 1, LENGTH(SQ.QUEST_NO)))
+				     END			   
+	</select>	
+
+</sqlMap>

@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="portalNaDataSitemap" >
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+	
+	<!-- 기관을 조회한다. -->
+	<select id="portalNaDataSitemapDao.selectCommOrgList" parameterClass="params" resultClass="record">
+		/* sql id : portalNaDataSitemapDao.selectCommOrgList */
+		SELECT A.ORG_CD AS "orgCd", 
+		       A.ORG_NM AS "orgNm" 
+		  FROM TB_COMM_ORG A 
+		 WHERE A.PAR_ORG_CD = 'T' 
+		   AND A.USE_YN = 'Y' 
+		   AND EXISTS 
+		       ( SELECT S.ORG_CD 
+		           FROM TB_NA_SITEMAP S 
+		          WHERE S.ORG_CD = A.ORG_CD  
+		            AND S.USE_YN = 'Y' 
+		       ) 
+		 ORDER BY A.V_ORDER		       
+	</select>
+	
+	<!-- 정보서비스 사이트맵 리스트 조회 -->
+	<select id="portalNaDataSitemapDao.selectSiteMapList" parameterClass="params" resultClass="record">
+		SELECT A.SRVM_ID            AS "srvmId"      
+		      , A.SRVM_NM           AS "srvmNm"
+		      , A.ORG_CD            AS "orgCd"
+		      , (SELECT ORG_NM FROM TB_COMM_ORG B WHERE B.ORG_CD = A.ORG_CD)   AS "orgNm"
+		      , A.INFO_SMRY_EXP     AS "infoSmryExp"
+		      , A.SRC_URL           AS "srcUrl"
+		      , A.TMNL_IMG_FILE     AS "tmnlImgFile"
+		      , A.TMNL_2_IMG_FILE   AS "tmnl2ImgFile"
+		      , A.V_ORDER           AS "vOrder"
+		      , A.VIEW_CNT          AS "viewCnt"
+		      , A.USE_YN            AS "useYn"
+		      , A.REG_ID            AS "regId"
+		      , A.REG_DTTM          AS "regDttm"
+		      , A.UPD_ID            AS "updId"
+		      , A.UPD_DTTM          AS "updDttm"
+		      , A.VIEW_YN		    AS "viewYn"
+		      , A.CATE_ID			AS "cateId"
+		      , B.PAR_CATE_ID	AS "parCateId"
+		      , B.CATE_FULLNM	AS "cateFullnm"
+		FROM TB_NA_SITEMAP A, TB_NA_CATE B
+		WHERE A.CATE_ID = B.CATE_ID(+)
+		  AND A.USE_YN = 'Y' 
+		  AND A.VIEW_YN = 'Y'
+		  AND B.PAR_CATE_ID = 'T'
+		<isNotEmpty property="schArrOrgCd" prepend=" AND ">
+			<iterate property="schArrOrgCd" prepend=" ORG_CD IN " open="(" close=")" conjunction=", ">
+				#schArrOrgCd[]#
+			</iterate>
+		</isNotEmpty>
+		ORDER BY A.V_ORDER
+	</select>
+	
+	<!-- 사이트맵 상세 조회 -->
+	<select id="portalNaDataSitemapDao.selectNaDataSiteMapDtl" parameterClass="params" resultClass="record">
+		/* sql id : portalNaDataSitemapDao.selectNaDataSiteMapDtl */
+		SELECT A.SRVM_ID            AS "srvmId"      
+		      , A.SRVM_NM           AS "srvmNm"
+		      , A.ORG_CD            AS "orgCd"
+		      , A.INFO_SMRY_EXP     AS "infoSmryExp"
+		      , A.SRC_URL           AS "srcUrl"
+		      , A.TMNL_IMG_FILE     AS "tmnlImgFile"
+		      , A.TMNL_2_IMG_FILE   AS "tmnl2ImgFile"
+		      , A.V_ORDER           AS "vOrder"
+		      , A.VIEW_CNT          AS "viewCnt"
+		      , A.USE_YN            AS "useYn"
+		      , A.REG_ID            AS "regId"
+		      , A.REG_DTTM          AS "regDttm"
+		      , A.UPD_ID            AS "updId"
+		      , A.UPD_DTTM          AS "updDttm"
+		      , A.VIEW_YN		    AS "viewYn"
+		FROM TB_NA_SITEMAP A
+	   WHERE A.SRVM_ID = #srvmId:VARCHAR#
+	</select>
+	
+	<!-- 사이트맵 메뉴목록 조회 -->
+	<select id="portalNaDataSitemapDao.selectMenuList" parameterClass="params" resultClass="record">
+		/* sql id : portalNaDataSitemapDao.selectMenuList */
+		SELECT cate_id       AS "cateId"
+				 , cate_nm       AS "cateNm"
+				 , eng_cate_nm   AS "engCateNm"
+				 , cate_fullnm   AS "cateFullNm"
+				 , cate_lvl      AS "cateLvl"
+				 , level         AS "Level"
+				 , use_yn        AS "useYn"
+				 , v_order       AS "vOrder"
+				 , decode(CONNECT_BY_ISLEAF, 0, 1, 0) AS "HaveChild"
+				 , (SELECT NVL(src_url, '') FROM tb_na_sitemap WHERE cate_id = a.cate_id) AS "srcUrl"
+		  FROM tb_na_cate a
+		WHERE 1 = 1
+		 START WITH par_cate_id = 'T'
+		            AND cate_tag = 'CT120'
+		            AND cate_id IN (
+		            		SELECT cate_id
+		            		  FROM tb_na_cate b
+		            	    WHERE b.par_cate_id = 'T'
+		   							 START WITH
+		        						b.cate_id LIKE '%' || #cateId:VARCHAR# || '%'
+		   							 CONNECT BY cate_id = PRIOR par_cate_id
+						) CONNECT BY
+						PRIOR cate_id = par_cate_id
+					ORDER SIBLINGS BY v_order
+	</select>
+
+	<!-- 정보서비스 사이트맵 검색 조회 -->
+	<select id="portalNaDataSitemapDao.searchSiteMapList" parameterClass="params" resultClass="record">
+		SELECT SB.TOP_CATE_ID		AS "topCateId"
+				 , (SELECT CATE_NM FROM TB_NA_CATE A WHERE A.CATE_ID = SB.TOP_CATE_ID)	AS "topCateNm"
+				 , (SELECT SRC_URL FROM TB_NA_SITEMAP B WHERE B.CATE_ID = sb.TOP_CATE_ID)   AS "topSrcUrl"				 
+				 , SA.ORG_CD				AS "orgCd"
+				 , (SELECT ORG_NM FROM TB_COMM_ORG C WHERE C.ORG_CD = SA.ORG_CD)	AS "orgNm"
+				 , (SELECT INFO_SMRY_EXP FROM TB_NA_SITEMAP D WHERE D.CATE_ID = SB.TOP_CATE_ID)	AS "topInfoSmryExp"
+				 , SA.SRVM_ID				AS "srvmId"
+				 , SA.SRVM_NM			AS "srvmNm"
+				 , SB.CATE_FULLNM		AS "cateFullnm"
+				 , SA.INFO_SMRY_EXP	AS "infoSmryExp"
+				 , SA.SRC_URL				AS "srcUrl"
+		  FROM TB_NA_SITEMAP SA
+		        , TB_NA_CATE SB
+	    WHERE SA.CATE_ID = SB.CATE_ID(+)
+	        AND SA.USE_YN = 'Y' 
+	        AND SA.VIEW_YN = 'Y' 
+	        AND SB.PAR_CATE_ID <![CDATA[<>]]> 'T'
+		<isNotEmpty property="schArrOrgCd" prepend=" AND ">
+			<iterate property="schArrOrgCd" prepend=" SA.ORG_CD IN " open="(" close=")" conjunction=", ">
+				#schArrOrgCd[]#
+			</iterate>
+		</isNotEmpty>
+	        <isNotEmpty property="schInputVal" prepend=" AND ">
+         	( SA.SRVM_NM LIKE '%'|| #schInputVal:VARCHAR# || '%'	
+			  	 OR SB.CATE_FULLNM LIKE '%'|| #schInputVal:VARCHAR# || '%'	
+			     OR UPPER(SA.SRC_URL) LIKE '%'|| #schInputVal:VARCHAR# || '%'
+				 OR LOWER(SA.SRC_URL) LIKE '%'|| #schInputVal:VARCHAR# || '%' )
+			</isNotEmpty>
+		ORDER BY SB.TOP_CATE_ID, SA.V_ORDER
+	</select>
+
+	<!-- 메뉴정보를 로그에 담는다. -->
+	<insert id="portalNaDataSitemapDao.insertLogMenu" parameterClass="params" >
+		/* sql id : portalNaDataSitemapDao.insertLogMenu */	
+         INSERT INTO TB_LOG_COMM_MENU
+                (   SEQCE_NO, SYS_TAG, 	MENU_ID, USER_CD, USER_IP, REG_DTTM, MENU_URL ) 
+               VALUES ( 
+               		  SQ_LOG_COMM_MENU_SEQ.NEXTVAL
+               		, #sysTag:VARCHAR#
+                    , #menuId#
+                    , #userCd:VARCHAR#
+                    , #userIp:VARCHAR#
+                    , SYSDATE
+                    , #menuUrl:VARCHAR#
+                )
+	</insert>
+	
+</sqlMap>

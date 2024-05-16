@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- @(#)AdminJobMonitor_Sql_Tibero.xml 1.0 2019/10/01                     -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- Job 모니터링을 관리하는 SQL 파일이다.	                                     -->
+<!--                                                                         -->
+<!-- @author JSSON                                                    	-->
+<!-- @version 1.0 2019/10/01                                                -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<sqlMap namespace="jobMonitor">
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Type Alias                                                          -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+    
+    <!-- 메인리스트 쿼리 -->
+    <sql id="jobMonitorDao.main">
+		SELECT
+		    A.SEQCE_NO		    AS "seqceNo",
+		    A.JOB_NM		    AS "jobNm",
+		    A.JOB_TAG_CD	    AS "jobTagCd",
+		    (
+            SELECT D.DITC_NM
+             FROM TB_COMM_CODE D
+             WHERE D.GRP_CD     = 'C1024'
+               AND D.DITC_CD    = A.JOB_TAG_CD
+               AND D.USE_YN     = 'Y'
+             ) AS "jobTagNm",
+		    A.SRC_OBJ_NM	    AS "srcObjNm",
+		    A.TARGET_OBJ_NM	    AS "targetObjNm",
+		    A.PRSS_CNT		    AS "prssCnt",
+		    A.PRSS_MSG_CONT	    AS "prssMsgCont",
+		    TO_CHAR(A.REG_DTTS, 'YYYY-MM-DD HH24:MI:SS') AS "regDtts"
+		FROM TB_LOG_JOB A
+		    
+	</sql>
+		    	
+    <sql id="jobMonitorDao.main.where">
+    	WHERE 1=1
+			<isNotEmpty property="jobTagCd" prepend="AND">
+				A.JOB_TAG_CD = #jobTagCd:VARCHAR#	   	 
+	   		</isNotEmpty>
+			<isNotEmpty property="searchVal" prepend="AND">
+				<isEqual property="searchGubun" compareValue="JOB_NM" >
+					A.JOB_NM LIKE '%' || #searchVal# || '%'
+				</isEqual>
+				<isEqual property="searchGubun" compareValue="SRC_OBJ_NM" >
+					A.SRC_OBJ_NM LIKE '%' || #searchVal# || '%'
+				</isEqual>
+				<isEqual property="searchGubun" compareValue="TARGET_OBJ_NM" >
+					A.TARGET_OBJ_NM LIKE '%' || #searchVal# || '%'
+				</isEqual>
+		   	</isNotEmpty>
+   		<isNotEmpty property="beginOpenDttm" prepend="AND">
+		   A.REG_DTTS <![CDATA[ >= ]]> TO_DATE(#beginOpenDttm:VARCHAR#, 'YYYY-MM-DD') + 0	   	 
+	   	</isNotEmpty>
+	   	<isNotEmpty property="endOpenDttm" prepend="AND">
+		   A.REG_DTTS <![CDATA[ < ]]> TO_DATE(#endOpenDttm:VARCHAR#, 'YYYY-MM-DD') + 1
+	   	</isNotEmpty>
+    </sql>
+  
+  	<!-- 메인 리스트 조회 -->
+  	<select id="jobMonitorDao.selectJobMonitorList" parameterClass="params" resultClass="record">
+  		/* sql id : jobMonitorDao.selectJobMonitorList */
+  		<isEqual property="paging" compareValue="0">
+		SELECT AA.* 
+		FROM   (SELECT ROWNUM AS ROW_NUM, AA.*
+				FROM   (  
+		</isEqual>
+			<include refid="jobMonitorDao.main"></include>
+			<include refid="jobMonitorDao.main.where"></include>
+			ORDER BY
+			    A.REG_DTTS DESC
+		<isEqual property="paging" compareValue="0">
+		<![CDATA[
+				) AA
+			WHERE ROWNUM <= #end:NUMERIC#
+			) AA
+		WHERE AA.ROW_NUM >= #start:NUMERIC#
+		]]>
+		</isEqual>
+  	</select>
+  	<select id="jobMonitorDao.selectJobMonitorListCount" parameterClass="params" resultClass="int">
+  		/* sql id : jobMonitorDao.selectJobMonitorListCount */
+		SELECT COUNT(*)
+		FROM   TB_LOG_JOB A
+		<include refid="jobMonitorDao.main.where"></include>
+  	</select>
+  	
+</sqlMap>

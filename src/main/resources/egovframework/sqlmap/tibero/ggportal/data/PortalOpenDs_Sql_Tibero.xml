@@ -1,0 +1,987 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- @(#)PortalOpenDs_Sql_Tibero.xml 1.0 2015/06/15                          -->
+<!--                                                                         -->
+<!-- COPYRIGHT (C) 2013 WISEITECH CO., LTD. ALL RIGHTS RESERVED.             -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- 공공데이터 데이터셋을 관리하는 SQL 파일이다.                            -->
+<!--                                                                         -->
+<!-- @author 김은삼                                                          -->
+<!-- @version 1.0 2015/06/15                                                 -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<sqlMap namespace="PortalOpenDsDao">
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Type Alias                                                          -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 공공데이터 데이터셋 인기순위를 검색한다.                            -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="PortalOpenDsDao.searchOpenDsHits" parameterClass="params" resultClass="record">
+        <![CDATA[
+         SELECT A.INF_ID   AS "infId",
+                CASE
+                WHEN A.SCOL_INF_SEQ IS NOT NULL
+                THEN A.SCOL_INF_SEQ
+                WHEN A.CCOL_INF_SEQ IS NOT NULL
+                THEN A.CCOL_INF_SEQ
+                WHEN A.MCOL_INF_SEQ IS NOT NULL
+                THEN A.MCOL_INF_SEQ
+                WHEN A.FILE_INF_SEQ IS NOT NULL
+                THEN A.FILE_INF_SEQ
+                WHEN A.ACOL_INF_SEQ IS NOT NULL
+                THEN A.ACOL_INF_SEQ
+                WHEN A.LINK_INF_SEQ IS NOT NULL
+                THEN A.LINK_INF_SEQ
+                END        AS "infSeq",
+                A.INF_NM   AS "infNm",
+                A.VIEW_CNT AS "viewCnt"
+           FROM (
+                     SELECT A.INF_ID       AS INF_ID,
+                            A.SCOL_INF_SEQ AS SCOL_INF_SEQ,
+                            A.CCOL_INF_SEQ AS CCOL_INF_SEQ,
+                            A.MCOL_INF_SEQ AS MCOL_INF_SEQ,
+                            A.FILE_INF_SEQ AS FILE_INF_SEQ,
+                            A.ACOL_INF_SEQ AS ACOL_INF_SEQ,
+                            A.LINK_INF_SEQ AS LINK_INF_SEQ,
+                            B.INF_NM       AS INF_NM,
+                            A.VIEW_CNT     AS VIEW_CNT
+                       FROM (
+                                 SELECT A.INF_ID        AS INF_ID,
+                                        MIN(CASE A.SRV_CD
+                                            WHEN 'S'
+                                            THEN A.INF_SEQ
+                                            END)        AS SCOL_INF_SEQ,
+                                        MIN(CASE A.SRV_CD
+                                            WHEN 'C'
+                                            THEN A.INF_SEQ
+                                            END)        AS CCOL_INF_SEQ,
+                                        MIN(CASE A.SRV_CD
+                                            WHEN 'M'
+                                            THEN A.INF_SEQ
+                                            END)        AS MCOL_INF_SEQ,
+                                        MIN(CASE A.SRV_CD
+                                            WHEN 'F'
+                                            THEN A.INF_SEQ
+                                            END)        AS FILE_INF_SEQ,
+                                        MIN(CASE A.SRV_CD
+                                            WHEN 'A'
+                                            THEN A.INF_SEQ
+                                            END)        AS ACOL_INF_SEQ,
+                                        MIN(CASE A.SRV_CD
+                                            WHEN 'L'
+                                            THEN A.INF_SEQ
+                                            END)        AS LINK_INF_SEQ,
+                                        SUM(A.VIEW_CNT) AS VIEW_CNT
+                                   FROM TB_OPEN_INF_SRV A
+                                   JOIN TB_OPEN_INF     B
+                                     ON B.INF_ID        = A.INF_ID
+                              LEFT JOIN TB_OPEN_DS      C
+                                     ON C.DS_ID         = B.DS_ID
+                                  WHERE A.SRV_YN        = 'Y'
+                                    AND A.SRV_CD       IN ('S', 'C', 'M', 'F', 'A', 'L')
+                                    AND B.INF_STATE     = 'Y'
+                                    AND B.OPEN_DTTM    <= SYSDATE
+                                    AND CASE A.SRV_CD
+                                        WHEN 'F'
+                                        THEN 'Y'
+                                        WHEN 'L'
+                                        THEN 'Y'
+                                        ELSE C.USE_YN
+                                        END             = 'Y'
+                                  GROUP BY
+                                        A.INF_ID
+                            )           A
+                       JOIN TB_OPEN_INF B
+                         ON B.INF_ID    = A.INF_ID
+                      ORDER BY
+                            A.VIEW_CNT       DESC,
+                            B.FVT_DATA_ORDER ASC,
+                            B.V_ORDER        ASC
+                )       A
+          WHERE ROWNUM <= 10
+        ]]>
+    </select>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 공공데이터 데이터셋 기간순위를 검색한다.                            -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="PortalOpenDsDao.searchOpenDsTerm" parameterClass="params" resultClass="record">
+    <!--
+        <![CDATA[
+         SELECT A.INF_ID   AS "infId",
+                CASE
+                WHEN A.SCOL_INF_SEQ IS NOT NULL
+                THEN A.SCOL_INF_SEQ
+                WHEN A.CCOL_INF_SEQ IS NOT NULL
+                THEN A.CCOL_INF_SEQ
+                WHEN A.MCOL_INF_SEQ IS NOT NULL
+                THEN A.MCOL_INF_SEQ
+                WHEN A.FILE_INF_SEQ IS NOT NULL
+                THEN A.FILE_INF_SEQ
+                WHEN A.ACOL_INF_SEQ IS NOT NULL
+                THEN A.ACOL_INF_SEQ
+                WHEN A.LINK_INF_SEQ IS NOT NULL
+                THEN A.LINK_INF_SEQ
+                END        AS "infSeq",
+                A.INF_NM   AS "infNm",
+                A.VIEW_CNT AS "viewCnt"
+           FROM (
+                     SELECT A.INF_ID       AS INF_ID,
+                            A.SCOL_INF_SEQ AS SCOL_INF_SEQ,
+                            A.CCOL_INF_SEQ AS CCOL_INF_SEQ,
+                            A.MCOL_INF_SEQ AS MCOL_INF_SEQ,
+                            A.FILE_INF_SEQ AS FILE_INF_SEQ,
+                            A.ACOL_INF_SEQ AS ACOL_INF_SEQ,
+                            A.LINK_INF_SEQ AS LINK_INF_SEQ,
+                            B.INF_NM       AS INF_NM,
+                            A.VIEW_CNT     AS VIEW_CNT
+                       FROM (
+                                 SELECT A.INF_ID        AS INF_ID,
+                                        MIN(CASE A.SRV_CD
+                                            WHEN 'S'
+                                            THEN A.INF_SEQ
+                                            END)        AS SCOL_INF_SEQ,
+                                        MIN(CASE A.SRV_CD
+                                            WHEN 'C'
+                                            THEN A.INF_SEQ
+                                            END)        AS CCOL_INF_SEQ,
+                                        MIN(CASE A.SRV_CD
+                                            WHEN 'M'
+                                            THEN A.INF_SEQ
+                                            END)        AS MCOL_INF_SEQ,
+                                        MIN(CASE A.SRV_CD
+                                            WHEN 'F'
+                                            THEN A.INF_SEQ
+                                            END)        AS FILE_INF_SEQ,
+                                        MIN(CASE A.SRV_CD
+                                            WHEN 'A'
+                                            THEN A.INF_SEQ
+                                            END)        AS ACOL_INF_SEQ,
+                                        MIN(CASE A.SRV_CD
+                                            WHEN 'L'
+                                            THEN A.INF_SEQ
+                                            END)        AS LINK_INF_SEQ,
+                                        (
+                                             SELECT COUNT(*)
+                                               FROM TB_LOG_OPEN_INF_SRV D
+                                              WHERE D.INF_ID            = A.INF_ID
+                                                AND D.REG_DTTM         >= TO_DATE(#fromDate#, 'YYYY-MM-DD') + 0
+                                                AND D.REG_DTTM         <  TO_DATE(#toDate#,   'YYYY-MM-DD') + 1
+                                        )               AS VIEW_CNT
+                                   FROM TB_OPEN_INF_SRV A
+                                   JOIN TB_OPEN_INF     B
+                                     ON B.INF_ID        = A.INF_ID
+                              LEFT JOIN TB_OPEN_DS      C
+                                     ON C.DS_ID         = B.DS_ID
+                                  WHERE A.SRV_YN        = 'Y'
+                                    AND A.SRV_CD       IN ('S', 'C', 'M', 'F', 'A', 'L')
+                                    AND B.INF_STATE     = 'Y'
+                                    AND B.OPEN_DTTM    <= SYSDATE
+                                    AND CASE A.SRV_CD
+                                        WHEN 'F'
+                                        THEN 'Y'
+                                        WHEN 'L'
+                                        THEN 'Y'
+                                        ELSE C.USE_YN
+                                        END             = 'Y'
+                                    AND CASE A.SRV_CD
+                                        WHEN 'F'
+                                        THEN 'RAW'
+                                        WHEN 'L'
+                                        THEN 'RAW'
+                                        ELSE C.DS_CD
+                                        END             = 'RAW'
+                                  GROUP BY
+                                        A.INF_ID
+                            )           A
+                       JOIN TB_OPEN_INF B
+                         ON B.INF_ID    = A.INF_ID
+                      ORDER BY
+                            A.VIEW_CNT       DESC,
+                            B.FVT_DATA_ORDER ASC,
+                            B.V_ORDER        ASC
+                )       A
+          WHERE ROWNUM <= 10
+        ]]>
+    -->
+        <![CDATA[
+         SELECT A.INF_ID   AS "infId",
+                CASE
+                WHEN A.SCOL_INF_SEQ IS NOT NULL
+                THEN A.SCOL_INF_SEQ
+                WHEN A.CCOL_INF_SEQ IS NOT NULL
+                THEN A.CCOL_INF_SEQ
+                WHEN A.MCOL_INF_SEQ IS NOT NULL
+                THEN A.MCOL_INF_SEQ
+                WHEN A.FILE_INF_SEQ IS NOT NULL
+                THEN A.FILE_INF_SEQ
+                WHEN A.ACOL_INF_SEQ IS NOT NULL
+                THEN A.ACOL_INF_SEQ
+                WHEN A.LINK_INF_SEQ IS NOT NULL
+                THEN A.LINK_INF_SEQ
+                END        AS "infSeq",
+                A.INF_NM   AS "infNm",
+                A.VIEW_CNT AS "viewCnt"
+           FROM (
+                     SELECT A.INF_ID       AS INF_ID,
+                            A.SCOL_INF_SEQ AS SCOL_INF_SEQ,
+                            A.CCOL_INF_SEQ AS CCOL_INF_SEQ,
+                            A.MCOL_INF_SEQ AS MCOL_INF_SEQ,
+                            A.FILE_INF_SEQ AS FILE_INF_SEQ,
+                            A.ACOL_INF_SEQ AS ACOL_INF_SEQ,
+                            A.LINK_INF_SEQ AS LINK_INF_SEQ,
+                            B.INF_NM       AS INF_NM,
+                            A.VIEW_CNT     AS VIEW_CNT
+                       FROM (
+                                 SELECT B.INF_ID        AS INF_ID,
+                                        MIN(CASE B.SRV_CD
+                                            WHEN 'S'
+                                            THEN B.INF_SEQ
+                                            END)        AS SCOL_INF_SEQ,
+                                        MIN(CASE B.SRV_CD
+                                            WHEN 'C'
+                                            THEN B.INF_SEQ
+                                            END)        AS CCOL_INF_SEQ,
+                                        MIN(CASE B.SRV_CD
+                                            WHEN 'M'
+                                            THEN B.INF_SEQ
+                                            END)        AS MCOL_INF_SEQ,
+                                        MIN(CASE B.SRV_CD
+                                            WHEN 'F'
+                                            THEN B.INF_SEQ
+                                            END)        AS FILE_INF_SEQ,
+                                        MIN(CASE B.SRV_CD
+                                            WHEN 'A'
+                                            THEN B.INF_SEQ
+                                            END)        AS ACOL_INF_SEQ,
+                                        MIN(CASE B.SRV_CD
+                                            WHEN 'L'
+                                            THEN B.INF_SEQ
+                                            END)        AS LINK_INF_SEQ,
+                                        MAX(A.VIEW_CNT) AS VIEW_CNT
+                                   FROM (
+                                             SELECT A.INF_ID           AS INF_ID,
+                                                    COUNT(A.INF_SEQ)   AS VIEW_CNT
+                                               FROM TB_LOG_OPEN_INF_SRV A
+                                              WHERE A.SRV_CD           IN ('S', 'C', 'M', 'F', 'A', 'L')
+                                                AND A.REG_DTTM         >= TO_DATE(#fromDate:VARCHAR#, 'YYYY-MM-DD') + 0
+                                                AND A.REG_DTTM         <  TO_DATE(#toDate:VARCHAR#,   'YYYY-MM-DD') + 1
+                                              GROUP BY
+                                                    A.INF_ID
+                                        )               A
+                                   JOIN TB_OPEN_INF_SRV B
+                                     ON B.INF_ID        = A.INF_ID
+                                   JOIN TB_OPEN_INF     C
+                                     ON C.INF_ID        = B.INF_ID
+                              LEFT JOIN TB_OPEN_DS      D
+                                     ON D.DS_ID         = C.DS_ID
+                                  WHERE B.SRV_YN        = 'Y'
+                                    AND B.SRV_CD       IN ('S', 'C', 'M', 'F', 'A', 'L')
+                                    AND C.INF_STATE     = 'Y'
+                                    AND C.OPEN_DTTM    <= SYSDATE
+                                    AND CASE B.SRV_CD
+                                        WHEN 'F'
+                                        THEN 'Y'
+                                        WHEN 'L'
+                                        THEN 'Y'
+                                        ELSE D.USE_YN
+                                        END             = 'Y'
+                                    AND NOT REGEXP_LIKE (C.INF_NM,'(유흥|유해|안마|여관|캬바레|단란|성인|나이트|모텔)')
+                                  GROUP BY
+                                        B.INF_ID
+                            )           A
+                       JOIN TB_OPEN_INF B
+                         ON B.INF_ID    = A.INF_ID
+                      ORDER BY
+                            A.VIEW_CNT       DESC,
+                            B.FVT_DATA_ORDER ASC,
+                            B.V_ORDER        ASC
+                )       A
+          WHERE ROWNUM <= 9
+        ]]>
+    </select>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 공공데이터 데이터셋 추천순위를 검색한다.                            -->
+    <!--     TB_OPEN_INF_SRV 건수가 많이 없어서 서브쿼리로 돌림                                -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="PortalOpenDsDao.searchOpenDsRcmd" parameterClass="params" resultClass="record">
+	<![CDATA[      
+	   SELECT   ROWNUM  AS "no"
+	   	    ,   INF_ID  AS "infId"
+			,	SEQ     AS "seq"
+			,   INF_NM	AS "infNm"
+			,   (SELECT MIN(SRV.INF_SEQ) FROM TB_OPEN_INF_SRV SRV WHERE SRV.SRV_YN = 'Y' AND SRV.INF_ID = R.INF_ID) AS "infSeq"
+		from (
+				SELECT M.INF_ID,  O.INF_NM, M.V_ORDER, O.SEQ
+				FROM 
+				(
+					SELECT INF_ID 
+				     , MIN(V_ORDER) V_ORDER 
+				     , MIN(UPD_DTTM) AS UPD_DTTM
+				  FROM (
+						SELECT A.INF_ID, FVT_DATA_ORDER  AS V_ORDER
+						     , A.UPD_DTTM
+						FROM TB_OPEN_INF A
+							INNER JOIN TB_OPEN_CATE B
+							ON  A.CATE_ID = B.CATE_ID
+							AND B.USE_YN = 'Y'
+						WHERE INF_STATE = 'Y' AND OPEN_DTTM <= SYSDATE
+							AND FVT_DATA_ORDER > 0
+							AND EXISTS(SELECT 1 FROM TB_OPEN_INF_SRV WHERE SRV_CD NOT IN('V') AND SRV_YN = 'Y' AND INF_ID = A.INF_ID)
+				UNION ALL			
+						select A.INF_ID, A.V_ORDER, SYSDATE AS UPD_DTTM
+						from (
+								SELECT INF_ID, ROWNUM + 10000000000 as V_ORDER
+								FROM (
+								  SELECT INF_ID, TOT_USE_CNT FROM TB_STAT_USE
+								  WHERE YYYYMMDD = (select max(YYYYMMDD) from TB_STAT_USE where tot_use_cnt > 0)
+								  ORDER BY tot_use_cnt DESC
+									 ) 
+								WHERE ROWNUM BETWEEN 1 AND 10
+							 ) A 
+					    inner join AD_CF_ITEM B 
+						ON A.INF_ID = B.ITEM_ID_A and RANK = 1
+						WHERE EXISTS(SELECT 1 FROM TB_OPEN_INF_SRV WHERE SRV_CD NOT IN('V') AND SRV_YN = 'Y' AND INF_ID = B.ITEM_ID_B)
+				) 
+				GROUP BY INF_ID 
+				)  M inner join TB_OPEN_INF O 
+					ON M.INF_ID =  O.INF_ID 
+						AND  O.INF_STATE = 'Y' AND O.OPEN_DTTM <= SYSDATE 
+				order by M.V_ORDER, M.UPD_DTTM
+		) R		
+		where rownum BETWEEN 1 AND 10
+		]]>
+	</select>
+
+    
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 마인드맵 카테고리 정보 호출                            -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="PortalOpenDsDao.searchOpenDsCate" parameterClass="params" resultClass="record">
+		SELECT LEVEL AS "Level"
+				 , CONNECT_BY_ISLEAF AS "leaf"
+				 , 'false' AS "open"
+				 , L.GUBUN_TAG AS "gubunTag"
+				 , L.INFS_ID AS "infsId"
+				 , L.PAR_INFS_ID AS "parInfsId"
+				 , L.INFS_NM AS "infsNm"
+				 , L.V_ORDER AS "vOrder"
+				 , L.INFS_URL AS "infsUrl"
+				 , SUBSTR(SYS_CONNECT_BY_PATH(INFS_NM, '>'), 2) AS "fullPath"
+		  FROM TV_INFA_LIST_MAP L 
+		WHERE 1 = 1 
+			AND EXISTS 
+				(SELECT 1 
+                   FROM TV_INFA_LIST_MAP E 
+                  WHERE E.GUBUN_TAG NOT IN ('C')
+                   START WITH E.INFS_ID = L.INFS_ID  AND L.USE_YN = 'Y'
+               CONNECT BY PRIOR E.INFS_ID = E.PAR_INFS_ID AND PRIOR L.USE_YN = L.USE_YN  
+				) 
+   		 START WITH L.PAR_INFS_ID = 'T'  AND L.GUBUN_TAG = 'C' AND L.USE_YN = 'Y'
+	 CONNECT BY PRIOR L.INFS_ID = L.PAR_INFS_ID AND PRIOR L.USE_YN = L.USE_YN  
+	     ORDER SIBLINGS BY L.V_ORDER,   L.INFS_NM
+    </select>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 공공데이터 데이터셋 인기태그를 검색한다.                            -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="PortalOpenDsDao.searchOpenDsTags" parameterClass="params" resultClass="record">
+        <![CDATA[
+         SELECT A.TAG_NM                                          AS "tagNm",
+                A.VIEW_CNT                                        AS "viewCnt",
+                RANK() OVER (ORDER BY A.VIEW_CNT DESC NULLS LAST) AS "viewCntRank"
+           FROM (
+                     SELECT A.TAG_NM   AS TAG_NM,
+                            A.VIEW_CNT AS VIEW_CNT
+                       FROM (
+                                 SELECT C.TAG_NM        AS TAG_NM,
+                                        SUM(A.VIEW_CNT) AS VIEW_CNT
+                                   FROM TB_OPEN_INF_SRV A
+                                   JOIN TB_OPEN_INF     B
+                                     ON B.INF_ID        = A.INF_ID
+                                   JOIN TB_OPEN_INF_TAG     C
+                                     ON C.INF_ID        = B.INF_ID
+                              LEFT JOIN TB_OPEN_DS      D
+                                     ON D.DS_ID         = B.DS_ID
+                                  WHERE A.SRV_YN        = 'Y'
+                                    AND A.SRV_CD       IN ('S', 'C', 'M', 'F', 'A', 'L')
+                                    AND B.INF_STATE     = 'Y'
+                                    AND B.OPEN_DTTM    <= SYSDATE
+                                    AND C.USE_YN        = 'Y'
+                                    AND CASE A.SRV_CD
+                                        WHEN 'F'
+                                        THEN 'Y'
+                                        WHEN 'L'
+                                        THEN 'Y'
+                                        ELSE D.USE_YN
+                                        END             = 'Y'
+                                  GROUP BY
+                                        C.TAG_NM
+                                  ORDER BY
+                                        VIEW_CNT DESC NULLS LAST
+                            )       A
+                      WHERE ROWNUM <= 50
+                ) A
+          ORDER BY
+                A.TAG_NM ASC
+        ]]>
+    </select>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 공공데이터 데이터셋 제공기관을 검색한다.                            -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="PortalOpenDsDao.searchOpenDsOrgs" parameterClass="params" resultClass="record">
+        <![CDATA[
+         SELECT A.ORG_CD   AS "orgCd",
+                A.ORG_NM   AS "orgNm",
+                B.INF_CNT  AS "infCnt"
+           FROM TB_COMM_ORG A
+      LEFT JOIN (
+                     SELECT E.ORG_CD                 AS ORG_CD,
+                            COUNT(DISTINCT A.INF_ID) AS INF_CNT
+                       FROM TB_OPEN_INF_SRV     A
+                       JOIN TB_OPEN_INF         B
+                         ON B.INF_ID            = A.INF_ID
+                       JOIN TB_OPEN_CATE C 
+                         ON C.CATE_ID = B.CATE_ID 
+					   JOIN TB_OPEN_CATE G 
+					     ON G.CATE_ID = C.TOP_CATE_ID 
+                       JOIN TB_COMM_ORG         D
+                         ON D.ORG_CD            = B.ORG_CD
+                       JOIN TB_COMM_ORG         E
+                         ON E.ORG_CD            = D.TOP_ORG_CD
+                  LEFT JOIN TB_OPEN_DS          F
+                         ON F.DS_ID             = B.DS_ID
+                      WHERE A.SRV_YN            = 'Y'
+                        AND A.SRV_CD           IN ('S', 'C', 'M', 'F', 'A', 'L')
+                        AND B.INF_STATE         = 'Y'
+                        AND B.OPEN_DTTM        <= SYSDATE
+                        AND D.USE_YN            = 'Y'
+                        AND E.USE_YN            = 'Y'
+                        AND C.USE_YN            = 'Y'
+                        AND G.USE_YN            = 'Y'
+                        AND CASE A.SRV_CD
+                            WHEN 'F'
+                            THEN 'Y'
+                            WHEN 'L'
+                            THEN 'Y'
+                            ELSE F.USE_YN
+                            END                 = 'Y'
+                      GROUP BY
+                            E.ORG_CD
+                )           B
+             ON B.ORG_CD    = A.ORG_CD
+          WHERE A.ORG_CD    = A.TOP_ORG_CD
+            AND A.USE_YN    = 'Y'
+            AND B.INF_CNT   > 0
+          ORDER BY
+                A.V_ORDER ASC
+        ]]>
+    </select>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 공공데이터 데이터셋 전체목록을 검색한다.                            -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 검색 조건절 -->
+    <sql id="PortalOpenDsDao.searchOpenDsListWhere">
+          WHERE A.SRV_YN        = 'Y'
+            AND A.SRV_CD       IN ('S', 'C', 'M', 'F', 'A', 'L')
+            AND B.INF_STATE     = 'Y'
+            <![CDATA[
+            AND B.OPEN_DTTM    <= SYSDATE
+            ]]>
+            <isNotEmpty property="orgCd">
+            AND EXISTS
+                (
+                     SELECT G.ORG_CD
+                       FROM TB_OPEN_INF F
+                       JOIN TB_COMM_ORG         G
+                         ON G.ORG_CD            = F.ORG_CD
+                       JOIN TB_COMM_ORG         H
+                         ON H.ORG_CD            = G.TOP_ORG_CD
+                      WHERE F.INF_ID            = B.INF_ID
+                        AND G.USE_YN            = 'Y'
+                        AND H.USE_YN            = 'Y'
+                        AND H.ORG_CD           IN (
+                                <iterate property="orgCd" conjunction=",">#orgCd[]#</iterate>
+                            )
+                )
+            </isNotEmpty>
+            <isNotEmpty property="srvCd">
+            AND EXISTS
+                (
+                     SELECT F.INF_SEQ
+                       FROM TB_OPEN_INF_SRV F
+                      WHERE F.INF_ID        = B.INF_ID
+                        AND F.SRV_YN        = 'Y'
+                        AND F.SRV_CD       IN (
+                                <iterate property="srvCd" conjunction=",">#srvCd[]#</iterate>
+                            )
+                )
+            </isNotEmpty>
+            <isNotEmpty property="infTag">
+            AND EXISTS
+                (
+                     SELECT F.TAG_NM
+                       FROM TB_OPEN_INF_TAG F
+                      WHERE F.INF_ID    = B.INF_ID
+                        AND F.USE_YN    = 'Y'
+                        AND F.TAG_NM   IN (
+                                <iterate property="infTag" conjunction=",">#infTag[]#</iterate>
+                            )
+                )
+            </isNotEmpty>
+            <isNotEmpty property="searchWord">
+            AND ((UPPER(B.INF_NM)  LIKE '%'||UPPER(#searchWord#)||'%') OR (UPPER(B.INF_EXP) LIKE '%'||UPPER(#searchWord#)||'%') OR (UPPER(B.SCHW_TAG_CONT) LIKE '%'||UPPER(#searchWord#)||'%'))
+            </isNotEmpty>
+            AND C.USE_YN        = 'Y'
+            AND D.USE_YN        = 'Y'
+            <isNotEmpty property="cateId">
+            AND D.CATE_ID      IN (
+                    <iterate property="cateId" conjunction=",">#cateId[]#</iterate>
+                )
+                <!-- 분류2 -->
+<!--             OR F.TOP_CATE2_ID      IN ( -->
+<!--                     <iterate property="cateId" conjunction=",">#cateId[]#</iterate> -->
+<!--                 )  -->
+            </isNotEmpty>
+            <isNotEmpty property="sigunFlag">
+            AND EXISTS 
+                (
+                    SELECT 
+                        F.INF_ID 
+                    FROM 
+                        TB_META_ORG_DS_REL F 
+                    WHERE 
+                        F.INF_ID = B.INF_ID 
+                        <!-- AND F.ORG_CD = #sigunFlag# 2016.07.29 -->
+                        AND F.ORG_CD IN (SELECT  ORG_CD from TB_COMM_ORG where TYPE_CD = #sigunFlag# )
+                )
+            </isNotEmpty>
+            AND CASE A.SRV_CD
+                WHEN 'F'
+                THEN 'Y'
+                WHEN 'L'
+                THEN 'Y'
+                ELSE E.USE_YN
+                END             = 'Y'
+            <isNotEmpty property="appOrgCd">    
+            AND B.INF_ID IN 
+            (
+				SELECT INF_ID FROM TB_OPEN_INF_USR
+				WHERE  USE_YN = 'Y'
+				<!-- 대표가 아니고 조직으로 관리하여 삭제
+				AND    RPST_YN = 'N'
+				AND    USR_CD IS NULL -->
+				AND    PRSS_ACC_CD <![CDATA[>]]> 0
+				AND    ORG_CD IN 
+				(					
+					SELECT ORG_CD
+					FROM   TB_COMM_ORG A
+					WHERE USE_YN = 'Y'
+					START WITH ORG_CD = #appOrgCd:VARCHAR#
+					CONNECT BY A.ORG_CD = PRIOR A.PAR_ORG_CD
+				)
+			) 
+			</isNotEmpty>
+    </sql>
+    <!-- 검색 데이터 -->
+    <select id="PortalOpenDsDao.searchOpenDsList" parameterClass="params" resultClass="record">
+        <isEqual property="paging" compareValue="0">
+         SELECT A.SEQ                             AS "seq",
+                A.INF_ID                          AS "infId",
+                CASE
+                WHEN A.SCOL_INF_SEQ IS NOT NULL
+                THEN A.SCOL_INF_SEQ
+                WHEN A.CCOL_INF_SEQ IS NOT NULL
+                THEN A.CCOL_INF_SEQ
+                WHEN A.MCOL_INF_SEQ IS NOT NULL
+                THEN A.MCOL_INF_SEQ
+                WHEN A.FILE_INF_SEQ IS NOT NULL
+                THEN A.FILE_INF_SEQ
+                WHEN A.ACOL_INF_SEQ IS NOT NULL
+                THEN A.ACOL_INF_SEQ
+                WHEN A.LINK_INF_SEQ IS NOT NULL
+                THEN A.LINK_INF_SEQ
+                END                               AS "infSeq",
+                A.SCOL_INF_SEQ                    AS "scolInfSeq",
+                A.CCOL_INF_SEQ                    AS "ccolInfSeq",
+                A.MCOL_INF_SEQ                    AS "mcolInfSeq",
+                A.FILE_INF_SEQ                    AS "fileInfSeq",
+                A.ACOL_INF_SEQ                    AS "acolInfSeq",
+                A.LINK_INF_SEQ                    AS "linkInfSeq",
+                A.SAVE_FILE_NM               	  AS "metaImagFileNm",
+                A.CATE_SAVE_FILE_NM               AS "cateSaveFileNm",
+                A.INF_NM                          AS "infNm",
+                A.INF_EXP                         AS "infExp",
+                A.VIEW_CNT                        AS "viewCnt",
+                TO_CHAR(A.OPEN_DTTM, 'YYYY-MM-DD') AS "regDttm",
+                NVL(TO_CHAR(A.LOAD_DTTM,  'YYYY-MM-DD'), A.LOAD_NM) AS "updDttm",
+                A.TOP_CATE_ID                     AS "topCateId",
+                A.TOP_CATE_NM                     AS "topCateNm",
+                A.TOP_CATE_ID2 AS "topCateId2",
+       		    A.TOP_CATE_NM2 AS "topCateNm2",
+       		    A.ORG_NM	   AS "orgNm"
+           FROM (
+                     SELECT ROWNUM              AS ROW_NUM,
+                            A.SEQ               AS SEQ,
+                            A.INF_ID            AS INF_ID,
+                            A.SCOL_INF_SEQ      AS SCOL_INF_SEQ,
+                            A.CCOL_INF_SEQ      AS CCOL_INF_SEQ,
+                            A.MCOL_INF_SEQ      AS MCOL_INF_SEQ,
+                            A.FILE_INF_SEQ      AS FILE_INF_SEQ,
+                            A.ACOL_INF_SEQ      AS ACOL_INF_SEQ,
+                            A.LINK_INF_SEQ      AS LINK_INF_SEQ,
+                            A.SAVE_FILE_NM 	    AS SAVE_FILE_NM,
+                            A.CATE_SAVE_FILE_NM AS CATE_SAVE_FILE_NM,
+                            A.INF_NM            AS INF_NM,
+                            A.INF_EXP           AS INF_EXP,
+                            A.VIEW_CNT          AS VIEW_CNT,
+                            A.LOAD_DTTM          AS LOAD_DTTM,
+                            A.OPEN_DTTM          AS OPEN_DTTM,
+                            A.LOAD_NM            AS LOAD_NM,
+                            A.TOP_CATE_ID       AS TOP_CATE_ID,
+                            A.TOP_CATE_NM       AS TOP_CATE_NM,
+                            A.TOP_CATE_ID2 AS TOP_CATE_ID2,
+                		    A.TOP_CATE_NM2 AS TOP_CATE_NM2,
+                		    A.ORG_NM
+                       FROM (
+        </isEqual>
+                                 SELECT B.SEQ               AS SEQ,
+                                        A.INF_ID            AS INF_ID,
+                                        A.SCOL_INF_SEQ      AS SCOL_INF_SEQ,
+                                        A.CCOL_INF_SEQ      AS CCOL_INF_SEQ,
+                                        A.MCOL_INF_SEQ      AS MCOL_INF_SEQ,
+                                        A.FILE_INF_SEQ      AS FILE_INF_SEQ,
+                                        A.ACOL_INF_SEQ      AS ACOL_INF_SEQ,
+                                        A.LINK_INF_SEQ      AS LINK_INF_SEQ,
+                                        B.SAVE_FILE_NM      AS SAVE_FILE_NM,
+                                        C.SAVE_FILE_NM      AS CATE_SAVE_FILE_NM,
+                                        B.INF_NM            AS INF_NM,
+                                        B.INF_EXP           AS INF_EXP,
+                                        A.VIEW_CNT          AS VIEW_CNT,
+                                        B.LOAD_DTTM          AS LOAD_DTTM,
+                                        B.OPEN_DTTM 			AS OPEN_DTTM,
+                                        FN_GET_COMM_CODE_NM('D1009', B.LOAD_CD) AS LOAD_NM,
+                                        D.CATE_ID           AS TOP_CATE_ID,
+                                        D.CATE_NM           AS TOP_CATE_NM,
+                                        (SELECT A.TOP_CATE_ID FROM TB_OPEN_CATE A WHERE A.CATE_ID = B.CATE2_ID) AS TOP_CATE_ID2,                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
+                         				(SELECT A.CATE_NM FROM TB_OPEN_CATE A WHERE A.CATE_ID = (SELECT A.TOP_CATE_ID FROM TB_OPEN_CATE A WHERE A.CATE_ID = B.CATE2_ID)) AS TOP_CATE_NM2,
+                         				O.ORG_NM
+                                   FROM (
+                                             SELECT A.INF_ID        AS INF_ID,
+                                                    MIN(CASE A.SRV_CD
+                                                        WHEN 'S'
+                                                        THEN A.INF_SEQ
+                                                        END)        AS SCOL_INF_SEQ,
+                                                    MIN(CASE A.SRV_CD
+                                                        WHEN 'C'
+                                                        THEN A.INF_SEQ
+                                                        END)        AS CCOL_INF_SEQ,
+                                                    MIN(CASE A.SRV_CD
+                                                        WHEN 'M'
+                                                        THEN A.INF_SEQ
+                                                        END)        AS MCOL_INF_SEQ,
+                                                    MIN(CASE A.SRV_CD
+                                                        WHEN 'F'
+                                                        THEN A.INF_SEQ
+                                                        END)        AS FILE_INF_SEQ,
+                                                    MIN(CASE A.SRV_CD
+                                                        WHEN 'A'
+                                                        THEN A.INF_SEQ
+                                                        END)        AS ACOL_INF_SEQ,
+                                                    MIN(CASE A.SRV_CD
+                                                        WHEN 'L'
+                                                        THEN A.INF_SEQ
+                                                        END)        AS LINK_INF_SEQ,
+                                                    SUM(A.VIEW_CNT) AS VIEW_CNT
+                                               FROM TB_OPEN_INF_SRV A
+                                               JOIN TB_OPEN_INF     B
+                                                 ON B.INF_ID        = A.INF_ID
+                                               JOIN TB_OPEN_CATE    C
+                                                 ON C.CATE_ID       = B.CATE_ID
+                                               JOIN TB_OPEN_CATE    D
+                                                 ON D.CATE_ID       = C.TOP_CATE_ID
+                                          LEFT JOIN TB_OPEN_DS      E
+                                                 ON E.DS_ID         = B.DS_ID
+                                         
+                                                    <include refid="PortalOpenDsDao.searchOpenDsListWhere" />
+                                              GROUP BY
+                                                    A.INF_ID
+                                        )            A
+                                   JOIN TB_OPEN_INF  B
+                                     ON B.INF_ID     = A.INF_ID
+                                   JOIN TB_OPEN_CATE C
+                                     ON C.CATE_ID    = B.CATE_ID
+                                   JOIN TB_OPEN_CATE D
+                                     ON D.CATE_ID    = C.TOP_CATE_ID
+                              LEFT JOIN TB_COMM_ORG     O
+                               	  	 ON B.ORG_CD 		= O.ORG_CD
+                               	  	AND O.USE_YN		= 'Y'   
+                                  ORDER BY	B.V_ORDER ASC, B.OPEN_DTTM DESC
+        <isEqual property="paging" compareValue="0">
+        <![CDATA[
+                            )       A
+                      WHERE ROWNUM <= #end:NUMERIC#
+                )          A
+          WHERE A.ROW_NUM >= #start:NUMERIC#
+        ]]>
+        </isEqual>
+    </select>
+    <!-- 검색 카운트 -->
+    <select id="PortalOpenDsDao.searchOpenDsListCount" parameterClass="params" resultClass="int">
+         SELECT COUNT(DISTINCT A.INF_ID)
+           FROM TB_OPEN_INF_SRV A
+           JOIN TB_OPEN_INF     B
+             ON B.INF_ID        = A.INF_ID
+           JOIN TB_OPEN_CATE    C
+             ON C.CATE_ID       = B.CATE_ID
+           JOIN TB_OPEN_CATE    D
+             ON D.CATE_ID       = C.TOP_CATE_ID
+      LEFT JOIN TB_OPEN_DS      E
+             ON E.DS_ID         = B.DS_ID
+      LEFT JOIN TV_OPEN_INF     F 
+             ON A.INF_ID        = F.INF_ID 
+                <include refid="PortalOpenDsDao.searchOpenDsListWhere" />
+    </select>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 공공데이터 데이터셋 관련목록을 검색한다.                            -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="PortalOpenDsDao.searchOpenDsRela" parameterClass="params" resultClass="record">
+         SELECT A.INF_ID                          AS "infId",
+                CASE
+                WHEN A.SCOL_INF_SEQ IS NOT NULL
+                THEN A.SCOL_INF_SEQ
+                WHEN A.CCOL_INF_SEQ IS NOT NULL
+                THEN A.CCOL_INF_SEQ
+                WHEN A.MCOL_INF_SEQ IS NOT NULL
+                THEN A.MCOL_INF_SEQ
+                WHEN A.FILE_INF_SEQ IS NOT NULL
+                THEN A.FILE_INF_SEQ
+                WHEN A.ACOL_INF_SEQ IS NOT NULL
+                THEN A.ACOL_INF_SEQ
+                WHEN A.LINK_INF_SEQ IS NOT NULL
+                THEN A.LINK_INF_SEQ
+                END                               AS "infSeq",
+                A.SCOL_INF_SEQ                    AS "scolInfSeq",
+                A.CCOL_INF_SEQ                    AS "ccolInfSeq",
+                A.MCOL_INF_SEQ                    AS "mcolInfSeq",
+                A.FILE_INF_SEQ                    AS "fileInfSeq",
+                A.ACOL_INF_SEQ                    AS "acolInfSeq",
+                A.LINK_INF_SEQ                    AS "linkInfSeq",
+                B.INF_NM                          AS "infNm",
+                C.CATE_ID                         AS "cateId",
+                C.CATE_NM                         AS "cateNm",
+                D.CATE_ID                         AS "topCateId",
+                D.CATE_NM                         AS "topCateNm",
+                TO_CHAR(B.REG_DTTM, 'YYYY-MM-DD') AS "regDttm"
+           FROM (
+                     SELECT A.INF_ID        AS INF_ID,
+                            MIN(CASE E.SRV_CD
+                                WHEN 'S'
+                                THEN E.INF_SEQ
+                                END)        AS SCOL_INF_SEQ,
+                            MIN(CASE E.SRV_CD
+                                WHEN 'C'
+                                THEN E.INF_SEQ
+                                END)        AS CCOL_INF_SEQ,
+                            MIN(CASE E.SRV_CD
+                                WHEN 'M'
+                                THEN E.INF_SEQ
+                                END)        AS MCOL_INF_SEQ,
+                            MIN(CASE E.SRV_CD
+                                WHEN 'F'
+                                THEN E.INF_SEQ
+                                END)        AS FILE_INF_SEQ,
+                            MIN(CASE E.SRV_CD
+                                WHEN 'A'
+                                THEN E.INF_SEQ
+                                END)        AS ACOL_INF_SEQ,
+                            MIN(CASE E.SRV_CD
+                                WHEN 'L'
+                                THEN E.INF_SEQ
+                                END)        AS LINK_INF_SEQ,
+                            SUM(E.VIEW_CNT) AS VIEW_CNT
+                       FROM TB_OPEN_INF     A
+                       JOIN TB_OPEN_DT      B
+                         ON B.DT_ID         = A.DT_ID
+                       <!-- JOIN TB_OPEN_DT      C
+                         ON C.DB_ID         = B.DB_ID
+                       JOIN TB_OPEN_INF     D
+                         ON D.DT_ID         = C.DT_ID -->
+                       JOIN TB_OPEN_INF_SRV E
+                         ON E.INF_ID        = A.INF_ID
+                  LEFT JOIN TB_OPEN_DS      F
+                         ON F.DS_ID         = A.DS_ID
+                      WHERE A.INF_ID        = #infId:VARCHAR#
+                        <!--
+                        AND B.SRC_YN        = 'Y'
+                        AND C.SRC_YN        = 'Y'
+                        
+                        AND D.INF_ID       != #infId# -->
+                        
+                        AND A.INF_STATE     = 'Y'
+                        <![CDATA[
+                        AND A.OPEN_DTTM    <= SYSDATE
+                        ]]>
+                        AND E.SRV_YN        = 'Y'
+                        AND E.SRV_CD       IN ('S', 'C', 'M', 'F', 'A', 'L')
+                        AND CASE E.SRV_CD
+                            WHEN 'F'
+                            THEN 'Y'
+                            WHEN 'L'
+                            THEN 'Y'
+                            ELSE F.USE_YN
+                            END             = 'Y'
+                      GROUP BY
+                            A.INF_ID
+                )            A
+           JOIN TB_OPEN_INF  B
+             ON B.INF_ID     = A.INF_ID
+           JOIN TB_OPEN_CATE C
+             ON C.CATE_ID    = B.CATE_ID
+           JOIN TB_OPEN_CATE D
+             ON D.CATE_ID    = C.TOP_CATE_ID
+    </select>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 공공데이터 데이터셋 썸네일을 조회한다.                              -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="PortalOpenDsDao.selectOpenDsTmnl" parameterClass="params" resultClass="record">
+        SELECT A.SEQ               AS "seq",
+               A.SAVE_FILE_NM      AS "metaImagFileNm",
+               B.SAVE_FILE_NM      AS "cateSaveFileNm"
+          FROM TB_OPEN_INF  A
+          JOIN TB_OPEN_CATE B
+            ON B.CATE_ID    = A.CATE_ID
+         WHERE A.INF_ID     = #infId:VARCHAR#
+    </select>
+    
+    
+    <!-- tema -->
+    
+    <select id="PortalOpenDsDao.searchTemaDsList" parameterClass="params" resultClass="record">
+       SELECT * FROM(
+       
+       SELECT A.INF_ID as infId, B.INF_NM as infNm, A.CATE_ID AS cateId
+			FROM TB_OPEN_INF_CATE A JOIN TB_OPEN_INF B
+			ON A.INF_ID = B.INF_ID
+			WHERE 1=1
+			AND B.INF_STATE = 'Y' 
+			AND A.CATE_DIV_TAG = 'T'
+			AND A.USE_YN = 'Y'
+		 <isEqual property="tab" compareValue="tab1">
+            AND A.CATE_ID = 'T101'
+         </isEqual>
+         <isEqual property="tab" compareValue="tab2">
+            AND A.CATE_ID = 'T102'
+         </isEqual>
+         <isEqual property="tab" compareValue="tab3">
+            AND A.CATE_ID = 'T103'
+         </isEqual>
+         <isEqual property="tab" compareValue="tab4">
+            AND A.CATE_ID = 'T104'
+         </isEqual>
+         ORDER BY A.V_ORDER
+        )
+        <isEqual property="tab" compareValue="tab1">
+             WHERE ROWNUM = 1
+         </isEqual>
+         <isEqual property="tab" compareValue="tab2">
+            WHERE ROWNUM = 1
+         </isEqual>
+         <isEqual property="tab" compareValue="tab3">
+             WHERE ROWNUM = 1
+         </isEqual>
+         <isEqual property="tab" compareValue="tab4">
+             WHERE ROWNUM = 1
+         </isEqual>
+        	
+    </select>
+    <!-- TB_OPEN_INF_CATE 테이블 없음 -->
+    <select id="PortalOpenDsDao.searchTemaDetailDsList" parameterClass="params" resultClass="record">
+       SELECT A.INF_ID as infId, B.INF_NM as infNm, A.CATE_ID AS cateId
+			FROM TB_OPEN_INF_CATE A JOIN TB_OPEN_INF B
+			ON A.INF_ID = B.INF_ID
+			WHERE 1=1
+			AND B.INF_STATE = 'Y' 
+			AND A.CATE_DIV_TAG = 'T'
+			AND A.USE_YN = 'Y'
+			AND A.CATE_ID = #temaId#
+        	ORDER BY A.V_ORDER 
+    </select>
+    <!-- TB_META_ORG_MAP 테이블 없음 -->
+    <select id="PortalOpenDsDao.searchSigunList" parameterClass="params" resultClass="record">
+       SELECT 
+       SIGUN_NM AS sigunNm 
+       ,SIGUN_CD AS sigunCd  
+       ,PAR_SIGUN_NM AS parSigunNm
+       FROM TB_META_ORG_MAP 
+	   WHERE PAR_SIGUN_NM = #orgNm#
+    </select>
+    
+
+   <!-- ............................................                       -->
+   <!-- .......................생애주기 강치성 시작......................      -->
+   <!-- ............................................                       -->
+
+        <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 생애주기 리스트를 받아온다.                            -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="PortalOpenDsDao.selectCategoryList" parameterClass="params" resultClass="record">
+        <![CDATA[
+		SELECT  A.SEQ                                   AS "seq"
+		         , A.INF_ID   AS "infId"
+				 , A.INF_NM   
+				 , A.INF_EXP
+				 , D.DITC_NM as CATE_NM 
+				  , D.DITC_CD as CATE_CD
+				, D.V_ORDER 
+				, C.V_ORDER 
+				, A.SAVE_FILE_NM "metaImagFileNm"
+				, E.SAVE_FILE_NM  AS "cateSaveFileNm"
+				, (SELECT SRV.INF_SEQ FROM TB_OPEN_INF_SRV SRV WHERE A.INF_ID = SRV.INF_ID AND SRV_CD= 'S') "scolInfSeq"
+				, (SELECT SRV.INF_SEQ FROM TB_OPEN_INF_SRV SRV WHERE A.INF_ID = SRV.INF_ID AND SRV_CD= 'M') "mcolInfSeq"
+		from TB_OPEN_INF A 
+		JOIN TB_OPEN_INF_CATE C 
+		on A.INF_ID = C.INF_ID AND C.CATE_DIV_TAG = 'L'   
+		JOIN TB_COMM_CODE D 
+			 	on C.CATE_ID = D.DITC_CD 
+			 				and D.GRP_CD = 'D1106'  
+			 				and D.USE_YN = 'Y'
+		LEFT JOIN TB_OPEN_CATE    E
+		ON E.CATE_ID       = A.CATE_ID
+		WHERE A.INF_STATE = 'Y'  AND A.OPEN_DTTM <= SYSDATE
+		ORDER BY D.V_ORDER, C.V_ORDER
+	   ]]>     
+    </select> 
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 생애주기 카테고리 정보를 받아온다.                            -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="PortalOpenDsDao.selectCategory" parameterClass="params" resultClass="record">
+    	select ditc_nm, ditc_cd, v_order
+		from TB_COMM_CODE
+		where grp_cd ='D1106'
+		and use_yn='Y'
+		order by v_order asc 
+    </select>   
+
+   <!-- ............................................                       -->
+   <!-- .......................생애주기 강치성 끝......................      -->
+   <!-- ............................................                       -->
+     
+    
+    
+</sqlMap>

@@ -1,0 +1,603 @@
+@charset "utf-8";
+
+.dataInfoVisual{padding-top:30px;border-top:2px solid #1a659b;}
+
+.tab_A.type2 a{width:auto;padding:0 28px;}
+
+
+.infoTop h4{display:inline-block;font-size:18px;color:#5d5d5d;margin-right:18px;font-weight:bold;vertical-align:middle;}
+.selectbox{display:inline-block;position:relative;}
+.selectbox a{display:inline-block;height:24px;width:100px;padding-right:25px;color:#ffffff;text-align:center;font-weight:bold;line-height:22px;border-radius:1px;background:#3399cc url('../../img/ggportal/desktop/data/visual/datainfovisual/arr_selectbox.png') no-repeat 100% 0;}
+.selectbox select{position:absolute;top:0;left:0;width:125px;height:24px;opacity:0;cursor:pointer;}
+
+
+/**************************************************
+	visualArea_1
+**************************************************/
+.visualArea_1 {margin-top:30px;}
+
+/*visualArea_1 area1 */
+.visualArea_1 .area1{padding:46px 42px;height:662px;box-sizing:border-box;background:url('../../img/ggportal/desktop/data/visual/datainfovisual/bg_visualArea_1_1.png') no-repeat 0 0;}
+.visualArea_1 .area1 .visualTit{width:349px;}
+.visualArea_1 .area1 .visualTit .year{margin-top:10px;position:relative;display:block;text-align:right;}
+.visualArea_1 .area1 .visualTit .year:after{position:absolute;top:50%;left:0;display:block;content:'';height:5px;width:100%;background:#8e0d0d;}
+.visualArea_1 .area1 .visualTit .year strong{position:relative;z-index:5;display:inline-block;width:115px;height:33px;line-height:33px;text-align:center;color:#fff;font-size:26px;font-weight:bold;background:#cc0000;}
+
+.dl_1{margin-top:58px;overflow:hidden;}
+.dl_1 dt{margin-bottom:8px;}
+.dl_1 .counter-holder span {position: relative; font-weight:bold;vertical-align: top; line-height:69px; color:#fff; font-size:44px;}
+.dl_1 .counter-holder span em{display:block;width:100%;position: relative; font-weight:bold;vertical-align: top; line-height:69px; color:#fff; font-size:44px;}
+.dl_1 .counter-holder .separator {float:left;padding:0 1px 0 4px;background:url('../../img/ggportal/desktop/data/visual/datainfovisual/bg_comma.png') no-repeat 6px 58px;}
+.dl_1 .counter .digit {position:relative;float:left;width: 59px; height: 69px; color: #fff; padding-bottom:17px; margin-left:5px; overflow: hidden;text-align: center; background:url('../../img/ggportal/desktop/data/visual/datainfovisual/bg_digit_1.png') no-repeat 0 0;}
+.dl_1 .counter .digit:after{position:absolute;bottom:0;left:0;display:block;content:'';height:17px; width:100%;z-index:10;background:#fff url('../../img/ggportal/desktop/data/visual/datainfovisual/bg_digit_1.png') no-repeat 0 100%;}
+
+.dl_2{float:left;}
+.dl_2 dt{margin-bottom:8px;padding-left:20px;}
+.dl_2 dd{position:relative;top:-20px;width:198px;float:left;padding:14px 18px;box-sizing:border-box;background:url('../../img/ggportal/desktop/data/visual/datainfovisual/bg_dl_2.png') no-repeat 0 0;}
+.dl_2 .counter-holder span {position: relative;font-weight:bold;vertical-align: top; line-height:59px; color:#fff; font-size:36px;}
+.dl_2 .counter-holder span em{display:block;width:100%;position: relative;font-weight:bold;vertical-align: top; line-height:59px; color:#fff; font-size:36px;}
+.dl_2 .counter-holder .separator {float:left;padding:0 1px 0 4px;background:url('../../img/ggportal/desktop/data/visual/datainfovisual/bg_comma.png') no-repeat 6px 51px;}
+.dl_2 .counter-holder .separator span{display:block;text-indent:-9999px;width:11px;overflow:hidden;}
+.dl_2 .counter .digit {float:left;width:47px; height:59px; color: #fff; margin-left:5px;overflow: hidden;text-align: center; background:url('../../img/ggportal/desktop/data/visual/datainfovisual/bg_digit_2.png') no-repeat 0 0;}
+
+.dl_3{float:left;margin-left:54px;}
+.dl_3 dt{margin-bottom:8px;padding-left:20px;}
+.dl_3 dd{position:relative;top:-20px;width:262px;float:left;padding:14px 18px;box-sizing:border-box;background:url('../../img/ggportal/desktop/data/visual/datainfovisual/bg_dl_3.png') no-repeat 0 0;}
+.dl_3 .counter-holder span {position: relative;font-weight:bold;vertical-align: top; line-height:59px; color:#fff; font-size:36px;}
+.dl_3 .counter-holder span em{display:block;width:100%;position: relative;font-weight:bold;vertical-align: top; line-height:59px; color:#fff; font-size:36px;}
+.dl_3 .counter-holder .separator {float:left;padding:0 1px 0 4px;background:url('../../img/ggportal/desktop/data/visual/datainfovisual/bg_comma.png') no-repeat 6px 51px;}
+.dl_3 .counter-holder .separator span{display:block;text-indent:-9999px;width:11px;overflow:hidden;}
+.dl_3 .counter .digit {float:left; width:47px; height:59px; color: #fff; margin-left:5px;overflow: hidden;text-align: center; background:url('../../img/ggportal/desktop/data/visual/datainfovisual/bg_digit_2.png') no-repeat 0 0;}
+
+.dl_4{float:left;margin-left:54px;}
+.dl_4 dt{margin-bottom:8px;padding-left:20px;}
+.dl_4 dd{position:relative;top:-20px;width:312px;float:left;padding:14px 18px;box-sizing:border-box;background:url('../../img/ggportal/desktop/data/visual/datainfovisual/bg_dl_4.png') no-repeat 0 0;}
+.dl_4 .counter-holder span {position: relative;font-weight:bold;vertical-align: top; line-height:59px; color:#fff; font-size:36px;}
+.dl_4 .counter-holder span em{display:block;width:100%;position: relative;font-weight:bold;vertical-align: top; line-height:59px; color:#fff; font-size:36px;}
+.dl_4 .counter-holder .separator {float:left;padding:0 1px 0 4px;background:url('../../img/ggportal/desktop/data/visual/datainfovisual/bg_comma.png') no-repeat 6px 51px;}
+.dl_4 .counter-holder .separator span{display:block;text-indent:-9999px;width:11px;overflow:hidden;}
+.dl_4 .counter .digit {float:left; width:47px; height:59px; color: #fff; margin-left:5px;overflow: hidden;text-align: center; background:url('../../img/ggportal/desktop/data/visual/datainfovisual/bg_digit_2.png') no-repeat 0 0;}
+
+
+/*visualArea_1 area2 */
+.visualArea_1 .area2{position:relative;height:473px;box-sizing:border-box;background:url('../../img/ggportal/desktop/data/visual/datainfovisual/bg_visualArea_1_2.png') no-repeat 0 0;}
+.visualArea_1 .area2 dt{padding:56px 0 0 83px;}
+.visualArea_1 .topLow{margin-top:15px;padding-left:83px;}
+.visualArea_1 .map{position:absolute;top:15px;right:87px;}
+
+
+/*visualArea_1 area3, visualArea_1 area4 */
+.visualArea_1 .area3{overflow:hidden;position:relative;height:304px;box-sizing:border-box;background:url('../../img/ggportal/desktop/data/visual/datainfovisual/bg_visualArea_1_3.png') no-repeat 0 0;}
+.visualArea_1 .area4{position:relative;height:300px;box-sizing:border-box;background:url('../../img/ggportal/desktop/data/visual/datainfovisual/bg_visualArea_1_4.png') no-repeat 0 0;}
+
+
+
+.infoDl{padding-left:217px;}
+.infoDl:after{display:block;content:'';clear:both}
+.infoDl dt{position:absolute;top:119px;left:45px;float:left;width:172px;text-align:center;}
+.infoDl dt strong{display:block;color:#993333;font-size:36px;line-height:1.2em;}
+.infoDl dt span{display:block;color:#000;font-size:36px;line-height:1.2em;font-weight:bold;}
+.infoDl dd{float:left;width:320px;}
+.infoDl dd.top{text-align:right;padding-top:75px;}
+.infoDl dd.low{text-align:left;padding-top:75px;}
+.infoDl dd.vs{width:122px;text-align:center;color:#999999;font-size:48px;line-height:340px;}
+.infoDl dd .tit{display:inline-block;padding:0 17px;height:31px;line-height:31px;font-size:17px;font-weight:bold;color:#000000;background:#d7d7d7;}
+.infoDl dd .tit strong{color:#990000;font-size:17px;}
+.infoDl dd .cont{display:table;width:100%;}
+.infoDl dd .cont > div{display:table-cell;vertical-align:top;}
+.infoDl dd .cont .txt{padding-top:10px;text-align:right;}
+.infoDl dd .cont .txt strong{font-size:70px;display:block;line-height:1em;color:#8e1521;}
+.infoDl dd .cont .txt strong span{font-size:36px;font-weight:bold;color:#8e1521;}
+.infoDl dd .cont .txt .num{display:block;font-weight:bold;font-size:24px;line-height:1em;color:#000;}
+.infoDl dd .cont .txt .per{display:block;font-size:24px;line-height:1.4em;color:#8e1521;font-weight:bold;}
+.infoDl dd .cont .img{width:155px;padding-top:15px;}
+
+.infoDl dd.top .tit{border-radius:15px 15px 0 15px;}
+.infoDl dd.low .tit{border-radius:15px 15px 15px 0;}
+.infoDl dd.low .tit strong{color:#336699;}
+.infoDl dd.low .cont .txt{text-align:left;}
+.infoDl dd.low .cont .txt strong{color:#336699;}
+.infoDl dd.low .cont .txt strong span{color:#336699;}
+.infoDl dd.low .cont .txt .per{color:#336699;}
+
+
+
+.infoDl.type2 dd{padding-top:55px;;}
+.infoDl.type2 dd .tit{background:#c0c0c0;}
+.infoDl.type2 dd.vs{color:#666666;line-height:240px;}
+.infoDl.type2 .cont .img{width:140px;padding-top:10px;}
+.infoDl.type2 .cont .txt{padding-top:20px;}
+.infoDl.type2 .cont .txt .num{line-height:1.2em;}
+
+/* visualArea_1 area5, visualArea_1 area6, visualArea_1 area7 */
+.visualArea_1 .area5{position:relative;padding:60px 30px;background:#ececec;}
+.visualArea_1 .area6{position:relative;padding:60px 30px;background:#ffffff;}
+.visualArea_1 .area7{position:relative;padding:60px 30px;background:#ececec;}
+
+.topList dt{margin-bottom:40px;text-align:center;}
+.topList dd ol{display:table; width:100%;}
+.topList dd ol li{display:table-cell;width:20%;text-align:center;}
+.topList dd ol li > strong{display:block;font-size:22px;color:#996666;margin-bottom:6px;line-height:1em;}
+.topList dd ol li > .img{display:inline-block;height:142px;width:142px;position:relative;}
+.topList dd ol li > .img img{border:1px solid #996666;}
+.topList dd ol li > .img .per{position:absolute;top:109px;left:-6px;display:block;font-size:17px;line-height:32px;padding-left:3px;text-align:center;color:#fff;width:64px;height:28px;background:url('../../img/ggportal/desktop/data/visual/datainfovisual/topPlace_label_per.png') no-repeat 0 0;}
+.topList dd ol li > .num{display:inline-block;width:142px;margin-top:5px;padding-top:14px;font-weight:bold;font-size:18px;height:40px;color:#fff;text-align:center;background:url('../../img/ggportal/desktop/data/visual/datainfovisual/topPlace_label_num.png') no-repeat 0 0;}
+.topList dd ol li > .num strong, 
+.topList dd ol li > .num span{color:#fff;font-size:20px;}
+
+
+.topList.type2 dd ol li > .img img{border:1px solid #996633;}
+.topList.type2 dd ol li > .img .per{background:url('../../img/ggportal/desktop/data/visual/datainfovisual/tipSymptom_label_per.png') no-repeat 0 0;}
+.topList.type2 dd ol li > .num{background:url('../../img/ggportal/desktop/data/visual/datainfovisual/tipSymptom_label_num.png') no-repeat 0 0;}
+
+.topList.type3 dd ol li > .img img{border:1px solid #666633;}
+.topList.type3 dd ol li > .img .per{background:url('../../img/ggportal/desktop/data/visual/datainfovisual/tipCase_label_per.png') no-repeat 0 0;}
+.topList.type3 dd ol li > .num{background:url('../../img/ggportal/desktop/data/visual/datainfovisual/tipCase_label_num.png') no-repeat 0 0;}
+
+
+/*************************************************
+	visualArea_2
+**************************************************/
+.visualArea_2 {margin-top:30px;}
+
+/*visualArea_2 area1 */
+.visualArea_2 .area1{position:relative;padding:46px 42px;height:1160px;box-sizing:border-box;background:url('../../img/ggportal/desktop/data/visual/datainfovisual/bg_visualArea_2_1.png') no-repeat 0 0;}
+
+.totalRescue .year{position:absolute;top:320px;left:407px;font-size:40px;color:#000;font-weight:bold;}
+.totalRescue .total{position:absolute;top:500px;left:345px;width:250px;text-align:center;}
+.totalRescue .total em{font-size:40px;color:#000;font-weight:bold;}
+.totalRescue .total span{font-size:30px; color:#000;font-weight:bold;}
+.totalRescue .time p{position:absolute;top:368px;left:674px;width:130px;text-align:center;}
+.totalRescue .time p em{font-size:30px;color:#fff;font-weight:bold;}
+.totalRescue .time p span{font-size:24px;color:#fff;font-weight:bold;}
+.totalRescue .day p{position:absolute;top:532px;left:672px;width:130px;text-align:center;}
+.totalRescue .day p em{font-size:30px;color:#fff;font-weight:bold;}
+.totalRescue .day p span{font-size:24px;color:#fff;font-weight:bold;}
+.totalRescue .month{position:absolute;top:674px;left:572px;width:130px;text-align:center;}
+.totalRescue .month p em{font-size:30px;color:#fff;font-weight:bold;}
+.totalRescue .month p span{font-size:24px;color:#fff;font-weight:bold;}
+
+.visualArea_2 .sigunMoStatus dt{position:absolute;top:877px;left:508px;}
+.visualArea_2 .sigunMoStatus dt .year{position:absolute;top:26px;left:250px;font-size:20px;color:#ffcc00;font-weight:bold;}
+.visualArea_2 .sigunMoStatus dd.topLow{position:absolute;top:963px;left:508px;}
+.visualArea_2 .sigunMoStatus dd.map{position:absolute;top:704px;left:110px;}
+
+/*visualArea_2 area2 */
+.visualArea_2 .area2{position:relative;height:408px;box-sizing:border-box;background:url('../../img/ggportal/desktop/data/visual/datainfovisual/bg_visualArea_2_2.png') no-repeat 0 0;}
+
+.timeMoStatus{padding-left:250px;padding-top:5px;}
+.timeMoStatus dt{position:absolute;top:48px;left:48px;}
+.timeMoStatus dd{padding-top:60px;height:108px;}
+.timeMoStatus dd .tit{float:left;width:130px;font-size:18px;letter-spacing:-1px;color:#000;font-weight:bold;}
+.timeMoStatus dd .tit strong{color:#990000;font-size:18px;}
+.timeMoStatus dd .cont{float:left;width:250px;}
+.timeMoStatus dd .cont .txt strong{display:block;height:54px;line-height:54px;letter-spacing:-1px;text-align:center;font-size:30px;color:#fff;background:#993333;}
+.timeMoStatus dd .cont .txt .num{height:54px;line-height:54px;float:left;font-weight:bold;letter-spacing:-1px;width:60%;text-align:center;font-size:30px;color:#000;background:#c18f8f;}
+.timeMoStatus dd .cont .txt .per{height:54px;line-height:54px;float:left;font-weight:bold;letter-spacing:-1px;width:40%;text-align:center;font-size:30px;color:#993333;background:#d3b7b7;}
+.timeMoStatus dd.low .txt strong{background:#736357;}
+.timeMoStatus dd.low .txt .num{background:#b0a8a2;}
+.timeMoStatus dd.low .txt .per{background:#c9c4c1;}
+
+
+/*visualArea_2 area3 */
+.visualArea_2 .area3{position:relative;height:380px;box-sizing:border-box;background:url('../../img/ggportal/desktop/data/visual/datainfovisual/bg_visualArea_2_3.png') no-repeat 0 0;}
+
+.monthMoStatus{padding-left:250px;padding-top:25px;}
+.monthMoStatus dt{position:absolute;top:48px;left:48px;}
+.monthMoStatus dd{padding-top:58px;width:394px;overflow:hidden;}
+.monthMoStatus dd .tit{float:left;width:155px;font-size:18px;letter-spacing:-1px;color:#000;font-weight:bold;}
+.monthMoStatus dd .tit strong{color:#990000;font-size:18px;}
+.monthMoStatus dd .cont{float:left;width:230px;}
+.monthMoStatus dd .cont .txt strong{float:left;height:30px;padding-right:10px;font-size:64px;color:#990000;line-height:1em;}
+.monthMoStatus dd .cont .txt .num{float:left;font-size:23px;color:#000;line-height:1em;font-weight:bold;margin-top:4px;}
+.monthMoStatus dd .cont .txt .per{float:left;font-size:32px;color:#663333;line-height:1em;margin-top:6px;}
+.monthMoStatus dd .monthTxt{text-align:center;width:164px;height:74px;}
+.monthMoStatus dd .monthTxt em{font-size:18px;color:#fff;font-weight:bold;margin-right:15px;line-height:74px;text-shadow:1px 1px 1px rgba(0,0,0,0.5) }
+.monthMoStatus dd .monthTxt strong{font-size:50px;color:#fff;vertical-align:middle;line-height:74px;text-shadow:1px 1px 1px rgba(0,0,0,0.5) }
+.monthMoStatus dd.top .monthTxt{position:absolute;top:73px;left:690px;}
+.monthMoStatus dd.low .monthTxt{position:absolute;top:200px;left:690px;}
+.monthMoStatus dd.low .monthTxt em{color:#6a6a6a;}
+.monthMoStatus dd.low .monthTxt strong{color:#6a6a6a;}
+
+
+/*visualArea_2 area4 */
+.visualArea_2 .area4{position:relative;padding:45px;height:514px;box-sizing:border-box;background:url('../../img/ggportal/desktop/data/visual/datainfovisual/bg_visualArea_2_4.png') repeat 0 0;}
+
+.topList2{border-bottom:2px solid #996666;padding-bottom:30px;}
+.topList2 dt{margin-bottom:40px;text-align:center;}
+.topList2 dd ol{display:table; width:100%;}
+.topList2 dd ol li{display:table-cell;width:144px;padding:0 16px;}
+.topList2 dd ol li > strong{display:block;}
+.topList2 dd ol li > .img{display:inline-block;height:138px;width:138px;position:relative;border:3px solid #cc9999;overflow:hidden;border-radius:0 17px 17px 17px;}
+.topList2 dd ol li > .img img{}
+.topList2 dd ol li > .num{font-size:30px;color:#000;font-weight:bold;line-height:1.2em;text-align:center;}
+.topList2 dd ol li > .per{font-size:24px;color:#663333;font-weight:bold;line-height:1.2em;text-align:center;}
+
+/*visualArea_2 area5 */
+.visualArea_2 .area5{position:relative;padding:45px;height:514px;box-sizing:border-box;background:#e1d6c4}
+
+
+/*************************************************
+	visualArea_3
+**************************************************/
+
+.visualArea_3 {margin-top:30px;padding:0 48px;background:url('../../img/ggportal/desktop/data/visual/datainfovisual/bg_visualArea_3.jpg') no-repeat 0 0;}
+
+/*visualArea_3 area1 */
+.visualArea_3 .area1{position:relative;height:662px;padding-top:310px;box-sizing:border-box;}
+.visualArea_3 .area1 .visualTit{position:absolute;top:93px;left:209px;width:578px;height:156px;}
+.visualArea_3 .area1 .visualTit img{position:absolute;top:0;left:0;}
+.visualArea_3 .area1 .dl_1{padding-top:311px;}
+
+
+/*visualArea_3 area2 */
+.visualArea_3 .area2{height:437px;}
+.visualArea_3 .dlbox{margin-top:40px;}
+.visualArea_3 h5{margin-bottom:15px;}
+.visualArea_3 .dlbox dl{float:left;}
+.dl2_1{position:relative;overflow:hidden;width:559px;height:90px;background:url('../../img/ggportal/desktop/data/visual/datainfovisual/bg_dl2_1.png') no-repeat 0 0;}
+.dl2_1 dt{position:absolute;top:14px;left:12px;}
+.dl2_1 .counter{float:right;padding-right:45px;padding-top:5px;}
+.dl2_1 .counter-holder span {position: relative; font-weight:bold;vertical-align: top; line-height:60px; color:#fff200; font-size:44px;}
+.dl2_1 .counter-holder span em{display:block;width:100%;position: relative; font-weight:bold;vertical-align: top; line-height:60px; color:#fff200; font-size:44px;}
+.dl2_1 .counter-holder .separator {float:left;}
+.dl2_1 .counter .digit {position:relative;float:left;height:60px; color: #fff200; margin-left:2px; overflow: hidden;text-align: center;}
+.dl2_1 .mwh{position:absolute;top:45px;right:15px;}
+
+
+.dl2_2{position:relative;float:left;margin-right:15px;}
+.dl2_2 dt{position:absolute;top:0;left:35px;margin-bottom:8px;padding-left:20px;}
+.dl2_2 dd > strong{float:left;}
+.dl2_2 dd > .counter{float:left;width:110px;padding-bottom:3px;padding-left:5px;padding-top:20px;border-bottom:2px solid #9ab9b9;}
+.dl2_2 .counter-holder{white-space:nowrap;}
+.dl2_2 .counter-holder .counter{width:100%}
+.dl2_2 .counter-holder span {position: relative;float:left;width:13px;font-weight:bold;vertical-align: top; line-height:30px; color:#000000; font-size:24px;}
+.dl2_2 .counter-holder span em{position: relative;float:left;font-weight:bold;vertical-align: top; line-height:30px; color:#000000; font-size:24px;}
+.dl2_2 .counter-holder span hr{display:none;}
+.dl2_2 .counter .digit {float:left;height:30px; color: #000000; margin-left:3px;overflow: hidden;text-align: center; }
+
+.powerStatus{position:relative;}
+.powerStatus dd{padding-left:50px;}
+.powerStatus .topLow strong{display:block;margin-bottom:15px;color:#006666;font-size:24px;line-height:1em;}
+.powerStatus .orderList{width:340px;margin-top:24px;}
+.powerStatus .orderList .list{width:50%;}
+.powerStatus .orderList .list .label{visibility:hidden;position:absolute;top:0;left:0;width:1px;height:1px;overflow:hidden;font-size:16px;color:#003333;}
+.powerStatus .orderList .list li{height:30px;line-height:30px;font-size:16px;color:#003333;font-weight:bold;}
+.powerStatus .orderList .list li span{visibility:hidden;position:absolute;top:0;left:0;width:1px;height:1px;overflow:hidden;}
+.powerStatus .orderList .list.topList{float:left;background:url('../../img/ggportal/desktop/data/visual/datainfovisual/topList_from1to5.png') no-repeat 0 6px;}
+.powerStatus .orderList .list.topList li{padding-left:38px;}
+.powerStatus .orderList .list.lowList{float:right;background:url('../../img/ggportal/desktop/data/visual/datainfovisual/lowList_from1to5.png') no-repeat 100% 6px;}
+.powerStatus .orderList .list.lowList li{text-align:right;padding-right:38px;}
+
+.powerStatus .map{position:absolute;top:0;right:0px;}
+
+/*visualArea_3 area3 */
+.visualArea_3 .area3{height:730px;}
+.chartImg {position:relative;top:15px;left:17px;}
+.chartImg img{position:absolute;top:0;left:0;opacity:0;}
+.chartImg img.img2{position:absolute;top:107px;left:0;height:0;width:875px;}
+.chartImg img.img3{position:absolute;top:250px;left:0;}
+
+/*visualArea_3 area4 */
+.visualArea_3 .area4{height:502px;}
+
+.topList3 dt{text-align:center;}
+.topList3 .list{margin-top:35px;}
+.topList3 .list li{width:120px;float:left;margin: 0 2px;}
+.topList3 .list li > .num{color:#ffff00;font-size:18px;text-align:center;margin: 0 2px;border-radius:5px;background:#003333;}
+.topList3 .list li > .num strong{display:block;height:36px;line-height:36px;text-align:center;color:#ffff00;font-size:18px;}
+
+/*visualArea_3 area5 */
+.area5 .chartArea{width:693px;height:530px;position:relative;left:200px;background:url('../../img/ggportal/desktop/data/visual/datainfovisual/bg_lineChart2.png') no-repeat 0 0;}
+.chartArea .chartUnit{position:absolute;top:-15px;right:15px;font-weight:bold;font-size:14px;}
+.chartArea .chartTit{position:absolute;top:0;right:0;opacity:0;}
+.lineChart .xAxis{position:relative;bottom:35px;left:110px;width:535px;}
+.lineChart .xAxis .unit	span{float:left;margin-top:5px;width:42px;font-weight:bold;text-align:center;color:#ffffff;font-size:14px;}
+.lineChart .yAxis{width:66px;position:absolute;top:20px;left:10px;text-align:right;}
+.lineChart .yAxis .label{position:absolute;top:-20px;right:0;}
+.lineChart .yAxis span{display:block;height:60px;}
+
+.lineChart .yAxis{height:382px !important;font-size:16px;text-align:right;}
+.lineChart .yAxis .bar{position:absolute;top:0;right:0;height:100%;display:block;width:6px;border-radius:6px;background:#7d7d7d;}
+.lineChart .yAxis .unit{display:block;height:100%;margin-top:15px;}
+.lineChart .yAxis .unit span{ display:block;font-size:15px;color:#ffffff;font-size:14px;font-weight:bold;white-space:nowrap;text-align:right;vertical-align:middle;}
+.lineChart .yAxis .unit span em{display:block;width:100%;white-space:normal;color:#8d97a8;font-size:14px;}
+.lineChart .yAxis .unit span b{display:block;}
+.lineChart .yAxis .initNum{position:absolute;bottom:-23px;left:0;;width:55px;font-size:12px;text-align:right;}
+.lineChart .yAxis .unitTxt{position:absolute;top:-25px;left:-30px;font-size:12px;width:100px;color:#0054a6;}
+
+.lineChart .chartView{position:relative;height:100%;top:-40px;left:120px;}
+.lineChart .chartView .viewer{height:100%;box-sizing:border-box;}
+.lineChart .chartView .viewer .barwrap{position:relative;z-index:10;height:100%;}
+.lineChart .chartView .viewer .barwrap .view{opacity:0;position:absolute;top:0;left:0;width:100%;height:100%;box-sizing:border-box;}
+
+.lineChart .view .circle{position:absolute;bottom:0;left:0;padding:2px;text-align:center;font-size:16px;color:#fff;font-weight:bold;z-index:1}
+.lineChart .view .circle .circlein{position:relative;width:8px;height:8px;border-radius:8px;background:#000;}
+.lineChart .view .line{opacity:0;position:absolute;top:0;left:0;height:2px;opacity:1 !important;margin-left:12px !important;margin-top:10px;background:#000;}
+.lineChart .view .line:last-child{display:none;}
+
+.lineChart .view.circle1 .circlein,
+.lineChart .view.circle1 .line{background:#ffff00;}
+.lineChart .view.circle2 .circlein,
+.lineChart .view.circle2 .line{background:#00ffff;}
+.lineChart .view.circle3 .circlein,
+.lineChart .view.circle3 .line{background:#00ff00;}
+.lineChart .view.circle4 .circlein,
+.lineChart .view.circle4 .line{background:#9999ff;}
+.lineChart .view.circle5 .circlein,
+.lineChart .view.circle5 .line{background:#f5989d;}
+.lineChart .view.circle6 .circlein,
+.lineChart .view.circle6 .line{background:#ff00ff;}
+.lineChart .view.circle7 .circlein,
+.lineChart .view.circle7 .line{background:#f7941d;}
+
+
+/*************************************************
+	visualArea_4
+**************************************************/
+.visualArea_4 {margin-top:30px;background:url('../../img/ggportal/desktop/data/visual/datainfovisual/bg_visualArea_4.png') no-repeat 0 0;}
+
+/*visualArea_4 area1 */
+.visualArea_4 .area1{position:relative;height:1010px;box-sizing:border-box;}
+.visualArea_4 .area1 .year{position:absolute;top:198px;left:764px;color:#fff;font-size:36px;font-weight:bold;}
+.visualArea_4 .area1 .total{position:absolute;top:344px;left:482px;white-space:nowrap;}
+.visualArea_4 .area1 .total p em{font-size:48px;color:#000;font-weight:bold;}
+.visualArea_4 .area1 .total p span{font-size:36px;color:#000;font-weight:bold;}
+.visualArea_4 .area1 .day{position:absolute;top:445px;left:296px;white-space:nowrap;}
+.visualArea_4 .area1 .day p em{font-size:32px;color:#000;font-weight:bold;}
+.visualArea_4 .area1 .day p span{font-size:24px;color:#000;font-weight:bold;}
+.visualArea_4 .area1 .month{position:absolute;top:445px;left:745px;white-space:nowrap;}
+.visualArea_4 .area1 .month p em{font-size:32px;color:#000;font-weight:bold;}
+.visualArea_4 .area1 .month p span{font-size:24px;color:#000;font-weight:bold;}
+
+.visualArea_4 .sigunMoStatus dt{position:absolute;top:764px;left:508px;}
+.visualArea_4 .sigunMoStatus dd.topLow{position:absolute;top:850px;left:508px;}
+.visualArea_4 .sigunMoStatus dd.map{position:absolute;top:520px;left:90px;}
+
+
+.visualArea_4 .area2{overflow:hidden}
+.visualArea_4 .area2 .infoDl{padding-left:135px;margin-top:-75px;}
+.visualArea_4 .area2 .infoDl dd.vs{width:100px;}
+
+.visualArea_4 .area3{padding-bottom:15px;}
+.visualArea_4 .area3 .infoDl{padding-left:135px;margin-top:-55px;}
+.visualArea_4 .area3 .infoDl dd.vs{width:100px;}
+
+.visualArea_4 .area4{padding:50px 0;background:#f4f4f4;}
+.chartStyle1{position:relative;width:800px;margin: 0 auto;padding-left:66px;}
+.chartStyle1 .yAxis{width:66px;position:absolute;top:28px;left:-10px;text-align:right;}
+.chartStyle1 .yAxis .label{position:absolute;top:-20px;right:0;}
+.chartStyle1 .yAxis span{display:block;height:60px;}
+.chartStyle1 .xAxis{position:absolute;bottom:-20px;left:0;width:800px;height:20px;padding:0 50px;}
+.chartStyle1 .xAxis span{float:left;width:25%;text-align:center;}
+.chartStyle1 .chartBox{width:800px;height:320px;border-left:5px solid #999999;border-bottom:5px solid #999999;}
+
+
+
+.visualArea_4 .area4 .chartArea{width:860px;margin: 0 auto;}
+
+/* �ﰢ�׷��� Ÿ��*/
+.chartArea{padding:80px 0 30px 0;position:relative;}
+.chartArea .chartUnit{position:absolute;top:-15px;right:15px;font-weight:bold;font-size:14px;}
+.chartArea .chartTit{position:absolute;top:0;right:0;opacity:0;}
+.triChart .xAxis{position:relative;bottom:-5px;left:0;width:100%;}
+.triChart .xAxis .unit	span{float:left;width:312px !important;margin-left:-151px;margin-top:5px;font-weight:bold;text-align:center;color:#666666;font-size:14px;}
+.triChart .xAxis .unit	span:first-child{margin-left:0;}
+
+.triChart .yAxis{height:100%;font-size:16px;text-align:right;}
+.triChart .yAxis .bar{position:absolute;top:0;right:0;height:100%;display:block;width:6px;border-radius:6px;background:#7d7d7d;}
+.triChart .yAxis .unit{display:block;height:100%;margin-top:15px;}
+.triChart .yAxis .unit span{ display:block;padding-right:15px;font-size:15px;color:#666666;font-size:14px;font-weight:bold;white-space:nowrap;text-align:right;vertical-align:middle;}
+.triChart .yAxis .unit span em{display:block;width:100%;white-space:normal;color:#8d97a8;font-size:14px;}
+.triChart .yAxis .unit span b{display:block;}
+.triChart .yAxis .initNum{position:absolute;bottom:-23px;left:0;;width:55px;font-size:12px;text-align:right;}
+.triChart .yAxis .unitTxt{position:absolute;top:-25px;left:-30px;font-size:12px;width:100px;color:#0054a6;}
+
+.triChart{opacity:0;position:relative;}
+.triChart:after {content: "."; display: block; height: 0; clear: both; visibility: hidden; }
+.triChart .chartView{position:relative;height:100%;}
+.triChart .chartView .viewer{height:100%;box-sizing:border-box;border-left:3px solid #999;border-bottom:3px solid #999;}
+.triChart .chartView .viewer .barwrap{position:relative;z-index:10;height:100%;}
+.triChart .chartView .viewer .barwrap .view{position:absolute;top:0;left:0;width:100%;height:100%;box-sizing:border-box;}
+.triChart .chartView .viewer .barwrap .gage{position:relative;float:left;width:312px;height:100%;margin-left:-151px;}
+.triChart .chartView .viewer .barwrap .gage:first-child{margin-left:0;}
+.triChart .chartView .viewer .barwrap .gage .gagebar{position:absolute;bottom:0;left:0;width:100%;height:0;overflow:hidden;}
+.triChart .chartView .viewer .barwrap .gage .gagebar .per{position:absolute;top:50%;left:0;text-align:center;width:100%;font-size:28px;font-weight:bold;color:#fff;}
+.triChart .chartView .viewer .barwrap .gage em{opacity:0;position:absolute;left:0;bottom:0;margin-bottom:-15px;width:100%;text-align:center;display:inline-block;color:#000000;font-size:20px;font-weight:bold;}
+.triChart.letter .chartView .viewer .barwrap .gage em{letter-spacing:-1px;padding:0 3px 0 4px;font-size:13px;}
+
+.triChart{display:table;}
+.triChart .cell{position:relative;display:table-cell;vertical-align:top;}
+
+
+/*************************************************
+	visualArea_5
+**************************************************/
+.visualArea_5 {margin-top:30px;padding:0 32px;padding-bottom:50px;background:url('../../img/ggportal/desktop/data/visual/datainfovisual/bg_visualArea_5.png') no-repeat 0 0;}
+
+.visualArea_5 .area1 .visualTit{margin-bottom:10px;padding-top:538px;text-align:right;}
+.visualArea_5 .area1 .titsubTxt{text-align:right;}
+.visualArea_5 .area1 .titsubTxt p{display:inline-block;padding:2px 5px;padding-left:60px;margin-top:3px;font-size:16px;color:#fff;background:#000;
+	 background: linear-gradient(to right, rgba(0,0,0,0),rgba(0,0,0,1),rgba(0,0,0,1),rgba(0,0,0,1),rgba(0,0,0,1));
+	 background: -webkit-linear-gradient(to right, rgba(0,0,0,0),rgba(0,0,0,1),rgba(0,0,0,1),rgba(0,0,0,1),rgba(0,0,0,1));
+	 }
+.visualArea_5 .area1 .titsubTxt p .gray{color:#cccccc;font-size:16px;}
+.visualArea_5 .area1 .titsubTxt p .yellow{color:#fff568;font-size:16px;}
+
+.visualArea_5 .mapChart{position:relative;float:right;width:620px;height:437px;margin-right:-12px;margin-top:20px;background:url('../../img/ggportal/desktop/data/visual/datainfovisual/bg_mapChart.png') no-repeat 0 0;
+	-webkit-animation-duration: 1s;
+	-moz-animation-duration: 1s;
+	-o-animation-duration: 1s;
+	animation-duration: 1s;
+	-webkit-animation-fill-mode: both;
+	-moz-animation-fill-mode: both;
+	-o-animation-fill-mode: both;
+	animation-fill-mode: both;
+}
+.visualArea_5 .mapChart .inner{width:100%;height:100%;background:url('../../img/ggportal/desktop/data/visual/datainfovisual/bg_mapChart_in.png') no-repeat 0 0;
+
+}
+.visualArea_5 .mapChart .si{position:absolute;top:20px;right:20px;font-size:24px;color:#fff;letter-spacing:-1px;}
+.visualArea_5 .mapChart .list{padding:0 25px;padding-top:28px;}
+.visualArea_5 .mapChart .list ul{display:table;width:480px;}
+.visualArea_5 .mapChart .list li{display:table-row;}
+.visualArea_5 .mapChart .list li .cell{display:table-cell;width:auto;border-top:1px solid #cccccc;padding:8px 0;font-size:16px;font-weight:bold;color:#666666;letter-spacing:-1px;}
+.visualArea_5 .mapChart .list li:first-child .cell{border-top:none;}
+.visualArea_5 .mapChart .list li .cell.tit{width:10px;padding-left:25px;color:#000;font-size:16px;white-space:nowrap;font-weight:bold;background:url('../../img/ggportal/desktop/data/visual/datainfovisual/ico_check.png') no-repeat 0 50%;}
+.visualArea_5 .mapChart .list li .cell .num{font-size:16px;}
+.visualArea_5 .mapChart .list li .cell .per{font-size:16px;}
+.visualArea_5 .mapChart .list li .cell .gray{color:#999999;font-size:16px;}
+.visualArea_5 .mapChart .chartWp{width:463px;margin: 0 auto;}
+.visualArea_5 .mapStatus .map{position:relative;top:50px;}
+.visualArea_5 .mapStatus .map #eachMap path{cursor:pointer;}
+
+/*.bar {fill:url('../../../img/ggportal/desktop/data/visual/datainfovisual/bg_bar.png');}*/
+.visualArea_5 .chart .bar {fill: #7ba0c9;}
+.visualArea_5 .chart .bar2 { fill:url('#bar');  }
+.visualArea_5 .chart .shadow { fill:url('#shadow');opacity:0.5; }
+.visualArea_5 .chart .tip rect{fill:#5c85ad;}
+.visualArea_5 .chart .axis text { font: 10px sans-serif; }
+.visualArea_5 .chart .axis path,
+.visualArea_5 .chart .axis line { fill: none; stroke: #000; shape-rendering: crispEdges; }
+.visualArea_5 .chart .x_line{  stroke: #000;}
+.visualArea_5 .chart .line{ stroke: #cccccc; shape-rendering: crispEdges; }
+.visualArea_5 .chart .axis.y .domain{opacity:0}
+.visualArea_5 .chart .axis.x .domain{stroke:#c8c8c8;stroke-width:2px}
+.visualArea_5 .chart .axis .tick line{opacity:0}
+.visualArea_5 .chart .axis .tick text{font-size:12px;fill:#666666;font-weight:bold;}
+.visualArea_5 #mapUnit > g{cursor:pointer;}
+.visualArea_5 #mapUnit > g.on > path,
+.visualArea_5 #mapUnit > g.on > polygon{fill:#639432}
+.visualArea_5 #mapUnit > g.on > g path:first-child{fill:#fff;}
+.visualArea_5 #mapUnit > g.on > g path:nth-child(2){fill:#639432;}
+.visualArea_5 #mapUnit > g .dataCircle{opacity:0;transition: all 0.5s ease;-webkit-transition: all 0.5s ease;}
+
+
+@keyframes flipInY {
+
+  from {
+    transform: perspective(2000px) rotate3d(0, 1, 0, 80deg);
+    animation-timing-function: ease-in;
+    opacity: 0;
+  }
+/*
+  40% {
+    transform: perspective(1400px) rotate3d(0, 1, 0, -20deg);
+    animation-timing-function: ease-in;
+  }
+*/
+  60% {
+    transform: perspective(2000px) rotate3d(0, 1, 0, 10deg);
+    opacity: 1;
+  }
+/*
+  80% {
+    transform: perspective(1400px) rotate3d(0, 1, 0, -5deg);
+  }
+*/
+  to {
+    transform: perspective(2000px);
+  }
+}
+
+.flipInY {
+  -webkit-backface-visibility: visible !important;
+  backface-visibility: visible !important;
+  animation-name: flipInY;
+}
+
+
+.visualArea_5 .area2{margin-top:100px;}
+.visualArea_5 .area2 .titsubTxt p{display:inline-block;padding:2px 5px;padding-right:60px;margin-top:3px;font-size:16px;color:#fff;background:#000;
+	 background: linear-gradient(to right, rgba(0,0,0,1),rgba(0,0,0,1),rgba(0,0,0,1),rgba(0,0,0,1),rgba(0,0,0,0));
+	 background: -webkit-linear-gradient(to right, rgba(0,0,0,1),rgba(0,0,0,1),rgba(0,0,0,1),rgba(0,0,0,1),rgba(0,0,0,0));
+}
+.visualArea_5 .area2 .titsubTxt p .gray{color:#cccccc;font-size:16px;}
+.visualArea_5 .area2 .titsubTxt p .yellow{color:#fff568;font-size:16px;}
+
+.visualArea_5 .chart2 .lineG .line { fill: none; stroke:#339999; stroke-width:2px}
+.visualArea_5 .chart2 .line { fill: none; stroke:#339999; stroke-width:2px}
+.visualArea_5 .chart2 g .line { stroke:#b2b3b3; }
+.visualArea_5 .chart2 .y.axis text { font-family: sans-serif; font-size: 12px;fill:#876343;font-weight:bold;}
+.visualArea_5 .chart2 .axis.right text { fill:#336666;font-weight:bold;}
+.visualArea_5 .chart2 .x.axis text { font-family: sans-serif; font-size: 12px;fill:#333333;font-weight:bold;}
+.visualArea_5 .chart2 .axis path,
+.visualArea_5 .chart2 .axis line {     opacity: 0;fill: none; stroke: black; }
+.visualArea_5 .chart2 .axis_x line { fill: none; stroke: black; }
+.visualArea_5 .chart2 .mark { fill: #fff; stroke: #339999; stroke-width:2px}
+.visualArea_5 .chart2 .bar { fill:url(#barBg);}
+.visualArea_5 .chart2 .colmn { fill:#c2c4c5;opacity:0}
+.visualArea_5 .chart2 .colmnHover{ fill:#000;opacity:0}
+.visualArea_5 .chart2 .circle { fill:#fff; stroke:#9B7859; stroke-width:3px; stroke-miterlimit:10;}
+.visualArea_5 .chart2 .ico{ fill:url(#icoDisabled);}
+.visualArea_5 .chart2 .tip .txtBg{font-size:12px;fill:#fff;font-weight:bold;stroke: #9b7859; stroke-width:2px}
+.visualArea_5 .chart2 .tip .txt{font-size:12px;fill:#fff;font-weight:bold;}
+.visualArea_5 .chart2 .lineTipBg{font-size:12px;fill:#fff;font-weight:bold;stroke: #339999; stroke-width:2px}
+.visualArea_5 .chart2 .lineTipTxt{font-size:12px;fill:#fff;font-weight:bold;}
+.visualArea_5 .label{display:none;text-align:right;color:#666666;font-weight:bold;padding-right:50px;}
+.visualArea_5 .label li{display:inline-block; font-size:12px;margin-left:15px;}
+.visualArea_5 .label li.label1 span{display:inline-block;width:20px;height:11px;background:#9d7b5b;vertical-align:middle;}
+.visualArea_5 .label li.label2 span{display:inline-block;width:20px;height:3px;background:#339999;vertical-align:middle;}
+
+
+.yearChart{position:relative;height:416px;padding:20px 25px;border-radius:8px;margin-top:27px;background:rgba(255,255,255,0.8);}
+.yearChart .inner{height:100%;background:url('../../img/ggportal/desktop/data/visual/datainfovisual/yearChart_grid.png') no-repeat 65px 39px;}
+.chart2Tooltip{display:none;position:absolute;top:0;left:0;opacity:1 !important;padding:10px;border-radius:10px;box-shadow:0 0 5px rgba(0,0,0, 0.5);opacity:0.8;background:#fbfbfb;transition: all 0.2s ease;-webkit-transition: all 0.2s ease;}
+.chart2Tooltip:after{content:""; display: block;position:absolute;bottom:-27px;left:50%;width:26px;height:27px;margin-left:-13px;background:url('../../img/ggportal/desktop/data/visual/datainfovisual/arr_chart2Tooltip.png') no-repeat 0 0;}
+.chart2Tooltip .box > div{margin-top:10px;padding-left:6px;}
+.chart2Tooltip .box > div:first-child{margin-top:0;}
+.chart2Tooltip .box .nation{border-left:6px solid #339999;}
+.chart2Tooltip .box .gyeonggi{border-left:6px solid #9e7b5b;}
+.chart2Tooltip .box p{line-height:1em;font-weight:bold;color:#666666;}
+.chart2Tooltip .box p strong{color:#000000;}
+.chart2Tooltip .box p strong span{color:#000000;}
+
+.visualArea_5 .area3{position:relative;}
+.visualArea_5 .area3:after{content:""; display: block;clear:both;}
+.visualArea_5 .area3 .visualTit{position:absolute;top:100px;left:0;}
+.visualArea_5 .area3{padding-top:100px;}
+.visualArea_5 .area3 .imgMap{float:right;position:relative;}
+.visualArea_5 .area3 .imgMap .base{position:absolute;top:0;left:0;z-index:10}
+.visualArea_5 .area3 .imgMap .img{position:relative;width:612px;height:417px;}
+.visualArea_5 .area3 .imgMap .img img{position:absolute;top:0;left:0;display:none;}
+.visualArea_5 .area3 .imgMap .img img:first-child{display:block;}
+.visualArea_5 .area3 .imgMap area{cursor:pointer;}
+
+.chart3Tooltip{display:none;position:absolute;top:360px;left:0;padding:20px 15px;border-radius:10px;box-shadow:0 0 5px rgba(0,0,0, 0.5);opacity:0.8;transition: all 0.2s ease;-webkit-transition: all 0.2s ease;animation-duration: 1s;-webkit-animation-duration: 1s;background:#fff;}
+.chart3Tooltip .year{color:#006666;font-size:24px;font-weight:bold;}
+.chart3Tooltip .year strong{color:#006666;font-size:24px;font-weight:bold;}
+.chart3Tooltip .box{margin-top:10px;padding-left:6px;border-left:6px solid #339999;}
+.chart3Tooltip .box p{line-height:1em;font-weight:bold;color:#666666;font-size:12px;}
+.chart3Tooltip .box p strong{color:#000000;}
+.chart3Tooltip .box p strong span{color:#000000;}
+@keyframes fadeOutLeft {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+    transform: translate3d(-100%, 0, 0);
+  }
+}
+.fadeOutLeft {
+  animation-name: fadeOutLeft;
+}
+
+@keyframes fadeInLeft {
+  from {
+    opacity: 0;
+    transform: translate3d(-100%, 0, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.fadeInLeft {
+  animation-name: fadeInLeft;
+}
+
+
+.visualArea_5 .area4{padding-top:100px;}

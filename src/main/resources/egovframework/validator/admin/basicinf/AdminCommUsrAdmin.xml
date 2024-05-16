@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE form-validation PUBLIC 
+    "-//Apache Software Foundation//DTD Commons Validator Rules Configuration 1.1//EN" 
+    "http://jakarta.apache.org/commons/dtds/validator_1_1.dtd">
+
+<form-validation>
+    <formset>
+		<form name="adminCommUsrAdmin">
+			<field property="usrId" depends="required">
+        		<arg0 key="labal.usrId" />
+			</field>
+			<field property="usrPw" depends="required">
+        		<arg0 key="labal.usrPw" />
+			</field>
+			
+			<field property="accCd" depends="required">
+        		<arg0 key="labal.auth" />
+			</field>
+		</form>
+    </formset>
+</form-validation>

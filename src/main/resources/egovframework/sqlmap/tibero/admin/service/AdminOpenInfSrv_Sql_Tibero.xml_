@@ -1,0 +1,507 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="OpenInfSrv" >
+  <typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+  
+  <resultMap id="OpenInfListAll" class="egovframework.admin.service.service.OpenInfSrv" >
+    <result column="INF_ID" property="infId" />
+    <result column="DT_NM" property="dtNm" />
+    <result column="INF_NM" property="infNm" />
+    <result column="CATE_NM" property="cateNm" />      
+    <result column="CATE_FULLNM" property="cateFullnm" />      
+    <result column="ORG_NM" property="orgNm" />
+    <result column="USR_NM" property="usrNm" />
+    <result column="OPEN_DTTM" property="openDttm" />
+    <result column="INF_STATE" property="infState" />
+    <result column="OPEN_SRV" property="openSrv" />
+    <result column="CCL_NM" property="cclNm" />
+  </resultMap>  
+      
+  <resultMap id="selectSrvConnMap" class="egovframework.admin.service.service.OpenInfSrv" >
+    <result column="OPEN_SRV" 	property="openSrv" />
+    <result column="CANCEL_SRV" property="cancelSrv" />
+  </resultMap>      
+  
+  <resultMap id="OpenInfSrvInfo" class="egovframework.admin.service.service.OpenInfSrv" >
+    <result column="INF_ID" property="infId" />
+    <result column="INF_SEQ" property="infSeq" />
+    <result column="SEQ" property="mstSeq" />
+    <result column="INF_NM" property="infNm" />
+     <result column="OWNER_CD" property="ownerCd" />
+    <result column="DS_ID" property="dsId" />
+    <result column="DS_NM" property="dsNm" />
+    <result column="SRV_CD" property="srvCd" />
+     <result column="SRV_YN" property="srvYn" />
+     <result column="MARKER_CD" property="markerCd" />
+     <result column="MARKER_VAL" property="markerVal" />
+     <result column="SGRP_CD" property="sgrpCd" />
+     <result column="LYTIT_NM" property="lytitNm" />
+     <result column="RYTIT_NM" property="rytitNm" />
+     <result column="ENG_LYTIT_NM" property="lytitNmEng" />
+     <result column="ENG_RYTIT_NM" property="rytitNmEng" />
+     <result column="SERIES_POSX" property="seriesPosx" />
+     <result column="SERIES_POSY" property="seriesPosy" />
+     <result column="SERIES_ORD" property="seriesOrd" />
+     <result column="SERIES_FYN" property="seriesFyn" />
+     <result column="XLN_CD" property="xlnCd" />
+     <result column="YLN_CD" property="ylnCd" />
+     <result column="XPOS" property="xPos" />
+     <result column="YPOS" property="yPos" />
+     <result column="MAP_LEVEL" property="mapLevel" />
+     <result column="API_EP" property="apiEp" />
+     <result column="API_TYPE" property="apiType" />
+     <result column="API_RES" property="apiRes" />
+     <result column="API_TRF" property="apiTrf" />
+     <result column="API_EXP" property="apiExp" />
+     <result column="ENG_API_EXP" property="apiExpEng" />
+     <result column="INF_SEQ" property="apiExpEng" />
+     <result column="PRSS_ACC_CD" property="prssAccCd" />
+     <result column="TMNL_IMG_FILE" property="tmnlImgFile" />
+  </resultMap>
+  
+<select id="OpenInfSrvDAO.selectOpenInfListAll" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultMap="OpenInfListAll" >
+	SELECT *
+	  FROM(
+		SELECT ROWNUM AS RN, TB.*
+		  FROM
+		  (
+				SELECT INF_ID
+					      ,DT_NM 
+					      ,INF_NM
+					      ,CATE_NM
+					      ,CATE_FULLNM
+					      ,ORG_NM
+					      ,USR_NM
+					      ,TO_CHAR(OPEN_DTTM,'YYYY-MM-DD HH24:MI:SS') AS OPEN_DTTM
+					      ,INF_STATE
+					      ,CCL_NM
+					      ,FN_GET_OPEN_SRV_HTML(OPEN_SRV) AS OPEN_SRV
+ 				 FROM TV_MNG_INF A
+		 		WHERE 1=1 
+		 <isNotEmpty property="accCd" prepend="AND">
+			<isNotEqual property="accCd" compareValue="SYS">
+				EXISTS (SELECT 1 FROM TB_OPEN_INF_USR 
+						WHERE  INF_ID = A.INF_ID
+						AND    USE_YN = 'Y' 
+						<![CDATA[
+						AND    PRSS_ACC_CD > 0
+						]]> 
+						AND    USR_CD = #sessionUsrCd:VARCHAR# )
+			</isNotEqual>
+		</isNotEmpty>			
+		<isNotEmpty property="serVal">
+			<isEqual property="serSel" compareValue="ALL">
+				 AND (DT_NM LIKE '%'||#serVal#||'%' OR INF_NM LIKE '%'||#serVal#||'%' OR SCHW_TAG_CONT LIKE '%'||#serVal#||'%')
+			</isEqual> 
+			<isEqual property="serSel" compareValue="DT">
+				 AND DT_NM LIKE '%'||#serVal#||'%'
+			</isEqual> 
+			<isEqual property="serSel" compareValue="INF">
+				 AND INF_NM LIKE '%'||#serVal#||'%'
+			</isEqual> 
+			<isEqual property="serSel" compareValue="TAG">
+				 AND SCHW_TAG_CONT LIKE '%'||#serVal#||'%'      
+			</isEqual> 
+		</isNotEmpty>
+		<isNotEmpty property="orgCd">
+			AND ORG_CD = #orgCd#
+		</isNotEmpty>
+		<isNotEmpty property="cateId">
+			AND CATE_ID IN	 (SELECT 
+									CATE_ID
+									FROM TB_OPEN_CATE A
+									WHERE 1 = 1
+									START WITH CATE_ID = #cateId:VARCHAR#
+									CONNECT BY PRIOR CATE_ID = PAR_CATE_ID)		
+		</isNotEmpty>
+		<isNotEmpty property="openDttmFrom">
+			AND OPEN_DTTM BETWEEN  TO_DATE(#openDttmFrom:VARCHAR#,'YYYY-MM-DD') AND TO_DATE(#openDttmTo:VARCHAR#,'YYYY-MM-DD') +1
+		</isNotEmpty>
+		<isNotEmpty property="infState">
+				 AND INF_STATE = #infState#
+		</isNotEmpty> 
+		<isNotEmpty property="infSrv">
+				 AND A.OPEN_SRV LIKE '%'||#infSrv#||'%'
+		</isNotEmpty> 
+		<isNotEmpty property="cclCd">
+				 AND A.CCL_CD = #cclCd#
+		</isNotEmpty>
+		<isNotEmpty property="fvtDataYn">
+				 AND A.FVT_DATA_ORDER IS NOT NULL
+		</isNotEmpty>
+			
+			ORDER  BY INF_ID 	
+		)TB
+	)
+	<isNotEqual prepend="startPage" compareValue="0">
+		WHERE RN BETWEEN #startPage:NUMERIC# AND #endPage:NUMERIC#
+	</isNotEqual>
+	</select>
+	
+	<select id="OpenInfSrvDAO.selectOpenInfListAllCnt" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultClass="java.lang.Integer">
+			SELECT   COUNT(A.INF_ID)
+		    FROM TV_MNG_INF A
+		   WHERE 1=1 
+		 <isNotEmpty property="accCd" prepend="AND">
+			<isNotEqual property="accCd" compareValue="SYS">
+				EXISTS (SELECT 1 FROM TB_OPEN_INF_USR 
+						WHERE  INF_ID = A.INF_ID
+						AND    USE_YN = 'Y' 
+						<![CDATA[
+						AND    PRSS_ACC_CD > 0
+						]]> 
+						AND    USR_CD = #sessionUsrCd:NUMERIC# )
+				</isNotEqual>
+			</isNotEmpty>			   
+		   	<isNotEmpty property="serVal">
+			<isEqual property="serSel" compareValue="ALL">
+				 AND (DT_NM LIKE '%'||#serVal#||'%' OR INF_NM LIKE '%'||#serVal#||'%' OR SCHW_TAG_CONT LIKE '%'||#serVal#||'%')
+			</isEqual> 
+			<isEqual property="serSel" compareValue="DT">
+				 AND DT_NM LIKE '%'||#serVal#||'%'
+			</isEqual> 
+			<isEqual property="serSel" compareValue="INF">
+				 AND INF_NM LIKE '%'||#serVal#||'%'
+			</isEqual> 
+			<isEqual property="serSel" compareValue="TAG">
+				 AND SCHW_TAG_CONT LIKE '%'||#serVal#||'%'      
+			</isEqual> 
+		</isNotEmpty>
+		<isNotEmpty property="orgCd">
+			AND ORG_CD = #orgCd#
+		</isNotEmpty>
+		<isNotEmpty property="cateId">
+			AND CATE_ID IN	 (SELECT 
+									CATE_ID
+									FROM TB_OPEN_CATE A
+									WHERE 1 = 1
+									START WITH CATE_ID = #cateId#
+									CONNECT BY PRIOR CATE_ID = PAR_CATE_ID)		
+		</isNotEmpty>
+		<isNotEmpty property="openDttmFrom">
+			AND OPEN_DTTM BETWEEN  TO_DATE(#openDttmFrom#,'YYYY-MM-DD') AND TO_DATE(#openDttmTo#,'YYYY-MM-DD') +1
+		</isNotEmpty>
+		<isNotEmpty property="infState">
+				 AND INF_STATE = #infState#
+		</isNotEmpty> 
+		<isNotEmpty property="infSrv">
+				 AND A.OPEN_SRV LIKE '%'||#infSrv#||'%'
+		</isNotEmpty> 
+		<isNotEmpty property="cclCd">
+				 AND A.CCL_CD = #cclCd#
+		</isNotEmpty>
+		<isNotEmpty property="fvtDataYn">
+				 AND A.FVT_DATA_ORDER IS NOT NULL
+		</isNotEmpty>
+	</select>
+	
+	<select id="OpenInfSrvDAO.selectOpenInfSrvInfo" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultMap="OpenInfSrvInfo" >
+			SELECT
+				    A.INF_ID
+				   ,NVL(C.INF_SEQ,0) AS INF_SEQ
+				   ,A.SEQ
+		           ,A.INF_NM
+		           ,B.OWNER_CD
+		           ,B.DS_ID
+		           ,B.DS_NM
+		           ,C.SRV_CD
+		           ,C.SRV_YN 
+		           ,C.MARKER_CD
+		          ,FN_GET_COMM_VALUE_CD('D1019',C.MARKER_CD) AS MARKER_VAL
+				   ,C.SGRP_CD
+		           ,C.LYTIT_NM
+		           ,C.RYTIT_NM
+		           ,C.ENG_LYTIT_NM
+		           ,C.ENG_RYTIT_NM
+		           ,C.SERIES_POSX
+		           ,C.SERIES_POSY
+		           ,C.SERIES_ORD
+		           ,C.SERIES_FYN
+		           ,C.XLN_CD
+		           ,C.YLN_CD
+		           ,C.XPOS
+		           ,C.YPOS
+		           ,C.MAP_LEVEL
+		           ,C.API_EP
+		           ,C.API_TYPE
+		           ,C.API_RES
+		           ,NVL(C.API_TRF, 0) API_TRF
+		           ,C.API_EXP
+		           ,C.ENG_API_EXP
+		           ,C.INF_SEQ
+		           ,C.TMNL_IMG_FILE
+			<!-- 관리자면 전체 권한 준다. -->		           	
+			<isNotEmpty property="accCd">
+				<isEqual property="accCd" compareValue="SYS">
+					,'50' AS PRSS_ACC_CD
+				</isEqual>
+				<isNotEqual property="accCd" compareValue="SYS">
+					,NVL(D.PRSS_ACC_CD, 0) AS PRSS_ACC_CD
+				</isNotEqual>
+			</isNotEmpty>
+			<isEmpty property="accCd">
+					, '0' AS PRSS_ACC_CD
+			</isEmpty>
+		       FROM TV_MNG_INF A
+		      LEFT OUTER JOIN TB_OPEN_DS B
+		         ON A.DS_ID = B.DS_ID
+		        AND B.USE_YN ='Y'
+              LEFT OUTER JOIN TB_OPEN_INF_SRV C
+                ON A.INF_ID = C.INF_ID
+			<isNotEmpty property="accCd">
+				<isNotEqual property="accCd" compareValue="SYS">
+              LEFT OUTER JOIN TB_OPEN_INF_USR D
+    			ON A.INF_ID = D.INF_ID
+    		   AND D.USR_CD = #sessionUsrCd:NUMERIC#  
+				</isNotEqual>
+			</isNotEmpty>                
+			WHERE A.INF_ID= #infId:VARCHAR#
+			<isNotEmpty  property="srvCd">
+				AND C.SRV_CD = #srvCd#
+			</isNotEmpty>
+	</select>
+	
+	<select id="OpenInfSrvDAO.selectInfSeq" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultClass="java.lang.Integer" >
+			SELECT NVL(MAX(INF_SEQ),0)+1
+			  FROM TB_OPEN_INF_SRV
+			WHERE INF_ID =#infId:VARCHAR#
+	</select>
+	
+	
+	<update id="OpenInfSrvDAO.mergeInto" parameterClass="egovframework.admin.service.service.OpenInfSrv" >
+		<![CDATA[
+			MERGE INTO TB_OPEN_INF_SRV A
+			USING(
+				SELECT
+					#infId:VARCHAR#            AS  INF_ID          
+					,#infSeq:NUMERIC#          AS  INF_SEQ     
+					,#srvCd:VARCHAR#           AS  SRV_CD      
+					,#srvYn:CHAR#           AS  SRV_YN      
+					,#apiEp:VARCHAR#   AS  API_EP      
+					,#apiType:VARCHAR#         AS  API_TYPE    
+					,#apiRes:VARCHAR#          AS  API_RES     
+					,#apiTrf:NUMERIC#  AS  API_TRF     
+					,#apiExp:VARCHAR#          AS  API_EXP     
+					,#apiExpEng:VARCHAR#       		AS  ENG_API_EXP 
+					,#markerCd:VARCHAR#     AS  MARKER_CD   
+					,#sgrpCd:VARCHAR#       AS  SGRP_CD     
+					,#lytitNm:VARCHAR#      AS  LYTIT_NM    
+					,#rytitNm:VARCHAR#      AS  RYTIT_NM    
+					,#lytitNmEng:VARCHAR#   AS  ENG_LYTIT_NM
+					,#rytitNmEng:VARCHAR#   AS  ENG_RYTIT_NM
+					,#seriesPosx:CHAR# AS  SERIES_POSX 
+					,#seriesPosy:CHAR# AS  SERIES_POSY 
+					,#seriesOrd:CHAR#  AS  SERIES_ORD  
+					,#seriesFyn:CHAR#  AS  SERIES_FYN  
+					,#xlnCd:VARCHAR#           AS  XLN_CD      
+					,#ylnCd:VARCHAR#           AS  YLN_CD
+					,#xPos:NUMERIC#           AS  XPOS
+					,#yPos:NUMERIC#           AS  YPOS
+					,#mapLevel:VARCHAR#           AS  MAP_LEVEL
+					,#sessionUsrId:VARCHAR#    AS  REG_ID        
+					,SYSDATE           AS  REG_DTTM    
+					,#sessionUsrId:VARCHAR#    AS  UPD_ID        
+					,SYSDATE           AS  UPD_DTTM
+					,#tmnlImgFile:VARCHAR#           AS  TMNL_IMG_FILE
+					    
+				FROM DUAL
+			)B
+			ON ( A.INF_ID = B.INF_ID AND A.SRV_CD = B.SRV_CD)
+			WHEN MATCHED THEN
+			UPDATE SET
+				 A.SRV_YN      	=  B.SRV_YN       
+				,A.API_EP      	=  B.API_EP      
+				,A.API_TYPE    	=  B.API_TYPE    
+				,A.API_RES     	=  B.API_RES     
+				,A.API_TRF     	=  B.API_TRF     
+				,A.API_EXP     	=  B.API_EXP     
+				,A.ENG_API_EXP 	=  B.ENG_API_EXP 
+				,A.MARKER_CD   	=  B.MARKER_CD   
+				,A.SGRP_CD     	=  B.SGRP_CD     
+				,A.LYTIT_NM    	=  B.LYTIT_NM    
+				,A.RYTIT_NM    	=  B.RYTIT_NM    
+				,A.ENG_LYTIT_NM	=  B.ENG_LYTIT_NM
+				,A.ENG_RYTIT_NM	=  B.ENG_RYTIT_NM
+				,A.SERIES_POSX 	=  B.SERIES_POSX 
+				,A.SERIES_POSY 	=  B.SERIES_POSY 
+				,A.SERIES_ORD  	=  B.SERIES_ORD  
+				,A.SERIES_FYN  	=  B.SERIES_FYN  
+				,A.XLN_CD      	=  B.XLN_CD      
+				,A.YLN_CD      	=  B.YLN_CD
+				,A.XPOS      	=  B.XPOS
+				,A.YPOS      	=  B.YPOS
+				,A.MAP_LEVEL   	=  B.MAP_LEVEL         
+				,A.UPD_ID      	=  B.UPD_ID        
+				,A.UPD_DTTM   	 =  B.UPD_DTTM
+				,A.TMNL_IMG_FILE = B.TMNL_IMG_FILE	
+			WHEN NOT MATCHED THEN
+			INSERT 
+			(
+				A.INF_ID      
+				,A.INF_SEQ     
+				,A.SRV_CD      
+				,A.SRV_YN      
+				,A.API_EP      
+				,A.API_TYPE    
+				,A.API_RES     
+				,A.API_TRF     
+				,A.API_EXP     
+				,A.ENG_API_EXP 
+				,A.MARKER_CD   
+				,A.SGRP_CD     
+				,A.LYTIT_NM    
+				,A.RYTIT_NM    
+				,A.ENG_LYTIT_NM
+				,A.ENG_RYTIT_NM
+				,A.SERIES_POSX 
+				,A.SERIES_POSY 
+				,A.SERIES_ORD  
+				,A.SERIES_FYN  
+				,A.XLN_CD      
+				,A.YLN_CD      
+				,A.XPOS
+				,A.YPOS
+				,A.MAP_LEVEL
+				,A.REG_ID      
+				,A.REG_DTTM    
+				,A.UPD_ID      
+				,A.UPD_DTTM 
+				,A.TMNL_IMG_FILE
+			)VALUES
+			(
+				 B.INF_ID      
+				,B.INF_SEQ     
+				,B.SRV_CD      
+				,B.SRV_YN          
+				,B.API_EP      
+				,B.API_TYPE    
+				,B.API_RES     
+				,B.API_TRF     
+				,B.API_EXP     
+				,B.ENG_API_EXP 
+				,B.MARKER_CD   
+				,B.SGRP_CD     
+				,B.LYTIT_NM    
+				,B.RYTIT_NM    
+				,B.ENG_LYTIT_NM
+				,B.ENG_RYTIT_NM
+				,B.SERIES_POSX 
+				,B.SERIES_POSY 
+				,B.SERIES_ORD  
+				,B.SERIES_FYN  
+				,B.XLN_CD      
+				,B.YLN_CD
+				,B.XPOS
+				,B.YPOS
+				,B.MAP_LEVEL
+				,B.REG_ID      
+				,B.REG_DTTM    
+				,B.UPD_ID      
+				,B.UPD_DTTM
+				,B.TMNL_IMG_FILE
+			)
+		]]>
+	</update>
+	
+	<insert id="OpenInfSrvDAO.insertCol" parameterClass="egovframework.admin.service.service.OpenInfSrv" >
+		<![CDATA[
+			INSERT INTO TB_OPEN_INF_$srvCd$COL          
+			(
+				 INF_ID
+				,INF_SEQ
+				,COL_SEQ   
+				,V_ORDER     
+				,REG_ID         
+				,REG_DTTM       
+				,UPD_ID         
+				,UPD_DTTM       
+			)SELECT A.INF_ID
+				   ,A.INF_SEQ
+			       ,B.COL_SEQ
+			       ,V_ORDER
+			       ,#sessionUsrId:VARCHAR#   
+			       ,SYSDATE
+			       ,#sessionUsrId:VARCHAR#   
+			       ,SYSDATE
+			   FROM TV_MNG_INF_SRV A
+			  INNER JOIN TB_OPEN_DSCOL B
+				 ON A.DS_ID = B.DS_ID
+			   AND B.USE_YN ='Y'
+			  WHERE A.INF_ID =#infId#
+			     AND A.INF_SEQ =#infSeq#
+			     AND A.DS_USE_YN ='Y'
+		]]>
+	</insert>
+	
+	<select id="OpenInfSrvDAO.selectOpenInfDsExp" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultClass="String" >
+			SELECT 
+				 <isEmpty property="viewLang"> 
+					DS_EXP
+					</isEmpty>
+					<isNotEmpty property="viewLang">
+					 ENG_DS_EXP AS DS_EXP
+					</isNotEmpty>
+			  FROM TV_MNG_INF_SRV
+			WHERE INF_ID =#infId#
+			   AND DS_USE_YN ='Y'
+			   AND ROWNUM = 1
+	</select>
+	
+	<select id="OpenInfSrvDAO.selectSrvConn" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultMap="selectSrvConnMap" >
+		SELECT NVL(MAX(DECODE(SRV_YN, 'Y', SERVICES) ), '') OPEN_SRV,
+		       NVL(MAX(DECODE(SRV_YN, 'N', SERVICES) ), '') CANCEL_SRV
+		  FROM ( SELECT SRV_YN,
+		                LTRIM(SYS_CONNECT_BY_PATH (A.SRV_CD || '-' || A.INF_SEQ,
+		                ','),
+		                ',') AS SERVICES
+		           FROM ( SELECT SRV_YN,
+		                         SRV_CD,
+		                         INF_SEQ,
+		                         ROW_NUMBER( ) OVER (PARTITION BY SRV_YN
+		                   ORDER BY INF_SEQ) RN,
+		                         COUNT(*) OVER (PARTITION BY SRV_YN) CNT
+		                    FROM TB_OPEN_INF_SRV
+		                   WHERE INF_ID = #infId:VARCHAR#) A
+		          WHERE RN = CNT START WITH RN = 1 CONNECT BY PRIOR SRV_YN = SRV_YN
+		            AND RN = PRIOR RN + 1)
+	</select>
+	
+	<update id="OpenInfSrvDAO.insertSrvConn" parameterClass="egovframework.admin.service.service.OpenInfSrv" >
+		<![CDATA[
+		UPDATE   TB_OPEN_INF A
+		   SET   A.OPEN_SRV    	=  #openSrv:VARCHAR#       
+			    ,A.CANCEL_SRV  	=  #cancelSrv:VARCHAR#
+	     WHERE   INF_ID = #infId:VARCHAR#
+			
+		]]>
+	</update>
+	
+	<select id="OpenInfSrvDAO.selectPubDttm" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultClass="String" >
+	 <![CDATA[SELECT CASE WHEN MAX(SRC_COL_ID) IS NOT NULL THEN  'AND '||MAX(SRC_COL_ID)||' <= '''||NVL(MAX(C.PUB_DTTM), to_date('1900-01-01', 'YYYY-MM-DD'))||''''
+	 					  ELSE '' END AS  PUB_DTTM ]]> 
+		  FROM TB_OPEN_DS A
+		INNER JOIN TB_OPEN_DSCOL B
+		   ON A.DS_ID = B.DS_ID
+		INNER JOIN TB_OPEN_PUBLISH C
+		   ON C.REF_DS_ID = A.DS_ID
+		  AND C.USE_YN = 'Y' 
+		  AND(C.AUTO_YN = 'Y' or (C.AUTO_YN = 'N' and C.PUBOK_YN = 'Y'))
+		 <![CDATA[   AND C.PUB_DTTM <= SYSDATE ]]> 
+		  AND C.LANG_TAG = 
+		  <isEmpty property="viewLang"> 
+					'K'
+			</isEmpty>
+			<isNotEmpty property="viewLang">
+					 'E'
+			</isNotEmpty>
+		INNER JOIN TB_OPEN_INF D
+		   ON A.DS_ID = D.DS_ID
+		 WHERE A.PUB_YN = 'Y'
+		   AND B.PUB_YN = 'Y'
+		   AND A.USE_YN = 'Y'
+		   AND B.USE_YN = 'Y'
+		   AND B.SRC_COL_TYPE='DATE'
+		   AND D.INF_ID =#infId:VARCHAR#
+ 	</select> 
+ 	
+</sqlMap>

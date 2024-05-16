@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="portalDocInfFile" >
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+
+
+	<sql id="docInfFile.select">
+		SELECT
+		    A.DOC_ID			AS "docId",
+		    A.FILE_SEQ		AS "fileSeq",
+		    A.SRC_FILE_NM		AS "srcFileNm",
+		    A.SAVE_FILE_NM	AS "saveFileNm",
+		    A.VIEW_FILE_NM	AS "viewFileNm",
+		    A.FILE_EXT		AS "fileExt",
+		    A.VIEW_CNT		AS "viewCnt",
+		    A.FILE_SIZE		AS "fileSize",
+		    FN_GET_DMPOINT(FN_GET_BYTE2UC(A.FILE_SIZE,  'KB' ), '0') || ' KB'	AS "cvtFileSize"
+		FROM
+		    TB_DOC_INF_FILE A
+	INNER JOIN 
+		    TB_DOC_INF B
+		  ON A.DOC_ID = B.DOC_ID
+	</sql>
+
+	<!-- 문서관리 파일 서비스 정보 조회 -->
+	<select id="portalDocInfFileDao.searchDocInfFile" parameterClass="params" resultClass="record">
+		/* sql id : portalDocInfFileDao.searchDocInfFile */
+		<include refid="docInfFile.select"/>
+		WHERE
+		    A.DOC_ID = #docId:VARCHAR#
+		    AND A.USE_YN = 'Y'
+		    AND B.USE_YN = 'Y'
+		ORDER BY
+		    A.V_ORDER
+	</select>
+	
+	<!-- 문서관리 파일 서비스 정보 조회(단건) -->
+	<select id="portalDocInfFileDao.selectDocInfFile" parameterClass="params" resultClass="record">
+		/* sql id : portalDocInfFileDao.selectDocInfFile */
+		<include refid="docInfFile.select"/>
+		WHERE
+		    A.DOC_ID 		= #docId:VARCHAR#
+		    AND A.FILE_SEQ 	= #fileSeq:NUMERIC#
+		    AND A.USE_YN 	= 'Y'
+		    AND B.USE_YN 	= 'Y'
+	</select>	  
+	
+	<!-- 문서관리 파일서비스 조회 로그 등록 -->
+	<insert id="portalDocInfFileDao.insertLogDocInfFile" parameterClass="params">
+		/* sql id : portalDocInfFileDao.insertLogDocInfFile */
+		INSERT INTO TB_LOG_DOC_INF_FILE (
+			SEQCE_NO,
+			DOC_ID,
+			FILE_SEQ,
+			SYS_TAG,
+			USER_CD,
+			USER_IP,
+			REG_DTTM
+		)
+		SELECT SQ_LOG_DOC_SEQ.NEXTVAL,
+			   #docId:VARCHAR#,
+			   #fileSeq:NUMERIC#,
+			   'K',
+			   	#userCd:NUMERIC#,
+			   	#userIp:VARCHAR#,
+			   	SYSDATE
+		FROM   TB_DOC_INF_FILE
+		WHERE  DOC_ID = #docId:VARCHAR#
+		AND    FILE_SEQ = #fileSeq:NUMERIC#
+	</insert>
+	
+	<!-- 문서관리 파일 서비스 조회수 증가 -->
+	<update id="portalDocInfFileDao.updateDocInfFileViewCnt" parameterClass="params">
+		/* sql id : portalDocInfFileDao.updateDocInfFileViewCnt */
+		UPDATE TB_DOC_INF_FILE A
+		SET    VIEW_CNT 	= VIEW_CNT + 1
+		WHERE  A.DOC_ID 	= #docId:VARCHAR#
+		AND    A.FILE_SEQ 	= #fileSeq:NUMERIC#
+		AND    A.USE_YN 	= 'Y'
+	</update>  
+</sqlMap>

@@ -1,0 +1,435 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- @(#)AdminStatSttsStat_Sql_Tibero.xml 1.0 2017/10/18                     -->
+<!--                                                                         -->
+<!-- COPYRIGHT (C) 2013 WISEITECH CO., LTD. ALL RIGHTS RESERVED.             -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- 공공데이터 입력관련 SQL 파일이다.  	                                    	-->
+<!--                                                                         -->
+<!-- @author 김정호                                                        	-->
+<!-- @version 1.0 2017/10/18                                                 -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<sqlMap namespace="OpenDsInput">
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Type Alias                                                          -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+    
+    <!-- 코드정보 조회 -->
+    <select id="OpenDsInput.selectOption" parameterClass="params" resultClass="record">
+    	/* sql id : OpenDsInput.selectOption */
+        SELECT 
+        	DITC_CD AS "code",
+        	DITC_NM AS "name"
+        FROM TB_COMM_CODE
+        WHERE GRP_CD = #grpCd#
+        	AND USE_YN = 'Y'
+        	<isNotEmpty property="valueCd" prepend="AND">
+        		VALUE_CD LIKE '%' || #valueCd# || '%'
+        	</isNotEmpty>
+        ORDER BY V_ORDER
+    </select>
+    
+    <!-- 공공데이터 입력 메인 리스트 조회 -->
+	<select id="OpenDsInput.selectOpenDsInputList" parameterClass="params" resultClass="record">
+		/* sql id : OpenDsInput.selectOpenDsInputList */
+		SELECT
+			A.LDLIST_SEQ	AS "ldlistSeq"			
+			, A.DS_ID		AS "dsId"
+			, B.DS_NM		AS "dsNm"
+			, A.LOAD_CD		AS "loadCd"
+			, C.DITC_NM		AS "ldstateNm"
+			, TO_CHAR(A.ACC_DTTM, 'YYYY/MM/DD')	 			AS "accDttm"
+			, A.LOAD_ORG_NM || ' (' || A.LOAD_USR_NM || ')'	AS "orgUsrNm"
+			, FN_GET_COMM_CODE_NM('D1009', A.LOAD_CD) 		AS "loadNm"
+			, CASE WHEN A.LOAD_CD IN ('RECY06','RECY07' ) THEN '없음'
+			  ELSE
+				TO_CHAR(TO_DATE(A.LOAD_PLAN_YMD, 'YYYY/MM/DD'), 'YYYY/MM/DD')
+			  END  AS "loadPlanYmd"
+			  
+			  
+			, CASE WHEN A.LDSTATE_CD != 'AC' THEN
+			<![CDATA[
+				CASE WHEN SYSDATE <= TO_DATE(A.LOAD_PLAN_YMD, 'YYYY/MM/DD') THEN 'D-' || TRUNC(TO_DATE(A.LOAD_PLAN_YMD, 'YYYY/MM/DD') - TRUNC(SYSDATE)) 
+				ELSE '만료'  END
+			]]> 
+			  ELSE TO_CHAR(A.LOAD_DTTM, 'YYYY/MM/DD')
+			  END AS "loadDttmDesc"		
+		FROM
+			TB_OPEN_LDLIST A
+			INNER JOIN TB_OPEN_DS B
+				ON  A.DS_ID = B.DS_ID
+			INNER JOIN TB_COMM_CODE C
+				ON  C.GRP_CD = 'D2005'
+				AND A.LDSTATE_CD = C.DITC_CD
+				AND C.USE_YN = 'Y'
+		<dynamic prepend="WHERE">
+			<isNotEmpty property="searchVal" prepend="AND">
+				<isEqual property="searchGubun" compareValue="DS_NM" >
+					B.DS_NM LIKE '%' || #searchVal# || '%'
+				</isEqual>
+				<isEqual property="searchGubun" compareValue="DS_ID" >
+					B.DS_ID LIKE '%' || #searchVal# || '%'
+				</isEqual>
+			</isNotEmpty>
+			<isNotEmpty property="orgCd" prepend="AND">
+				A.LOAD_ORG_CD = #orgCd#
+			</isNotEmpty>
+			<isNotEmpty property="startLoadDttm" prepend="AND">
+				A.LOAD_PLAN_YMD <![CDATA[>=]]> REPLACE(#startLoadDttm#, '-', '')
+				AND A.LOAD_CD NOT IN ('RECY06','RECY07' )
+			</isNotEmpty>
+			<isNotEmpty property="endLoadDttm" prepend="AND">
+				A.LOAD_PLAN_YMD <![CDATA[<=]]> REPLACE(#endLoadDttm#, '-', '')
+				AND A.LOAD_CD NOT IN ('RECY06','RECY07' )
+			</isNotEmpty>			
+			<isNotEmpty property="startAccDttm" prepend="AND">
+				A.LOAD_DTTM <![CDATA[>=]]> TO_DATE(#startAccDttm:VARCHAR#, 'YYYY-MM-DD')
+			</isNotEmpty>
+			<isNotEmpty property="endAccDttm" prepend="AND">
+				A.LOAD_DTTM <![CDATA[<=]]> TO_DATE(#endAccDttm:VARCHAR#, 'YYYY-MM-DD')
+			</isNotEmpty>				
+			<isEmpty property="loadCdAll" prepend="AND">
+				<isNotEmpty property="loadCdArr">
+					<iterate prepend="A.LOAD_CD IN" property="loadCdArr" open="(" close=")" conjunction=",">
+						#loadCdArr[]# 
+					</iterate>
+				</isNotEmpty>
+			</isEmpty>
+			<isEmpty property="ldstateCdAll" prepend="AND">
+				<isNotEmpty property="ldstateCdArr">
+					<iterate prepend="A.LDSTATE_CD IN" property="ldstateCdArr" open="(" close=")" conjunction=",">
+						#ldstateCdArr[]# 
+					</iterate>
+				</isNotEmpty>
+			</isEmpty>
+			<isNotEmpty property="accCd" prepend="AND">
+				<isNotEqual property="accCd" compareValue="SYS">
+					EXISTS (SELECT 1 FROM TB_OPEN_DS_USR 
+							WHERE  DS_ID = A.DS_ID 
+							AND    USE_YN = 'Y' 
+							<![CDATA[
+							AND    PRSS_ACC_CD > 0
+							]]> 
+							<isEmpty property="SysInpGbn">
+								AND	USR_CD = #inpUsrCd:NUMERIC#
+							</isEmpty>
+							<isNotEmpty property="SysInpGbn">
+								<isEqual property="SysInpGbn" compareValue="ORG">
+									AND ORG_CD = A.LOAD_ORG_CD
+									AND ORG_CD = #inpOrgCd:VARCHAR# 
+								</isEqual>
+								<isEqual property="SysInpGbn" compareValue="USR">
+									AND	USR_CD = #inpUsrCd:NUMERIC#	
+								</isEqual>
+							</isNotEmpty>
+							)
+				</isNotEqual>
+			</isNotEmpty>			
+		</dynamic>
+		ORDER BY DECODE(C.DITC_CD, 'AC',9999, 'WW', 9998, C.V_ORDER) ASC, A.LOAD_PLAN_YMD ASC
+	</select>
+	
+	
+	<!-- 공공데이터 입력 상세 조회 -->
+	<select id="OpenDsInput.selectOpenDsInputDtl" parameterClass="params" resultClass="record">
+		/* sql id : OpenDsInput.selectOpenDsInputDtl */
+		SELECT
+			A.LDLIST_SEQ		AS "ldlistSeq"	
+			, A.DS_ID			AS "dsId"
+			, B.DS_NM			AS "dsNm"
+			, A.LOAD_CD			AS "loadCd"
+			, B.AUTO_ACC_YN 	AS "autoAccYn"
+			, D.DT_NM			AS "dtNm" 
+			, A.LDSTATE_CD		AS "ldstateCd"
+			, C.DITC_NM			AS "ldstateNm"
+			, B.KEY_DB_YN		AS "keyDbYn"
+			, TO_CHAR(A.ACC_DTTM, 'YYYY/MM/DD')				AS "accDttm"
+			, A.LOAD_ORG_NM || ' (' || A.LOAD_USR_NM || ')'	AS "orgUsrNm"
+			, FN_GET_COMM_CODE_NM('D1009', A.LOAD_CD) 		AS "loadNm"
+			, DECODE(A.LOAD_PLAN_YMD, '99991231', '없음', TO_CHAR(TO_DATE(A.LOAD_PLAN_YMD, 'YYYY/MM/DD'), 'YYYY/MM/DD')) 	AS "loadPlanYmd"
+			, TO_CHAR(A.LOAD_DTTM, 'YYYY/MM/DD')															AS "loadDttm" 
+			, CASE WHEN A.LOAD_CD = 'RECY06' OR A.LOAD_CD = 'RECY07' THEN 'D-0'
+			  WHEN A.LDSTATE_CD = 'WW' THEN
+			  	<![CDATA[
+				CASE WHEN SYSDATE < TO_DATE(A.LOAD_PLAN_YMD, 'YYYY-MM-DD') THEN
+				]]>
+				    'D-' || TRUNC(TO_DATE(A.LOAD_PLAN_YMD, 'YYYY-MM-DD') - SYSDATE)
+				  ELSE 
+				    '지연'
+				END
+			  	ELSE TO_CHAR(A.LOAD_DTTM, 'YYYY/MM/DD')
+			END AS "loadDttmDesc"
+		FROM
+			TB_OPEN_LDLIST A
+			INNER JOIN TB_OPEN_DS B
+				ON  A.DS_ID = B.DS_ID
+			INNER JOIN TB_COMM_CODE C
+				ON  C.GRP_CD = 'D2005'
+				AND A.LDSTATE_CD = C.DITC_CD
+				AND C.USE_YN = 'Y'
+			INNER JOIN TB_OPEN_DT D
+				ON  B.DT_ID = D.DT_ID	
+		WHERE
+			A.LDLIST_SEQ = #ldlistSeq:NUMERIC#
+	</select>
+	
+	<!-- 공공데이터 입력 데이터셋 컬럼 조회 -->
+	<select id="OpenDsInput.selectOpenDsInputCol" parameterClass="params" resultClass="record">
+		SELECT 
+			COL_SEQ		AS "colSeq"
+			, COL_ID	AS "colId"
+			, COL_NM	AS "colNm"
+			, NEED_YN	AS "needYn"
+		FROM
+			TB_OPEN_DSCOL
+		WHERE
+			DS_ID = #dsId:VARCHAR#
+		AND USE_YN = 'Y'
+		ORDER BY V_ORDER
+	</select>		
+	
+	<!-- 공공데이터 실 데이터 중복제거 한 rowSeq 조회 -->
+	<select id="OpenDsInput.selectOpenDsInputDataRowSeq" parameterClass="params" resultClass="record">
+		SELECT
+			DISTINCT ROW_SEQCE_NO AS "disRowSeqceNo"
+		FROM
+		<isEqual property="ldstateCd" compareValue="AC">
+			 (	 SELECT *
+				   FROM TB_HIS_OPEN_LDDATA
+				  WHERE LDLIST_SEQ = #ldlistSeq:NUMERIC#
+				    AND LDLIST_SEQCE_NO = ( SELECT MAX(LDLIST_SEQCE_NO)
+				                              FROM TB_HIS_OPEN_LDDATA
+				                             WHERE LDLIST_SEQ = #ldlistSeq:NUMERIC# )
+			) A
+		</isEqual>
+		<isNotEqual property="ldstateCd" compareValue="AC">
+			TB_OPEN_LDDATA A
+		</isNotEqual>
+		WHERE 
+			LDLIST_SEQ = #ldlistSeq:NUMERIC#
+		ORDER BY ROW_SEQCE_NO	
+	</select>
+	
+	<select id="OpenDsInput.selectOpenDsInputData" parameterClass="params" resultClass="record">
+		SELECT 
+			SEQCE_NO			AS "seqceNo"
+			, LDLIST_SEQ		AS "ldlistSeq"
+			, DS_ID				AS "dsId"
+			, COL_SEQ			AS "colSeq"
+			, COL_SEQCE_NO		AS "colSeqceNo"
+			, ROW_SEQCE_NO		AS "rowSeqceNo"
+			, DATA_VAL			AS "dataVal"
+			, VERIFY_ID			AS "verifyId"
+			, VERIFY_YN			AS "verifyYn"
+			, VERIFY_RSLT		AS "verifyRslt"
+			, MAX(A.COL_SEQCE_NO) OVER()	AS "maxColSeqceNo"
+			, MAX(A.ROW_SEQCE_NO) OVER() 	AS "maxRowSeqceNo"
+		FROM
+		<isEqual property="ldstateCd" compareValue="AC">
+			 (	 SELECT *
+				   FROM TB_HIS_OPEN_LDDATA
+				  WHERE LDLIST_SEQ = #ldlistSeq:NUMERIC#
+				    AND LDLIST_SEQCE_NO = ( SELECT MAX(LDLIST_SEQCE_NO)
+				                              FROM TB_HIS_OPEN_LDDATA
+				                             WHERE LDLIST_SEQ = #ldlistSeq:NUMERIC# )
+			) A
+		</isEqual>
+		<isNotEqual property="ldstateCd" compareValue="AC">
+			TB_OPEN_LDDATA A
+		</isNotEqual>
+		WHERE 
+			LDLIST_SEQ = #ldlistSeq:NUMERIC#
+	</select>		
+	
+	<select id="OpenDsInput.selectOpenDsVerifyData" parameterClass="params" resultClass="record">
+		SELECT
+			A.COL_SEQ		AS "colSeq"
+			, A.VERIFY_ID	AS "verifyId"
+			, VERIFY_NM		AS "verifyNm"
+			, COLTY_CD		AS "coltyCd"
+			, VERIFY_CD		AS "verifyCd"
+			, VERIFY_PATN	AS "verifyPatn"
+			, A.NEED_YN		AS "needYn"
+		FROM
+			TB_OPEN_DSCOL A
+			INNER JOIN TB_OPEN_DSCOLFY B
+				ON  A.VERIFY_ID = B.VERIFY_ID
+				AND A.USE_YN = 'Y'
+				AND B.USE_YN = 'Y'
+		WHERE
+			A.DS_ID = #dsId:VARCHAR#
+	</select>
+	
+	<delete id="OpenDsInput.deleteOpenDsInputData" parameterClass="params">
+		DELETE FROM TB_OPEN_LDDATA
+		WHERE  LDLIST_SEQ = #ldlistSeq:NUMERIC#
+	</delete>
+	
+	<insert id="OpenDsInput.insertOpenDsInputData" parameterClass="record">
+		INSERT INTO TB_OPEN_LDDATA A (
+			SEQCE_NO
+			, DS_ID
+			, COL_SEQ
+			, COL_SEQCE_NO
+			, ROW_SEQCE_NO
+			, DATA_VAL
+			, LDLIST_SEQ
+			, LDSTATE_CD
+			, VERIFY_ID
+			, VERIFY_YN
+			, REG_DTTS
+		)
+		VALUES (
+			SQ_OPEN_LDDATA_SEQ.NEXTVAL
+			, #dsId:VARCHAR#
+			, #colSeq:NUMERIC#
+			, #colSeqceNo:NUMERIC#
+			, #rowSeqceNo:NUMERIC#
+			, #dataVal:VARCHAR#
+			, #ldlistSeq:NUMERIC#
+			, #ldstateCd:VARCHAR#
+			, #verifyId:NUMERIC#
+			, #verifyYn:CHAR#
+			, SYSDATE
+		)
+	</insert>
+	
+	<insert id="OpenDsInput.insertLogOpenLdlist" parameterClass="params">
+		<selectKey keyProperty="ldlistSeqceNo" resultClass="integer">
+			SELECT SQ_LOG_MNG_SEQ.NEXTVAL FROM DUAL
+		</selectKey>
+		
+		INSERT INTO TB_LOG_OPEN_LDLIST (
+			LDLIST_SEQCE_NO
+			, LDLIST_SEQ
+			, DS_ID
+			, DS_NM
+			, LDSTATE_CD
+			, LOAD_TYPE
+			, SRC_FILE_NM
+			, SAVE_FILE_NM
+			, TOT_CNT
+			, VAL_CNT
+			, ERR_CNT
+			, DATA_DTTM_CONT
+			, DELAY_CONT
+			, PRSS_MSG_CONT
+			, LOAD_DTTM
+			, LOAD_ORG_CD
+			, LOAD_ORG_NM
+			, LOAD_USR_CD
+			, LOAD_USR_NM
+			, REG_ID
+		)
+		SELECT
+			#ldlistSeqceNo:NUMERIC#
+			, A.LDLIST_SEQ
+			, A.DS_ID
+			, B.DS_NM
+			, #ldstateCd:VARCHAR#
+			, #loadType:VARCHAR#
+			, #srcFileNm:VARCHAR#
+			, #saveFileNm:VARCHAR#
+			, (SELECT COUNT(*) FROM TB_OPEN_LDDATA C
+				WHERE C.LDLIST_SEQ = A.LDLIST_SEQ
+			) AS TOT_CNT
+			, (SELECT COUNT(*) FROM TB_OPEN_LDDATA C
+				WHERE C.LDLIST_SEQ = A.LDLIST_SEQ
+		 		  AND C.VERIFY_ID IS NOT NULL
+				  AND C.VERIFY_YN = 'Y'
+			) AS VAL_CNT
+			, (SELECT COUNT(*) FROM TB_OPEN_LDDATA C
+				WHERE C.LDLIST_SEQ = A.LDLIST_SEQ
+				  AND C.VERIFY_ID IS NOT NULL
+				  AND C.VERIFY_YN = 'N'
+			) AS ERR_CNT
+			, #dataDttmCont:VARCHAR#
+			, #delayCont:VARCHAR#
+			, #prssMsgCont:VARCHAR#
+			, SYSDATE
+			, A.LOAD_ORG_CD
+			, A.LOAD_ORG_NM
+			, A.LOAD_USR_CD
+			, A.LOAD_USR_NM
+			, #regId:VARCHAR#
+		FROM
+			TB_OPEN_LDLIST A
+			INNER JOIN TB_OPEN_DS B
+				ON  A.DS_ID = B.DS_ID
+		WHERE
+			A.LDLIST_SEQ = #ldlistSeq:NUMERIC#		
+	</insert>
+	
+	<!-- 공공데이터 입력 검증 실패 데이터 조회 -->
+	<select id="OpenDsInput.selectOpenDsInputVerifyData" parameterClass="params" resultClass="record">
+		SELECT SEQCE_NO			AS "seqceNo"
+			 , COL_SEQCE_NO		AS "colSeqceNo"
+			 , ROW_SEQCE_NO		AS "rowSeqceNo"
+		  FROM TB_OPEN_LDDATA
+		 WHERE LDLIST_SEQ = #ldlistSeq:NUMERIC# 
+		   AND VERIFY_ID IS NOT NULL
+		   AND VERIFY_YN = 'N'	
+		   AND DATA_VAL IS NOT NULL
+	</select>
+	
+	<!-- 공공데이터 입력 유저 조회(버튼 권한 처리 위해) -->
+	<select id="OpenDsInput.selectOpenDsUsrList" parameterClass="params" resultClass="record">
+		SELECT 
+			DS_ID			AS "dsId"
+			, USR_CD		AS "usrCd"
+			, ORG_CD		AS "orgCd"
+			, PRSS_ACC_CD	AS "prssAccCd"
+		FROM
+			TB_OPEN_DS_USR
+		WHERE
+			DS_ID = #dsId:VARCHAR#
+		AND USE_YN = 'Y'
+		<isEmpty property="SysInpGbn">
+			AND	USR_CD = #inpUsrCd:NUMERIC#
+		</isEmpty>
+		<isNotEmpty property="SysInpGbn">
+			<isEqual property="SysInpGbn" compareValue="ORG">
+				AND ORG_CD = #inpOrgCd:VARCHAR# 
+			</isEqual>
+			<isEqual property="SysInpGbn" compareValue="USR">
+				AND	USR_CD = #inpUsrCd:NUMERIC#	
+			</isEqual>
+		</isNotEmpty>
+	</select>
+	
+	<!-- 검증 update -->
+	<update id="OpenDsInput.updateOpenLddataVerify" parameterClass="record">
+		UPDATE TB_OPEN_LDDATA
+		SET
+			VERIFY_ID = #verifyId:NUMERIC#
+			, VERIFY_YN = #verifyYn:CHAR#
+		WHERE
+			LDLIST_SEQ = #ldlistSeq#
+		AND COL_SEQCE_NO = #colSeqceNo:NUMERIC#
+		AND ROW_SEQCE_NO = #rowSeqceNo:NUMERIC#	
+	</update>
+	
+	<!-- 공공데이터입력 데이터셋 테이블 생성 -->
+	<procedure id="OpenDsInput.execSpCreateOpenDs" parameterClass="params">
+	    <![CDATA[
+	      { CALL SP_CREATE_OPEN_DS(#ldlistSeq:NUMERIC#)}
+	      ]]>
+	</procedure>
+	
+	<!-- 데이터입력 스케쥴 생성 -->
+	<procedure id="OpenDsInput.execSpCreateOpenLdlist" parameterClass="params">
+	    <![CDATA[
+	      { CALL SP_CREATE_OPEN_LDLIST(#dsId:VARCHAR#)}
+	      ]]>
+	</procedure>
+	
+	
+	
+</sqlMap>

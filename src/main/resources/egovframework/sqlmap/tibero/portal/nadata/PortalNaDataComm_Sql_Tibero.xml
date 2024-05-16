@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="PortalNaDataCommDao" >
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 	-->
+    <!-- 분류 정보를 조회한다.                            																					-->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 	-->
+    <select id="PortalNaDataCommDao.selectDataCommItm" parameterClass="params" resultClass="record">
+    	/* sql id : PortalNaDataCommDao.selectDataCommItm  */
+        <![CDATA[
+        SELECT DITC_CD
+        		 , DITC_NM 
+           FROM TB_COMM_CODE
+		 WHERE GRP_CD = 'D1022' 
+		     AND USE_YN = 'Y'
+		  ORDER BY V_ORDER
+        ]]>
+    </select>
+
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 	-->
+    <!-- 기관 정보를 조회한다.                            																					-->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 	-->
+    <select id="PortalNaDataCommDao.selectDataCommOrg" parameterClass="params" resultClass="record">
+    	/* sql id : PortalNaDataCommDao.selectDataCommOrg  */
+        <![CDATA[
+        SELECT ORG_CD
+       		 , ORG_NM
+       		 , V_ORDER
+	    FROM TV_COMM_ORG O
+        ]]>
+    </select>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 	-->
+    <!-- 발간주기 정보를 조회한다.                            																					-->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 	-->
+    <select id="PortalNaDataCommDao.selectDataCommCycle" parameterClass="params" resultClass="record">
+    	/* sql id : PortalNaDataCommDao.selectDataCommCycle  */
+        <![CDATA[
+        SELECT DITC_CD
+        		 , DITC_NM 
+           FROM TB_COMM_CODE
+		 WHERE GRP_CD = 'D1009' 
+		     AND VALUE_CD = 'R' 
+		     AND USE_YN = 'Y'
+		  ORDER BY V_ORDER
+        ]]>
+    </select>  
+
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 	-->
+    <!-- 보고서&발간물 정보를 조회한다.                            																					-->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 	-->
+    <!-- 검색 조건절 -->
+    <sql id="PortalNaDataCommDao.searchNaDataCommWhere">
+	    <isNotEmpty property="searchItm">
+	    	AND A.SGRP_CD =  #searchItm:VARCHAR#
+	    </isNotEmpty>
+	    <isNotEmpty property="searchOrg">
+	    	AND A.TOP_ORG_CD =  #searchOrg#
+	    </isNotEmpty>
+	    <isNotEmpty property="searchCycle">
+	    	AND A.LOAD_CD =  #searchCycle:VARCHAR#
+	    </isNotEmpty>
+	    <isNotEmpty property="searchWord">
+			AND UPPER(A.INF_NM)  LIKE '%'||UPPER(#searchWord#)||'%'
+	    </isNotEmpty>
+    </sql>
+    <select id="PortalNaDataCommDao.searchNaDataComm" parameterClass="params" resultClass="record">
+        <isEqual property="paging" compareValue="0">
+         SELECT A.ROW_NUM				AS "rowNum"
+         		  , A.INF_ID			AS "infId"
+         		  , A.INF_NM			AS "infNm"
+         		  , A.TMNL_IMG_FILE		AS "tmnlImgFile"
+         		  , A.SRV_CD			AS "srvCd"
+           FROM (
+                     SELECT ROWNUM					AS ROW_NUM
+                     		  , A.INF_ID			AS INF_ID
+                     		  , A.INF_NM			AS INF_NM
+                     		  , A.TMNL_IMG_FILE	 	AS TMNL_IMG_FILE
+                     		  , A.SRV_CD	 		AS SRV_CD
+                       FROM (
+        </isEqual>
+        						SELECT
+        							A.INF_ID
+        							, A.INF_NM
+        							, A.ORG_NM
+        							, A.TMNL_IMG_FILE
+        							, A.SRV_CD
+        							, A.SGRP_CD
+        							, A.TOP_ORG_CD
+        							, A.LOAD_CD
+        						FROM
+        							TV_NADATA_COMM A
+        						WHERE 1=1
+                                <include refid="PortalNaDataCommDao.searchNaDataCommWhere" />
+        <isEqual property="paging" compareValue="0">
+        <![CDATA[
+                            )       A
+                      WHERE ROWNUM <= #end:NUMERIC#
+                )          A
+          WHERE A.ROW_NUM >= #start:NUMERIC#
+        ]]>
+        </isEqual>
+    </select>
+    <!-- 검색 카운트 -->
+    <select id="PortalNaDataCommDao.searchNaDataCommCount" parameterClass="params" resultClass="int">
+         SELECT COUNT(*)
+         FROM   TV_NADATA_COMM A 
+         WHERE   1=1
+         <include refid="PortalNaDataCommDao.searchNaDataCommWhere" />
+    </select>
+</sqlMap>

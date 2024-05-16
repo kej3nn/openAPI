@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMapConfig PUBLIC "-//iBATIS.com//DTD SQL Map Config 2.0//EN"
+    "http://www.ibatis.com/dtd/sql-map-config-2.dtd">
+
+<sqlMapConfig>	
+	<sqlMap resource="egovframework/sqlmap/tibero/common/code_SQL_Tibero.xml"/>						
+	<sqlMap resource="egovframework/sqlmap/tibero/common/file_SQL_Tibero.xml"/>						
+	<sqlMap resource="egovframework/sqlmap/tibero/admin/basicinf/AdminCommCode_SQL_Tibero.xml"/>	
+	<sqlMap resource="egovframework/sqlmap/tibero/admin/basicinf/AdminCommMenu_SQL_Tibero.xml"/>	
+	<sqlMap resource="egovframework/sqlmap/tibero/admin/basicinf/AdminCommMenuAcc_SQL_Tibero.xml"/>	
+	<sqlMap resource="egovframework/sqlmap/tibero/admin/basicinf/AdminCommUsr_SQL_Tibero.xml"/>	
+	<sqlMap resource="egovframework/sqlmap/tibero/admin/basicinf/AdminCommUsrAdmin_SQL_Tibero.xml"/>
+	<sqlMap resource="egovframework/sqlmap/tibero/admin/basicinf/AdminCommUsrSearch_SQL_Tibero.xml"/>
+	<sqlMap resource="egovframework/sqlmap/tibero/admin/basicinf/AdminCommOrg_SQL_Tibero.xml"/>
+	<sqlMap resource="egovframework/sqlmap/tibero/admin/openinf/AdminOpenInf_Sql_Tibero.xml"/>	
+	<sqlMap resource="egovframework/sqlmap/tibero/admin/service/AdminOpenInfSrv_Sql_Tibero.xml"/>	
+	<sqlMap resource="egovframework/sqlmap/tibero/admin/service/AdminOpenInfAcol_Sql_Tibero.xml"/>	
+	<sqlMap resource="egovframework/sqlmap/tibero/admin/service/AdminOpenInfLcol_Sql_Tibero.xml"/>
+	<sqlMap resource="egovframework/sqlmap/tibero/admin/service/AdminOpenInfFcol_Sql_Tibero.xml"/>
+	<sqlMap resource="egovframework/sqlmap/tibero/admin/service/AdminOpenInfScol_Sql_Tibero.xml"/>	
+	<sqlMap resource="egovframework/sqlmap/tibero/admin/service/AdminOpenInfMcol_Sql_Tibero.xml"/>
+	<!--  2015.08.13 신익진 설정 추가 BEGIN-->
+	<sqlMap resource="egovframework/sqlmap/tibero/admin/service/AdminOpenInfVcol_Sql_Tibero.xml"/>
+	<!--  2015.08.13 신익진 설정 추가 END-->	
+	<sqlMap resource="egovframework/sqlmap/tibero/admin/openinf/AdminOpenDs_Sql_Tibero.xml"/>
+	<sqlMap resource="egovframework/sqlmap/tibero/admin/openinf/AdminOpenDt_Sql_Tibero.xml"/>
+	<sqlMap resource="egovframework/sqlmap/tibero/admin/service/AdminOpenInfTcol_Sql_Tibero.xml"/>
+	<sqlMap resource="egovframework/sqlmap/tibero/admin/opendt/AdminOpenInfTcolItem_Sql_Tibero.xml"/>
+	<sqlMap resource="egovframework/sqlmap/tibero/admin/service/AdminOpenInfCcol_Sql_Tibero.xml"/>	
+	<sqlMap resource="egovframework/sqlmap/tibero/admin/opendt/AdminOpenCate_Sql_Tibero.xml"/>
+	<sqlMap resource="egovframework/sqlmap/tibero/admin/openinf/AdminOpenMetaOrder_Sql_Tibero.xml"/>
+	<sqlMap resource="egovframework/sqlmap/tibero/admin/openinf/AdminOpenInfPrss_Sql_Tibero.xml"/>
+	<sqlMap resource="egovframework/sqlmap/tibero/admin/openinf/AdminOpenPubCfg_Sql_Tibero.xml"/>
+	<sqlMap resource="egovframework/sqlmap/tibero/admin/openinf/AdminOpenPublish_Sql_Tibero.xml"/>
+ 	<sqlMap resource="egovframework/sqlmap/tibero/admin/bbs/AdminSurvey_Sql_Tibero.xml"/>
+ 	<sqlMap resource="egovframework/sqlmap/tibero/admin/bbs/AdminSurveyQuest_Sql_Tibero.xml"/>
+ 	<sqlMap resource="egovframework/sqlmap/tibero/admin/bbs/AdminSurveyExam_Sql_Tibero.xml"/>
+ 	<sqlMap resource="egovframework/sqlmap/tibero/admin/bbs/AdminSurveyAns_Sql_Tibero.xml"/>
+ 	<sqlMap resource="egovframework/sqlmap/tibero/admin/bbs/AdminSurveyAnsExam_Sql_Tibero.xml"/>
+ 	
+	<sqlMap resource="egovframework/sqlmap/tibero/admin/bbs/AdminBbsAdmin_Sql_Tibero.xml"/>
+ 	<sqlMap resource="egovframework/sqlmap/tibero/admin/bbs/AdminBbsList_Sql_Tibero.xml"/>
+ 	<sqlMap resource="egovframework/sqlmap/tibero/admin/stat/AdminStatOpen_Sql_Tibero.xml"/>
+ 	<sqlMap resource="egovframework/sqlmap/tibero/admin/stat/AdminStatOpenPrgs_Sql_Tibero.xml"/>
+ 	<sqlMap resource="egovframework/sqlmap/tibero/admin/stat/AdminStatUse_Sql_Tibero.xml"/>
+ 	<sqlMap resource="egovframework/sqlmap/tibero/admin/stat/AdminStatUseApp_Sql_Tibero.xml"/>
+ 	<sqlMap resource="egovframework/sqlmap/tibero/admin/stat/AdminStatUsePrgs_Sql_Tibero.xml"/>
+ 	<sqlMap resource="egovframework/sqlmap/tibero/admin/stat/AdminStatUseFB_Sql_Tibero.xml"/>
+ 	<sqlMap resource="egovframework/sqlmap/tibero/admin/stat/AdminStatUseAPI_Sql_Tibero.xml"/>
+	<sqlMap resource="egovframework/sqlmap/tibero/portal/service/PortalOpenInfTcol_Sql_Tibero.xml"/>
+	
+	<sqlMap resource="egovframework/sqlmap/tibero/portal/service/PortalOpenInfAcol_Sql_Tibero.xml"/>
+	<sqlMap resource="egovframework/sqlmap/tibero/portal/service/PortalOpenInfScol_Sql_Tibero.xml"/>
+	<sqlMap resource="egovframework/sqlmap/tibero/portal/service/PortalOpenInfFcol_Sql_Tibero.xml"/>
+	<sqlMap resource="egovframework/sqlmap/tibero/portal/service/PortalOpenInfLcol_Sql_Tibero.xml"/>
+	<sqlMap resource="egovframework/sqlmap/tibero/portal/service/PortalOpenInfLog_Sql_Tibero.xml"/>
+	<sqlMap resource="egovframework/sqlmap/tibero/admin/user/AdminUser_Sql_Tibero.xml"/>
+	<sqlMap resource="egovframework/sqlmap/tibero/admin/user/AdminUserKey_Sql_Tibero.xml"/>
+	<sqlMap resource="egovframework/sqlmap/tibero/admin/openinf/AdminOpenInfRe_Sql_Tibero.xml"/>
+	
+	<sqlMap resource="egovframework/sqlmap/tibero/portal/user/PortalUser_Sql_Tibero.xml"/>
+	<sqlMap resource="egovframework/sqlmap/tibero/portal/user/PortalUserKey_Sql_Tibero.xml"/>
+	<sqlMap resource="egovframework/sqlmap/tibero/admin/user/AdminAdminCommUsr_Sql_Tibero.xml"/>
+	<!--	사용 안함 
+	<sqlMap resource="egovframework/sqlmap/tibero/portal/bbs/PortalBbsList_Sql_Tibero.xml"/>
+	<sqlMap resource="egovframework/sqlmap/tibero/portal/openinf/PortalOpenInfSrv_Sql_Tibero.xml"/>
+	<sqlMap resource="egovframework/sqlmap/tibero/portal/ctslaw/PortalCtsLaw_Sql_Tibero.xml"/>
+	<sqlMap resource="egovframework/sqlmap/tibero/admin/foss/AdminAidCommCode_Sql_Tibero.xml"/>
+	<sqlMap resource="egovframework/sqlmap/tibero/admin/foss/AdminAidFile_Sql_Tibero.xml"/>
+	<sqlMap resource="egovframework/sqlmap/tibero/admin/foss/AdminAidRson_Sql_Tibero.xml"/>
+	<sqlMap resource="egovframework/sqlmap/tibero/admin/foss/AdminContrPrivAid_Sql_Tibero.xml"/>
+	<sqlMap resource="egovframework/sqlmap/tibero/admin/foss/AdminOtpHistBatMg_Sql_Tibero.xml"/>
+	<sqlMap resource="egovframework/sqlmap/tibero/admin/foss/AdminOtpRvn_Sql_Tibero.xml"/>
+	<sqlMap resource="egovframework/sqlmap/tibero/admin/foss/AdminSgvnCommAid_Sql_Tibero.xml"/> 
+	<sqlMap resource="egovframework/sqlmap/tibero/admin/foss/AdminSiamLink_Sql_Tibero.xml"/>
+	<sqlMap resource="egovframework/sqlmap/tibero/admin/foss/AdminFossTheme_Sql_Tibero.xml"/>
+	<sqlMap resource="egovframework/sqlmap/tibero/admin/combine/AdminDataCombine_SQL_Tibero.xml"/>
+	 -->
+	<!-- 사용 안함 
+	<sqlMap resource="egovframework/sqlmap/tibero/portal/theme/PortalTheme_Sql_Tibero.xml"/>
+	<sqlMap resource="egovframework/sqlmap/tibero/portal/theme/PortalProfile_Sql_Tibero.xml"/>
+	<sqlMap resource="egovframework/sqlmap/tibero/portal/foss/PortalFossTheme_Sql_Tibero.xml"/>
+	 -->
+	<sqlMap resource="egovframework/sqlmap/tibero/admin/stat/AdminStatOpenStats_Sql_Tibero.xml"/>
+	<sqlMap resource="egovframework/sqlmap/tibero/admin/monitor/AdminLogEtl_Sql_Tibero.xml"/>
+	<!-- 2015.06.01 김은삼 [1] 설정 추가 BEGIN -->
+	<sqlMap resource="egovframework/sqlmap/tibero/admin/dtfile/AdminOpenDttype_Sql_Tibero.xml"/>
+	<sqlMap resource="egovframework/sqlmap/tibero/admin/dtfile/AdminOpenDtfile_Sql_Tibero.xml"/>
+	<sqlMap resource="egovframework/sqlmap/tibero/admin/dtfile/AdminOpenDtcols_Sql_Tibero.xml"/>
+	<sqlMap resource="egovframework/sqlmap/tibero/admin/dtfile/AdminOpenDtchck_Sql_Tibero.xml"/>
+	<sqlMap resource="egovframework/sqlmap/tibero/admin/dtfile/AdminOpenDttran_Sql_Tibero.xml"/>
+	<!-- 2015.06.01 김은삼 [1] 설정 추가 END -->
+	
+	<!--  2015.07.20 신익진 설정 추가 BEGIN-->
+	<sqlMap resource="egovframework/sqlmap/tibero/admin/dtfile/AdminUploadSche_Sql_Tibero.xml"/>
+	<!--  2015.07.20 신익진 설정 추가 END-->
+	
+	<!-- 2015.08.31 장홍식 설정 추가 BEGIN -->
+	<sqlMap resource="egovframework/sqlmap/tibero/admin/mainmng/AdminMainMng_Sql_Tibero.xml"/>
+	<sqlMap resource="egovframework/sqlmap/tibero/admin/dtfile/AdminOpenDtAprv_Sql_Tibero.xml"/>
+	<!-- 2015.08.31 장홍식 설정 추가 END -->
+	
+	<!--  2015.09.24 신익진 설정 추가 BEGIN-->
+	<sqlMap resource="egovframework/sqlmap/tibero/admin/dtfile/AdminPresMng_Sql_Tibero.xml"/>
+	<!--  2015.09.24 신익진 설정 추가 END-->
+	
+	<!--  2016.07.12 박일환 설정 추가 BEGIN-->
+	<sqlMap resource="egovframework/sqlmap/tibero/admin/opendt/AdminRefList_Sql_Tibero.xml"/>
+	<sqlMap resource="egovframework/sqlmap/tibero/admin/refLog/AdminRefLog_Sql_Tibero.xml"/>
+	<!--  2016.07.12 박일환 설정 추가 END-->
+</sqlMapConfig>
+          

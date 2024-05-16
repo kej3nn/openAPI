@@ -1,0 +1,465 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="portalAssmLawm" >
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+	
+	<!-- 법률발의안 -->
+	<sql id="lawmBill.col">
+		A.REPRESENT		    AS "represent"
+		, A.BILL_ID		    AS "billId"
+		, A.BILL_NO		    AS "billNo"
+		, A.BILL_NAME		AS "billName"
+		, A.BILL_KIND_CD    AS "billKindCd"
+		, A.EMP_NO		    AS "empNo"
+		, A.PROPOSER        AS "proposer"
+		, A.COMMITTEE		AS "committee"
+		, A.PROPOSE_DT	    AS "proposeDt"
+		, A.PROC_RESULT	    AS "procResult"
+		, A.SORT_NO		    AS "sortNo"
+		, A.LINK_URL	    AS "linkUrl"
+		, A.UNIT_NM         AS "unitNm"
+	</sql>
+	<sql id="lawmBill.where">
+		WHERE A.EMP_NO  = #empNo:VARCHAR#
+		<isNotEmpty property="unitCd" prepend=" AND ">
+			A.UNIT_CD = #unitCd:VARCHAR#
+		</isNotEmpty>
+		<isNotEmpty property="represent" prepend=" AND ">
+			A.REPRESENT = #represent:VARCHAR#
+		</isNotEmpty>
+		<isNotEmpty property="committeeId" prepend=" AND ">
+			A.COMMITTEE_ID = #committeeId:VARCHAR#
+		</isNotEmpty>
+		<isNotEmpty property="billKindCd" prepend=" AND ">
+			A.BILL_KIND_CD = #billKindCd:VARCHAR#
+		</isNotEmpty>
+		<isNotEmpty property="procResult" prepend=" AND ">
+			A.PROC_RESULT = #procResult:VARCHAR#
+		</isNotEmpty>
+		<isNotEmpty property="billName" prepend=" AND ">
+			A.BILL_NAME LIKE '%' || #billName:VARCHAR# || '%'
+		</isNotEmpty>
+		<isNotEmpty property="proposer" prepend=" AND ">
+			A.PROPOSER LIKE '%' || #proposer:VARCHAR# || '%'
+		</isNotEmpty>
+	</sql>
+	
+	<!-- 표결현황 -->
+	<sql id="voteCond.col">
+		BILL_ID				   AS "billId"
+		, BILL_NO			   AS "billNo"
+		, BILL_NAME			   AS "billName"
+		, PROC_DT			   AS "procDt"
+		, PROPOSE_DT		   AS "proposeDt"
+		, PROPOSER_KIND_CD	   AS "proposerKindCd"
+		, COMMITTEE			   AS "currCommittee"
+		, COMMITTEE_ID 		   AS "currCommitteeId"
+		, PROC_RESULT		   AS "result"
+		, BILL_KIND_CD		   AS "billKindCd"
+		, AGE				   AS "age"
+		, ID_MASTER			   AS "idMaster"
+		, RESULT_VOTE_CD	   AS "resultVoteCd"
+		, RESULT_VOTE		   AS "resultVote"
+		, HG_NM				   AS "hgNm"
+		, HJ_NM				   AS "hjNm"
+		, LINK_URL             AS "linkUrl"
+		, VOTEEND_DT		   AS "voteendDt"
+		, SORT_NO			   AS "sortNo"
+		, '제'|| A.AGE || '대'  AS "unitNm"
+	</sql>
+	<sql id="voteCond.where">
+		WHERE EMP_NO  = #empNo:VARCHAR#
+		<isNotEmpty property="unitCd" prepend=" AND ">
+			UNIT_CD = #unitCd:VARCHAR#
+		</isNotEmpty>
+		<isNotEmpty property="committeeId" prepend=" AND ">
+			COMMITTEE_ID = #committeeId:VARCHAR#
+		</isNotEmpty>
+		<isNotEmpty property="billKindCd" prepend=" AND ">
+			BILL_KIND_CD = #billKindCd:VARCHAR#
+		</isNotEmpty>
+		<isNotEmpty property="procResult" prepend=" AND ">
+			PROC_RESULT = #procResult:VARCHAR#
+		</isNotEmpty>
+		<isNotEmpty property="billName" prepend=" AND ">
+			BILL_NAME LIKE '%' || #billName:VARCHAR# || '%'
+		</isNotEmpty>
+		<isNotEmpty property="resultVoteCd" prepend=" AND ">
+			RESULT_VOTE_CD = #resultVoteCd:VARCHAR#
+		</isNotEmpty>
+		<isNotEmpty property="voteendDt" prepend=" AND ">
+			VOTEEND_DT = #voteendDt:VARCHAR#
+		</isNotEmpty>
+		
+	</sql>
+	
+	<!-- 코드 조회 -->
+	<select id="assmLawmDao.searchAssmLawmCommCd" parameterClass="params" resultClass="record">
+		/* sql id : assmLawmDao.searchAssmLawmCommCd */
+		SELECT
+			CM_CD		AS "code"
+			, CM_NM		AS "name"	
+		FROM  TV_BPM_CODE
+		WHERE USE_YN = 1
+		AND   G_CM_CD = #gCmCd:VARCHAR#
+	</select>
+	
+	<!-- 발의법률안 조회 -->
+	<select id="assmLawmDao.searchLawmMotnLgsb" remapResults="true" parameterClass="params" resultClass="record">
+		/* sql id : assmLawmDao.searchLawmMotnLgsb */
+		<isEqual property="paging" compareValue="0">
+		SELECT AA.* 
+		FROM   (SELECT ROWNUM AS ROW_NUM, AA.*
+				FROM   (
+		</isEqual>
+		
+			SELECT
+			    <include refid="lawmBill.col"/>
+			FROM
+			    TV_BPM_BILL A
+			<include refid="lawmBill.where"/>
+			ORDER BY A.SORT_NO DESC
+		<isEqual property="paging" compareValue="0">
+		<![CDATA[
+				) AA
+			WHERE ROWNUM <= #end:NUMERIC#
+			) AA
+		WHERE AA.ROW_NUM >= #start:NUMERIC#
+		]]>
+		</isEqual>
+	</select>
+	<select id="assmLawmDao.searchLawmMotnLgsbCount" parameterClass="params" resultClass="int">
+		/* sql id : assmLawmDao.searchLawmMotnLgsbCount */
+		SELECT
+		    COUNT(*)
+		FROM
+		    TV_BPM_BILL A INNER JOIN TV_THXPSN01 B 
+			    ON  A.EMP_NO  = B.EMP_NO
+			    AND A.UNIT_CD = B.UNIT_CD
+		<include refid="lawmBill.where"/>
+	</select>
+	
+	<!-- 표결현황 -->
+	<select id="assmLawmDao.searchLawmVoteCond" remapResults="true" parameterClass="params" resultClass="record">
+		/* sql id : assmLawmDao.searchLawmVoteCond */
+		<isEqual property="paging" compareValue="0">
+		SELECT AA.* 
+		FROM   (SELECT ROWNUM AS ROW_NUM, AA.*
+				FROM   (
+		</isEqual>
+		
+			SELECT
+			    <include refid="voteCond.col"/>
+			FROM
+			    TV_BPM_VOTE_RESULT A
+			<include refid="voteCond.where"/>
+			ORDER BY SORT_NO DESC
+		<isEqual property="paging" compareValue="0">
+		<![CDATA[
+				) AA
+			WHERE ROWNUM <= #end:NUMERIC#
+			) AA
+		WHERE AA.ROW_NUM >= #start:NUMERIC#
+		]]>
+		</isEqual>
+	</select>
+	<select id="assmLawmDao.searchLawmVoteCondCount" parameterClass="params" resultClass="int">
+		/* sql id : assmLawmDao.searchLawmVoteCondCount */
+		SELECT
+		    COUNT(*)
+		FROM
+		    TV_BPM_VOTE_RESULT A
+		<include refid="voteCond.where"/>
+	</select>
+	
+	<!-- 표결현황 결과 카운트 -->
+	<select id="assmLawmDao.selectLawmVoteCondResultCnt" parameterClass="params" resultClass="record">
+		/* sql id : assmLawmDao.selectLawmVoteCondResultCnt */
+		SELECT
+			COUNT(*)	AS "totalCnt" 
+			, SUM(DECODE(RESULT_VOTE_CD, 'AG', 1, 0))	AS "agreeCnt"
+			, SUM(DECODE(RESULT_VOTE_CD, 'DA', 1, 0))	AS "disCnt"
+			, SUM(DECODE(RESULT_VOTE_CD, 'DR', 1, 0))	AS "absCnt"
+			<!-- , SUM(DECODE(RESULT_VOTE_CD, 'XX', 1, 0))	AS "nonAtanCnt" -->
+		FROM TV_BPM_VOTE_RESULT	
+		<include refid="voteCond.where"/>
+	</select>
+	
+	<!-- TreeMap Chart 데이터 조회(발의법률안) -->
+	<select id="assmLawmDao.searchDegtMotnLgsbTreeMap" parameterClass="params" resultClass="record">
+		/* sql id : assmLawmDao.searchDegtMotnLgsbTreeMap */
+		SELECT A.COMMITTEE AS "name" 
+		     , COUNT(A.BILL_NO) AS "value" 
+		  FROM TV_BPM_BILL A INNER JOIN TV_THXPSN01 B 
+			   ON  A.EMP_NO  = B.EMP_NO
+			   AND A.UNIT_CD = B.UNIT_CD 
+		 WHERE A.EMP_NO    = #empNo:VARCHAR#
+		 AND   A.REPRESENT = #represent:VARCHAR#
+		 <isNotEmpty property="unitCd">
+		 	AND   A.UNIT_CD   = #unitCd:VARCHAR#
+		 </isNotEmpty>
+		 GROUP BY A.COMMITTEE
+		ORDER BY A.COMMITTEE 
+	</select>
+	<!-- Column Chart 데이터 조회(발의법률안) -->
+	<select id="assmLawmDao.searchDegtMotnLgsbColumn" parameterClass="params" resultClass="record">
+		/* sql id : assmLawmDao.searchDegtMotnLgsbColumn */
+		SELECT TO_CHAR(TO_DATE(A.PROPOSE_DT,'YYYY-MM-DD'), 'YYYY') AS "name" 
+       		 , COUNT(A.BILL_NO) AS "value" 
+		  FROM TV_BPM_BILL A INNER JOIN TV_THXPSN01 B 
+			   ON  A.EMP_NO  = B.EMP_NO
+			   AND A.UNIT_CD = B.UNIT_CD 
+		 WHERE A.EMP_NO    = #empNo:VARCHAR# 
+		 AND   A.REPRESENT = #represent:VARCHAR#
+		 <isNotEmpty property="unitCd">
+		 	AND   A.UNIT_CD   = #unitCd:VARCHAR#
+		 </isNotEmpty>
+		GROUP BY TO_CHAR(TO_DATE(A.PROPOSE_DT,'YYYY-MM-DD'), 'YYYY') 
+		ORDER BY TO_CHAR(TO_DATE(A.PROPOSE_DT,'YYYY-MM-DD'), 'YYYY')
+	</select>	
+	
+	
+	<!-- 상임위 활동 -->
+	<sql id="lawm.confer.col">
+		DAE_NUM		AS "daeNum",
+		SES_NUM		AS "sesNum",
+		DEGREE_NUM	AS "degreeNum",
+		COMM_NAME	AS "commName",
+		CONF_DATE	AS "confDate",
+		REG_DATE	AS "regDate",
+		LINK_URL	AS "linkUrl" 
+	</sql>
+	<sql id="lawm.confer.where">
+		WHERE A.EMP_NO  = #empNo:VARCHAR#
+		<isNotEmpty property="unitCd" prepend=" AND ">
+			A.UNIT_CD = #unitCd:VARCHAR#
+		</isNotEmpty>
+		<isNotEmpty property="sesNum" prepend=" AND ">
+			SES_NUM LIKE '%' || #sesNum:VARCHAR# || '%'
+		</isNotEmpty>
+		<isNotEmpty property="commName" prepend=" AND ">
+			COMM_NAME LIKE '%' || #commName:VARCHAR# || '%'
+		</isNotEmpty>
+		<isNotEmpty property="degreeNum" prepend=" AND ">
+			DEGREE_NUM LIKE '%' || #degreeNum:VARCHAR# || '%'
+		</isNotEmpty>
+	</sql>
+	<select id="assmLawmDao.searchLawmSdcmAct" remapResults="true" parameterClass="params" resultClass="record">
+		/* sql id : assmLawmDao.searchLawmSdcmAct */
+		<isEqual property="paging" compareValue="0">
+		SELECT AA.* 
+		FROM   (SELECT ROWNUM AS ROW_NUM, AA.*
+				FROM   (
+		</isEqual>
+		
+			SELECT
+				<include refid="lawm.confer.col"/>
+			FROM
+			    TV_CONFER A
+			<include refid="lawm.confer.where"/>
+			ORDER BY SORT_NO DESC
+		<isEqual property="paging" compareValue="0">
+		<![CDATA[
+				) AA
+			WHERE ROWNUM <= #end:NUMERIC#
+			) AA
+		WHERE AA.ROW_NUM >= #start:NUMERIC#
+		]]>
+		</isEqual>
+	</select>
+	<select id="assmLawmDao.searchLawmSdcmActCount" parameterClass="params" resultClass="int">
+		/* sql id : assmLawmDao.searchLawmSdcmActCount */
+		SELECT
+		    COUNT(*)
+		FROM
+		    TV_CONFER A
+		<include refid="lawm.confer.where"/>
+	</select>	
+
+	
+	
+	<!-- 연구단체 조회 -->
+	<sql id="lawm.org.col">
+		RE_TOPIC_NAME   		  AS "reTopicName"
+       	, RE_NAME				  AS "reName"
+       	, RE_OBJECTIVE  		  AS "reObjective"
+       	, UNIT_CD				  AS "unitCd"
+       	, EMP_NO		          AS "empNo"
+	   	, '제' || REGDAESU || '대' AS "regdaesu"
+	   	, LINK_URL				  AS "linkUrl"
+	</sql>
+	<sql id="lawm.org.where">
+		WHERE A.EMP_NO LIKE '%' || #empNo:VARCHAR# || '%'
+		<isNotEmpty property="unitCd" prepend=" AND ">
+			A.UNIT_CD  = #unitCd:VARCHAR#
+		</isNotEmpty>
+		<isNotEmpty property="reTopicName" prepend=" AND ">
+			RE_TOPIC_NAME LIKE '%' || #reTopicName:VARCHAR# || '%'
+		</isNotEmpty>
+		<isNotEmpty property="reName" prepend=" AND ">
+			RE_NAME LIKE '%' || #reName:VARCHAR# || '%'
+		</isNotEmpty>
+	</sql>
+	<select id="assmLawmDao.searchLawmRschOrg" remapResults="true" parameterClass="params" resultClass="record">
+		/* sql id : assmLawmDao.searchLawmSdcmAct */
+		<isEqual property="paging" compareValue="0">
+		SELECT AA.* 
+		FROM   (SELECT ROWNUM AS ROW_NUM, AA.*
+				FROM   (
+		</isEqual>
+		
+			SELECT
+				<include refid="lawm.org.col"/>
+			FROM
+			    TV_REG_ORG A
+			<include refid="lawm.org.where"/>
+			ORDER BY SORT_NO DESC
+		<isEqual property="paging" compareValue="0">
+		<![CDATA[
+				) AA
+			WHERE ROWNUM <= #end:NUMERIC#
+			) AA
+		WHERE AA.ROW_NUM >= #start:NUMERIC#
+		]]>
+		</isEqual>
+	</select>
+	<select id="assmLawmDao.searchLawmRschOrgCount" parameterClass="params" resultClass="int">
+		/* sql id : assmLawmDao.searchLawmRschOrgCount */
+		SELECT
+		    COUNT(*)
+		FROM
+		    TV_REG_ORG A
+		<include refid="lawm.org.where"/>
+	</select>	
+	
+	<!-- 청원 조회 -->
+	<sql id="lawmPttnReport.col">
+		A.BILL_NO          AS "billNo"  
+		, A.BILL_ID          AS "billId"
+		, A.UNIT_CD          AS "unitCd"
+		, A.BILL_NAME        AS "billName"
+		, A.PROPOSER         AS "proposer"
+		, A.APPROVER         AS "approver"
+		, A.PROPOSE_DT       AS "proposeDt"
+		, A.PROC_RESULT_CD   AS "procResultCd"
+		, A.CMIT_CD          AS "cmitCd"
+		, A.CMIT_NM          AS "cmitNm"
+		, A.COMMITTEE_DT     AS "committeeDt"
+		, A.REPORT_DT        AS "reportDt"
+		, A.PASS_GUBUN       AS "passGubun"
+		, A.PROC_DT          AS "procDt"
+		, A.BILL_MEMO        AS "billMemo"
+		, A.LINK_URL         AS "linkUrl"
+		, A.UNIT_NM          AS "unitNm"
+	</sql>
+	<sql id="lawmPttnReport.where">
+		WHERE   A.EMP_NO  = #empNo:VARCHAR#
+			<isNotEmpty property="unitCd" prepend=" AND ">
+				A.UNIT_CD = #unitCd:VARCHAR#
+			</isNotEmpty>	
+			<isNotEmpty property="billName" prepend=" AND ">
+				A.BILL_NAME LIKE '%' || #billName:VARCHAR# || '%'
+			</isNotEmpty>
+			<isNotEmpty property="approver" prepend=" AND ">
+				A.APPROVER LIKE '%' || #approver:VARCHAR# || '%'
+			</isNotEmpty>
+			<isNotEmpty property="proposer" prepend=" AND ">
+				A.PROPOSER LIKE '%' || #proposer:VARCHAR# || '%'
+			</isNotEmpty>
+			<isNotEmpty property="cmitCd" prepend=" AND ">
+				A.CMIT_CD = #cmitCd:VARCHAR#
+			</isNotEmpty>	
+			<isNotEmpty property="procResultCd" prepend=" AND ">
+				A.PROC_RESULT_CD LIKE '%' || #procResultCd:VARCHAR# || '%'
+			</isNotEmpty>
+	</sql>
+	<select id="assmLawmDao.searchCombLawmPttnReport" remapResults="true" parameterClass="params" resultClass="record">
+		/* sql id : assmLawmDao.searchCombLawmPttnReport */
+		<isEqual property="paging" compareValue="0">
+		SELECT AA.* 
+		FROM   (SELECT ROWNUM AS ROW_NUM, AA.*
+				FROM   (
+		</isEqual>
+		
+			SELECT
+			    <include refid="lawmPttnReport.col"/>
+			FROM
+			    TV_PTT_BILL_PSN A
+			<include refid="lawmPttnReport.where"/>
+			ORDER BY PROC_DT DESC, PROPOSE_DT DESC
+		<isEqual property="paging" compareValue="0">
+		<![CDATA[
+				) AA
+			WHERE ROWNUM <= #end:NUMERIC#
+			) AA
+		WHERE AA.ROW_NUM >= #start:NUMERIC#
+		]]>
+		</isEqual>
+	</select>
+	<select id="assmLawmDao.searchCombLawmPttnReportCount" parameterClass="params" resultClass="int">
+		/* sql id : assmLawmDao.searchCombLawmPttnReportCount */
+		SELECT
+		    COUNT(*)
+		FROM
+		    TV_PTT_BILL_PSN A
+		<include refid="lawmPttnReport.where"/>
+	</select>
+	
+	
+	
+	<!-- 영상회의록 조회 -->
+	<sql id="lawmVideo.col">
+		A.EMP_NO          	 AS "empNo"  
+		, A.TITLE          	 AS "title"
+		, A.TAKING_DATE		 AS "takingDate"
+		, A.REC_TIME         AS "recTime"
+		, A.LINK_URL         AS "linkUrl"
+		, A.ESSENTIAL_PERSON AS "essentialPerson"
+		, A.UNIT_CD          AS "unitCd"
+		, A.UNIT_NM          AS "unitNm"
+	</sql>
+	<sql id="lawmVideo.where">
+		WHERE 1=1 
+		<isNotEmpty property="empNo" prepend=" AND ">
+			A.EMP_NO =  #empNo:VARCHAR#
+		</isNotEmpty>
+		<isNotEmpty property="unitCd" prepend=" AND ">
+			A.UNIT_CD  = #unitCd:VARCHAR#
+		</isNotEmpty>
+		<isNotEmpty property="title" prepend=" AND ">
+			A.TITLE LIKE '%' || #title:VARCHAR# || '%'
+		</isNotEmpty>
+	</sql>
+	<select id="assmLawmDao.searchCombLawmVideoMnts" remapResults="true" parameterClass="params" resultClass="record">
+		/* sql id : assmLawmDao.searchCombLawmVideoMnts */
+		<isEqual property="paging" compareValue="0">
+		SELECT AA.* 
+		FROM   (SELECT ROWNUM AS ROW_NUM, AA.*
+				FROM   (
+		</isEqual>
+		
+			SELECT
+			    <include refid="lawmVideo.col"/>
+			FROM
+			    TV_SPEAK_LIST A
+			<include refid="lawmVideo.where"/>
+			ORDER BY A.TAKING_DATE DESC, A.NO DESC
+		<isEqual property="paging" compareValue="0">
+		<![CDATA[
+				) AA
+			WHERE ROWNUM <= #end:NUMERIC#
+			) AA
+		WHERE AA.ROW_NUM >= #start:NUMERIC#
+		]]>
+		</isEqual>
+	</select>
+	<select id="assmLawmDao.searchCombLawmVideoMntsCount" parameterClass="params" resultClass="int">
+		/* sql id : assmLawmDao.searchCombLawmVideoMntsCount */
+		SELECT
+		    COUNT(*)
+		FROM
+		    TV_SPEAK_LIST A
+		<include refid="lawmVideo.where"/>
+	</select>
+</sqlMap>

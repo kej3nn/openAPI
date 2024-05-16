@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+						http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd">
+
+	<aop:config>
+		<aop:pointcut id="egov.serviceMethod" expression="execution(* egovframework.*..impl.*Impl.*(..))" />
+ 
+		<aop:aspect ref="egov.exceptionTransfer">
+			<aop:after-throwing throwing="exception" pointcut-ref="egov.serviceMethod" method="transfer" />
+		</aop:aspect>
+	</aop:config>
+	
+	<bean id="egov.exceptionTransfer" class="egovframework.rte.fdl.cmmn.aspect.ExceptionTransfer">
+		<property name="exceptionHandlerService">
+			<list>
+				<ref bean="defaultExceptionHandleManager" />
+				<ref bean="otherExceptionHandleManager" />
+			</list>
+		</property>
+	</bean>
+
+	<bean id="defaultExceptionHandleManager" class="egovframework.rte.fdl.cmmn.exception.manager.DefaultExceptionHandleManager">
+		<property name="reqExpMatcher">
+			<ref bean="egov.antPathMater"/>
+		</property>
+		<property name="patterns">
+			<list>
+				<value>**service.impl.*</value>
+			</list>
+		</property>
+		<property name="handlers">
+			<list>
+				<ref bean="egovHandler" />
+			</list>
+		</property>
+	</bean>
+
+	<bean id="otherExceptionHandleManager" class="egovframework.rte.fdl.cmmn.exception.manager.DefaultExceptionHandleManager">
+		<property name="reqExpMatcher">
+			<ref bean="egov.antPathMater"/>
+		</property>
+		<property name="patterns">
+			<list>
+				<value>**service.impl.*</value>
+			</list>
+		</property>
+		<property name="handlers">
+			<list>
+				<ref bean="otherHandler" />
+			</list>
+		</property>
+	</bean>
+	
+	<bean id="egovHandler" class="egovframework.com.cmm.EgovComExcepHndlr" />
+	<bean id="otherHandler" class="egovframework.com.cmm.EgovComOthersExcepHndlr" />	
+
+	<!-- 페이징 처리 -->		
+	<bean id="common.pageing" class="egovframework.common.aspect.AspectIbSheetPaging" />
+	<aop:config>
+		<aop:aspect id="common.pageingAspect" ref="common.pageing">
+			<aop:before pointcut="execution(public * egovframework.*..impl.*Impl.*IbPaging(..)) and args(Vo)" method="PageNum" arg-names="Vo"/>
+		</aop:aspect>
+	</aop:config>
+	
+	
+	<!-- 로그인 id 셋팅 처리 -->		
+	<bean id="common.loginUserId" class="egovframework.common.aspect.AspectLoginUser" />
+	<aop:config>
+		<aop:aspect id="common.loginUserIdAspect" ref="common.loginUserId">
+			<aop:before pointcut="execution(public * egovframework.admin..impl.*Impl.*CUD(..)) and args(Vo,status)" method="setUsrId" arg-names="Vo,status"/>
+			<aop:before pointcut="execution(public * egovframework.admin..impl.*Impl.*CUD(..)) and args(Vo)" method="setUsrId2" arg-names="Vo"/>
+			
+		</aop:aspect>
+	</aop:config>
+	
+	
+	<bean id="common.Locale" class="egovframework.common.aspect.AspectLocale" />
+	<aop:config>
+		<aop:aspect id="common.LocaleAspect" ref="common.Locale">
+			<aop:before pointcut="execution(public * egovframework.*..impl.*Impl.*(..)) and args(Vo)" method="setLocale" arg-names="Vo"/>
+		</aop:aspect>
+	</aop:config>
+	
+	<bean id="common.InfLog" class="egovframework.common.aspect.AspectInfLog" />
+	<aop:config>
+		<aop:aspect id="common.infLogAspect" ref="common.InfLog">
+			<aop:before pointcut="execution(public * egovframework.*..impl.PortalOpenInfLogServiceImpl.*(..)) and args(Vo,requset)" method="setUserInfo" arg-names="Vo,requset"/>
+		</aop:aspect>
+	</aop:config>
+	
+</beans>

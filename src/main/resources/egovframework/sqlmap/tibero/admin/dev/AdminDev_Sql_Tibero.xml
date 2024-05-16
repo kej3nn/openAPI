@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- @(#)AdminNaCmps_Sql_Tibero.xml 1.0 2019/07/29                       -->
+<!--                                                                         -->
+<!-- COPYRIGHT (C) 2013 WISEITECH CO., LTD. ALL RIGHTS RESERVED.             -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- 관리자 개발자 관리 SQL 파일이다.	                                  -->
+<!--                                                                         -->
+<!-- @author                                                        	-->
+<!-- @version 1.0 2020/06/17                                                -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<sqlMap namespace="Dev">
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Type Alias                                                          -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<typeAlias alias="params" type="egovframework.common.base.model.Params" />
+	<typeAlias alias="Record" type="egovframework.common.base.model.Record" />
+	<!-- 메인리스트 쿼리 -->
+	<sql id="AdminDevMngDao.main">
+		SELECT  U.USER_CD 		AS "userCd"
+	  , U.USER_NM		AS "userNm"
+	  , U.USER_ID		AS "userId"
+	  , DVP_EMAIL_YN	AS "dvpEmailYn"
+	  , DVP_HP_YN		AS "dvpHpYn"
+	  , DVP_KAKAO_YN 	AS "dvpKakaoYn"
+	  , K.KEY_CNT		AS "keyCnt"
+	  , G.GALLERY_CNT	AS "galleryCnt"
+	  , TO_CHAR(G.USER_DTTM, 'YYYY-MM-DD')	AS "userDttm"
+ FROM TB_USER U 
+ LEFT OUTER JOIN 
+ ( SELECT  USER_CD , COUNT(USER_CD) AS KEY_CNT 
+     FROM TB_USER_KEY 
+     WHERE KEY_STATE = 'O' 
+    GROUP BY USER_CD
+    ) K ON U.USER_CD = K.USER_CD
+ LEFT OUTER JOIN 
+ ( SELECT  USER_CD , COUNT(USER_CD) AS GALLERY_CNT,  MAX(USER_DTTM) AS USER_DTTM  
+     FROM TB_BBS_LIST 
+     WHERE BBS_CD = 'GALLERY' AND DEL_YN = 'N'  
+     <!--  AND APPR_DTTM IS NOT NULL -->
+    GROUP BY USER_CD
+    ) G ON U.USER_CD = G.USER_CD
+    	 WHERE 1=1
+	  AND ( K.KEY_CNT IS NOT NULL OR G.GALLERY_CNT IS NOT NULL)
+	</sql>
+	<sql id="AdminDevMngDao.main.where">
+	    <isNotEmpty property="searchVal">
+	        AND (U.USER_NM LIKE '%'||#searchVal#||'%')
+	    </isNotEmpty>
+	    <isNotEmpty property="dvpEmailYn">
+	        AND U.DVP_EMAIL_YN = 'Y'
+	    </isNotEmpty>
+	    <isNotEmpty property="dvpHpYn">
+	        AND U.DVP_HP_YN = 'Y'
+	    </isNotEmpty>
+	    <isNotEmpty property="dvpKakaoYn">
+	        AND U.DVP_KAKAO_YN = 'Y'
+	    </isNotEmpty>
+	</sql>
+
+<!-- <sql id="AdminDevMngDao.main.countwhere">
+    <dynamic prepend="WHERE">
+        <isNotEmpty property="searchVal">
+         AND   (A.USER_NM LIKE '%'||#searchVal#||'%')
+        </isNotEmpty>
+        <isNotEmpty property="dvpEmailYn">
+            AND A.DVP_EMAIL_YN = 'Y'
+        </isNotEmpty>
+        <isNotEmpty property="dvpHpYn">
+            AND A.DVP_HP_YN = 'Y'
+        </isNotEmpty>
+        <isNotEmpty property="dvpKakaoYn">
+            AND A.DVP_KAKAO_YN = 'Y'
+        </isNotEmpty>
+    </dynamic>
+</sql>
+ -->
+	<select id="AdminDevMngDao.selectDevMngList" parameterClass="params" resultClass="record">
+		<include refid="AdminDevMngDao.main"></include>
+		<include refid="AdminDevMngDao.main.where"></include>
+	</select>
+	
+	<select id="AdminDevMngDao.selectDevMngListCount" parameterClass="params" resultClass="int">
+			SELECT COUNT(*)
+	 FROM TB_USER U 
+	 LEFT OUTER JOIN 
+	 ( SELECT  USER_CD , COUNT(USER_CD) AS KEY_CNT 
+	     FROM TB_USER_KEY 
+	     WHERE KEY_STATE = 'O' 
+	    GROUP BY USER_CD
+	    ) K ON U.USER_CD = K.USER_CD
+	 LEFT OUTER JOIN 
+	 ( SELECT  USER_CD , COUNT(USER_CD) AS GALLERY_CNT,  MAX(USER_DTTM) AS USER_DTTM  
+	     FROM TB_BBS_LIST 
+	     WHERE BBS_CD = 'GALLERY' AND DEL_YN = 'N'  
+	     <!--  AND APPR_DTTM IS NOT NULL -->
+	    GROUP BY USER_CD
+	    ) G ON U.USER_CD = G.USER_CD
+	        	 WHERE 1=1
+	  AND ( K.KEY_CNT IS NOT NULL OR G.GALLERY_CNT IS NOT NULL)
+		<include refid="AdminDevMngDao.main.where"></include>
+	</select>
+	
+	<select id="AdminDevMngDao.selectUserDevInfo" parameterClass="params" resultClass="record">
+		SELECT DVP_EMAIL_YN		AS "dvpEmailYn"
+		     , DVP_HP_YN		AS "dvpHpYn"
+		     , DVP_KAKAO_YN		AS "dvpKakaoYn"
+		     , USER_ID			AS "userId"
+		     , USER_NM			AS "userNm"
+		     , PKG_CRYPTO2.DECRYPT(USER_HP)			AS "userHp"
+		     , PKG_CRYPTO2.DECRYPT(USER_EMAIL)		AS "userEmail"
+		  FROM TB_USER
+		 WHERE USER_ID = #userId# 		
+	</select>
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 	-->
+    <!-- SMS발송정보를 등록한다.                            																								-->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 	-->
+	<insert id="AdminDevMngDao.insertSMSRow" parameterClass="params">
+		/* sql id : AdminDevMngDao.insertSMSRow */
+		INSERT INTO BIZ_MSG ( 
+			  CMID
+			, MSG_TYPE
+			, STATUS
+			, REQUEST_TIME
+			, SEND_TIME
+			, DEST_PHONE
+			, DEST_NAME
+			, SEND_PHONE
+			, SEND_NAME
+			, SUBJECT
+			, MSG_BODY	
+			)
+		VALUES(
+			  SQ_BIZ_MSG_CMID.NEXTVAL
+			, (CASE WHEN LENGTHB(#msg_body#)  <![CDATA[ > ]]>90 THEN 5 ELSE 0 END) <!--   5: MMS, 0 : 단문메시지  -->
+			, 0
+			, SYSDATE
+			, SYSDATE			
+			, #dest_phone#
+			, #dest_name#
+			, #send_phone#
+			, #send_name#
+			, #subject#
+			, #msg_body#
+			)
+	</insert>
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 	-->
+    <!-- i-Mailer 발송정보를 등록한다.                            						-->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 	-->
+	<insert id="AdminDevMngDao.insertIMailRow" parameterClass="params">
+		/* sql id : AdminDevMngDao.insertIMailRow */
+		INSERT INTO IM_DMAIL_INFO_48 ( 
+			  SEQIDX
+			, SUBJECT
+			, QRY
+			, REJECT_SLIST_IDX
+			, BLOCK_GROUP_IDX
+			, MAILFROM
+			, MAILTO
+			, REPLYTO
+			, ERRORSTO
+			, HTML
+			, ENCODING
+			, CHARSET
+			, SDATE
+			, TDATE
+			, DURATION_SET
+			, CLICK_SET
+			, SITE_SET
+			, ATC_SET
+			, MTYPE
+			, U_IDX
+			, G_IDX
+			, MSGFLAG
+			, CONTENT
+			)
+		VALUES(
+			  IM_SEQ_DMAIL_INFO_48.NEXTVAL
+			, #mailtitle#
+			, #mailqry#
+			, 0
+			, 0
+			, #mailfrom#
+			, #mailto#
+			, #mailfrom#
+			, #mailfrom#
+			, 1
+			, 1
+			, (SELECT VALUE_CD FROM TB_COMM_CODE WHERE GRP_CD = 'A8000' AND DITC_CD = 'OPNZM' AND  USE_YN = 'Y')
+			, TO_CHAR(SYSDATE, 'yyyymmddHH24MISS')
+			, TO_CHAR(SYSDATE+10, 'yyyymmddHH24MISS')
+			, 1
+			, 1
+			, 0
+			, 0
+			, 0
+			, 0
+			, 0
+			, 0
+			, #mailBody#
+			)
+	</insert>	
+	
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 	-->
+    <!-- 카카오알림톡 발송정보를 등록한다.                            																								-->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 	-->
+	<insert id="AdminDevMngDao.insertTalkRow" parameterClass="params">
+		/* sql id : AdminDevMngDao.insertTalkRow */
+		INSERT INTO BIZ_MSG ( 
+			  CMID
+			, MSG_TYPE
+			, STATUS
+			, REQUEST_TIME
+			, SEND_TIME
+			, DEST_PHONE
+			, DEST_NAME
+			, SEND_PHONE
+			, SEND_NAME
+			, SUBJECT
+			, MSG_BODY
+			, NATION_CODE
+			, SENDER_KEY
+			, TEMPLATE_CODE			
+			)
+		VALUES(
+			  SQ_BIZ_MSG_CMID.NEXTVAL
+			, 6
+			, 0
+			, SYSDATE
+			, SYSDATE			
+			, #dest_phone#
+			, #dest_name#
+			, #send_phone#
+			, #send_name#
+			, #subjectKakao#
+			, #msg_body#
+			, '82'
+			, #senderKey#
+			, #templateCode#
+			)
+	</insert>
+	
+	
+</sqlMap>

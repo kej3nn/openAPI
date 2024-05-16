@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- @(#)AdminDocInfCate_Sql_Tibero.xml 1.0 2019/07/29                       -->
+<!--                                                                         -->
+<!-- COPYRIGHT (C) 2013 WISEITECH CO., LTD. ALL RIGHTS RESERVED.             -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- 관리자 문서 분류 관리 SQL 파일이다.	                                  -->
+<!--                                                                         -->
+<!-- @author 손정식                                                        	-->
+<!-- @version 1.0 2019/08/06                                                -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<sqlMap namespace="DocInfCate">
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Type Alias                                                          -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+    
+    <!-- 문서 분류 메인 리스트 조회 -->
+    <select id="DocInfCateDao.selectDocInfCateList" parameterClass="params" resultClass="record">
+		SELECT 
+			CATE_ID				AS "cateId"
+			, CATE_NM			AS "cateNm"
+			, ENG_CATE_NM		AS "engCateNm"
+			, CATE_FULLNM		AS "cateFullNm"
+			, CATE_LVL			AS "cateLvl"
+			, LEVEL				AS "Level"
+			, USE_YN			AS "useYn"
+			, V_ORDER			AS "vOrder"
+			, DECODE(CONNECT_BY_ISLEAF, 0, 1, 0)	AS "HaveChild"
+		FROM 
+			TB_DOC_CATE A
+		WHERE
+			1=1		
+		START WITH 
+			PAR_CATE_ID = 'T'
+			<isNotEmpty property="useYn">
+				AND USE_YN = #useYn#
+			</isNotEmpty>
+			AND CATE_ID IN (
+				SELECT CATE_ID FROM TB_DOC_CATE B
+				WHERE  B.PAR_CATE_ID = 'T'	
+				<isNotEmpty property="searchVal">			 
+					<isEqual property="searchGubun" compareValue="CATE_NM" >
+					START WITH B.CATE_NM LIKE '%'||#searchVal#||'%'
+					</isEqual>
+					<isEqual property="searchGubun" compareValue="CATE_NM_ENG" >
+					START WITH B.CATE_NM_ENG LIKE '%'||#searchVal#||'%'
+					</isEqual>
+					<isEqual property="searchGubun" compareValue="CATE_ID" >
+					START WITH B.CATE_ID LIKE '%'||#searchVal#||'%'
+					</isEqual>
+				</isNotEmpty>
+				CONNECT BY 
+					CATE_ID = PRIOR PAR_CATE_ID
+				<isNotEmpty property="useYn">
+					AND USE_YN = #useYn#
+				</isNotEmpty>
+			)
+		CONNECT BY 
+			PRIOR CATE_ID = PAR_CATE_ID
+		<isNotEmpty property="useYn">
+			AND USE_YN = #useYn#
+		</isNotEmpty>
+		ORDER SIBLINGS BY V_ORDER    
+	</select>
+	
+	<!-- 문서 분류 상세 조회 -->
+	<select id="DocInfCateDao.selectDocInfCateDtl" parameterClass="params" resultClass="record">
+		SELECT
+			A.CATE_ID					AS "cateId"
+			, A.PAR_CATE_ID				AS "parCateId"
+			, A.TOP_CATE_ID				AS "topCateId"
+			, A.CATE_NM					AS "cateNm"
+			, A.ENG_CATE_NM				AS "engCateNm"
+			, NVL(B.CATE_NM, '최상위')	AS "parCateNm"
+			, A.CATE_FULLNM				AS "cateFullNm"
+			, A.SAVE_FILE_NM			AS "saveFileNm"
+			, A.VIEW_FILE_NM			AS "viewFileNm"
+			, A.V_ORDER					AS "vOrder"
+			, A.USE_YN					AS "useYn"
+			, A.CATE_LVL				AS "Level"
+		FROM 
+			TB_DOC_CATE A
+			LEFT JOIN TB_DOC_CATE B
+				ON  A.PAR_CATE_ID = B.CATE_ID
+		WHERE
+			A.CATE_ID = #cateId:VARCHAR#	
+    </select>
+    
+    <!-- 문서 분류 ID 중복체크 -->
+    <select id="DocInfCateDao.selectDocInfCateDupChk" parameterClass="params" resultClass="record">
+		SELECT COUNT(*) AS "dupCnt"
+		FROM   TB_DOC_CATE
+		WHERE  CATE_ID = #cateId:VARCHAR#
+	</select>
+	
+	<!-- 문서 분류 등록/수정 -->
+	<update id="DocInfCateDao.mergeDocInfCate" parameterClass="params">
+		MERGE INTO TB_DOC_CATE A
+		USING (
+				SELECT
+					#cateId:VARCHAR#				AS CATE_ID
+					, #cateNm:VARCHAR#				AS CATE_NM
+					, #engCateNm:VARCHAR#			AS ENG_CATE_NM
+					, #parCateId:VARCHAR#			AS PAR_CATE_ID
+				<isEqual property="parCateId" compareValue="T">
+					, #cateId:VARCHAR#				AS TOP_CATE_ID	<!-- 최상위는 자기 ID가 최상위 ID가 됨 -->
+				</isEqual>
+				<isNotEqual property="parCateId" compareValue="T">
+					, #topCateId:VARCHAR#			AS TOP_CATE_ID
+				</isNotEqual>
+					, 'CATE_FULLNM'			        AS CATE_FULLNM
+					, 0						        AS CATE_LVL
+					, #useYn:CHAR#				    AS USE_YN
+					, #srcFileNm:VARCHAR#			AS SRC_FILE_NM
+					, #saveFileNm:VARCHAR#			AS SAVE_FILE_NM
+					, #viewFileNm:VARCHAR#			AS VIEW_FILE_NM
+				FROM DUAL
+		) B
+		ON (
+			A.CATE_ID 		= B.CATE_ID
+		)
+		WHEN MATCHED THEN
+		UPDATE SET
+			A.CATE_NM 			= B.CATE_NM
+			, A.ENG_CATE_NM 	= B.ENG_CATE_NM
+			, A.PAR_CATE_ID 	= B.PAR_CATE_ID
+			, A.TOP_CATE_ID 	= B.TOP_CATE_ID
+			, A.USE_YN 			= B.USE_YN
+		<isNotEmpty property="srcFileNm">	
+			, A.SRC_FILE_NM 	= B.SRC_FILE_NM
+		</isNotEmpty>
+		<isNotEmpty property="saveFileNm">
+			, A.SAVE_FILE_NM	= B.SAVE_FILE_NM
+		</isNotEmpty>
+		<isNotEmpty property="viewFileNm">
+			, A.VIEW_FILE_NM	= B.VIEW_FILE_NM
+		</isNotEmpty>
+		WHEN NOT MATCHED THEN
+		INSERT (
+			A.CATE_ID
+			, A.CATE_NM
+			, A.ENG_CATE_NM
+			, A.PAR_CATE_ID
+			, A.TOP_CATE_ID
+			, A.USE_YN
+			, A.CATE_FULLNM
+			, A.CATE_LVL
+			, A.SRC_FILE_NM
+			, A.SAVE_FILE_NM	
+			, A.VIEW_FILE_NM
+			, A.V_ORDER
+		)
+		VALUES (
+			B.CATE_ID
+			, B.CATE_NM
+			, B.ENG_CATE_NM
+			, B.PAR_CATE_ID
+			, B.TOP_CATE_ID
+			, B.USE_YN
+			, B.CATE_FULLNM
+			, B.CATE_LVL
+			, B.SRC_FILE_NM
+			, B.SAVE_FILE_NM	
+			, B.VIEW_FILE_NM
+			 <isNotEqual property="parCateId" compareValue="T">
+			 ,	(SELECT NVL(MAX(V_ORDER)+1, 0) FROM TB_DOC_CATE
+			  	WHERE PAR_CATE_ID = #topCateId:VARCHAR#)
+			  </isNotEqual>
+			  <isEqual property="parCateId" compareValue="T">
+			 ,  (SELECT NVL(MAX(V_ORDER)+1, 0) FROM TB_DOC_CATE
+			  	WHERE PAR_CATE_ID = 'T')
+			  </isEqual>
+		)
+	</update>	
+    
+	<!-- 관련된 분류 전체명, 분류 레벨 일괄 업데이트 처리 -->
+	<update id="DocInfCateDao.updateDocInfCateFullnm" parameterClass="params">
+		MERGE INTO TB_DOC_CATE A
+		USING (
+			SELECT 
+				CATE_ID
+				, LEVEL AS LVL
+				, LTRIM(SYS_CONNECT_BY_PATH (B.CATE_NM,'>'),'>') AS NEW_CATE_FULLNM
+				, LTRIM(SYS_CONNECT_BY_PATH (B.ENG_CATE_NM,'>'),'>') AS ENG_NEW_CATE_FULLNM
+			FROM   TB_DOC_CATE B
+			START WITH 
+				B.CATE_ID = (SELECT TOP_CATE_ID FROM TB_DOC_CATE WHERE CATE_ID = #cateId:VARCHAR#)
+			CONNECT BY 
+				PRIOR B.CATE_ID = B.PAR_CATE_ID
+		) C
+		ON (
+			A.CATE_ID = C.CATE_ID
+		)
+		WHEN MATCHED THEN
+		UPDATE 
+		SET
+			CATE_FULLNM = NEW_CATE_FULLNM
+			, ENG_CATE_FULLNM = ENG_NEW_CATE_FULLNM
+			, CATE_LVL 	= LVL
+	</update>	
+		
+	<!-- 정보 자식 분류 여부 조회 -->
+	<select id="DocInfCateDao.selectDocInfCateHaveChild" parameterClass="params" resultClass="record">
+		SELECT 
+			CASE 
+				<![CDATA[
+				WHEN COUNT(*) = 1 THEN 'N' 
+				WHEN COUNT(*) = 0 THEN 'X'
+				ELSE 'Y' 
+				]]>
+			END AS "haveChild"
+		FROM 
+			TB_DOC_CATE
+		START WITH 
+			CATE_ID = #cateId:VARCHAR#
+		CONNECT BY 
+			PRIOR CATE_ID = PAR_CATE_ID		
+	</select>
+	
+	<!-- 문서 분류 삭제 -->
+	<delete id="DocInfCateDao.deleteDocInfCate" parameterClass="params">
+		DELETE FROM TB_DOC_CATE
+		WHERE  CATE_ID = #cateId:VARCHAR#
+	</delete>
+	
+	<!-- 문서 분류 순서 저장 -->
+	<delete id="DocInfCateDao.saveDocInfCateOrder" parameterClass="record">
+		UPDATE TB_DOC_CATE
+		SET    V_ORDER = #vOrder:NUMERIC#
+		WHERE  CATE_ID = #cateId:VARCHAR#
+	</delete>
+	
+	<!-- 문서 분류 리스트 조회(팝업 리스트 조회) -->
+	<select id="DocInfCateDao.selectDocInfCatePopList" parameterClass="params" resultClass="record">
+		SELECT 
+			CATE_ID				AS "cateId"
+			, CATE_NM			AS "cateNm"
+			, ENG_CATE_NM		AS "engCateNm"
+			, CATE_FULLNM		AS "cateFullNm"
+			, CATE_LVL			AS "cateLvl"
+			, TOP_CATE_ID		AS "topCateId"
+			, LEVEL				AS "Level"
+			, USE_YN			AS "useYn"
+			, V_ORDER			AS "vOrder"
+			, DECODE(CONNECT_BY_ISLEAF, 0, 1, 0)	AS "HaveChild"
+		FROM 
+			TB_DOC_CATE A
+		WHERE
+			CATE_ID IN (
+				SELECT CATE_ID FROM TB_DOC_CATE B
+			<isNotEmpty property="searchVal">
+				<isEqual property="searchGubun" compareValue="CATE_NM" >
+					START WITH B.CATE_NM LIKE '%'||#searchVal#||'%'
+				</isEqual>
+				<isEqual property="searchGubun" compareValue="ENG_CATE_NM" >
+					START WITH B.ENG_CATE_NM LIKE '%'||#searchVal#||'%'
+				</isEqual>
+			</isNotEmpty>
+				CONNECT BY 
+					CATE_ID = PRIOR PAR_CATE_ID
+					AND USE_YN = 'Y'
+			)
+		START WITH 
+			PAR_CATE_ID = 'T'
+		CONNECT BY 
+			PRIOR CATE_ID = PAR_CATE_ID
+			AND USE_YN = 'Y'
+		ORDER SIBLINGS BY V_ORDER   	
+	</select>
+	
+</sqlMap>

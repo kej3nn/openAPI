@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- @(#)PortalUserKey_Sql_Tibero.xml 1.0 2015/06/15                         -->
+<!--                                                                         -->
+<!-- COPYRIGHT (C) 2013 WISEITECH CO., LTD. ALL RIGHTS RESERVED.             -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- 사용자 인증키를 관리하는 SQL 파일이다.                                  -->
+<!--                                                                         -->
+<!-- @author 김은삼                                                          -->
+<!-- @version 1.0 2015/06/15                                                 -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<sqlMap namespace="PortalUserKeyDao">
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Type Alias                                                          -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+
+	<select id="PortalUserKeyDao.selectActKeyCnt" parameterClass="params" resultClass="record">
+		SELECT
+			COUNT(KEY_SEQ) "cnt"
+		FROM 
+			TB_USER_KEY 
+		WHERE 
+			USER_CD = #regId:NUMERIC# 
+			AND KEY_STATE = 'O' 
+			AND LIMIT_CD = 'NONE'
+	</select>
+	
+	<!-- 인증키 등록 -->
+	<insert id="PortalUserKeyDao.insertActKey" parameterClass="params">
+		<selectKey keyProperty="keySeq" resultClass="int">
+		SELECT NVL(MAX(A.KEY_SEQ), 0) + 1
+		FROM TB_USER_KEY A
+		</selectKey>
+		INSERT INTO TB_USER_KEY (
+			USER_CD
+			, KEY_SEQ
+			, ACT_KEY
+			, KEY_STATE
+			, USE_NM
+			, USE_CONT
+			, PAUSE_MSG
+			, PAUSE_DTTM
+			, LIMIT_CD
+			, LIMIT_DTTM
+			, LIMIT_ID
+			, SYS_TAG
+			, REG_DTTM
+		) VALUES (
+			#regId:NUMERIC#
+			, #keySeq:NUMERIC#
+			, #actKey:VARCHAR#
+			, 'O'
+			, #useNm:VARCHAR#
+			, #useCont:VARCHAR#
+			, #pauseMsg:VARCHAR#
+			, TO_DATE(#pauseDttm:VARCHAR#, 'YYYY-MM-DD')
+			, 'NONE'
+			, TO_DATE(#limitDttm:VARCHAR#, 'YYYY-MM-DD')
+			, #limitId:VARCHAR#
+			, #sysTag:CHAR#
+			, SYSDATE
+		)
+	</insert>
+	
+	<!-- 인증키 폐기 -->
+	<delete id="PortalUserKeyDao.deleteActKey" parameterClass="params">
+		DELETE TB_USER_KEY
+		WHERE  ACT_KEY = #actKey:VARCHAR#
+	</delete>
+
+	<!-- 나의 인증키 조회 -->
+	<select id="PortalUserKeyDao.searchActKey" parameterClass="params" resultClass="record">
+		SELECT
+			TOTAL_CNT "totalCnt"
+			, ACT_KEY "actKey"
+			, KEY_SEQ "keySeq"
+			, USE_NM "useNm"
+			, REG_DTTM "regDttm"
+			, CALL_CNT "callCnt"
+			, LIMIT_CNT "limitCnt"
+			, DECODE(KEY_STATE, 'P', '폐기', DECODE(LIMIT_CD, 'NONE', '정상', '제한')) "keyState"
+		FROM (	
+			SELECT
+				ROWNUM RN
+				, TOTAL_CNT
+				, KEY_SEQ
+				, ACT_KEY
+				, USE_NM
+				, REG_DTTM
+				, CALL_CNT
+				, LIMIT_CNT
+				, KEY_STATE
+				, LIMIT_CD
+			FROM (	
+				SELECT
+					COUNT(*) OVER() TOTAL_CNT
+					, A.KEY_SEQ
+					, A.ACT_KEY
+					, A.USE_NM
+					, TO_CHAR(A.REG_DTTM, 'YYYY-MM-DD') REG_DTTM
+					, (SELECT COUNT(*) FROM TB_LOG_OPEN_INF_A B WHERE B.USER_CD = A.USER_CD AND B.KEY_SEQ = A.KEY_SEQ) CALL_CNT
+					, 0 LIMIT_CNT
+					, KEY_STATE
+					, LIMIT_CD
+				FROM
+					TB_USER_KEY A
+				WHERE
+					A.USER_CD = #regId:NUMERIC#
+				ORDER BY
+					A.REG_DTTM DESC
+				)
+		)
+		<dynamic prepend="WHERE">
+			<isNotEmpty property="viewCnt">
+				<![CDATA[ RN <= #viewCnt:NUMERIC# ]]>
+			</isNotEmpty>
+		</dynamic>			
+	</select>
+
+</sqlMap>

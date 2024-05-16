@@ -1,0 +1,42 @@
+@charset "utf-8";
+
+/* reset */
+*{margin:0;padding:0;}
+ul{list-style:none;}
+input,select,button{font-size:14px;vertical-align:middle;font-family:'맑은 고딕', 'Malgun Gothic';color:#515151;}
+label,span,img{vertical-align:middle;}
+button{border:none;}
+textarea{font-size:14px;vertical-align:middle;font-family:'맑은 고딕', 'Malgun Gothic';color:#515151;padding:5px;}
+pre{font-size:14px;vertical-align:middle;font-family:'맑은 고딕', 'Malgun Gothic';color:#515151;padding:5px;}
+select{padding:4px 5px; }
+input{padding:5px; }
+input,select,textarea{border-radius:0;}
+input[type="text"],input[type="password"], textarea, select{border:1px solid #c6c6c6;}
+
+
+/* hidden */
+.hiddenTitle{position:absolute;margin-left:-10000px;display:none;}
+caption{position:absolute;visibility:hidden;width:0;height:0;overflow:hidden;font:0;line-height:0;display:none;}
+
+/* default */
+body{font-family:'맑은 고딕', 'Malgun Gothic';color:#666;font-size:14px;background:url(../img/bg.gif) repeat-x 0 0;}
+
+/**/
+.ui-datepicker select.ui-datepicker-month, .ui-datepicker select.ui-datepicker-year{/*height:20px;*/}
+
+
+/* ibsheet */
+body .GridMain1 .GridMain2 .GMCellHeader, body .GridMain1 .GridMain2 .GMCellHeaderEmpty{color:#151f37 !important;font-size:14px !important;background:#f1f3f6 !important; border-right:1px solid #e0e3e7; border-bottom:1px solid #e0e3e7; 	background:#f1f3f6 !important;}
+.GridMain1 .GridMain2 .GMMainTable{border:1px solid #e0e3e7 !important;}
+.GridMain1 .GridMain2 .GMCountRowBottom{color:#151f37 !important;font-size:14px !important;border-top:1px solid #e0e3e7 !important;background:#f1f3f6 !important;}
+.GridMain1 .GridMain2 .GMCountFont0{font-size:14px !important;color:#151f37 !important;}
+.GridMain1 .GridMain2 div, .GridMain1 .GridMain2 p, .GridMain1 .GridMain2 td, .GridMain1 .GridMain2 tr, .GridMain1 .GridMain2 table, .GridMain1 .GridMain2 tbody, .GridMain1 .GridMain2 span, .GridMain1 .GridMain2 i, .GridMain1 .GridMain2 input, .GridMain1 .GridMain2 textarea, .GridMain1 .GridMain2 button{
+	font-family:'Malgun Gothic', 'Dotum', 'Gulim', 'sans-serif' !important;color:#151f37 !important;
+}
+.GridMain1 .GridMain2 .GMStatus, .GridMain1 .GridMain2 .GMSeq, .GridMain1 .GridMain2 .GMPopup, .GridMain1 .GridMain2 .GMPopupEdit, .GridMain1 .GridMain2 .GMHtml, .GridMain1 .GridMain2 .GMText, .GridMain1 .GridMain2 .GMLines, .GridMain1 .GridMain2 .GMPass, .GridMain1 .GridMain2 .GMInt, .GridMain1 .GridMain2 .GMFloat, .GridMain1 .GridMain2 .GMDate, .GridMain1 .GridMain2 .GMLink, .GridMain1 .GridMain2 .GMImg, .GridMain1 .GridMain2 .GMRadio, .GridMain1 .GridMain2 .GMRadioText, .GridMain1 .GridMain2 .GMList, .GridMain1 .GridMain2 .GMEnum, .GridMain1 .GridMain2 .GMDropCols, .GridMain1 .GridMain2 .GMAbs, .GridMain1 .GridMain2 .GMPagerEdit, .GridMain1 .GridMain2 .GMUser, .GridMain1 .GridMain2 .GMResult{
+	padding: 7px 3px !important;color:#151f37 !important;font-size:14px !important;
+}
+
+
+/* ibchart */
+.ibsheet-area *{font-family:'Malgun Gothic', 'Dotum', 'Gulim', 'sans-serif' !important;color:#151f37 !important;}

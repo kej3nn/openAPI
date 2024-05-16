@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="UserKey">
+	<resultMap id="UserKeyAll" class="egovframework.admin.user.service.UserKey">
+		<result property="userId" column="USER_ID"/>
+		<result property="userNm" column="USER_NM"/>
+		<result property="userCd" column="USER_CD"/>
+		<result property="keySeq" column="KEY_SEQ"/>
+		<result property="actKey" column="ACT_KEY"/>
+		<result property="keyState" column="KEY_STATE"/>
+		<result property="useNm" column="USE_NM"/>
+		<result property="limitCd" column="LIMIT_CD"/>
+		<result property="limitDttm" column="LIMIT_DTTM"/>
+		<result property="regDttm" column="REG_DTTM"/>
+	</resultMap>
+	<select id="UserKeyDao.UserKeyAll" parameterClass="egovframework.admin.user.service.UserKey" resultMap="UserKeyAll">
+		SELECT *
+		  FROM(
+			SELECT ROWNUM AS RN, TB.*
+			  FROM
+			  (
+					SELECT A.USER_ID
+						  ,A.USER_NM
+						  ,B.USER_CD
+						  ,B.KEY_SEQ
+						  ,B.ACT_KEY
+						  ,B.USE_NM
+						  ,DECODE(B.KEY_STATE,'O','정상','이용중지(폐기)') KEY_STATE
+						  ,B.REG_DTTM
+						  ,B.LIMIT_DTTM
+						  ,DECODE(B.LIMIT_CD,'NONE','','LM101','비정상 이용자','LM102','과도한 트레픽 유발') LIMIT_CD
+					 FROM TB_USER A
+					 	 ,TB_USER_KEY B
+					WHERE A.USER_CD=B.USER_CD
+					<isNotEmpty property="searchWord">
+				 		<isEqual property="searchWd" compareValue="0">
+				 		AND ( A.USER_ID LIKE '%' || #searchWord#  || '%' 
+				 			 OR  A.USER_ID LIKE '%' || UPPER(#searchWord#)  || '%'
+				 			 OR  A.USER_ID LIKE '%' || LOWER(#searchWord#)  || '%'
+				 		 )
+				 		</isEqual>
+				 		<isEqual property="searchWd" compareValue="1">
+				 		AND ( A.USER_NM LIKE '%' || #searchWord#  || '%' 
+				 			 OR  A.USER_NM LIKE '%' || UPPER(#searchWord#)  || '%'
+				 			 OR  A.USER_NM LIKE '%' || LOWER(#searchWord#)  || '%'
+				 		 )
+				 		</isEqual>
+				 		<isEqual property="searchWd" compareValue="2">
+				 		AND ( B.USE_NM LIKE '%' || #searchWord#  || '%' 
+				 			 OR  B.USE_NM LIKE '%' || UPPER(#searchWord#)  || '%'
+				 			 OR  B.USE_NM LIKE '%' || LOWER(#searchWord#)  || '%'
+				 		 )
+				 		</isEqual>
+				 	</isNotEmpty>
+					<isNotEmpty property="keyState">
+						AND B.KEY_STATE = #keyState#
+					</isNotEmpty>
+					<isNotEmpty property="pubDttmFrom">	
+							AND B.REG_DTTM BETWEEN  TO_DATE(#pubDttmFrom:VARCHAR#,'YYYY-MM-DD') AND TO_DATE(#pubDttmTo:VARCHAR#,'YYYY-MM-DD') +1
+					</isNotEmpty>
+					ORDER BY USER_CD, KEY_SEQ DESC
+			)TB
+		)
+		<isNotEqual prepend="startPage" compareValue="0">
+			WHERE RN BETWEEN #startPage:NUMERIC# AND #endPage:NUMERIC#
+		</isNotEqual>
+	</select>
+	
+	
+	<select id="UserKeyDao.UserKeyAllCnt" parameterClass="egovframework.admin.user.service.UserKey" resultClass="java.lang.Integer">
+		SELECT COUNT(A.USER_ID)
+		 FROM TB_USER A ,TB_USER_KEY B
+				WHERE A.USER_CD=B.USER_CD
+				<isNotEmpty property="searchWord">
+			 		<isEqual property="searchWd" compareValue="0">
+			 		AND ( A.USER_ID LIKE '%' || #searchWord#  || '%' 
+			 			 OR  A.USER_ID LIKE '%' || UPPER(#searchWord#)  || '%'
+			 			 OR  A.USER_ID LIKE '%' || LOWER(#searchWord#)  || '%'
+			 		 )
+			 		</isEqual>
+			 		<isEqual property="searchWd" compareValue="1">
+			 		AND ( A.USER_NM LIKE '%' || #searchWord#  || '%' 
+			 			 OR  A.USER_NM LIKE '%' || UPPER(#searchWord#)  || '%'
+			 			 OR  A.USER_NM LIKE '%' || LOWER(#searchWord#)  || '%'
+			 		 )
+			 		</isEqual>
+			 		<isEqual property="searchWd" compareValue="2">
+			 		AND ( B.USE_NM LIKE '%' || #searchWord#  || '%' 
+			 			 OR  B.USE_NM LIKE '%' || UPPER(#searchWord#)  || '%'
+			 			 OR  B.USE_NM LIKE '%' || LOWER(#searchWord#)  || '%'
+			 		 )
+			 		</isEqual>
+			 	</isNotEmpty>
+				<isNotEmpty property="keyState">
+					AND B.KEY_STATE = #keyState#
+				</isNotEmpty>
+				<isNotEmpty property="pubDttmFrom">	
+						AND B.REG_DTTM BETWEEN  TO_DATE(#pubDttmFrom:VARCHAR#,'YYYY-MM-DD') AND TO_DATE(#pubDttmTo:VARCHAR#,'YYYY-MM-DD') +1
+				</isNotEmpty>
+	</select>
+	
+	
+	<update id="UserKeyDao.UpdateUserKey" parameterClass="egovframework.admin.user.service.UserKey">
+		UPDATE TB_USER_KEY 
+		SET LIMIT_CD = #hiLimit:VARCHAR#
+			,LIMIT_ID = #limitId:VARCHAR#
+			,LIMIT_DTTM = CASE WHEN #hiLimit:VARCHAR#='NONE' THEN NULL ELSE SYSDATE END		
+			,KEY_STATE = CASE WHEN #hiLimit:VARCHAR# = 'NONE' THEN 'O' ELSE 'P' END
+		WHERE KEY_SEQ = #keySeq:NUMERIC#
+		AND USER_CD = #userCd:NUMERIC#
+	</update>
+</sqlMap>
+

@@ -1,0 +1,1732 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- @(#)AdminOpenDttran_Sql_Tibero.xml 1.0 2015/06/01                       -->
+<!--                                                                         -->
+<!-- COPYRIGHT (C) 2013 WISEITECH CO., LTD. ALL RIGHTS RESERVED.             -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- 통계표를 관리하는 SQL 파일이다.                                    	-->
+<!--                                                                         -->
+<!-- @author 김정호                                                        	-->
+<!-- @version 1.0 2017/05/31                                                 -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<sqlMap namespace="StatsMgmt">
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Type Alias                                                          -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+    
+   	<!-- 코드정보 조회 -->
+    <select id="StatsMgmtDao.selectOption" parameterClass="params" resultClass="record">
+    	/* sql id : StatsMgmtDao.selectOption */
+        SELECT 
+        	DITC_CD AS "code",
+        	DITC_NM AS "name"
+        FROM TB_COMM_CODE
+        WHERE GRP_CD = #grpCd:VARCHAR#
+        	AND USE_YN = 'Y'
+        	<isNotEmpty property="valueCd" prepend="AND">
+        		VALUE_CD LIKE '%' || #valueCd# || '%'
+        	</isNotEmpty>
+        ORDER BY V_ORDER
+    </select>
+	<!-- 정보카탈로그 시스템 코드 조회 -->
+    <select id="StatsMgmtDao.selectSysOption" parameterClass="params" resultClass="record">
+    	/* sql id : StatsMgmtDao.StatsMgmtDao.selectOption */
+        SELECT 
+        	DITC_CD AS "code",
+        	DITC_NM AS "name"
+        FROM TB_COMM_CODE c
+        WHERE GRP_CD = #grpCd:VARCHAR#
+        	AND USE_YN = 'Y'
+        	AND EXISTS (SELECT 1 FROM TB_NA_CMPS p WHERE USE_YN = 'Y' AND p.SRC_SYS_CD = C.DITC_CD) 
+        ORDER BY V_ORDER
+    </select>
+    
+	<!-- 통계 기준정보 조회 -->
+	<select id="StatsMgmtDao.selectSTTSOption" parameterClass="params" resultClass="record">
+		/* sql id : StatsMgmtDao.selectSTTSOption */
+		SELECT 
+			DITC_CD AS "code",
+        	DITC_NM AS "name"
+		FROM 
+			TV_STTS_CODE
+		WHERE  
+			GRP_CD = #grpCd:VARCHAR#
+		ORDER BY V_ORDER 
+	</select>   
+	
+	<!-- 통계메타명 팝업 리스트 조회 -->
+	<select id="StatsMgmtDao.selectStatsMetaPopList" parameterClass="params" resultClass="java.util.HashMap">
+		/* sql id : StatsMgmtDao.selectStatsMetaPopList */
+		SELECT 
+			STAT_ID AS 		"statId",
+			STAT_NM AS 		"statNm",
+			ENG_STAT_NM AS 	"engStatNm"
+		FROM
+			TB_STTS_STAT A
+		WHERE
+			USE_YN = 'Y'
+		<isNotEmpty property="searchVal">
+			<isEqual property="searchGubun" compareValue="STAT_NM" >
+				AND A.STAT_NM LIKE '%' || #searchVal# || '%'
+			</isEqual>
+			<isEqual property="searchGubun" compareValue="ENG_STAT_NM" >
+				AND A.ENG_STAT_NM LIKE '%' || #searchVal# || '%'
+			</isEqual>
+	   	</isNotEmpty> 	
+	</select>
+	<!-- 통계메타명 팝업 리스트 갯수 -->
+	<select id="StatsMgmtDao.selectStatsMetaPopListCount" parameterClass="params" resultClass="int">
+		/* sql id : StatsMgmtDao.selectStatsMetaPopListCount */
+		SELECT 
+			COUNT(*)
+		FROM
+			TB_STTS_STAT
+		WHERE
+			USE_YN = 'Y'
+		<isNotEmpty property="searchVal">
+			<isEqual property="searchGubun" compareValue="STAT_NM" >
+				AND A.STAT_NM LIKE '%' || #searchVal# || '%'
+			</isEqual>
+			<isEqual property="searchGubun" compareValue="ENG_STAT_NM" >
+				AND A.ENG_STAT_NM LIKE '%' || #searchVal# || '%'
+			</isEqual>   	 
+	   	</isNotEmpty> 
+	</select>
+	
+	<!-- 통계분류체계 팝업 리스트 조회 -->
+	<select id="StatsMgmtDao.selectStatsCatePopList" parameterClass="params" resultClass="java.util.HashMap">
+		/* sql id : StatsMgmtDao.selectStatsCatePopList */
+		SELECT
+			A.CATE_ID					AS "cateId"
+			, A.CATE_NM					AS "cateNm"
+			, A.CATE_FULLNM 			AS "cateFullnm"
+			, A.CATE_LVL				AS "Level"
+			, A.USE_YN					AS "useYn"
+			, NVL2(B.CATE_ID, '1', '0') AS "chk"
+		FROM
+			TB_STTS_CATE A
+		LEFT JOIN TB_STTS_TBL_CATE B 
+			ON B.STATBL_ID = #statblId:VARCHAR#
+		    AND A.CATE_ID = B.CATE_ID 			
+		WHERE 
+			A.CATE_ID IN 
+			(
+			SELECT CATE_ID FROM TB_STTS_CATE B
+		<isNotEmpty property="searchVal">
+			<isEqual property="searchGubun" compareValue="CATE_NM" >
+				START WITH B.CATE_NM LIKE '%' || #searchVal# || '%'
+			</isEqual>
+			<isEqual property="searchGubun" compareValue="ENG_CATE_NM" >
+				START WITH B.ENG_CATE_NM LIKE '%' || #searchVal# || '%'
+			</isEqual>
+	   	</isNotEmpty> 
+			CONNECT BY 
+				CATE_ID = PRIOR PAR_CATE_ID 
+				AND B.USE_YN = 'Y'
+			)
+		START WITH PAR_CATE_ID = 'T'
+		CONNECT BY 
+			PRIOR A.CATE_ID = PAR_CATE_ID 
+			AND A.USE_YN = 'Y'
+		ORDER SIBLINGS BY A.V_ORDER	
+	</select>
+	<!-- 통계분류체계 팝업 리스트 갯수 -->
+	<select id="StatsMgmtDao.selectStatsCatePopListCount" parameterClass="params" resultClass="int">
+		/* sql id : StatsMgmtDao.selectStatsCatePopListCount */
+		SELECT
+			COUNT(*)
+		FROM
+			TB_STTS_CATE A
+		WHERE 
+			A.CATE_ID IN 
+			(
+			SELECT CATE_ID FROM TB_STTS_CATE B
+			START WITH B.USE_YN = 'Y'
+		<isNotEmpty property="searchVal">
+			<isEqual property="searchGubun" compareValue="CATE_NM" >
+				START WITH B.CATE_NM LIKE '%' || #searchVal# || '%'
+			</isEqual>
+			<isEqual property="searchGubun" compareValue="ENG_CATE_NM" >
+				START WITH B.ENG_CATE_NM LIKE '%' || #searchVal# || '%'
+			</isEqual> 	 
+	   	</isNotEmpty> 
+			CONNECT BY CATE_ID = PRIOR PAR_CATE_ID
+			)
+		START WITH PAR_CATE_ID = 'T'
+		CONNECT BY PRIOR CATE_ID = PAR_CATE_ID AND A.USE_YN = 'Y'
+		ORDER SIBLINGS BY V_ORDER	
+	</select>
+	
+	<!-- 통계표 등록/수정 메인 리스트 조회 -->
+	<select id="StatsMgmtDao.statsMgmtList" parameterClass="params" resultClass="record">
+		/* sql id : StatsMgmtDao.statsMgmtList */
+		WITH TMP_STTS_TBL AS
+		(
+		    SELECT 
+		    	'C'	 			AS STATBL_TAG
+		        , C.CATE_ID 	AS STATBL_ID
+		        , C.PAR_CATE_ID AS PAR_STATBL_ID
+		        , C.CATE_NM 	AS STATBL_NM
+		        , ''			AS ENG_STATBL_NM
+		        , '' 			AS STAT_ID
+		        , '' 			AS STAT_NM
+		        , TO_NUMBER('') AS DSCN_ID
+		        , '' 			AS DSCN_NM
+		        , '' 			AS DTACYCLE_NM
+		        , '' 			AS ORG_NM
+		        , '' 			AS USR_NM
+		        , '' 			AS OPEN_STATE
+		        , TO_DATE('') 	AS OPEN_DTTM
+		        , C.V_ORDER		AS V_ORDER
+		        , ''			AS CTS_SRV_CD
+		        , ''			AS CCL_CD
+		        , ''			AS CCL_NM
+		        , '' 			AS OPEN_SYS_NM
+		        , TO_NUMBER('') AS FVT_DATA_ORDER
+		        , ''			AS FVT_DATA_ORDER_NM
+		    FROM  TB_STTS_CATE C
+		    WHERE C.USE_YN = 'Y'
+			<isNotEmpty property="iterCateId">	<!-- 특정 분류체계가 넘어왔을 경우 -->
+				AND   CATE_ID IN (
+			    		SELECT CATE_ID
+			    		FROM   TB_STTS_CATE F
+			    		START WITH F.CATE_ID IN
+			    	<iterate property="iterCateId" open="(" close=")" conjunction=", ">
+           				#iterCateId[]:VARCHAR#
+           			</iterate>
+			    		CONNECT BY F.CATE_ID = PRIOR F.PAR_CATE_ID
+			          )	
+			</isNotEmpty>		
+				 UNION ALL                                         
+		   	SELECT 
+		   	 	A.STATBL_TAG
+		        , A.STATBL_ID
+		        , A.CATE_ID   	AS PAR_STATBL_ID
+		        , A.STATBL_NM
+		        , A.ENG_STATBL_NM
+		        , A.STAT_ID
+		        , A.STAT_NM
+		        , A.DSCN_ID
+		        , A.DSCN_NM
+		        , A.DTACYCLE_NM
+		        , A.ORG_NM
+		        , A.USR_NM
+		        , A.OPEN_STATE
+		        , A.OPEN_DTTM
+		        , A.V_ORDER
+		        , A.CTS_SRV_CD
+		        , A.CCL_CD
+		        , A.CCL_NM
+		        , A.OPEN_SYS_NM
+		        , A.FVT_DATA_ORDER
+		        , DECODE(A.FVT_DATA_ORDER, 0, '', FN_GET_COMM_CODE_NM('C1018', A.FVT_DATA_ORDER)) 	AS FVT_DATA_ORDER_NM
+		   	FROM  TV_STTS_TBL A
+			WHERE USE_YN = 'Y'
+	   	<isNotEmpty property="orgCd">
+			AND   A.ORG_CD = #orgCd#	   	 
+	   	</isNotEmpty>
+		<isNotEmpty property="dscnId">
+			AND   A.DSCN_ID = #dscnId#	   	 
+	   	</isNotEmpty>
+	   	<isNotEmpty property="beginOpenDttm">
+		    AND   A.OPEN_DTTM <![CDATA[ >= ]]> TO_DATE(#beginOpenDttm:VARCHAR#, 'YYYY-MM-DD') + 0	   	 
+	   	</isNotEmpty>
+	   	<isNotEmpty property="endOpenDttm">
+		    AND   A.OPEN_DTTM <![CDATA[ < ]]> TO_DATE(#endOpenDttm:VARCHAR#, 'YYYY-MM-DD') + 1
+	   	</isNotEmpty>
+	   	<isNotEmpty property="searchVal">
+	   		<isEqual property="searchGubun" compareValue="STATBL_NM">
+				AND   A.TAG_STATBL_NM LIKE '%' || REPLACE(UPPER(#searchVal#), ' ', '') || '%'	   	 
+	   		</isEqual>
+	   		<isNotEqual property="searchGubun" compareValue="STATBL_NM">
+				<isEqual property="searchGubun" compareValue="ENG_STATBL_NM" >
+					AND A.ENG_STATBL_NM LIKE '%' || #searchVal# || '%'
+				</isEqual>
+				<isEqual property="searchGubun" compareValue="STATBL_ID" >
+					AND A.STATBL_ID LIKE '%' || #searchVal# || '%'
+				</isEqual>
+	   		</isNotEqual>
+	   	</isNotEmpty>
+	   	<isNotEmpty property="openState">
+			AND   A.OPEN_STATE = #openState#	   	 
+	   	</isNotEmpty>
+	   	<isNotEmpty property="fvtDataOrder">
+	   		<isEqual property="fvtDataOrder" compareValue="Y">
+			AND   A.FVT_DATA_ORDER IN (SELECT DITC_CD FROM TB_COMM_CODE WHERE GRP_CD = 'C1018' AND USE_YN = 'Y' AND DITC_CD != 0)
+			</isEqual>   	 
+	   	</isNotEmpty>
+	   	<isNotEmpty property="accCd" prepend="AND">
+			<isNotEqual property="accCd" compareValue="SYS">
+				EXISTS (SELECT 1 FROM TB_STTS_TBL_USR 
+						WHERE  STATBL_ID = A.STATBL_ID
+						AND    USE_YN = 'Y' 
+						<![CDATA[
+						AND    PRSS_ACC_CD > 0
+						]]> 
+						AND    USR_CD = #regId:NUMERIC# )
+			</isNotEqual>
+		</isNotEmpty>
+   		<dynamic prepend="AND (">
+		   	<isNotEmpty property="dtacycleExist">
+	   			<isNotEmpty property="YYdtacycleYn" prepend="OR">
+	   			A.YY_DTACYCLE_YN = 'Y'
+	   			</isNotEmpty>
+	   			<isNotEmpty property="HYdtacycleYn" prepend="OR">
+	   			A.HY_DTACYCLE_YN = 'Y'
+	   			</isNotEmpty>
+	   			<isNotEmpty property="QYdtacycleYn" prepend="OR">
+	   			A.QY_DTACYCLE_YN = 'Y'
+	   			</isNotEmpty>
+	   			<isNotEmpty property="MMdtacycleYn" prepend="OR">
+	   			A.MM_DTACYCLE_YN = 'Y'
+	   			</isNotEmpty>
+		   		)
+		   	</isNotEmpty>
+   		</dynamic>
+   		<dynamic prepend="AND (">
+		   	<isNotEmpty property="systemExist">
+	   			<isNotEmpty property="korYn" prepend="OR">
+	   			A.KOR_YN = 'Y'
+	   			</isNotEmpty>
+	   			<isNotEmpty property="engYn" prepend="OR">
+	   			A.ENG_YN = 'Y'
+	   			</isNotEmpty>
+	   			<isNotEmpty property="korMobileYn" prepend="OR">
+	   			A.KOR_MOBILE_YN = 'Y'
+	   			</isNotEmpty>
+	   			<isNotEmpty property="engMobileYn" prepend="OR">
+	   			A.ENG_MOBILE_YN = 'Y'
+	   			</isNotEmpty>
+	   		)
+		   	</isNotEmpty>
+	   	</dynamic>
+		)       
+		SELECT     
+			LEVEL 					AS "Level"		
+			, L.STATBL_TAG			AS "statblTag"
+			, L.STATBL_ID 			AS "statblId"
+			, L.STATBL_NM			AS "statblNm"
+			, L.PAR_STATBL_ID		AS "parStatblId"
+			, L.STATBL_NM			AS "statblNm"	
+			, L.STAT_ID				AS "statId"
+			, L.STAT_NM				AS "statNm"
+			, L.DSCN_ID				AS "dscnId"
+			, L.DSCN_NM         	AS "dscnNm"
+			, L.DTACYCLE_NM			AS "dtacycleNm"
+			, L.OPEN_SYS_NM     	AS "openSysNm"
+			, L.ORG_NM				AS "orgNm"
+			, L.USR_NM				AS "usrNm"
+			, L.OPEN_STATE			AS "openState"
+			, L.OPEN_DTTM			AS "openDttm"
+			, L.V_ORDER				AS "vOrder"
+			, L.CTS_SRV_CD			AS "ctsSrvCd"
+			, L.CCL_CD				AS "cclCd"
+			, L.CCL_NM				AS "cclNm"
+			, L.FVT_DATA_ORDER		AS "fvtDataOrder"
+			, L.FVT_DATA_ORDER_NM 	AS "fvtDataOrderNm"
+			, DECODE(CONNECT_BY_ISLEAF, 0, 1, 0) AS "HaveChild"
+			<![CDATA[
+            , L.STATBL_NM  ||
+              CASE
+                                WHEN L.STATBL_TAG = 'T'
+                                THEN ' <a href="/admin/stat/popup/statMetaExpPopup.do?statblId='
+                                                                    || L.STATBL_ID
+                                                                    || '" target="_blank" title="통계설명(팝업)"><img src="../../images/admin/icon_book.png"/></a>'
+                                ELSE ''
+              END
+              ||                  
+              CASE
+                                WHEN CTS_SRV_CD = 'N'
+                                THEN '<a href="/admin/stat/statPreviewPage/'
+                                                                    || L.STATBL_ID
+                                                                    || '.do" target="_blank" title="통계표(팝업)"><img src="../../images/admin/icon_file.gif"/></a>'
+                                ELSE ''
+              END "statblNmExp"
+		     ]]>
+		FROM 
+			TMP_STTS_TBL L
+		WHERE 
+			1=1
+		<isEmpty property="parStatblId">
+				AND LEVEL = 1
+		</isEmpty>
+			AND EXISTS (
+				SELECT 1 
+				FROM   TMP_STTS_TBL E
+				WHERE  E.STATBL_TAG = 'T'
+				START WITH 
+					E.STATBL_ID = L.STATBL_ID 
+				CONNECT BY 
+					PRIOR E.STATBL_ID = E.PAR_STATBL_ID
+			)
+		START WITH 
+			<isEmpty property="parStatblId">
+				L.PAR_STATBL_ID = 'T'
+			</isEmpty>
+			<isNotEmpty property="parStatblId">
+				L.PAR_STATBL_ID = #parStatblId#
+			</isNotEmpty>
+		CONNECT BY 
+			PRIOR L.STATBL_ID = L.PAR_STATBL_ID
+		ORDER SIBLINGS BY L.V_ORDER, L.STATBL_NM
+	</select>
+
+	
+	<!-- 통계표 상세조회 -->
+	<select id="StatsMgmtDao.selectStatsMgmtDtl" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		/* sql id : StatsMgmtDao.selectStatsMgmtDtl */
+		SELECT
+			A.STATBL_ID 							AS "statblId"
+			, A.STATBL_NM							AS "statblNm"
+			, A.ENG_STATBL_NM						AS "engStatblNm"
+			, A.STAT_ID								AS "statId"
+			, B.STAT_NM								AS "statNm"
+			, A.CATE_ID								AS "cateId"
+			, C.CATE_NM								AS "cateNm"
+			, A.DSCN_ID								AS "dscnId"
+			, A.RPSTUI_NM							AS "rpstuiNm"
+			, A.ENG_RPSTUI_NM						AS "engRpstuiNm"
+			, A.CMMT_IDTFR							AS "cmmtIdtfr"
+			, A.STATBL_CMMT							AS "statblCmmt"
+			, A.ENG_STATBL_CMMT						AS "engStatblCmmt"
+			, A.SCHW_TAG_CONT						AS "schwTagCont"
+			, A.ENG_SCHW_TAG_CONT					AS "engSchwTagCont"
+			, A.OPEN_STATE							AS "openState"
+			, A.FVT_DATA_ORDER						AS "fvtDataOrder"
+			, TO_CHAR(A.OPEN_DTTM, 'YYYY-MM-DD')	AS "openDttm"
+			, SUBSTR(A.WRT_START_YMD, 1, 4)			AS "wrtStartYmd"
+			, SUBSTR(A.WRT_END_YMD, 1, 4)			AS "wrtEndYmd"
+			, A.USE_YN								AS "useYn"
+			, A.HIS_CYCLE_YN						AS "hisCycleYn"
+			, A.SRC_STATBL_ID						AS "srcStatblId"
+			, A.MAP_SRV_CD							AS "mapSrvCd"
+			, A.CTS_SRV_CD							AS "ctsSrvCd"
+			, A.CCL_CD							AS "cclCd"
+			, ( SELECT 	WRTSTDD_CD AS WRTSTDD_CD
+			   	FROM 	TB_STTS_TBL_SCHL  
+			   	WHERE 	STATBL_ID = #statblId:VARCHAR#
+				AND 	ROWNUM = 1
+			) AS "wrtstddCd"
+			, FN_GET_CONCAT(A.STATBL_ID) 			AS "cateIds" 
+			, KOR_YN								AS "korYn"
+			, ENG_YN								AS "engYn"
+			, KOR_MOBILE_YN							AS "korMobileYn"
+			, ENG_MOBILE_YN							AS "engMobileYn"
+			, A.DATA_DTTM_CONT						AS "dataDttmCont"
+		FROM 
+			TB_STTS_TBL A
+			INNER JOIN TB_STTS_STAT B
+				ON  A.STAT_ID = B.STAT_ID
+			INNER JOIN TB_STTS_CATE C
+				ON  A.CATE_ID = C.CATE_ID
+		WHERE
+			A.USE_YN = 'Y'	
+		AND A.STATBL_ID = #statblId:VARCHAR#		
+	</select>
+	
+	<!-- 통계표 옵션정보 조회 -->
+	<select id="StatsMgmtDao.selectStatsMgmtDtlOpt" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		/* sql id : StatsMgmtDao.selectStatsMgmtDtlOpt */
+		SELECT
+			STATBL_ID	AS "statblId"
+			, OPT_CD	AS "optCd"
+			, OPT_VAL	AS "optVal"
+		FROM 
+			TB_STTS_TBL_OPT 
+		WHERE 
+			STATBL_ID = #statblId:VARCHAR#
+		AND USE_YN = 'Y'	
+	</select>
+	
+	<!-- 통계자료 작성일정 조회 -->
+	<select id="StatsMgmtDao.selectStatsMgmtDtlSchl" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		/* sql id : StatsMgmtDao.selectStatsMgmtDtlSchl */
+		SELECT
+			STATBL_ID		AS "statblId"
+			, DTACYCLE_CD	AS "dtacycleCd"
+			, WRTTIME_IDTFR	AS "wrttimeIdtfr"
+			, WRTSTDD_CD	AS "wrtstddCd"
+			, SUBSTR(WRT_START_MD, 1, 2) || '-' || SUBSTR(WRT_START_MD, 3, 4) 	AS "wrtStartMd"
+         	, SUBSTR(WRT_END_MD, 1, 2) || '-' || SUBSTR(WRT_END_MD, 3, 4) 		AS "wrtEndMd"
+		FROM 
+			TB_STTS_TBL_SCHL
+		WHERE 
+			STATBL_ID = #statblId:VARCHAR#	
+	</select>
+	
+	<!-- 통계표 정보 등록 -->
+	<insert id="StatsMgmtDao.insertStatsTbl" parameterClass="params">
+		<selectKey keyProperty="statblId" resultClass="string">
+			SELECT FN_CREATE_STATBL_ID('') FROM DUAL
+		</selectKey>
+		/* sql id : StatsMgmtDao.insertStatsMgmt */
+		INSERT INTO TB_STTS_TBL
+		(
+			STATBL_ID
+			, STATBL_NM
+			, ENG_STATBL_NM
+			, STAT_ID
+			, CATE_ID
+			, DSCN_ID
+			
+			, RPSTUI_NM
+			, ENG_RPSTUI_NM
+			, CMMT_IDTFR
+			, STATBL_CMMT
+			, OPEN_DTTM
+			, CLOSE_DTTM
+			, FVT_DATA_ORDER
+			
+			, WRT_START_YMD
+			, WRT_END_YMD
+			, ENG_STATBL_CMMT
+			, SCHW_TAG_CONT
+			, ENG_SCHW_TAG_CONT
+			, HIS_CYCLE_YN
+			
+			, SRC_STATBL_ID
+			, TAG_STATBL_NM
+			, ENG_TAG_STATBL_NM
+			, MAP_SRV_CD
+			, CTS_SRV_CD
+			, CCL_CD
+			
+			, KOR_YN
+			, ENG_YN
+			, KOR_MOBILE_YN
+			, ENG_MOBILE_YN
+			, DATA_DTTM_CONT
+			
+			, USE_YN
+			, REG_ID
+			, REG_DTTM
+			, UPD_ID
+			, UPD_DTTM
+		)
+		VALUES
+		(
+			#statblId:VARCHAR#
+			, #statblNm:VARCHAR#
+			, #engStatblNm:VARCHAR#
+			, #statId:VARCHAR#
+			, #cateId:VARCHAR#
+			, #dscnId:NUMERIC#
+			
+			, #rpstuiNm:VARCHAR#
+			, #engRpstuiNm:VARCHAR#
+			, #cmmtIdtfr:VARCHAR#
+			, #statblCmmt:VARCHAR#
+			, (CASE WHEN #openState:CHAR# = 'Y' THEN TO_DATE(#openDttm:VARCHAR#, 'YYYY-MM-DD') END)
+			, (CASE WHEN #openState:CHAR# = 'N' THEN SYSDATE END)
+			, #fvtDataOrder:NUMERIC#
+
+			, CONCAT(#wrtStartYmd:VARCHAR#, '0101')
+			, (CASE WHEN #wrtChk:VARCHAR# = 'Y' THEN '99991231' ELSE CONCAT(#wrtEndYmd:VARCHAR#, '1231') END)
+			, #engStatblCmmt:VARCHAR#
+			, #schwTagCont:VARCHAR#
+			, #engSchwTagCont:VARCHAR#
+			, #hisCycleYn:CHAR#
+			
+			, #srcStatblId:VARCHAR#
+			, UPPER(REPLACE(#statblNm:VARCHAR#, ' ', '')) 
+			, UPPER(REPLACE(#engStatblNm:VARCHAR#, ' ', ''))
+			, #mapSrvCd:VARCHAR#
+			, #ctsSrvCd:VARCHAR# 
+			, #cclCd:VARCHAR# 
+			
+			, NVL(#korYn:CHAR#, 'N')
+			, NVL(#engYn:CHAR#, 'N')
+			, NVL(#korMobileYn:CHAR#, 'N')
+			, NVL(#engMobileYn:CHAR#, 'N')
+			, #dataDttmCont:VARCHAR#
+			
+			, #useYn:CHAR#
+			, #regId:VARCHAR#
+			, SYSDATE
+			, #updId:VARCHAR#
+			, SYSDATE
+		)	
+	</insert>
+	
+	<!-- 통계표 정보 변경 -->
+	<update id="StatsMgmtDao.updateStatsTbl" parameterClass="params">
+		UPDATE TB_STTS_TBL
+		SET
+			STATBL_NM = #statblNm:VARCHAR#
+			, ENG_STATBL_NM = #engStatblNm:VARCHAR#
+			, STAT_ID = #statId:VARCHAR#
+			, CATE_ID = #cateId:VARCHAR#
+			, DSCN_ID = #dscnId:VARCHAR:NUMERIC#
+			, RPSTUI_NM = #rpstuiNm:VARCHAR#
+			, ENG_RPSTUI_NM = #engRpstuiNm:VARCHAR#
+			, CMMT_IDTFR = #cmmtIdtfr:VARCHAR#
+			, STATBL_CMMT = #statblCmmt:VARCHAR#
+			, OPEN_STATE = #openState:CHAR#
+			, OPEN_DTTM = (CASE WHEN #openState:CHAR# = 'Y' THEN TO_DATE(#openDttm:VARCHAR#, 'YYYY-MM-DD') END)
+			, CLOSE_DTTM = (CASE WHEN #openState:CHAR# = 'N' THEN SYSDATE END)
+			, USR_CD = #usrCd:NUMERIC#
+			, ORG_CD = (SELECT TOP_ORG_CD FROM TB_COMM_ORG WHERE ORG_CD = #orgCd:VARCHAR#)
+			, WRT_START_YMD = CONCAT(#wrtStartYmd:VARCHAR#, '0101')
+			, WRT_END_YMD = (CASE WHEN #wrtChk:VARCHAR# = 'Y' THEN '99991231' ELSE CONCAT(#wrtEndYmd:VARCHAR#, '1231') END)
+			, ENG_STATBL_CMMT = #engStatblCmmt:VARCHAR#
+			, SCHW_TAG_CONT = #schwTagCont:VARCHAR#
+			, ENG_SCHW_TAG_CONT = #engSchwTagCont:VARCHAR#
+			, FVT_DATA_ORDER = #fvtDataOrder:NUMERIC#
+			, HIS_CYCLE_YN = #hisCycleYn:VARCHAR#
+		<isNotEmpty property="srcStatblId">
+			, SRC_STATBL_ID = #srcStatblId:VARCHAR#
+		</isNotEmpty>
+			, KOR_YN = NVL(#korYn:CHAR#, 'N')
+			, ENG_YN = NVL(#engYn:CHAR#, 'N')
+			, KOR_MOBILE_YN = NVL(#korMobileYn:CHAR#, 'N')
+			, ENG_MOBILE_YN = NVL(#engMobileYn:CHAR#, 'N')
+			, TAG_STATBL_NM = UPPER(REPLACE(#statblNm:VARCHAR#, ' ', '')) 
+			, ENG_TAG_STATBL_NM = UPPER(REPLACE(#engStatblNm:VARCHAR#, ' ', '')) 
+			, DATA_DTTM_CONT  = #dataDttmCont:VARCHAR#
+			, MAP_SRV_CD = #mapSrvCd:VARCHAR#
+			, CTS_SRV_CD = #ctsSrvCd:VARCHAR#
+			, CCL_CD = #cclCd:VARCHAR#
+			, USE_YN = #useYn:CHAR#
+			, UPD_ID =  #updId:VARCHAR#
+			, UPD_DTTM = SYSDATE
+		WHERE
+			STATBL_ID = #statblId:VARCHAR#
+	</update>
+	
+	<!-- 통계표 옵션정보 입력 -->
+	<insert id="StatsMgmtDao.insertStatsOpt" parameterClass="java.util.HashMap">
+		INSERT INTO TB_STTS_TBL_OPT
+		(
+			STATBL_ID
+			, OPT_CD
+			, OPT_VAL
+			, USE_YN
+		)
+		<dynamic>
+		<iterate property="pMap" conjunction="UNION ALL ">
+		SELECT 
+			#pMap[].statblId:VARCHAR#
+			, #pMap[].optCd:VARCHAR#
+			, #pMap[].optVal:VARCHAR#
+			, 'Y'
+		FROM DUAL
+		</iterate>
+		</dynamic>
+	</insert>
+	
+	<!-- 통계표 옵션정보 삭제 -->
+	<update id="StatsMgmtDao.delStatsOpt" parameterClass="params">
+		UPDATE TB_STTS_TBL_OPT
+		SET    USE_YN = 'N'
+		WHERE  STATBL_ID = #statblId:VARCHAR#
+	</update>
+	
+	<!-- 통계표 옵션정보 삭제(항목 위치) -->
+	<update id="StatsMgmtDao.delStatsOptInSc" parameterClass="params">
+		UPDATE TB_STTS_TBL_OPT
+		SET    USE_YN = 'N'
+		WHERE  STATBL_ID = #statblId:VARCHAR#
+		AND    OPT_CD = 'SC'
+	</update>
+	
+	<!-- 통계표 옵션정보 삭제 후 재 입력 -->
+	<update id="StatsMgmtDao.mergeStatsOpt" parameterClass="java.util.HashMap">
+		MERGE INTO TB_STTS_TBL_OPT A
+		USING (
+			<dynamic>
+			<iterate property="pMap" conjunction="UNION ALL ">
+			SELECT 
+				#pMap[].statblId:VARCHAR# 	AS STATBL_ID
+				, #pMap[].optCd:VARCHAR#	AS OPT_CD
+				, #pMap[].optVal:VARCHAR#	AS OPT_VAL
+				, 'Y'				AS USE_YN
+			FROM DUAL
+			</iterate>
+			</dynamic>			
+		) B
+		ON (
+			A.STATBL_ID = B.STATBL_ID
+			AND A.OPT_CD = B.OPT_CD
+			AND A.OPT_VAL = B.OPT_VAL
+		)
+		WHEN MATCHED THEN 
+		UPDATE SET
+			A.USE_YN = B.USE_YN
+		WHEN NOT MATCHED THEN
+		INSERT (
+			A.STATBL_ID, A.OPT_CD, A.OPT_VAL, A.USE_YN
+		)
+		VALUES (
+			B.STATBL_ID, B.OPT_CD, B.OPT_VAL, B.USE_YN
+		)	
+	</update>
+	
+	<!-- 통계자료작성 일정 입력 -->
+	<insert id="StatsMgmtDao.insertStatsSchl" parameterClass="java.util.HashMap">
+		INSERT INTO TB_STTS_TBL_SCHL
+		(
+			STATBL_ID
+			, DTACYCLE_CD
+			, WRTTIME_IDTFR
+			, WRTSTDD_CD
+			, WRT_START_MD
+			, WRT_END_MD
+		)
+		<dynamic>
+		<iterate property="pMap" conjunction="UNION ALL ">
+		SELECT 
+			#pMap[].statblId:VARCHAR#
+			, #pMap[].dtacycleCd:VARCHAR#
+			, #pMap[].wrttimeIdtfr:VARCHAR#
+			, #pMap[].wrtstddCd:VARCHAR#
+			, #pMap[].wrtStartMd:VARCHAR#
+			, #pMap[].wrtEndMd:VARCHAR#
+		FROM DUAL
+		</iterate>
+		</dynamic>
+	</insert>
+	
+	<!-- 통계자료작성 일정 삭제 -->
+	<delete id="StatsMgmtDao.deleteStatsSchl" parameterClass="params">
+		DELETE FROM TB_STTS_TBL_SCHL
+		WHERE  STATBL_ID = #statblId:VARCHAR#
+	</delete>
+	
+	<!-- 통계표 관리담당자 입력 -->
+	<insert id="StatsMgmtDao.insertStatsUsr" parameterClass="java.util.HashMap">
+		INSERT INTO TB_STTS_TBL_USR
+		(
+			STATBL_ID
+			, USR_CD
+			, ORG_CD
+			, RPST_YN
+			, PRSS_ACC_CD
+			, SRC_VIEW_YN
+			, USE_YN
+			, REG_ID
+			, REG_DTTM
+			, UPD_ID
+			, UPD_DTTM
+		)
+		<dynamic>
+		<iterate property="pMap" conjunction="UNION ALL ">
+		SELECT 
+			#pMap[].statblId:VARCHAR#
+			, #pMap[].usrCd:NUMERIC#
+			, #pMap[].orgCd:VARCHAR#
+			, #pMap[].rpstYn:CHAR#
+			, #pMap[].prssAccCd:VARCHAR#
+			, #pMap[].srcViewYn:CHAR#
+			, #pMap[].useYn:CHAR#
+			, #pMap[].regId:VARCHAR#
+			, SYSDATE
+			, #pMap[].updId:VARCHAR#
+			, SYSDATE
+		FROM DUAL
+		</iterate>
+		</dynamic>
+	</insert>	
+	
+	<!-- 통계표 관리담당자 삭제 -->
+	<update id="StatsMgmtDao.delStatsUsr" parameterClass="params">
+		UPDATE TB_STTS_TBL_USR
+		SET    USE_YN = 'N'
+		WHERE  STATBL_ID = #statblId:VARCHAR#
+	</update>
+	
+	<!-- 통계표 관리담당자 삭제 후 재 입력 -->
+	<update id="StatsMgmtDao.mergeStatsUsr" parameterClass="java.util.HashMap">
+		MERGE INTO TB_STTS_TBL_USR A
+		USING (
+			<dynamic>
+			<iterate property="pMap" conjunction="UNION ALL ">
+			SELECT 
+				#pMap[].statblId:VARCHAR# 		AS STATBL_ID
+				, #pMap[].usrCd:NUMERIC#		AS USR_CD
+				, #pMap[].orgCd:VARCHAR#		AS ORG_CD
+				, #pMap[].rpstYn:CHAR#			AS RPST_YN
+				, #pMap[].prssAccCd:VARCHAR#	AS PRSS_ACC_CD
+				, #pMap[].srcViewYn:CHAR#		AS SRC_VIEW_YN
+				, #pMap[].useYn:CHAR#			AS USE_YN
+				, #pMap[].regId:VARCHAR#		AS REG_ID
+				, #pMap[].updId:VARCHAR#		AS UPD_ID
+			, SYSDATE
+			FROM DUAL
+			</iterate>
+			</dynamic>			
+		) B
+		ON (
+			A.STATBL_ID = B.STATBL_ID
+			AND A.USR_CD = B.USR_CD
+			AND A.ORG_CD = B.ORG_CD
+		)
+		WHEN MATCHED THEN 
+		UPDATE SET
+			A.RPST_YN = B.RPST_YN
+			, A.PRSS_ACC_CD = B.PRSS_ACC_CD
+			, A.SRC_VIEW_YN = B.SRC_VIEW_YN
+			, A.USE_YN = B.USE_YN
+			, A.UPD_ID = B.UPD_ID
+			, A.UPD_DTTM = SYSDATE
+		WHEN NOT MATCHED THEN
+		INSERT (
+			A.STATBL_ID
+			, A.USR_CD
+			, A.ORG_CD
+			, A.RPST_YN
+			, A.PRSS_ACC_CD
+			, A.SRC_VIEW_YN
+			, A.USE_YN
+			, A.REG_ID
+			, A.REG_DTTM
+			, A.UPD_ID
+			, A.UPD_DTTM
+		)
+		VALUES (
+			B.STATBL_ID
+			, B.USR_CD
+			, B.ORG_CD
+			, B.RPST_YN
+			, B.PRSS_ACC_CD
+			, B.SRC_VIEW_YN
+			, B.USE_YN
+			, B.REG_ID
+			, SYSDATE
+			, B.UPD_ID
+			, SYSDATE
+		)	
+	</update>
+	
+	<!-- 통계표 관리담당자 대표담당자 처리 -->
+	<update id="StatsMgmtDao.updateStatsOwnerUsr" parameterClass="java.util.HashMap">
+		UPDATE TB_STTS_TBL
+		SET
+			USR_CD = #usrCd:NUMERIC#
+			, ORG_CD = (SELECT TOP_ORG_CD FROM TB_COMM_ORG WHERE ORG_CD = #orgCd:VARCHAR#)
+		WHERE
+			STATBL_ID = #statblId:VARCHAR#
+	</update>
+	
+	<!-- 통계표 관리담당자 목록 조회 -->
+	<select id="StatsMgmtDao.selectStatsUsrList" parameterClass="params" resultClass="java.util.HashMap">
+		SELECT 
+			A.STATBL_ID AS "statblId"
+			, A.USR_CD	AS "usrCd"
+			, A.ORG_CD	AS "orgCd"
+			, A.RPST_YN	AS "rpstYn"
+			, A.PRSS_ACC_CD	AS "prssAccCd"
+			, A.SRC_VIEW_YN	AS "srcViewYn"
+			, A.USE_YN		AS "useYn"
+			, (SELECT USR_NM FROM TB_COMM_USR WHERE USR_CD = A.USR_CD) AS "usrNm"
+			, (SELECT ORG_NM FROM TB_COMM_ORG WHERE ORG_CD = A.ORG_CD) AS "orgNm"
+		FROM
+			TB_STTS_TBL_USR A
+		WHERE
+			A.STATBL_ID = #statblId:VARCHAR#
+		AND	A.USE_YN = 'Y'
+	</select>
+
+	<!-- 표준항목분류정보 계층 조회 -->
+	<select id="StatsMgmtDao.selectStatsStddItmPopList" parameterClass="params" resultClass="java.util.HashMap">
+		SELECT
+			ITM_ID				AS "itmId"
+			, PAR_ITM_ID		AS "parItmId"
+			, ITM_NM			AS "itmNm"
+			, ENG_ITM_NM		AS "engItmNm"
+			, LTRIM(SYS_CONNECT_BY_PATH(ITM_NM, '>'), '>')  AS "itmFullnm"
+			, ITM_EXP			AS "itmExp"
+			, USE_YN			AS "useYn"
+			, V_ORDER			AS "vOrder"
+		<isEmpty property="parItmId">	
+			, LEVEL			AS "Level"
+		</isEmpty>
+		<isNotEmpty property="parItmId">
+			, LEVEL + 1		AS "Level"
+		</isNotEmpty>	
+			, DECODE(CONNECT_BY_ISLEAF, 0, 1, 0) AS "HaveChild"
+		FROM
+			TB_STTS_STDDITM	
+		WHERE
+			1=1
+		<isEmpty property="parItmId">
+			AND PAR_ITM_ID = 0
+		START WITH	
+			PAR_ITM_ID = 0	
+			<isNotEmpty property="useYn">
+					AND USE_YN = #useYn#
+				</isNotEmpty>
+			<isNotEmpty property="searchVal">	
+				AND ITM_ID IN (
+					SELECT DISTINCT ITM_ID FROM TB_STTS_STDDITM B
+				<isEmpty property="searchGubun">
+					START WITH B.ITM_NM LIKE '%' || #searchVal:VARCHAR# || '%'
+				</isEmpty>
+				<isNotEmpty property="searchGubun">
+					<isEqual property="searchGubun" compareValue="ITM_NM" >
+						START WITH B.ITM_NM LIKE '%' || #searchVal:VARCHAR# || '%'
+					</isEqual>
+					<isEqual property="searchGubun" compareValue="ENG_ITM_NM" >
+						START WITH B.ENG_ITM_NM LIKE '%' || #searchVal:VARCHAR# || '%'
+					</isEqual>
+				</isNotEmpty>	
+					CONNECT BY ITM_ID = PRIOR PAR_ITM_ID
+					<isNotEmpty property="useYn">
+						AND USE_YN = #useYn#
+					</isNotEmpty>
+				)
+			</isNotEmpty>
+		</isEmpty>
+		<isNotEmpty property="parItmId"> 
+		START WITH	PAR_ITM_ID = #parItmId#
+				<isNotEmpty property="useYn">
+					AND USE_YN = #useYn#
+				</isNotEmpty>
+		</isNotEmpty>	
+		CONNECT BY 
+			PRIOR ITM_ID = PAR_ITM_ID
+		<isNotEmpty property="useYn">
+			AND USE_YN = #useYn#
+		</isNotEmpty>
+		ORDER SIBLINGS BY V_ORDER
+	</select>
+	
+	<!-- 표준항목단위정보 팝업 조회 -->
+	<select id="StatsMgmtDao.selectStatsStddUiPopup" parameterClass="params" resultClass="java.util.HashMap">
+		/* sql id : StatsMgmtDao.selectStatsStddUiPopup */
+		SELECT 
+			UI_ID			AS "uiId"
+			, UI_NM			AS "uiNm"
+			, GRP_UI_ID		AS "grpUiId"
+			, UITY_CD		AS "uityCd"
+			, UI_CVSN_VAL	AS "uiCvsnVal"
+			, LEVEL			AS "Level"
+		FROM
+			TB_STTS_STDDUI
+		WHERE
+			UI_ID IN (
+				SELECT UI_ID FROM TB_STTS_STDDUI B
+				START WITH B.UI_NM LIKE '%'||#uiNm:VARCHAR#||'%'
+				CONNECT BY UI_ID = PRIOR GRP_UI_ID
+			)		
+		START WITH GRP_UI_ID = 'UICTLG'
+		CONNECT BY
+			PRIOR UI_ID = GRP_UI_ID
+			AND USE_YN = 'Y'	
+		ORDER SIBLINGS BY V_ORDER			
+	</select>
+	<!-- 표준항목단위정보 팝업 조회 갯수 -->
+	<select id="StatsMgmtDao.selectStatsStddUiPopupCount" parameterClass="params" resultClass="int">
+		/* sql id : StatsMgmtDao.StatsMgmtDao.selectStatsStddUiPopupCount */
+		SELECT 
+			COUNT(*)
+		FROM
+			TB_STTS_STDDUI
+		WHERE
+			UI_ID IN (
+				SELECT UI_ID FROM TB_STTS_STDDUI B
+				START WITH B.UI_NM LIKE '%'||#uiNm:VARCHAR#||'%'
+				CONNECT BY UI_ID = PRIOR GRP_UI_ID
+			)		
+		START WITH GRP_UI_ID = 'UICTLG'
+		CONNECT BY
+			PRIOR UI_ID = GRP_UI_ID
+			AND USE_YN = 'Y'	
+		ORDER SIBLINGS BY V_ORDER
+	</select>
+   
+   	<!-- 통계표 항목분류 리스트 조회 -->
+	<select id="StatsMgmtDao.selectStatsTblItmList" parameterClass="params" resultClass="java.util.HashMap">
+		SELECT
+			A.STATBL_ID			AS "statblId"
+			, A.DATANO			AS "datano"
+			, A.PAR_DATANO		AS "parDatano"
+			, A.ITM_TAG			AS "itmTag"
+			, A.ITM_ID			AS "itmId"
+			, A.ITM_NM			AS "itmNm"
+			, A.VIEW_ITM_NM		AS "viewItmNm"
+			, A.ENG_VIEW_ITM_NM	AS "engViewItmNm"
+			, A.CHART_ITM_NM		AS "chartItmNm"
+			, A.ENG_CHART_ITM_NM	AS "engChartItmNm"
+			, A.DUMMY_YN		AS "dummyYn"
+			, A.CHCK_CD			AS "chckCd"
+			, A.UI_ID			AS "uiId"
+			, A.UI_NM			AS "uiNm"
+			, A.CMMT_IDTFR		AS "cmmtIdtfr"
+			, A.CMMT_CONT		AS "cmmtCont"
+			, A.ENG_CMMT_CONT	AS "engCmmtCont"
+			, A.INPUT_NEED_YN	AS "inputNeedYn"
+			, A.DEF_SEL_YN		AS "defSelYn"
+			, A.C_DEF_SEL_YN	AS "cDefSelYn"
+			, A.SERIES_CD		AS "seriesCd"
+			, A.SUMAVG_YN		AS "sumavgYn"
+			, A.REF_CD			AS "refCd"
+			, A.USE_YN			AS "useYn"
+			, A.V_ORDER			AS "vOrder"
+			, A.DMPOINT_CD		AS "dmpointCd"
+			, LEVEL				AS "Level"
+			, SUBSTR(A.ITM_START_YM, 1, 4) 	|| '-' || SUBSTR(A.ITM_START_YM, 5, 2) 	AS "itmStartYm"
+       		, SUBSTR(A.ITM_END_YM, 1, 4) 	|| '-' || SUBSTR(A.ITM_END_YM, 5, 2) 	AS "itmEndYm"
+		FROM
+			TV_STTS_TBL_ITM A
+		START WITH 
+			A.STATBL_ID = #statblId:VARCHAR# 
+			AND A.PAR_DATANO = 0
+		<isNotEmpty property="gb">
+			AND A.ITM_TAG = #gb#
+		</isNotEmpty>
+		CONNECT BY 
+			PRIOR DATANO = PAR_DATANO 
+			AND PRIOR A.STATBL_ID = A.STATBL_ID
+		<isNotEmpty property="gb">	
+			AND PRIOR A.ITM_TAG = A.ITM_TAG
+		</isNotEmpty>
+		ORDER SIBLINGS BY A.V_ORDER, A.VIEW_ITM_NM
+	</select>
+	<select id="StatsMgmtDao.selectStatsTblItmListCount" parameterClass="params" resultClass="int">
+		SELECT
+			COUNT(*)
+		FROM
+			TV_STTS_TBL_ITM A
+		START WITH 
+			A.STATBL_ID = #statblId:VARCHAR# 
+			AND A.PAR_DATANO = 0
+		<isNotEmpty property="gb">
+			AND A.ITM_TAG = #gb#
+		</isNotEmpty>
+		CONNECT BY
+			PRIOR DATANO = PAR_DATANO
+		<isNotEmpty property="gb"> 
+			AND PRIOR A.STATBL_ID = A.STATBL_ID
+		</isNotEmpty>
+		ORDER SIBLINGS BY A.V_ORDER
+	</select>   
+   
+    <!-- 통계표 항목분류 입력/수정 --> 	
+   	<update id="StatsMgmtDao.mergeStddTblItm" parameterClass="egovframework.admin.stat.service.StatsStddTblItm">
+		MERGE INTO TB_STTS_TBL_ITM A
+		USING
+		(
+			SELECT
+				#statblId:VARCHAR#			AS STATBL_ID
+				, #datano:NUMERIC#			AS DATANO
+				, #parDatano:NUMERIC#		AS PAR_DATANO
+				, #gb:CHAR# 				AS ITM_TAG
+				, #itmId:NUMERIC#			AS ITM_ID
+				, #viewItmNm:VARCHAR#		AS VIEW_ITM_NM
+				, #engViewItmNm:VARCHAR#	AS ENG_VIEW_ITM_NM
+				, #chartItmNm:VARCHAR#		AS CHART_ITM_NM
+				, #engChartItmNm:VARCHAR#	AS ENG_CHART_ITM_NM
+				, #dummyYn:CHAR#			AS DUMMY_YN
+				, #cmmtIdtfr:VARCHAR#		AS CMMT_IDTFR
+				, #cmmtCont:VARCHAR#		AS CMMT_CONT
+				, #engCmmtCont:VARCHAR#		AS ENG_CMMT_CONT
+				<isEqual property="gb" compareValue="I">
+				, #chckCd:VARCHAR#			AS CHCK_CD
+				, #uiId:VARCHAR#			AS UI_ID
+				, NVL(#inputNeedYn:CHAR#, 'N')    AS INPUT_NEED_YN
+				, #seriesCd:VARCHAR#		AS SERIES_CD
+				, #dmpointCd:VARCHAR#		AS DMPOINT_CD
+				</isEqual>
+				, NVL(#sumavgYn:CHAR#, 'N') AS SUMAVG_YN
+				, #refCd:VARCHAR#			AS REF_CD
+				, #defSelYn:CHAR#			AS DEF_SEL_YN
+				, #cDefSelYn:CHAR#			AS C_DEF_SEL_YN
+				, #useYn:CHAR#				AS USE_YN
+				, REGEXP_REPLACE(#itmStartYm:VARCHAR#, '-', '')	AS ITM_START_YM
+				, REGEXP_REPLACE(#itmEndYm:VARCHAR#, '-', '')	AS ITM_END_YM
+				, #vOrder:NUMERIC#			AS V_ORDER
+				, #usrId:VARCHAR#			AS REG_ID
+				, #usrId:VARCHAR#			AS UPD_ID
+			FROM DUAL
+		) B
+		ON (
+			A.STATBL_ID = B.STATBL_ID
+			AND A.DATANO = B.DATANO
+		)
+		WHEN MATCHED THEN
+		UPDATE SET
+			A.PAR_DATANO 		= B.PAR_DATANO
+			, A.VIEW_ITM_NM 	= B.VIEW_ITM_NM
+			, A.ENG_VIEW_ITM_NM = B.ENG_VIEW_ITM_NM	
+			, A.CHART_ITM_NM	= B.CHART_ITM_NM
+			, A.ENG_CHART_ITM_NM	= B.ENG_CHART_ITM_NM
+			, A.DUMMY_YN 		= B.DUMMY_YN
+			<isEqual property="gb" compareValue="I">
+			, A.CHCK_CD 		= B.CHCK_CD
+			, A.UI_ID 			= B.UI_ID
+			, A.INPUT_NEED_YN 	= B.INPUT_NEED_YN
+			, A.SERIES_CD 		= B.SERIES_CD
+			, A.DMPOINT_CD 		= B.DMPOINT_CD
+			</isEqual>
+			, A.REF_CD 			= B.REF_CD
+			, A.SUMAVG_YN 		= B.SUMAVG_YN
+			, A.CMMT_IDTFR 		= B.CMMT_IDTFR
+			, A.CMMT_CONT 		= B.CMMT_CONT
+			, A.ENG_CMMT_CONT 	= B.ENG_CMMT_CONT
+			, A.DEF_SEL_YN 		= B.DEF_SEL_YN
+			, A.C_DEF_SEL_YN 	= B.C_DEF_SEL_YN
+			, A.USE_YN 			= B.USE_YN
+			, A.ITM_START_YM    = B.ITM_START_YM
+			, A.ITM_END_YM    	= B.ITM_END_YM
+			, A.V_ORDER 		= B.V_ORDER
+			, A.UPD_ID 			= B.UPD_ID
+			, A.UPD_DTTM 		= SYSDATE
+			, A.TAG_VIEW_ITM_NM 	= UPPER(REPLACE(B.VIEW_ITM_NM, ' ', ''))
+			, A.ENG_TAG_VIEW_ITM_NM = UPPER(REPLACE(B.ENG_VIEW_ITM_NM, ' ', ''))
+		WHEN NOT MATCHED THEN
+		INSERT (
+			A.STATBL_ID
+			, A.DATANO
+			, A.PAR_DATANO
+			, A.ITM_TAG
+			, A.ITM_ID
+			, A.VIEW_ITM_NM
+			, A.ENG_VIEW_ITM_NM
+			, A.CHART_ITM_NM
+			, A.ENG_CHART_ITM_NM
+			, A.TAG_VIEW_ITM_NM
+			, A.ENG_TAG_VIEW_ITM_NM
+			, A.DUMMY_YN
+			, A.CMMT_IDTFR
+			, A.CMMT_CONT
+			, A.ENG_CMMT_CONT
+			, A.DEF_SEL_YN
+			, A.C_DEF_SEL_YN
+			, A.USE_YN
+			, A.V_ORDER
+			<isEqual property="gb" compareValue="I">
+			, A.CHCK_CD
+			, A.UI_ID
+			, A.INPUT_NEED_YN
+			, A.SERIES_CD
+			, A.DMPOINT_CD
+			</isEqual>
+			, A.REF_CD
+			, A.SUMAVG_YN
+			, A.ITM_START_YM
+			, A.ITM_END_YM
+			, A.REG_ID
+			, A.REG_DTTM
+			, A.UPD_ID
+			, A.UPD_DTTM
+		)
+		VALUES (
+			B.STATBL_ID
+			, B.DATANO
+			, B.PAR_DATANO
+			, B.ITM_TAG
+			, B.ITM_ID
+			, B.VIEW_ITM_NM
+			, B.ENG_VIEW_ITM_NM
+			, B.CHART_ITM_NM
+			, B.ENG_CHART_ITM_NM
+			, UPPER(REPLACE(B.VIEW_ITM_NM, ' ', ''))
+			, UPPER(REPLACE(B.ENG_VIEW_ITM_NM, ' ', ''))
+			, B.DUMMY_YN
+			, B.CMMT_IDTFR
+			, B.CMMT_CONT
+			, B.ENG_CMMT_CONT
+			, B.DEF_SEL_YN
+			, B.C_DEF_SEL_YN
+			, B.USE_YN
+			, B.V_ORDER
+			<isEqual property="gb" compareValue="I">
+			, B.CHCK_CD
+			, B.UI_ID
+			, B.INPUT_NEED_YN
+			, B.SERIES_CD
+			, B.DMPOINT_CD
+			</isEqual>
+			, B.REF_CD
+			, B.SUMAVG_YN
+			, B.ITM_START_YM
+			, B.ITM_END_YM
+			, B.REG_ID
+			, SYSDATE
+			, B.UPD_ID
+			, SYSDATE
+		)   
+   	</update>
+   
+   <!-- 통계표 항목분류 삭제 -->
+	<delete id="StatsMgmtDao.delStddTblItm" parameterClass="java.util.HashMap">
+   		DELETE FROM TB_STTS_TBL_ITM
+   		WHERE
+   			STATBL_ID = #statblId:VARCHAR#
+   		AND ITM_TAG   = #gb:CHAR#
+   		AND DATANO IN (
+   			<dynamic>
+			<iterate property="delList" conjunction=", ">
+				#delList[].datano:NUMERIC#
+			</iterate>
+			</dynamic>	
+   			)
+	</delete>
+	
+
+	<!-- 출력항목명 FullNm 계층 업데이트 -->
+	<update id="StatsMgmtDao.updateStddTblItmFullNm" parameterClass="java.util.HashMap">
+		BEGIN
+		    FOR i IN (
+		 			select  STATBL_ID, DATANO, ITM_TAG, PAR_DATANO
+		                    ,  LTRIM(sys_connect_by_path(C.VIEW_ITM_NM,'>'),'>') AS VIEW_ITM_FULLNM
+		                    ,  LTRIM(sys_connect_by_path(C.ENG_VIEW_ITM_NM,'>'),'>') AS ENG_VIEW_ITM_FULLNM
+		                    ,  ROWNUM AS FULL_ORDER
+		            FROM   TB_STTS_TBL_ITM C
+		            START WITH  PAR_DATANO = 0 AND STATBL_ID = #statblId:VARCHAR# AND ITM_TAG = #gb:CHAR#
+		            CONNECT BY PRIOR C.DATANO = C.PAR_DATANO
+		                    AND C.STATBL_ID = #statblId:VARCHAR#
+		                    AND C.USE_YN = 'Y'
+		                    AND C.ITM_TAG = #gb:CHAR#
+					ORDER SIBLINGS BY C.V_ORDER
+		    ) LOOP
+		        UPDATE TB_STTS_TBL_ITM
+		        SET VIEW_ITM_FULLNM 	= i.VIEW_ITM_FULLNM,
+		            ENG_VIEW_ITM_FULLNM = i.ENG_VIEW_ITM_FULLNM,
+		            FULL_ORDER = i.FULL_ORDER
+		        WHERE  STATBL_ID =  i.STATBL_ID
+		                AND DATANO = i.DATANO
+		                AND ITM_TAG =  i.ITM_TAG ;
+		    END LOOP;
+		END;			
+	</update>
+	
+	<!-- 항목/분류 순서 저장 -->
+	<update id="StatsMgmtDao.saveStddTblItmOrder" parameterClass="egovframework.admin.stat.service.StatsStddTblItm">
+		UPDATE TB_STTS_TBL_ITM
+		SET    V_ORDER = #vOrder:NUMERIC#
+		WHERE  STATBL_ID = #statblId:VARCHAR#
+		AND    DATANO = #datano:NUMERIC#
+	</update>
+	
+	<!-- 통계표 백업 -->
+	<procedure id="StatsMgmtDao.execSpBcupSttsTbl" parameterClass="params" resultClass="record" >
+	    <![CDATA[
+	      { CALL SP_BCUP_STTS_TBL(#statblId:VARCHAR#, #Status:VARCHAR#, #updId:VARCHAR#)}
+	      ]]>
+	</procedure>
+
+	<!-- 통계자료작성대장 생성 -->
+	<procedure id="StatsMgmtDao.execSpCreateSttsWrtlist" parameterClass="params" resultClass="record" >
+	    <![CDATA[
+	      { CALL SP_CREATE_STTS_WRTLIST(#statblId:VARCHAR#)}
+	      ]]>
+	</procedure>
+	
+	<!-- 통계표 메인 순서저장 -->
+	<update id="StatsMgmtDao.saveStatsMgmtOrder" parameterClass="record">
+		UPDATE TB_STTS_TBL
+		SET    V_ORDER = #vOrder:NUMERIC#
+		WHERE  STATBL_ID = #statblId:VARCHAR#
+	</update>
+	
+	
+	<!-- 통계표 검색태그 입력 -->
+	<insert id="StatsMgmtDao.insertStatsTag" parameterClass="java.util.ArrayList">
+		INSERT INTO TB_STTS_TBL_TAG
+		(
+			STATBL_ID
+			, SYS_TAG
+			, TAG_NM
+			, REG_ID
+			, REG_DTTM
+			, UPD_ID
+			, UPD_DTTM
+		)
+		<dynamic>
+		<iterate conjunction="UNION ALL ">
+		SELECT 
+			#[].statblId:VARCHAR#
+			, #[].sysTag:CHAR#
+			, #[].tagNm:VARCHAR#
+			, #[].regId:VARCHAR#
+			, SYSDATE
+			, #[].updId:VARCHAR#
+			, SYSDATE
+		FROM DUAL
+		</iterate>
+		</dynamic>
+	</insert>
+	
+	<!-- 통계표 옵션정보 삭제 -->
+	<delete id="StatsMgmtDao.delStatsTag" parameterClass="params">
+		DELETE TB_STTS_TBL_TAG
+		WHERE  STATBL_ID = #statblId:VARCHAR#
+	</delete>
+	
+	<!-- 통계표 공개상태를 공개/취소 한다 -->
+	<update id="StatsMgmtDao.updateOpenState" parameterClass="params">
+		UPDATE TB_STTS_TBL
+		SET    
+			OPEN_STATE = #openState:CHAR#
+		<isEqual property="openState" compareValue="Y">
+			, OPEN_DTTM = TO_DATE(#openDttm:VARCHAR#, 'YYYY-MM-DD')		
+		</isEqual>
+		<isEqual property="openState" compareValue="N">
+			, OPEN_DTTM = ''		
+			, CLOSE_DTTM = SYSDATE
+		</isEqual>
+		WHERE  STATBL_ID = #statblId:VARCHAR#  
+	</update>
+	
+	<!-- 통계분석자료 일괄생성 -->
+	<procedure id="StatsMgmtDao.execSttsAnlsAll" parameterClass="params" resultClass="record" >
+	    <![CDATA[
+	      { CALL SP_CREATE_STTS_ANLS_ALL()}
+	      ]]>
+	</procedure>
+	
+	<!-- 통계표 복사 -->
+	<procedure id="StatsMgmtDao.execCopySttsTbl" parameterClass="params" resultClass="record" >
+	    <![CDATA[
+	      { CALL SP_COPY_STTS_TBL(#statblId:VARCHAR#, #regId:VARCHAR#)}
+	      ]]>
+	</procedure>
+	
+	<!--통계표 분류체계 리스트 조회 -->
+	<select id="StatsMgmtDao.selectStatSttsTblCateList" remapResults="true" parameterClass="params" resultClass="record">
+		/* sql id : StatsMgmtDao.selectStatSttsTblCateList */
+		SELECT STATBL_ID 	AS "statblId", 
+		       CATE_ID 		AS "cateId"
+		  FROM TB_STTS_TBL_CATE
+		WHERE 
+			STATBL_ID = #statblId:VARCHAR#	
+	</select>
+	
+	<!-- 통계표 분류체계 데이터 사용여부 변경 -->
+	<delete id="StatsMgmtDao.updateStatTblCate" parameterClass="params">
+		/* sql id : StatsMgmtDao.deleteStatTblCate */
+		UPDATE TB_STTS_TBL_CATE
+		SET    USE_YN = 'N' 
+		WHERE  STATBL_ID = #statblId:VARCHAR#
+	</delete>
+	
+	<!-- 통계표 분류체계 데이터 등록 -->
+	<insert id="StatsMgmtDao.insertStatTblCate" parameterClass="record">
+		/* sql id : StatsMgmtDao.insertStatTblCate */
+		<!-- 
+		INSERT INTO TB_STTS_TBL_CATE (STATBL_ID, CATE_ID, REG_DTTM)
+		VALUES (#statblId:VARCHAR#, #cateId:VARCHAR#, SYSDATE) -->
+		MERGE INTO TB_STTS_TBL_CATE A
+		USING (
+			SELECT 
+				#statblId:VARCHAR# 	AS STATBL_ID
+				, #cateId:VARCHAR#	AS CATE_ID
+			FROM DUAL
+		) B
+		ON (
+			A.STATBL_ID 	= B.STATBL_ID
+			AND A.CATE_ID 	= B.CATE_ID
+		)
+		WHEN MATCHED THEN 
+		UPDATE SET
+			A.USE_YN 		= 'Y'
+			, A.REG_DTTM 	= SYSDATE
+		WHEN NOT MATCHED THEN
+		INSERT (
+			A.STATBL_ID
+			, A.CATE_ID
+			, A.USE_YN
+			, A.REG_DTTM
+		)
+		VALUES (
+			B.STATBL_ID
+			, B.CATE_ID
+			, 'Y'
+			, SYSDATE
+		)	
+	</insert>
+	
+	<!-- 통계표 분류체계 데이터 삭제 -->
+	<delete id="StatsMgmtDao.deleteStatTblCate" parameterClass="params">
+		DELETE FROM TB_STTS_TBL_CATE WHERE STATBL_ID = #statblId:VARCHAR# AND USE_YN = 'N'
+	</delete>
+	
+	
+	<!-- 통계표연결 리스트조회(팝업) -->
+	<select id="StatsMgmtDao.selectSttsTblPopList"	parameterClass="params" resultClass="record">
+		/* sql id : StatsMgmtDao.selectSttsTblPopList */
+		SELECT A.STATBL_ID		AS "statblId",
+		       A.STATBL_NM		AS "statblNm",
+		       COUNT(*) OVER() 	AS "rowCnt",
+		       <![CDATA[
+		       A.STATBL_NM
+		              || ' <a href="/admin/stat/popup/statMetaExpPopup.do?statblId='|| A.STATBL_ID|| '" target="_blank" title="통계설명(팝업)"><img src="../../../images/admin/icon_book.png"/></a>'
+		              ||
+		       CASE
+		              WHEN CTS_SRV_CD = 'N'
+		              THEN '<a href="/admin/stat/statPreviewPage/' || A.STATBL_ID || '.do" target="_blank" title="통계표(팝업)"><img src="../../../images/admin/icon_file.gif"/></a>'
+		              ELSE ''
+		       END "statblNmExp"
+		       ]]>
+		FROM   TB_STTS_TBL A
+		WHERE  1=1
+		<isNotEmpty property="statblId">
+			AND A.STATBL_ID != #statblId:VARCHAR#
+		</isNotEmpty>
+		<isEmpty property="statblId">
+			AND A.STATBL_ID IS NOT NULL
+		</isEmpty>
+		
+		<isNotEmpty property="statblId">
+		AND 
+			NOT EXISTS 
+	       	(SELECT 1 
+	         FROM TB_STTS_TBL_REL B 
+	         WHERE B.STATBL_ID = #statblId:VARCHAR# 
+	         AND A.STATBL_ID = B.STATBL_ID
+	       	)
+		</isNotEmpty>
+		<isNotEmpty property="searchVal">
+			<isEqual property="searchGubun" compareValue="STATBL_NM" >
+				AND A.STATBL_NM LIKE '%' || #searchVal# || '%'
+			</isEqual>
+		</isNotEmpty>		       
+	</select>	
+	
+	<!-- 연관 통계표 리스트 조회 -->
+	<select id="StatsMgmtDao.selectSttsTblList"	parameterClass="params" resultClass="record">
+		/* sql id : StatsMgmtDao.selectSttsTblList */
+		SELECT   A.STATBL_ID			AS "statblId"
+				, B.STATBL_NM			AS "statblNm"
+				, A.REL_STATBL_ID		AS "relStatblId"
+				, C.STATBL_NM			AS "relStatblNm"
+				, C.OPEN_STATE			AS "openState"
+				, A.USE_YN				AS "useYn"
+		FROM
+			TB_STTS_TBL_REL A
+	        INNER JOIN TB_STTS_TBL B
+	      		ON A.STATBL_ID = B.STATBL_ID
+	        INNER JOIN TB_STTS_TBL C
+	      		ON A.REL_STATBL_ID = C.STATBL_ID  			
+		WHERE
+			A.STATBL_ID = #statblId:VARCHAR#
+		AND A.USE_YN = 'Y'
+	</select>
+	
+	
+	<!-- 연관통계표 삭제 -->
+	<update id="StatsMgmtDao.delStatsTblRel" parameterClass="params">
+		/* sql id : StatsMgmtDao.delStatsTblRel */
+		UPDATE TB_STTS_TBL_REL
+		SET    USE_YN = 'N'
+		WHERE  STATBL_ID = #statblId:VARCHAR#
+	</update>
+	
+	<!-- 연관통계표 삭제 후 재 입력 -->
+	<update id="StatsMgmtDao.mergeStatsTblRel" parameterClass="java.util.HashMap">
+		/* sql id : StatsMgmtDao.mergeStatsTblRel */
+		MERGE INTO TB_STTS_TBL_REL A
+		USING (
+			<dynamic>
+			<iterate property="pMap" conjunction="UNION ALL ">
+			SELECT 
+				#pMap[].statblId:VARCHAR# 		AS STATBL_ID
+				, #pMap[].relStatblId:VARCHAR#	AS REL_STATBL_ID
+				, #pMap[].useYn:CHAR#			AS USE_YN
+				, #pMap[].regId:VARCHAR#		AS REG_ID
+				, #pMap[].updId:VARCHAR#		AS UPD_ID
+			, SYSDATE
+			FROM DUAL
+			</iterate>
+			</dynamic>			
+		) B
+		ON (
+			A.STATBL_ID 		= B.STATBL_ID
+			AND A.REL_STATBL_ID = B.REL_STATBL_ID
+		)
+		WHEN MATCHED THEN 
+		UPDATE SET
+			A.USE_YN 		= B.USE_YN
+			, A.UPD_ID 		= B.UPD_ID
+			, A.UPD_DTTM 	= SYSDATE
+		WHEN NOT MATCHED THEN
+		INSERT (
+			A.STATBL_ID
+			, A.REL_STATBL_ID
+			, A.USE_YN
+			, A.REG_ID
+			, A.REG_DTTM
+			, A.UPD_ID
+			, A.UPD_DTTM
+		)
+		VALUES (
+			B.STATBL_ID
+			, B.REL_STATBL_ID
+			, B.USE_YN
+			, B.REG_ID
+			, SYSDATE
+			, B.UPD_ID
+			, SYSDATE
+		)	
+	</update>	
+	
+	<!-- 통계표 정보 항목/분류/그룹 설정 시 처리 작업 -->
+	<procedure id="StatsMgmtDao.execSpModSttsTblItm" parameterClass="params" resultClass="record" >
+	    <![CDATA[
+	      { CALL SP_MOD_STTS_TBL_ITM(#statblId:VARCHAR#, #regId:VARCHAR#)}
+	      ]]>
+	</procedure>
+	
+	<!-- 통계표 정보분류 관련 분류 조회 -->
+	<select id="StatsMgmtDao.selectStatsCateInfoList" parameterClass="params" resultClass="record">
+		/* sql id : StatsMgmtDao.selectStatsCateInfoList */
+		SELECT
+		    B.STATBL_ID		AS "statblId",
+		    A.CATE_ID		AS "cateId",
+		 	B.RPST_YN		AS "rpstYn",  
+		    B.USE_YN		AS "useYn",
+		    A.CATE_NM		AS "cateNm",
+		    A.CATE_FULLNM	AS "cateFullNm"
+		FROM TB_STTS_CATE A
+	   INNER JOIN TB_STTS_TBL_CATE B
+	      ON A.CATE_ID = B.CATE_ID
+		  	AND B.USE_YN = 'Y'
+		WHERE
+		    B.STATBL_ID = #statblId:VARCHAR#
+		ORDER BY A.V_ORDER
+
+	</select>
+	
+	<!-- 통계표 분류정보체계 팝업 리스트 조회 -->
+	<select id="StatsMgmtDao.selectStatCateInfoPop" parameterClass="params" resultClass="record">
+		/* sql id : StatsMgmtDao.selectStatCateInfoPop */
+		SELECT
+			A.CATE_ID					AS "cateId"
+			, A.CATE_NM					AS "cateNm"
+			, A.CATE_FULLNM 			AS "cateFullnm"
+			, A.CATE_LVL				AS "Level"
+			, A.USE_YN					AS "useYn"
+			, NVL2(B.CATE_ID, '1', '0') AS "chk"
+		FROM
+			TB_STTS_CATE A
+		LEFT JOIN TB_STTS_TBL_CATE B 
+			ON  B.STATBL_ID = #statblId:VARCHAR#
+		    AND A.CATE_ID = B.CATE_ID 			
+		WHERE 
+			A.CATE_ID IN 
+			(
+			SELECT CATE_ID FROM TB_STTS_CATE B
+		<isNotEmpty property="searchVal">
+				<isEqual property="searchGubun" compareValue="CATE_NM" >
+					START WITH B.CATE_NM LIKE '%' || #searchVal# || '%'
+				</isEqual>
+				<isEqual property="searchGubun" compareValue="ENG_CATE_NM" >
+					START WITH B.ENG_CATE_NM LIKE '%' || #searchVal# || '%'
+				</isEqual>
+	   	</isNotEmpty> 
+			CONNECT BY 
+				CATE_ID = PRIOR PAR_CATE_ID 
+				AND B.USE_YN = 'Y'
+			)
+		START WITH PAR_CATE_ID = 'T'
+		CONNECT BY 
+			PRIOR A.CATE_ID = PAR_CATE_ID 
+			AND A.USE_YN = 'Y'
+		ORDER SIBLINGS BY A.V_ORDER	
+	</select>
+	
+	<!-- 통계표 정보분료 관련 분류 삭제 -->
+	<delete id="StatsMgmtDao.deleteStatsCateInfo" parameterClass="record">
+		/* sql id : docInfMgmtDao.deleteDocInfCate */
+		DELETE FROM TB_STTS_TBL_CATE
+		WHERE  STATBL_ID  = #statblId:VARCHAR#
+		AND    CATE_ID = #cateId:VARCHAR#
+	</delete>
+    
+    <!-- 통계표 정보분류 관련 분류 머지 -->
+	<update id="StatsMgmtDao.mergeStatsCateInfo" parameterClass="record">
+		/* sql id : docInfMgmtDao.mergeDocInfCate */
+		MERGE INTO TB_STTS_TBL_CATE A
+		USING (
+			SELECT 
+				  #statblId:VARCHAR#		AS STATBL_ID
+				, #cateId:VARCHAR#	AS CATE_ID
+			    , #rpstYn:VARCHAR#	AS RPST_YN 
+				, #useYn:CHAR#		AS USE_YN
+		 		, #regId:VARCHAR#	AS REG_ID
+				, #updId:VARCHAR#	AS UPD_ID  
+			FROM DUAL
+		) B
+		ON (
+			A.STATBL_ID 	  = B.STATBL_ID
+			AND A.CATE_ID = B.CATE_ID
+		)
+		WHEN MATCHED THEN 
+		UPDATE SET
+			  A.RPST_YN 	= B.RPST_YN 
+			, A.USE_YN 		= B.USE_YN
+		 	, A.UPD_ID 		= B.UPD_ID 
+			, A.UPD_DTTM 	= SYSDATE
+		WHEN NOT MATCHED THEN
+		INSERT (
+			A.STATBL_ID
+			, A.CATE_ID
+	 		, A.RPST_YN 
+			, A.USE_YN
+			, A.REG_ID
+			, A.REG_DTTM
+		 	, A.UPD_ID 
+			, A.UPD_DTTM
+		)
+		VALUES (
+			B.STATBL_ID
+			, B.CATE_ID
+			, B.RPST_YN 
+			, B.USE_YN
+			, B.REG_ID
+			, SYSDATE
+			, B.UPD_ID
+			, SYSDATE
+		)	
+	</update>
+	
+	<!-- 분류체계 대표여부 처리 -->
+	<update id="StatsMgmtDao.updateMstStatsCateInfo" parameterClass="params">
+		UPDATE TB_STTS_TBL
+		SET
+		    CATE_ID = NVL((SELECT MAX(CATE_ID) FROM TB_STTS_TBL_CATE WHERE STATBL_ID = #statblId:VARCHAR# AND RPST_YN = 'Y' AND USE_YN = 'Y'), CATE_ID)
+		WHERE
+		    STATBL_ID = #statblId:VARCHAR#
+	</update>
+	
+	<!-- 내부 사원용 공공데이터 메타관리 리스트 조회 -->
+  	<select id="StatsMgmtDao.selectStfStatsMgmtList" parameterClass="params" resultClass="egovframework.common.base.model.Record">
+  		/* sql id : StatsMgmtDao.selectStfStatsMgmtList */
+  		<isEqual property="paging" compareValue="0">
+		SELECT AA.* 
+		FROM   (SELECT ROWNUM AS ROW_NUM, AA.*
+				FROM   (  
+		</isEqual>
+			SELECT A.STATBL_ID AS "statblId"
+				 , A.STATBL_NM AS "statblNm" 
+				 , A.CATE_FULLNM AS "cateFullnm" 
+		 		 , A.ORG_NM AS "orgNm"
+	 			 ,TO_CHAR(A.OPEN_DTTM,'YYYY-MM-DD') AS "openDttm"
+				 , A.CCL_NM AS "cclNm"
+				 , A.CATE_NM 
+			FROM TV_STTS_TBL A
+			WHERE 1 = 1
+			<isNotEmpty property="accCd" prepend="AND">
+			<isNotEqual property="accCd" compareValue="SYS">
+				EXISTS (SELECT 1 FROM TB_STTS_TBL_USR 
+						WHERE  STATBL_ID = A.STATBL_ID
+						AND    USE_YN = 'Y' 
+						<![CDATA[
+						AND    PRSS_ACC_CD > 0
+						]]> 
+						AND    USR_CD = #regId:NUMERIC# )
+			</isNotEqual>
+		</isNotEmpty>
+			AND USE_YN = 'Y'
+			AND OPEN_STATE = 'Y'
+			<isNotEmpty property="orgCd">
+			AND   A.ORG_CD = #orgCd#	   	 
+		   	</isNotEmpty>
+		   	<isNotEmpty property="searchVal">
+	   		<isEqual property="searchGubun" compareValue="STATBL_NM">
+				AND   A.TAG_STATBL_NM LIKE '%' || REPLACE(UPPER(#searchVal#), ' ', '') || '%'	   	 
+	   		</isEqual>
+	   		<isNotEqual property="searchGubun" compareValue="STATBL_NM">
+				<isEqual property="searchGubun" compareValue="ENG_STATBL_NM" >
+					AND A.ENG_STATBL_NM LIKE '%' || #searchVal# || '%'
+				</isEqual>
+				<isEqual property="searchGubun" compareValue="STATBL_ID" >
+					AND A.STATBL_ID LIKE '%' || #searchVal# || '%'
+				</isEqual>
+	   		</isNotEqual>
+	   	</isNotEmpty>
+		<isEqual property="paging" compareValue="0">
+		<![CDATA[
+				) AA
+			WHERE ROWNUM <= #end:NUMERIC#
+			) AA
+		WHERE AA.ROW_NUM >= #start:NUMERIC#
+		]]>
+		</isEqual> 
+  	</select>
+  	
+	<select id="StatsMgmtDao.selectStfStatsMgmtListCount" parameterClass="params" resultClass="int">
+  		/* sql id : StatsMgmtDao.selectStfStatsMgmtListCount */
+		SELECT COUNT(*)
+		FROM   TV_STTS_TBL A
+		WHERE 1 = 1
+		<isNotEmpty property="accCd" prepend="AND">
+			<isNotEqual property="accCd" compareValue="SYS">
+				EXISTS (SELECT 1 FROM TB_STTS_TBL_USR 
+						WHERE  STATBL_ID = A.STATBL_ID
+						AND    USE_YN = 'Y' 
+						<![CDATA[
+						AND    PRSS_ACC_CD > 0
+						]]> 
+						AND    USR_CD = #regId:NUMERIC# )
+			</isNotEqual>
+		</isNotEmpty>
+		AND USE_YN = 'Y'
+		 AND OPEN_STATE = 'Y'
+		<isNotEmpty property="orgCd">
+			AND   A.ORG_CD = #orgCd#	   	 
+	   	</isNotEmpty>
+	   	<isNotEmpty property="searchVal">
+	   		<isEqual property="searchGubun" compareValue="STATBL_NM">
+				AND   A.TAG_STATBL_NM LIKE '%' || REPLACE(UPPER(#searchVal#), ' ', '') || '%'	   	 
+	   		</isEqual>
+	   		<isNotEqual property="searchGubun" compareValue="STATBL_NM">
+				<isEqual property="searchGubun" compareValue="ENG_STATBL_NM" >
+					AND A.ENG_STATBL_NM LIKE '%' || #searchVal# || '%'
+				</isEqual>
+				<isEqual property="searchGubun" compareValue="STATBL_ID" >
+					AND A.STATBL_ID LIKE '%' || #searchVal# || '%'
+				</isEqual>
+	   		</isNotEqual>
+	   	</isNotEmpty>
+  	</select>
+	
+	<!-- 내부 사원용 공공데이터 메타관리 리스트 조회  상세 조회 -->
+	<select id="StatsMgmtDao.selectStfStatsMgmtDtl" parameterClass="params" resultClass="record">
+		/* sql id : StatsMgmtDao.selectStfStatsMgmtDtl */
+		SELECT A.STATBL_ID AS "statblId"
+				 , A.STATBL_NM AS "statblNm" 
+				 , A.CCL_NM AS "cclNm"
+				 , A.CCL_CD AS "cclCd"
+				 , A.CATE_NM 
+				 , A.ORG_NM AS "orgNm"
+				 , CATE_FULLNM AS "cateFulLNm"
+		  		 , TO_CHAR(A.OPEN_DTTM,'YYYY-MM-DD') AS "openDttm"
+		  		 , D.META_CONT AS "srcExp"
+		  		 , C.DATA_DTTM_CONT AS "dataCondDttm"
+		  		 , A.SCHW_TAG_CONT AS "infTag"
+		  		 , C.STATBL_CMMT AS "infExp"
+		  		/* ,(SELECT DITC_NM FROM TB_COMM_CODE WHERE GRP_CD = 'D1009' AND USE_YN = 'Y' AND DITC_CD = C.LOAD_CD)  AS "loadNm" */
+		  		 , TO_CHAR(C.UPD_DTTM,'YYYY-MM-DD') AS "updDttm"
+		  		 , A.DTACYCLE_NM AS "dtacycleNm"
+		  FROM TV_STTS_TBL A
+		  LEFT OUTER JOIN TB_STTS_TBL C
+			ON A.STATBL_ID = C.STATBL_ID
+		  LEFT OUTER JOIN TB_STTS_STAT B	
+			ON A.STAT_ID = B.STAT_ID
+		  LEFT OUTER JOIN TB_STTS_STAT_META D 
+		    ON B.STAT_ID = D.STAT_ID
+		   AND D.META_ID = '81000176'
+		 WHERE A.STATBL_ID = #statblId:VARCHAR#
+	</select>
+	<!-- 내부 사원용 공공데이터 메타관리 리스트 조회  수정 -->
+	<update id="StatsMgmtDao.updateStfStatsMgmt" parameterClass="params">
+	UPDATE TB_STTS_TBL
+	   SET   STATBL_ID = #statblId:VARCHAR#
+		   , DATA_DTTM_CONT = #dataCondDttm:VARCHAR#
+		   , STATBL_CMMT = #infExp:VARCHAR#
+		   , SCHW_TAG_CONT = #infTag:VARCHAR#
+		   , CCL_CD = #cclCd:VARCHAR#
+		   , UPD_DTTM = SYSDATE
+		WHERE STATBL_ID = #statblId:VARCHAR#
+	</update>	
+    
+</sqlMap>

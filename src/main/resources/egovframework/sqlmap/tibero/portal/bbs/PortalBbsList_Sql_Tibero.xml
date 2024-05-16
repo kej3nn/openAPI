@@ -1,0 +1,1464 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="BbsList" >
+  <!-- 
+  <typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+  <typeAlias alias="clobHandler" type="com.ibatis.sqlmap.engine.type.ClobTypeHandlerCallback" />
+  
+  <resultMap id="BbsActKey" class="egovframework.admin.bbs.service.BbsList">
+  		<result column="ACT_KEY" property="actKey" />
+		<result column="USE_NM" property="useNm" />
+		<result column="KEY_SEQ" property="keySeq" />
+  </resultMap>
+  <resultMap id="BbsAdminInfo" class="egovframework.admin.bbs.service.BbsList">
+		<result column="BBS_CD" property="bbsCd" />
+		<result column="BBS_NM" property="bbsNm" />
+		<result column="LANG_CD" property="langCd" />
+		<result column="LIST_CD" property="listCd" />
+		<result column="BBS_TYPE_CD" property="bbsTypeCd" />
+		<result column="NOTICE_YN" property="noticeYn" />
+		<result column="SECRET_YN" property="secretYn" />
+		<result column="ATFILE_YN" property="atfileYn" />
+		<result column="EXT_LIMIT" property="extLimit" />
+		<result column="SIZE_LIMIT" property="sizeLimit" />
+		<result column="LINK_YN" property="linkYn" />
+		<result column="INF_YN" property="infYn" />
+		<result column="EMAIL_REG_YN" property="emailRegYn" />
+		<result column="EMAIL_NEED_YN" property="emailNeedYn" />
+		<result column="TEL_YN" property="telYn" />
+		<result column="TEL_NEED_YN" property="telNeedYn" />
+		<result column="ANS_YN" property="ansYn" />
+		<result column="ANS_TAG" property="ansTag" />
+		<result column="HTML_YN" property="htmlYn" />
+		<result column="DEPT_YN" property="deptYn" />
+		<result column="LIST_CNT" property="listCnt" />
+		<result column="HL_CNT" property="hlCnt" />
+		<result column="LOGIN_WT_YN" property="loginWtYn" />
+	</resultMap>
+	
+  	<resultMap id="BbsListAll" class="egovframework.admin.bbs.service.BbsList">
+  		<result column="CURRDATE"  property="currdate"  />
+		<result column="BBS_CD" property="bbsCd" />
+		<result column="SEQ" property="seq" />
+		<result column="P_SEQ" property="pSeq" />
+		<result column="LIST_SUB_CD" property="listSubCd" />
+		<result column="BBS_TIT" property="bbsTit" />
+		<result column="NOTICE_YN" property="noticeYn" />
+		<result column="USER_ID" property="userId" />
+		<result column="USER_NM" property="userNm" />
+		<result column="USER_CD" property="userCd" />
+		<result column="USER_DTTM" property="userDttm" />
+		<result column="BBS_CONT" property="bbsCont"  jdbcType="CLOB" javaType="java.lang.String" typeHandler="clobHandler"/>
+		<result column="ORG_CD" property="orgCd" />
+		<result column="ORG_NM" property="orgNm" />
+		<result column="APPR_NM" property="apprNm" />
+		<result column="APPR_DTTM" property="apprDttm" />
+		<result column="SECRET_YN" property="secretYn" />
+		<result column="DEPT_NM" property="deptNm" />
+		<result column="DEPT_CD" property="deptCd" />
+		<result column="DEL_YN" property="delYn" />
+		<result column="FILE_CNT" property="fileCnt" />
+		<result column="VIEW_CNT" property="viewCnt" />
+		<result column="DITC_NM1" property="ditcNm1" />
+		<result column="DITC_NM2" property="ditcNm2" />
+		<result column="DITC_NM3" property="ditcNm3" />
+		<result column="DITC_NM4" property="ditcNm4" />
+		<result column="DITC_NM5" property="ditcNm5" />
+		<result column="DITC_NM6" property="ditcNm6" />
+		<result column="DITC_NM7" property="ditcNm7" />
+		<result column="ANS_STATE_NM" property="ansStateNm" />
+	</resultMap>
+	
+  	<resultMap id="BbsGalleryListAll" class="egovframework.admin.bbs.service.BbsList">
+  		<result column="CURRDATE"  property="currdate"  />
+		<result column="BBS_CD" property="bbsCd" />
+		<result column="SEQ" property="seq" />
+		<result column="P_SEQ" property="pSeq" />
+		<result column="FILE_SEQ" property="fileSeq" />
+		<result column="LIST_SUB_CD" property="listSubCd" />
+		<result column="BBS_TIT" property="bbsTit" />
+		<result column="NOTICE_YN" property="noticeYn" />
+		<result column="USER_ID" property="userId" />
+		<result column="USER_NM" property="userNm" />
+		<result column="USER_DTTM" property="userDttm" />
+		<result column="BBS_CONT" property="bbsCont"  jdbcType="CLOB" javaType="java.lang.String" typeHandler="clobHandler"/>
+		<result column="ORG_CD" property="orgCd" />
+		<result column="ORG_NM" property="orgNm" />
+		<result column="APPR_NM" property="apprNm" />
+		<result column="APPR_DTTM" property="apprDttm" />
+		<result column="SECRET_YN" property="secretYn" />
+		<result column="DEL_YN" property="delYn" />
+		<result column="FILE_CNT" property="fileCnt" />
+		<result column="VIEW_CNT" property="viewCnt" />
+	</resultMap>
+	
+	<resultMap id="BbsDtlList" class="egovframework.admin.bbs.service.BbsList">
+		<result column="BBS_CD" property="bbsCd" />
+		<result column="SEQ" property="seq" />
+		<result column="P_SEQ" property="pSeq" />
+		<result column="VIEW_CNT" property="viewCnt" />
+		<result column="FILE_CNT" property="fileCnt" />
+		<result column="LINK_CNT" property="linkCnt" />
+		<result column="INF_CNT" property="infCnt" />
+		<result column="LIST_SUB_CD" property="listSubCd" />
+		<result column="BBS_TIT" property="bbsTit" />
+		<result column="NOTICE_YN" property="noticeYn" />
+		<result column="USER_ID" property="userId" />
+		<result column="USER_NM" property="userNm" />
+		<result column="USER_DTTM" property="userDttm" />
+		<result column="DEPT_NM" property="deptNm" />
+		<result column="KEY_SEQ" property="keySeq" />
+		<result column="USER_EMAIL" property="userEmail" />
+		<result column="EMAIL1" property="email1" />
+		<result column="EMAIL2" property="email2" />
+		<result column="USER_TEL" property="userTel" />
+		<result column="TEL1" property="tel1" />
+		<result column="TEL2" property="tel2" />
+		<result column="TEL3" property="tel3" />
+		<result column="BBS_CONT" property="bbsCont"  jdbcType="CLOB" javaType="java.lang.String" typeHandler="clobHandler"/>
+		<result column="ORG_CD" property="orgCd" />
+		<result column="ORG_NM" property="orgNm" />
+		<result column="ANS_CONT" property="ansCont" />
+		<result column="ACPT_ID" property="acptId" />
+		<result column="ACPT_DTTM" property="acptDttm" />
+		<result column="APPR_NM" property="apprNm" />
+		<result column="APPR_ID" property="apprId" />
+		<result column="APPR_TEL" property="apprTel" />
+		<result column="UPD_ID" property="updId" />
+		<result column="UPD_DTTM" property="updDttm" />
+		<result column="REG_ID" property="regId" />
+		<result column="REG_DTTM" property="regDttm" />
+		<result column="ANS_STATE_NM" property="ansStateNm" />
+		<result column="ANS_STATE" property="ansState" />
+		<result column="APPR_DTTM" property="apprDttm" />
+		<result column="SECRET_YN" property="secretYn" />
+		<result column="DEL_YN" property="delYn" />
+		<result column="DITC_NM1" property="ditcNm1" />
+		<result column="DITC_NM2" property="ditcNm2" />
+		<result column="DITC_NM3" property="ditcNm3" />
+		<result column="DITC_NM4" property="ditcNm4" />
+		<result column="DITC_NM5" property="ditcNm5" />
+		<result column="DITC_NM6" property="ditcNm6" />
+		<result column="DITC_NM7" property="ditcNm7" />
+	</resultMap>
+	
+<resultMap id="BbsLinkListAll" class="egovframework.admin.bbs.service.BbsList">
+		<result column="SEQ" property="seq" />
+		<result column="BBS_CD" property="bbsCd" />
+		<result column="DEL_YN" property="delYn" />
+		<result column="LINK_SEQ" property="linkSeq" />
+		<result column="URL" property="url" />
+		<result column="LINK_NM" property="linkNm" />
+	</resultMap>
+	
+	<resultMap id="BbsInfListAll" class="egovframework.admin.bbs.service.BbsList">
+		<result column="SEQ" property="seq" />
+		<result column="DEL_YN" property="delYn" />
+		<result column="BBS_CD" property="bbsCd" />
+		<result column="INF_ID" property="infId" />
+		<result column="INF_NM" property="infNm" />
+	</resultMap>
+	
+	<resultMap id="BbsFileListAll" class="egovframework.admin.bbs.service.BbsList">
+		<result column="SEQ" property="mstSeq" />
+		<result column="DEL_YN" property="delYn" />
+		<result column="BBS_CD" property="bbsCd" />
+		<result column="FILE_SEQ" property="fileSeq" />
+		<result column="FILE_SIZE" property="fileSize" />
+		<result column="VIEW_FILE_NM" property="viewFileNm" />
+		<result column="SRC_FILE_NM" property="srcFileNm" />
+		<result column="SAVE_FILE_NM" property="saveFileNm" />
+		<result column="FILE_EXT" property="fileExt" />
+		<result column="TOP_YN" property="topYn" />
+		<result column="REG_DTTM" property="regDttm" />
+		<result column="FILE_SIZE_KB"  property="fileSizeKb"                />               
+		<result column="CATE_NM"  property="cateNm"                />               
+	</resultMap>
+	
+	<resultMap id="BbsFileListAll2" class="egovframework.admin.bbs.service.BbsList">
+		<result column="SEQ" property="mstSeq" />
+		<result column="BBS_CD" property="bbsCd" />
+		<result column="FILE_SEQ" property="fileSeq" />
+		<result column="VIEW_FILE_NM" property="viewFileNm" />
+	</resultMap>
+	
+	<resultMap id="preNextList" class="egovframework.admin.bbs.service.BbsList">
+		<result column="SEQ" property="seq" />
+		<result column="BBS_TIT" property="bbsTit" />
+		<result column="SECRET_YN" property="secretYn" />
+		<result column="USER_ID" property="userId" />
+	</resultMap>
+	
+	<resultMap id="DicListAll" class="egovframework.admin.bbs.service.BbsList">
+		<result column="SEQ" property="seq" />
+		<result column="BBS_TIT" property="bbsTit" />
+		<result column="BBS_CONT" property="bbsCont" />
+		<result column="DEL_YN" property="delYn" />
+		<result column="VIEW_CNT" property="viewCnt" />
+	</resultMap>
+	
+	<resultMap id="ReportListAll" class="egovframework.admin.bbs.service.BbsList">
+		<result column="SEQ" property="seq" />
+		<result column="BBS_TIT" property="bbsTit" />
+		<result column="BBS_CONT" property="bbsCont" />
+		<result column="DEL_YN" property="delYn" />
+		<result column="REG_DTTM" property="regDttm" />
+		<result column="USER_DTTM" property="userDttm" />
+		<result column="FILE_SEQ" property="fileSeq" />
+		<result column="SRC_FILE_NM" property="srcFileNm" />
+		<result column="SAVE_FILE_NM" property="saveFileNm" />
+		<result column="VIEW_FILE_NM" property="viewFileNm" />
+		<result column="FILE_EXT" property="fileExt" />
+		<result column="TOP_YN" property="topYn" />
+		<result column="FILE_SEQ_LENGTH" property="fileSeqLength" />
+	</resultMap>
+	
+		<resultMap id="SitesListAll" class="egovframework.admin.bbs.service.BbsList">
+		<result column="SEQ" property="seq" />
+		<result column="BBS_TIT" property="bbsTit" />
+		<result column="BBS_CONT" property="bbsCont" />
+		<result column="DEL_YN" property="delYn" />
+		<result column="REG_DTTM" property="regDttm" />
+		<result column="FILE_SEQ_LENGTH" property="fileSeqLength" />
+		<result column="FILE_SEQ" property="fileSeq" />
+		<result column="SRC_FILE_NM" property="srcFileNm" />
+		<result column="SAVE_FILE_NM" property="saveFileNm" />
+		<result column="VIEW_FILE_NM" property="viewFileNm" />
+		<result column="FILE_EXT" property="fileExt" />
+		<result column="FILE_SIZE" property="fileSize" />
+		<result column="TOP_YN" property="topYn" />
+		<result column="LINK_SEQ" property="linkSeq" />
+		<result column="LINK_NM" property="linkNm" />
+		<result column="URL" property="url" />
+	</resultMap>
+	
+	<resultMap id="ReportDetail" class="egovframework.admin.bbs.service.BbsList">
+		<result column="SEQ" property="seq" />
+		<result column="BBS_TIT" property="bbsTit" />
+		<result column="BBS_CONT" property="bbsCont" />
+		<result column="DEL_YN" property="delYn" />
+		<result column="FILE_SEQ" property="fileSeq" />
+		<result column="SRC_FILE_NM" property="srcFileNm" />
+		<result column="SAVE_FILE_NM" property="saveFileNm" />
+		<result column="VIEW_FILE_NM" property="viewFileNm" />
+		<result column="FILE_EXT" property="fileExt" />
+		<result column="REG_DTTM" property="regDttm" />
+		<result column="TOP_YN" property="topYn" />
+		<result column="FILE_SEQ_LENGTH" property="fileSeqLength" />
+	</resultMap>
+	
+	<resultMap id="ReportFileList" class="egovframework.admin.bbs.service.BbsList">
+		<result column="RN_SEQ"  property="rnSeq"  />
+		<result column="FILE_SEQ" property="fileSeq" />
+		<result column="SRC_FILE_NM" property="srcFileNm" />
+		<result column="SAVE_FILE_NM" property="saveFileNm" />
+		<result column="VIEW_FILE_NM" property="viewFileNm" />
+		<result column="FILE_SIZE_KB" property="fileSizeKb" />
+		<result column="FILE_EXT" property="fileExt" />
+		<result column="TOP_YN" property="topYn" />
+		<result column="REG_DTTM" property="regDttm" />
+	</resultMap>
+	
+	<resultMap id="SitesLinkList" class="egovframework.admin.bbs.service.BbsList">
+		<result column="LINK_SEQ" property="linkSeq" />
+		<result column="LINK_NM" property="linkNm" />
+		<result column="URL" property="url" />
+	</resultMap>
+	
+	<resultMap id="bbsDetail" class="egovframework.admin.bbs.service.BbsList">
+		<result column="SECRET_YN" property="secretYn" />
+		<result column="USER_ID" property="userId" />
+	</resultMap>
+	
+	<resultMap id="bbsEngMain" class="egovframework.admin.bbs.service.BbsList">
+		<result column="RN" property="rn" />
+		<result column="SEQ" property="seq" />
+		<result column="BBS_TIT" property="bbsTit" />
+		<result column="USER_DTTM" property="userDttm" />
+	</resultMap>
+	
+	<resultMap id="bbsSiteMap" class="egovframework.admin.bbs.service.BbsList">
+		<result column="LIST_SUB_CD"	property="listSubCd" />
+		<result column="SITE_NM" 		property="siteNm" />
+		<result column="SITE_URL" 		property="siteUrl" />
+		<result column="BBS_CONT" 		property="bbsCont" nullValue=""/>
+		<result column="CONTINENT" 		property="continent" />
+		<result column="NATION" 		property="nation" />
+		<result column="CT_CD" 			property="ctCd" />
+	</resultMap>
+	
+	<resultMap id="bbsPopupMap" class="egovframework.admin.bbs.service.BbsList">
+		<result column="RN_SEQ"  property="rnSeq"  />
+		<result column="WEIGHT_SIZE" property="weightSize" />
+		<result column="HEIGHT_SIZE" property="heightSize" />
+	</resultMap>
+	
+	<resultMap id="bbsPopupDtlMap" class="egovframework.admin.bbs.service.BbsList">
+		<result column="BBS_TIT" property="bbsTit" />
+		<result column="BBS_CONT" property="bbsCont" />
+		<result column="WEIGHT_SIZE" property="weightSize" />
+		<result column="HEIGHT_SIZE" property="heightSize" />
+		<result column="RN_SEQ"  property="rnSeq"  />
+	</resultMap>
+	
+	<select id="PortalBbsListDAO.selectBbsAdminInfo" parameterClass="egovframework.admin.bbs.service.BbsList" resultMap="BbsAdminInfo">
+		SELECT BBS_CD, BBS_NM, LIST_CD, LANG_CD, BBS_TYPE_CD, NOTICE_YN, SECRET_YN, ATFILE_YN, EXT_LIMIT, SIZE_LIMIT, LIST_CNT,HL_CNT
+			, LINK_YN, INF_YN, EMAIL_REG_YN, EMAIL_NEED_YN, TEL_YN, TEL_NEED_YN, ANS_YN, ANS_TAG, HTML_YN, DEPT_YN, LOGIN_WT_YN
+		FROM TB_BBS_ADMIN
+		WHERE BBS_CD = #bbsCd#
+		AND USE_YN = 'Y'
+  	</select>
+  	
+	<select id="PortalBbsListDAO.getListCnt" parameterClass="egovframework.admin.bbs.service.BbsList" resultClass="java.lang.Integer">
+		SELECT LIST_CNT
+		FROM TB_BBS_ADMIN
+		WHERE BBS_CD = #bbsCd#
+		AND USE_YN = 'Y'
+  	</select>
+  	
+  	<select id="PortalBbsListDAO.getBbsExp" parameterClass="egovframework.admin.bbs.service.BbsList" resultClass="String">
+  		SELECT BBS_EXP 
+  		FROM TB_BBS_ADMIN
+  		WHERE BBS_CD = #bbsCd#
+  		AND USE_YN = 'Y'
+  	</select>
+  
+  	<select id="PortalBbsListDAO.selectBbsListAll" parameterClass="egovframework.admin.bbs.service.BbsList" resultMap="BbsListAll">
+  	  	<![CDATA[
+	 	SELECT *
+		  FROM ( SELECT (TRUNC(ROWNUM / #pageSize# - 0.1) +1) RN,
+		                TB.*
+		           FROM (
+					 	SELECT T.BBS_TIT
+								, CASE WHEN (SYSDATE - T.USER_DTTM < 3) THEN 'NEW' ELSE 'OLD' END AS CURRDATE	
+								, T.BBS_CD, T.SEQ, T.P_SEQ, T.DEL_YN, T.LIST_SUB_CD, T.NOTICE_YN, T.VIEW_CNT
+								, T.FILE_CNT, TO_CHAR(T.USER_DTTM,'YYYY-MM-DD') AS USER_DTTM, T.SECRET_YN 
+								, T.BBS_CONT, T.ORG_CD, T.ORG_NM, T.APPR_NM, T.APPR_DTTM, T.DEPT_CD, NVL(T.DEPT_NM, ' ') DEPT_NM
+								, FN_GET_COMM_CODE_NM('B1001', LIST_SUB_CD) AS DITC_NM1
+								, FN_GET_COMM_CODE_NM('B1002', LIST_SUB_CD) AS DITC_NM2
+								, FN_GET_COMM_CODE_NM('B1003', LIST_SUB_CD) AS DITC_NM3
+								, FN_GET_COMM_CODE_NM('B1004', LIST_SUB_CD) AS DITC_NM4
+								, FN_GET_COMM_CODE_NM('B1005', LIST_SUB_CD) AS DITC_NM5
+								, FN_GET_COMM_CODE_NM('B1006', LIST_SUB_CD) AS DITC_NM6		
+								, FN_GET_COMM_CODE_ENM('B1002', LIST_SUB_CD) AS DITC_NM7		
+							]]>	
+								, T.USER_ID, T.USER_NM
+						<isNotEmpty property="ansTag" >
+					    	<isEqual property="ansTag" compareValue="R" >
+					    		, CASE ANS_STATE WHEN 'RW' THEN '접수대기'
+				 					 	WHEN 'AW' THEN '답변대기'
+				 					 	WHEN 'AK' THEN '답변완료'
+				 					 	WHEN 'AC' THEN '답변불가'
+					                 	ELSE ANS_STATE END AS ANS_STATE_NM
+					    	</isEqual>
+					    	<isNotEqual property="ansTag" compareValue="R" >
+					    		, ANS_STATE AS ANS_STATE_NM
+					    	</isNotEqual>
+						</isNotEmpty>
+						<isEmpty property="ansTag">
+							, ANS_STATE AS ANS_STATE_NM
+						</isEmpty>
+						FROM TB_BBS_LIST T	
+						WHERE T.BBS_CD = #bbsCd#	
+						AND T.DEL_YN = 'N'
+					<isNotEmpty property="userId">
+			         	<isNotEmpty property="subCd">
+						AND T.USER_ID = #userId#
+						</isNotEmpty>
+					</isNotEmpty>
+					<isNotEmpty property="searchWd">
+						<isEqual property="bbsCd" compareValue="FSL1004">
+						AND (T.BBS_TIT LIKE '%'||#searchWd#||'%'
+							        OR
+							        EXISTS (
+							             SELECT 1
+							             FROM	  TB_BBS_FILE X
+										 WHERE	  T.BBS_CD = X.BBS_CD
+										 AND	  T.SEQ = X.SEQ
+										 AND	  X.VIEW_FILE_NM LIKE '%'||#searchWd#||'%'
+										 AND X.DEL_YN ='N'
+										 )
+							     )
+						</isEqual>
+						<isNotEqual property="bbsCd" compareValue="FSL1004">
+						AND (UPPER(T.BBS_TIT) LIKE UPPER('%'||#searchWd#||'%') OR UPPER(T.BBS_CONT) LIKE UPPER('%'||#searchWd#||'%'))
+						</isNotEqual>
+					</isNotEmpty>
+					<isNotEmpty property="ditcNm5">
+						AND LIST_SUB_CD =#ditcNm5#
+					</isNotEmpty>
+					<isNotEmpty property="listSubCd">
+						AND T.LIST_SUB_CD = #listSubCd#
+					</isNotEmpty>
+						ORDER BY T.NOTICE_YN DESC, T.USER_DTTM DESC, T.SEQ DESC	) TB
+		 ) 
+		WHERE RN = #currPage#
+  	</select>
+  	<select id="PortalBbsListDAO.selectBbsListAllCnt" parameterClass="egovframework.admin.bbs.service.BbsList" resultClass="java.lang.Integer">
+		  	SELECT COUNT(T.BBS_CD)
+			FROM TB_BBS_LIST T	
+			WHERE T.BBS_CD = #bbsCd#
+			AND T.DEL_YN = 'N'
+		<isNotEmpty property="userId">
+         	<isNotEmpty property="subCd">
+			AND T.USER_ID = #userId#
+			</isNotEmpty>
+		</isNotEmpty>
+		<isNotEmpty property="searchWd">
+			<isEqual property="bbsCd" compareValue="FSL1004">
+			AND (T.BBS_TIT LIKE '%'||#searchWd#||'%'
+				        OR
+				        EXISTS (
+				             SELECT 1
+				             FROM	  TB_BBS_FILE X
+							 WHERE	  T.BBS_CD = X.BBS_CD
+							 AND	  T.SEQ = X.SEQ
+							 AND	  X.VIEW_FILE_NM LIKE '%'||#searchWd#||'%'
+							 AND X.DEL_YN ='N'
+							 )
+				     )
+			</isEqual>
+			<isNotEqual property="bbsCd" compareValue="FSL1004">
+			AND (UPPER(T.BBS_TIT) LIKE UPPER('%'||#searchWd#||'%') OR UPPER(T.BBS_CONT) LIKE UPPER('%'||#searchWd#||'%'))
+			</isNotEqual>
+		</isNotEmpty>
+		<isNotEmpty property="ditcNm5">
+			AND LIST_SUB_CD =#ditcNm5#
+		</isNotEmpty>
+		<isNotEmpty property="listSubCd">
+			AND T.LIST_SUB_CD = #listSubCd#
+		</isNotEmpty>  
+  	</select>
+  	
+  	<select id="PortalBbsListDAO.selectActKey" parameterClass="egovframework.admin.bbs.service.BbsList" resultMap="BbsActKey">
+	  	SELECT KEY_SEQ, ACT_KEY, USE_NM FROM TB_USER_KEY
+			WHERE USER_CD = #userCd#
+			AND KEY_STATE = 'O'
+  	</select>
+  	
+  	<select id="PortalBbsListDAO.selectGalleryListAll" parameterClass="egovframework.admin.bbs.service.BbsList" resultMap="BbsGalleryListAll">
+  	  	<![CDATA[
+	 	SELECT *
+		  FROM ( SELECT (TRUNC(ROWNUM / #pageSize# - 0.1) +1) RN,
+		                TB.*
+		           FROM (
+					 	SELECT T.BBS_TIT, F.FILE_SEQ 
+								, CASE WHEN (SYSDATE - T.USER_DTTM < 3) THEN 'NEW' ELSE 'OLD' END AS CURRDATE	
+								, T.BBS_CD, T.SEQ, T.P_SEQ, T.DEL_YN, T.LIST_SUB_CD, T.NOTICE_YN, T.VIEW_CNT
+								, T.FILE_CNT, TO_CHAR(T.USER_DTTM,'YYYY-MM-DD') AS USER_DTTM, T.SECRET_YN 
+								, T.BBS_CONT, T.ORG_CD, T.ORG_NM, T.APPR_NM, T.APPR_DTTM, T.DEPT_CD, NVL(T.DEPT_NM, ' ') DEPT_NM
+								]]>	
+								, T.USER_ID, T.USER_NM
+						FROM TB_BBS_LIST T	
+						INNER JOIN TB_BBS_FILE F
+			            ON T.BBS_CD = F.BBS_CD
+			            AND T.SEQ = F.SEQ
+						WHERE T.BBS_CD = #bbsCd#	
+						AND T.DEL_YN = 'N'
+						AND F.TOP_YN = 'Y'
+					 <isNotEmpty property="userId">
+		            	<isNotEmpty property="subCd">
+						AND T.USER_ID = #userId#
+						</isNotEmpty>
+						<isEmpty property = "subCd">
+							<isEqual property="ansTag" compareValue="A" >
+							AND T.ANS_STATE = 'AK'
+							</isEqual>
+							</isEmpty>
+					</isNotEmpty>
+					<isEmpty property = "userId">
+						<isEmpty property = "subCd">
+							<isEqual property="ansTag" compareValue="A" >
+							AND T.ANS_STATE = 'AK'
+							</isEqual>
+							</isEmpty>
+					</isEmpty>
+					<isNotEmpty property="searchWd">
+						AND (UPPER(T.BBS_TIT) LIKE UPPER('%'||#searchWd#||'%') OR UPPER(T.BBS_CONT) LIKE UPPER('%'||#searchWd#||'%'))
+					</isNotEmpty>
+					<isNotEmpty property="listSubCd">
+						AND T.LIST_SUB_CD = #listSubCd#
+					</isNotEmpty>
+						ORDER BY T.NOTICE_YN DESC, T.USER_DTTM DESC, T.SEQ DESC	) TB
+		 ) 
+		WHERE RN = #currPage#
+  	</select>
+  	
+  	<select id="PortalBbsListDAO.selectGalleryListAllCnt" parameterClass="egovframework.admin.bbs.service.BbsList" resultClass="java.lang.Integer">
+		  	SELECT COUNT(T.BBS_CD)
+			FROM TB_BBS_LIST T	
+			INNER JOIN TB_BBS_FILE F
+            ON T.BBS_CD = F.BBS_CD
+            AND T.SEQ = F.SEQ
+			WHERE T.BBS_CD = #bbsCd#
+			AND T.DEL_YN = 'N'
+			AND F.TOP_YN = 'Y'
+		 <isNotEmpty property="userId">
+           	<isNotEmpty property="subCd">
+			AND T.USER_ID = #userId#
+			</isNotEmpty>
+			<isEmpty property = "subCd">
+				<isEqual property="ansTag" compareValue="A" >
+				AND T.ANS_STATE = 'AK'
+				</isEqual>
+				</isEmpty>
+		</isNotEmpty>
+		<isEmpty property = "userId">
+			<isEmpty property = "subCd">
+				<isEqual property="ansTag" compareValue="A" >
+				AND T.ANS_STATE = 'AK'
+				</isEqual>
+				</isEmpty>
+		</isEmpty>
+		<isNotEmpty property="searchWd">
+			AND (UPPER(T.BBS_TIT) LIKE UPPER('%'||#searchWd#||'%') OR UPPER(T.BBS_CONT) LIKE UPPER('%'||#searchWd#||'%'))
+		</isNotEmpty>
+		<isNotEmpty property="listSubCd">
+			AND T.LIST_SUB_CD = #listSubCd#
+		</isNotEmpty>
+  	</select>
+  	
+  	<select id="PortalBbsListDAO.selectBbsDetailView" parameterClass="egovframework.admin.bbs.service.BbsList" resultMap="BbsDtlList">
+  		SELECT BBS_CD, SEQ, P_SEQ, BBS_TIT, LIST_SUB_CD, NOTICE_YN, USER_ID, USER_NM, TO_CHAR(USER_DTTM,'YYYY-MM-DD') AS USER_DTTM
+  		, NVL(DEPT_NM, ' ') DEPT_NM, VIEW_CNT, FILE_CNT, LINK_CNT, INF_CNT, SECRET_YN
+  		, USER_EMAIL
+  		,SUBSTR(USER_EMAIL, 1, INSTR(USER_EMAIL, '@')-1) EMAIL1
+		,SUBSTR(USER_EMAIL, INSTR(USER_EMAIL, '@')+1, LENGTH(USER_EMAIL)) EMAIL2
+		,FN_SCP_EDC_STR('D', USER_EMAIL) USER_EMAIL
+		,SUBSTR(FN_SCP_EDC_STR('D', USER_EMAIL), 1, INSTR(FN_SCP_EDC_STR('D', USER_EMAIL), '@')-1) EMAIL1
+		,SUBSTR(FN_SCP_EDC_STR('D', USER_EMAIL), INSTR(FN_SCP_EDC_STR('D', USER_EMAIL), '@')+1, LENGTH(FN_SCP_EDC_STR('D', USER_EMAIL))) EMAIL2
+  		, FN_SCP_EDC_STR('D', USER_TEL) USER_TEL
+  	 	,SUBSTR(FN_SCP_EDC_STR('D', USER_TEL), 1, INSTR(FN_SCP_EDC_STR('D', USER_TEL), '-')-1) TEL1
+		,SUBSTR(SUBSTR(FN_SCP_EDC_STR('D', USER_TEL), INSTR(FN_SCP_EDC_STR('D', USER_TEL), '-')+1, LENGTH(FN_SCP_EDC_STR('D', USER_TEL))), 1, INSTR(SUBSTR(FN_SCP_EDC_STR('D', USER_TEL), INSTR(FN_SCP_EDC_STR('D', USER_TEL), '-')+1, LENGTH(FN_SCP_EDC_STR('D', USER_TEL))), '-')-1) TEL2
+		,SUBSTR(SUBSTR(FN_SCP_EDC_STR('D', USER_TEL), INSTR(FN_SCP_EDC_STR('D', USER_TEL), '-')+1, LENGTH(FN_SCP_EDC_STR('D', USER_TEL))), INSTR(SUBSTR(FN_SCP_EDC_STR('D', USER_TEL), INSTR(FN_SCP_EDC_STR('D', USER_TEL), '-')+1, LENGTH(FN_SCP_EDC_STR('D', USER_TEL))), '-')+1, 
+		LENGTH(SUBSTR(FN_SCP_EDC_STR('D', USER_TEL), INSTR(FN_SCP_EDC_STR('D', USER_TEL), '-')+1, LENGTH(FN_SCP_EDC_STR('D', USER_TEL))))) TEL3 
+  		,SUBSTR(USER_TEL, 1, INSTR(USER_TEL, '-')-1) TEL1
+		,SUBSTR(SUBSTR(USER_TEL, INSTR(USER_TEL, '-')+1, LENGTH(USER_TEL)), 1, INSTR(SUBSTR(USER_TEL, INSTR(USER_TEL, '-')+1, LENGTH(USER_TEL)), '-')-1) TEL2
+		,SUBSTR(SUBSTR(USER_TEL, INSTR(USER_TEL, '-')+1, LENGTH(USER_TEL)), INSTR(SUBSTR(USER_TEL, INSTR(USER_TEL, '-')+1, LENGTH(USER_TEL)), '-')+1, 
+		LENGTH(SUBSTR(USER_TEL, INSTR(USER_TEL, '-')+1, LENGTH(USER_TEL)))) TEL3
+  		, BBS_CONT, ORG_CD, ORG_NM, ANS_STATE
+			<isNotEmpty property="ansTag" >
+				<isEqual property="ansTag" compareValue="A" >
+					, CASE ANS_STATE WHEN 'RW' THEN '접수대기'
+	 					 	WHEN 'AW' THEN '승인대기'
+	 					 	WHEN 'AK' THEN '승인완료'
+	 					 	WHEN 'AC' THEN '승인불가'
+		                 	ELSE ANS_STATE END AS ANS_STATE_NM
+		            , KEY_SEQ     	
+		    	</isEqual>  
+		    	<isEqual property="ansTag" compareValue="R" >
+		    		, CASE ANS_STATE WHEN 'RW' THEN '접수대기'
+	 					 	WHEN 'AW' THEN '답변대기'
+	 					 	WHEN 'AK' THEN '답변완료'
+	 					 	WHEN 'AC' THEN '답변불가'
+		                 	ELSE ANS_STATE END AS ANS_STATE_NM
+					, 0 AS KEY_SEQ		                 	
+		    	</isEqual>
+		    	<isEqual property="ansTag" compareValue="N" > 
+	   	        	, ANS_STATE AS ANS_STATE_NM
+	   	        	, 0 AS KEY_SEQ
+	   	        </isEqual>	           	
+			</isNotEmpty>
+					, DECODE(ANS_CONT, NULL, ' ', ANS_CONT) AS ANS_CONT                 	
+					, ACPT_ID, ACPT_DTTM
+					, FN_GET_COMM_CODE_NM('B1001', LIST_SUB_CD) AS DITC_NM1
+					, FN_GET_COMM_CODE_NM('B1002', LIST_SUB_CD) AS DITC_NM2
+					, FN_GET_COMM_CODE_NM('B1003', LIST_SUB_CD) AS DITC_NM3
+					, FN_GET_COMM_CODE_NM('B1004', LIST_SUB_CD) AS DITC_NM4
+					, FN_GET_COMM_CODE_NM('B1005', LIST_SUB_CD) AS DITC_NM5
+					, FN_GET_COMM_CODE_NM('B1006', LIST_SUB_CD) AS DITC_NM6
+					, FN_GET_COMM_CODE_ENM('B1002', LIST_SUB_CD) AS DITC_NM7
+					, NVL(APPR_NM, ' ') AS APPR_NM, NVL(APPR_ID, ' ') AS APPR_ID, NVL(APPR_TEL, ' ') AS APPR_TEL, NVL(TO_CHAR(APPR_DTTM,'YYYY-MM-DD'), ' ') AS APPR_DTTM, REG_ID, TO_CHAR(REG_DTTM,'YYYY-MM-DD') AS REG_DTTM, UPD_ID, UPD_DTTM, DEL_YN
+		FROM TB_BBS_LIST
+		WHERE BBS_CD = #bbsCd#
+		AND SEQ = #seq#
+  	</select>
+  	
+  	<update id="PortalBbsListDAO.updateViewCnt" parameterClass="egovframework.admin.bbs.service.BbsList">
+  		UPDATE TB_BBS_LIST A
+			SET A.VIEW_CNT = (SELECT NVL(MAX(VIEW_CNT),0)+1 FROM TB_BBS_LIST B WHERE A.BBS_CD = B.BBS_CD AND A.SEQ = B.SEQ)	
+		WHERE A.SEQ = #seq#
+  	</update>
+  	
+	<select id="PortalBbsListDAO.selectBbsInfList"	parameterClass="egovframework.admin.bbs.service.BbsList" resultMap="BbsInfListAll">
+		SELECT A.BBS_CD, A.SEQ, A.INF_ID, B.INF_NM, A.DEL_YN
+		FROM TB_BBS_INF A
+		INNER JOIN TB_OPEN_INF B
+		ON A.INF_ID = B.INF_ID
+		WHERE A.BBS_CD = #bbsCd#
+		AND A.SEQ = #seq#
+	</select>
+	
+	<select id="PortalBbsListDAO.selectBbsLinkList"	parameterClass="egovframework.admin.bbs.service.BbsList" resultMap="BbsLinkListAll">
+		SELECT SEQ, BBS_CD, LINK_SEQ, LINK_NM, URL, DEL_YN
+		FROM TB_BBS_LINK
+		WHERE BBS_CD = #bbsCd#
+		AND SEQ = #seq#
+		ORDER BY LINK_SEQ
+	</select>
+	
+	<select id="PortalBbsListDAO.selectBbsFileList"	parameterClass="egovframework.admin.bbs.service.BbsList" resultMap="BbsFileListAll">
+		SELECT BBS_CD
+			, SEQ
+			, FILE_SEQ
+			, FILE_SIZE
+			, VIEW_FILE_NM
+			, SRC_FILE_NM
+			, SAVE_FILE_NM
+			, FILE_EXT
+			, TOP_YN
+			, DEL_YN
+			, REG_DTTM
+			, CATE_NM
+			<![CDATA[
+	       , CASE  WHEN FILE_SIZE < 1024 THEN 1
+            ELSE ROUND(FILE_SIZE/1024, 2) END FILE_SIZE_KB
+              ]]> 
+		FROM TB_BBS_FILE
+		WHERE BBS_CD = #bbsCd#
+		AND SEQ = #seq#
+		AND DEL_YN = 'N'
+		<isEqual property="bbsCd" compareValue="FSL1004">
+		AND TOP_YN = 'N'
+		</isEqual>
+		<isEqual property="bbsCd" compareValue="FSL1004">
+		ORDER BY MIN(FILE_SEQ) OVER (PARTITION BY CATE_NM), FILE_SEQ
+		</isEqual>
+		<isNotEqual property="bbsCd" compareValue="FSL1004">
+		ORDER BY TOP_YN DESC, FILE_SEQ
+		</isNotEqual>
+	</select>
+	
+	<select id="PortalBbsListDAO.getTopImgInfo"	parameterClass="egovframework.admin.bbs.service.BbsList" resultMap="BbsFileListAll2">
+		SELECT BBS_CD
+			, SEQ
+			, FILE_SEQ
+			, VIEW_FILE_NM
+		FROM TB_BBS_FILE
+		WHERE BBS_CD = #bbsCd#
+		AND SEQ = #seq#
+		AND TOP_YN ='Y'
+	</select>
+	
+	<resultMap id="BbsFileCateNm" class="egovframework.admin.bbs.service.BbsList">
+  		<result column="CATE_NM" property="cateNm" />
+  	</resultMap>
+	
+	<select id="PortalBbsListDAO.getFileCateNm" parameterClass="egovframework.admin.bbs.service.BbsList" resultMap="BbsFileCateNm">
+		SELECT CATE_NM
+		FROM TB_BBS_FILE
+		WHERE BBS_CD = #bbsCd#
+		AND SEQ = #seq#
+		AND DEL_YN = 'N'
+		AND TOP_YN = 'N'
+		GROUP BY CATE_NM
+		ORDER BY MIN(FILE_SEQ)
+	</select>
+	
+	
+		<select id="PortalBbsListDAO.selectDicListAll" parameterClass="egovframework.admin.bbs.service.BbsList" resultMap="DicListAll">
+	 	SELECT *
+		  FROM ( SELECT (TRUNC(ROWNUM / #pageSize# - 0.1) +1) RN,
+		                TB.*
+		           FROM (
+					 	SELECT 	T.BBS_TIT, T.SEQ, T.DEL_YN, T.BBS_CONT,T.VIEW_CNT
+						FROM TB_BBS_LIST T	
+						WHERE T.BBS_CD = #bbsCd#	
+						AND T.DEL_YN = 'N'
+						
+						검색화면에서 직접 SEQ를 받아서 넘어왔을 경우 해당 자료만 보여줌	
+					<isNotEmpty property="seq">
+						AND T.SEQ = #seq#
+					</isNotEmpty>
+
+					
+					<isEmpty property="seq">	
+						<isEmpty property="chosung">
+							<isNotEmpty property="searchWd">
+								AND (UPPER(T.BBS_TIT) LIKE '%'||UPPER(#searchWd#)||'%')
+								일부러 제목으로만 검색하게 해놓았음 
+								AND (UPPER(T.BBS_TIT) LIKE '%'||UPPER(#searchWd#)||'%' OR UPPER(T.BBS_CONT) LIKE '%'||UPPER(#searchWd#)||'%')
+							</isNotEmpty>
+							<isEmpty property="searchWd">
+							<![CDATA[
+								 AND UPPER(T.BBS_TIT) >='가' AND UPPER(T.BBS_TIT) <'나'
+								 ]]> 
+							</isEmpty>
+						</isEmpty>
+				
+						<isNotEmpty property="chosung">
+							<isEqual property="chosung" compareValue="PART">
+							<![CDATA[
+								AND UPPER(T.BBS_TIT) >=#choval1# AND UPPER(T.BBS_TIT) <#choval2#
+								]]> 
+							</isEqual>
+							<isEqual property="chosung" compareValue="ALL">
+								AND 1=1
+							</isEqual>
+						</isNotEmpty>
+					</isEmpty>
+			
+						ORDER BY T.BBS_TIT) TB
+		 ) 
+		WHERE RN = #currPage#
+  	</select>
+  	
+  	<select id="PortalBbsListDAO.selectDicListAllCnt" parameterClass="egovframework.admin.bbs.service.BbsList" resultClass="java.lang.Integer">
+		 	SELECT 	COUNT(T.SEQ)
+			FROM TB_BBS_LIST T	
+			WHERE T.BBS_CD = #bbsCd#	
+			AND T.DEL_YN = 'N'
+			검색화면에서 직접 SEQ를 받아서 넘어왔을 경우 해당 자료만 보여줌	
+		<isNotEmpty property="seq">
+			AND T.SEQ = #seq#
+		</isNotEmpty>
+		<isEmpty property="seq">	
+			<isEmpty property="chosung">
+				<isNotEmpty property="searchWd">
+					AND (UPPER(T.BBS_TIT) LIKE '%'||UPPER(#searchWd#)||'%')
+					일부러 제목으로만 검색하게 해놓았음 
+					AND (UPPER(T.BBS_TIT) LIKE '%'||UPPER(#searchWd#)||'%' OR UPPER(T.BBS_CONT) LIKE '%'||UPPER(#searchWd#)||'%')
+				</isNotEmpty>
+				<isEmpty property="searchWd">
+				<![CDATA[
+					 AND UPPER(T.BBS_TIT) >='가' AND UPPER(T.BBS_TIT) <'나'
+					 ]]> 
+				</isEmpty>
+			</isEmpty>
+			<isNotEmpty property="chosung">
+				<isEqual property="chosung" compareValue="PART">
+				<![CDATA[
+					AND UPPER(T.BBS_TIT) >=#choval1# AND UPPER(T.BBS_TIT) <#choval2#
+					]]> 
+				</isEqual>
+				<isEqual property="chosung" compareValue="ALL">
+					AND 1=1
+				</isEqual>
+			</isNotEmpty>
+		</isEmpty>
+  	</select>
+  	
+	
+	<select id="PortalBbsListDAO.getSeq" parameterClass="egovframework.admin.bbs.service.BbsList" resultClass="java.lang.Integer">
+		SELECT NVL(MAX(SEQ),0)+1
+		FROM TB_BBS_LIST
+	</select>
+	
+	<select id="PortalBbsListDAO.getLinkSeq" parameterClass="egovframework.admin.bbs.service.BbsList" resultClass="java.lang.Integer">
+		SELECT NVL(MAX(LINK_SEQ),0)+1
+		FROM TB_BBS_LINK
+	</select>
+	
+	<select id="PortalBbsListDAO.getLinkSeq2" parameterClass="egovframework.admin.bbs.service.BbsList" resultClass="java.lang.Integer">
+		SELECT COUNT(LINK_SEQ) FROM TB_BBS_LINK
+		WHERE LINK_SEQ = #linkSeq#
+	</select>
+	
+	<update id = "PortalBbsListDAO.updateBbsGallery" parameterClass="egovframework.admin.bbs.service.BbsList">
+		UPDATE TB_BBS_LIST
+		SET BBS_TIT = #bbsTit#
+			, OLD_TIT = #bbsTit#
+			, LIST_SUB_CD = #listSubCd#
+			, USER_ID = #userId#
+			, USER_NM = #userNm#
+			, USER_DTTM = SYSDATE
+			, KEY_SEQ = #keySeq#
+			<isEmpty property="secretYn">
+			, SECRET_YN = 'N'	
+			 </isEmpty>
+			 <isNotEmpty property="secretYn">
+			, SECRET_YN = #secretYn#
+			 </isNotEmpty>
+ 			<isNotEmpty property="email1">
+				<isNotEmpty property="email2">
+			, USER_EMAIL = FN_SCP_EDC_STR('E', #email1# || '@' || #email2#)
+				</isNotEmpty>
+			</isNotEmpty>
+			<isNotEmpty property="tel1">
+				<isNotEmpty property="tel2">
+					<isNotEmpty property="tel3">
+			, USER_TEL = FN_SCP_EDC_STR('E', #tel1# || '-' || #tel2# || '-' || #tel3#)
+					</isNotEmpty>
+				</isNotEmpty>	
+			</isNotEmpty>
+			, BBS_CONT = #bbsCont:CLOB#
+			, REG_ID =  #userId#
+			, REG_DTTM = SYSDATE
+			, UPD_ID = #userId#
+			, UPD_DTTM = SYSDATE
+			, USER_CD = #userCd#
+			, USER_PW =  FN_SCP_EDC_STR('H', #userPw#)
+		WHERE BBS_CD = #bbsCd#	
+		AND SEQ = #seq#
+	</update>
+	
+	<insert id="PortalBbsListDAO.insertBbsList" parameterClass="egovframework.admin.bbs.service.BbsList">
+		INSERT INTO TB_BBS_LIST
+			(BBS_CD, SEQ, P_SEQ, BBS_TIT, OLD_TIT, LIST_SUB_CD, USER_ID, USER_NM, USER_DTTM, KEY_SEQ, SECRET_YN
+			<isNotEmpty property="email1">
+				<isNotEmpty property="email2">
+			, USER_EMAIL
+				</isNotEmpty>
+			</isNotEmpty>
+			<isNotEmpty property="tel1">
+				<isNotEmpty property="tel2">
+					<isNotEmpty property="tel3">
+			, USER_TEL
+					</isNotEmpty>
+				</isNotEmpty>	
+			</isNotEmpty>
+			, BBS_CONT, REG_ID, REG_DTTM, UPD_ID, UPD_DTTM, ORG_CD, ORG_NM, USER_CD, DEPT_CD, DEPT_NM, USER_PW)
+			VALUES
+			(#bbsCd#, #seq#, #pSeq#, #bbsTit#, #bbsTit#, #listSubCd#, 
+			#userId#
+			, #userNm#
+			, SYSDATE, #keySeq#, 
+			<isEmpty property="secretYn">
+					 'N'	
+			 </isEmpty>
+			 <isNotEmpty property="secretYn">
+				#secretYn#
+			 </isNotEmpty>
+			 <isNotEmpty property="email1">
+				<isNotEmpty property="email2">
+			 , FN_SCP_EDC_STR('E', #email1# || '@' || #email2#)
+			 	</isNotEmpty>
+			 </isNotEmpty>
+			 <isNotEmpty property="tel1">
+				<isNotEmpty property="tel2">
+					<isNotEmpty property="tel3">
+			 , FN_SCP_EDC_STR('E', #tel1# || '-' || #tel2# || '-' || #tel3#)
+			 		</isNotEmpty>
+			 	</isNotEmpty>
+			 </isNotEmpty>
+			, #bbsCont:CLOB#, #userId#, SYSDATE, #userId#, SYSDATE
+			, '', '', #userCd#, '', ''
+			,  FN_SCP_EDC_STR('H', #userPw#)
+			) 나중에 session처리해야함
+	</insert>
+	
+  	<update id="PortalBbsListDAO.updateBbsList" parameterClass="egovframework.admin.bbs.service.BbsList">
+  		UPDATE TB_BBS_LIST 
+			SET BBS_TIT = #bbsTit#
+				, LIST_SUB_CD = #listSubCd#
+			<isEmpty property="secretYn">
+				, SECRET_YN = 'N'	
+			 </isEmpty>
+			 <isNotEmpty property="secretYn">
+				, SECRET_YN = #secretYn#
+			 </isNotEmpty>
+			 <isNotEmpty property="email1">
+				<isNotEmpty property="email2">
+				, USER_EMAIL = FN_SCP_EDC_STR('E', #email1# || '@' || #email2#)
+				 </isNotEmpty>
+			 </isNotEmpty>
+			 <isNotEmpty property="tel1">
+				<isNotEmpty property="tel2">
+					<isNotEmpty property="tel3">
+				, USER_TEL = FN_SCP_EDC_STR('E', #tel1# || '-' || #tel2# || '-' || #tel3#)
+					 </isNotEmpty>
+				  </isNotEmpty>
+			  </isNotEmpty>	 
+				, BBS_CONT = #bbsCont:CLOB#
+				, UPD_ID = #userId#
+				, UPD_DTTM = SYSDATE
+			<isNotEmpty property = "keySeq">
+				, KEY_SEQ = #keySeq#
+			</isNotEmpty>
+		WHERE BBS_CD = #bbsCd#			
+		AND SEQ = #seq#
+  	</update>
+	
+		<select id="PortalBbsListDAO.selectReportListAll" parameterClass="egovframework.admin.bbs.service.BbsList" resultMap="ReportListAll">
+	 	SELECT *
+		  FROM ( SELECT (TRUNC(ROWNUM / #pageSize# - 0.1) +1) RN,
+		                TB.*
+		           FROM (
+					 	SELECT 	T.BBS_TIT, T.SEQ, LENGTH(T.SEQ)-1 AS FILE_SEQ_LENGTH, T.DEL_YN, T.BBS_CONT,T.REG_DTTM,
+					 	F.FILE_SEQ,	F.SRC_FILE_NM,F.SAVE_FILE_NM,F.VIEW_FILE_NM,F.FILE_EXT,F.TOP_YN, T.USER_DTTM
+						FROM TB_BBS_LIST T	
+						LEFT OUTER JOIN TB_BBS_FILE F
+						ON T.SEQ = F.SEQ
+						WHERE T.BBS_CD = 'FSL1004' 
+						AND F.TOP_YN = 'Y'
+						AND T.DEL_YN = 'N'	
+						<isNotEmpty property="listCd">
+							AND T.LIST_SUB_CD = #listCd#
+						</isNotEmpty>
+							
+					<isEmpty property="searchWd">
+					검색화면에서 직접 SEQ를 받아서 넘어왔을 경우 해당 자료만 보여줌	
+						<isNotEmpty property="seq">
+							AND T.SEQ = #seq#
+						</isNotEmpty>
+					</isEmpty>
+					<isNotEmpty property="searchWd">
+						AND T.BBS_TIT LIKE '%'||#searchWd#||'%'
+					</isNotEmpty>
+			
+						ORDER BY T.USER_DTTM DESC, T.SEQ DESC) TB
+		 ) 
+		WHERE RN = #currPage#
+  	</select>
+  	
+  	<select id="PortalBbsListDAO.selectReportListAllCnt" parameterClass="egovframework.admin.bbs.service.BbsList" resultClass="java.lang.Integer">
+  			SELECT 	COUNT(T.SEQ)
+						FROM TB_BBS_LIST T	
+						LEFT OUTER JOIN TB_BBS_FILE F
+						ON T.SEQ = F.SEQ
+						WHERE T.BBS_CD = 'FSL1004' 
+						AND F.TOP_YN = 'Y'
+						AND T.DEL_YN = 'N'	
+						<isNotEmpty property="listCd">
+							AND T.LIST_SUB_CD = #listCd#
+						</isNotEmpty>
+					<isEmpty property="searchWd">
+					검색화면에서 직접 SEQ를 받아서 넘어왔을 경우 해당 자료만 보여줌	
+						<isNotEmpty property="seq">
+							AND T.SEQ = #seq#
+						</isNotEmpty>
+					</isEmpty>
+					<isNotEmpty property="searchWd">
+						AND T.BBS_TIT LIKE '%'||#searchWd#||'%'
+					</isNotEmpty>
+  	</select>
+  	
+	
+	<select id="PortalBbsListDAO.selectBbsReportDetail" parameterClass="egovframework.admin.bbs.service.BbsList" resultMap="ReportDetail">
+	 			SELECT 	T.BBS_TIT, T.SEQ, LENGTH(T.SEQ)-1 AS FILE_SEQ_LENGTH, T.DEL_YN, T.BBS_CONT, TO_CHAR(T.REG_DTTM,'YYYY-MM-DD') AS REG_DTTM,
+					 	F.FILE_SEQ,	F.SRC_FILE_NM,F.SAVE_FILE_NM,F.VIEW_FILE_NM,F.FILE_EXT,F.TOP_YN
+						FROM TB_BBS_LIST T	
+						LEFT OUTER JOIN TB_BBS_FILE F
+						ON T.SEQ = F.SEQ
+						WHERE T.BBS_CD = #bbsCd#	
+						AND F.TOP_YN = 'Y'
+						AND T.DEL_YN = 'N'
+                      AND T.SEQ = #seq#
+  	</select>
+  	
+  	<select id="PortalBbsListDAO.selectBbsReportFileList" parameterClass="egovframework.admin.bbs.service.BbsList" resultMap="ReportFileList">
+	  				SELECT *
+		  FROM ( SELECT (TRUNC(ROWNUM / 10 - 0.1) +1) RN,
+		           TB.*
+		           FROM (
+	  				SELECT 
+	  				ROWNUM AS RN_SEQ,
+	  				F.FILE_SEQ,
+	  				F.SRC_FILE_NM,
+	  				F.SAVE_FILE_NM,
+	  				F.VIEW_FILE_NM,
+	  				F.FILE_EXT,
+	  				ROUND(F.FILE_SIZE / 1024,0) AS FILE_SIZE_KB,
+	  				F.TOP_YN,
+	  				TO_CHAR(F.REG_DTTM,'YYYY-MM-DD') REG_DTTM
+					FROM TB_BBS_FILE F
+                    WHERE BBS_CD = #bbsCd#
+                    AND SEQ = #seq#
+                    AND TOP_YN = 'N'
+                    ORDER BY F.FILE_SEQ DESC  ) TB
+		 ) 
+		WHERE RN = #currFilePage#
+                      
+  	</select>
+  	
+  	<select id="PortalBbsListDAO.selectBbsReportFileListCnt" parameterClass="egovframework.admin.bbs.service.BbsList" resultClass="java.lang.Integer">
+  				SELECT COUNT(F.FILE_SEQ)	  			
+					FROM TB_BBS_FILE F
+                    WHERE BBS_CD = #bbsCd#
+                    AND SEQ = #seq#
+                    AND TOP_YN = 'N'
+  	</select>
+	
+	<select id="PortalBbsListDAO.selectSitesListAll" parameterClass="egovframework.admin.bbs.service.BbsList" resultMap="SitesListAll">
+	 	SELECT *
+		  FROM ( SELECT (TRUNC(ROWNUM / #pageSize# - 0.1) +1) RN,
+		           TB.*
+		           FROM (
+					 	SELECT 	T.BBS_TIT, T.SEQ, LENGTH(T.SEQ)-1 AS FILE_SEQ_LENGTH, T.DEL_YN, T.BBS_CONT,T.REG_DTTM,
+						F.SAVE_FILE_NM,F.SRC_FILE_NM,F.VIEW_FILE_NM,F.FILE_SEQ,F.TOP_YN,F.FILE_SIZE,F.FILE_EXT,
+						L.LINK_SEQ,L.LINK_NM,L.URL
+						FROM TB_BBS_LIST T	
+						LEFT OUTER JOIN TB_BBS_LINK L
+						ON T.BBS_CD = L.BBS_CD
+						AND T.SEQ = L.SEQ
+						LEFT OUTER JOIN TB_BBS_FILE F
+						ON T.BBS_CD = F.BBS_CD
+						AND T.SEQ = F.SEQ
+						WHERE T.BBS_CD = 'FSL1007'
+						<isNotEmpty property="listSubCd">
+							AND T.LIST_SUB_CD = #listSubCd#
+						</isNotEmpty>		
+						AND T.DEL_YN = 'N'
+						AND L.DEL_YN = 'N'
+						
+						<isNotEmpty property="searchWd">
+							AND (UPPER(T.BBS_TIT) LIKE '%'||UPPER(#searchWd#)||'%' OR UPPER(T.BBS_CONT) LIKE '%'||UPPER(#searchWd#)||'%')
+						</isNotEmpty>
+						
+						ORDER BY T.BBS_TIT) TB
+		 ) 
+		WHERE RN = #currPage#
+  	</select>
+  	<select id="PortalBbsListDAO.selectSitesListAllCnt" parameterClass="egovframework.admin.bbs.service.BbsList" resultClass="java.lang.Integer">
+		  		SELECT COUNT(T.BBS_CD)
+				FROM TB_BBS_LIST T	
+						LEFT OUTER JOIN TB_BBS_LINK L
+						ON T.BBS_CD = L.BBS_CD
+						AND T.SEQ = L.SEQ
+						LEFT OUTER JOIN TB_BBS_FILE F
+						ON T.BBS_CD = F.BBS_CD
+						AND T.SEQ = F.SEQ
+						WHERE T.BBS_CD = 'FSL1007'
+						<isNotEmpty property="listSubCd">
+							AND T.LIST_SUB_CD = #listSubCd#
+						</isNotEmpty>		
+						AND T.DEL_YN = 'N'
+						AND L.DEL_YN = 'N'
+						<isNotEmpty property="searchWd">
+							AND (UPPER(T.BBS_TIT) LIKE '%'||UPPER(#searchWd#)||'%' OR UPPER(T.BBS_CONT) LIKE '%'||UPPER(#searchWd#)||'%')
+						</isNotEmpty>
+		
+  	</select>
+	
+	<select id="PortalBbsListDAO.selectBbsSitesDetail" parameterClass="egovframework.admin.bbs.service.BbsList" resultMap="ReportDetail">
+	 			SELECT 	T.BBS_TIT, T.SEQ, LENGTH(T.SEQ)-1 AS FILE_SEQ_LENGTH, T.DEL_YN, T.BBS_CONT, TO_CHAR(T.REG_DTTM,'YYYY-MM-DD') AS REG_DTTM,
+					 	F.FILE_SEQ,	F.SRC_FILE_NM,F.SAVE_FILE_NM,F.VIEW_FILE_NM,F.FILE_EXT,F.TOP_YN
+						FROM TB_BBS_LIST T	
+						LEFT OUTER JOIN TB_BBS_FILE F
+						ON T.BBS_CD = F.BBS_CD
+						WHERE T.BBS_CD = #bbsCd#	
+						AND F.TOP_YN = 'Y'
+						AND T.DEL_YN = 'N'
+                      AND T.SEQ = #seq#
+  	</select>
+  	
+  	<select id="PortalBbsListDAO.selectBbsSitesLinkList" parameterClass="egovframework.admin.bbs.service.BbsList" resultMap="SitesLinkList">
+					SELECT 
+					LINK_SEQ,
+					LINK_NM,
+					URL
+					FROM TB_BBS_LINK
+					WHERE BBS_CD = #bbsCd#
+					AND SEQ = #seq#
+  	</select>
+	
+	
+	<select id="PortalBbsListDAO.getFileSeq" parameterClass="egovframework.admin.bbs.service.BbsList" resultClass="java.lang.Integer">
+		SELECT NVL(MAX(FILE_SEQ),0)+1  
+		FROM TB_BBS_FILE
+	</select>
+	
+	<insert id="PortalBbsListDAO.insertBbsGalleryList" parameterClass="egovframework.admin.bbs.service.BbsList">
+		INSERT INTO TB_BBS_LIST
+			(	BBS_CD, SEQ, P_SEQ, BBS_TIT, REG_ID, REG_DTTM, UPD_ID, UPD_DTTM  )
+		 VALUES 
+		 ( #bbsCd#, #mstSeq#, 0, 'test', #sessionUsrId#, SYSDATE, #sessionUsrId#, SYSDATE			)
+	</insert>
+	
+	<insert id="PortalBbsListDAO.insertBbsFile" parameterClass="egovframework.admin.bbs.service.BbsList">
+		INSERT INTO TB_BBS_FILE
+			(	BBS_CD, SEQ, FILE_SEQ	, FILE_SIZE, SRC_FILE_NM, SAVE_FILE_NM, VIEW_FILE_NM, FILE_EXT, TOP_YN, DEL_YN, REG_DTTM, UPD_ID, UPD_DTTM )
+		 VALUES 
+		 ( #bbsCd#, #mstSeq#, #fileSeq#, #fileSize#, #srcFileNm#, #saveFileNm#, #viewFileNm#, #fileExt#, #topYn#, 'N', SYSDATE, #sessionUsrId#, SYSDATE			)
+	</insert>
+	
+	<select id="PortalBbsListDAO.getFileCnt" parameterClass="egovframework.admin.bbs.service.BbsList" resultClass="java.lang.Integer">
+		SELECT COUNT(FILE_SEQ) 
+		FROM TB_BBS_FILE
+		WHERE DEL_YN = 'N'
+		AND BBS_CD = #bbsCd#
+		AND SEQ = #mstSeq#
+	</select>
+	
+	<update id = "PortalBbsListDAO.updateFileCnt" parameterClass="egovframework.admin.bbs.service.BbsList">
+		UPDATE TB_BBS_LIST
+		SET FILE_CNT = #fileCnt#
+		WHERE BBS_CD = #bbsCd#	
+		AND SEQ = #mstSeq#
+	</update>
+	
+	<update id="PortalBbsListDAO.updateBbsFile" parameterClass="egovframework.admin.bbs.service.BbsList">
+		UPDATE TB_BBS_FILE
+		SET VIEW_FILE_NM = #viewFileNm#
+			, FILE_SIZE = #fileSize#
+			, SRC_FILE_NM = #srcFileNm#
+			, SAVE_FILE_NM = #saveFileNm#
+			, FILE_EXT = #fileExt#
+			, TOP_YN = #topYn#
+			, REG_DTTM = SYSDATE
+			, UPD_ID = #sessionUsrId#
+			, UPD_DTTM = SYSDATE
+		WHERE BBS_CD = #bbsCd#
+		AND SEQ = #mstSeq#
+		AND FILE_SEQ = #fileSeq#
+	</update>
+	
+	<update id="PortalBbsListDAO.updateFile" parameterClass="egovframework.admin.bbs.service.BbsList">
+		UPDATE TB_BBS_FILE
+		SET SEQ = #seq#
+		WHERE BBS_CD = #bbsCd#
+		AND SEQ = #mstSeq#
+	</update>
+	
+	<select id="PortalBbsListDAO.selectPrevList"	parameterClass="egovframework.admin.bbs.service.BbsList" resultMap="preNextList">
+		SELECT SEQ, BBS_TIT, SECRET_YN, USER_ID FROM TB_BBS_LIST		
+		WHERE SEQ IN (	#prevSeq#	)
+	</select>
+	
+	<select id="PortalBbsListDAO.selectNextList"	parameterClass="egovframework.admin.bbs.service.BbsList" resultMap="preNextList">
+		SELECT SEQ, BBS_TIT, SECRET_YN, USER_ID FROM TB_BBS_LIST	
+		WHERE SEQ IN ( #nextSeq# )
+	</select>
+	
+	
+	<insert id="PortalBbsListDAO.insertBbsLinkList" parameterClass="egovframework.admin.bbs.service.BbsList">
+		INSERT INTO TB_BBS_LINK
+		(BBS_CD, SEQ, LINK_SEQ, LINK_NM, URL, DEL_YN, REG_DTTM, UPD_ID, UPD_DTTM)
+		VALUES
+		(#bbsCd#, #seq#, #linkSeq#, #linkNm#, #url#, 'N', SYSDATE, #sessionUsrId#, SYSDATE)
+	</insert>
+	
+	<update id="PortalBbsListDAO.updateBbsLinkList" parameterClass="egovframework.admin.bbs.service.BbsList">
+		UPDATE TB_BBS_LINK
+		SET LINK_NM = #linkNm#
+			, URL = #url#
+			, UPD_DTTM = SYSDATE
+		WHERE LINK_SEQ = #linkSeq#
+	</update>
+	
+	<update id="PortalBbsListDAO.deleteBbsList" parameterClass="egovframework.admin.bbs.service.BbsList">
+		DELETE FROM TB_BBS_LIST
+		WHERE BBS_CD = #bbsCd#
+		AND SEQ = #seq#
+	</update>
+	
+	<update id="PortalBbsListDAO.deleteCPBbsLink" parameterClass="egovframework.admin.bbs.service.BbsList">
+		DELETE FROM TB_BBS_LINK
+		WHERE BBS_CD = #bbsCd#
+		AND SEQ = #seq#
+	</update>
+	
+	<update id = "PortalBbsListDAO.deleteCPBbsInf" parameterClass="egovframework.admin.bbs.service.BbsList">
+		DELETE FROM TB_BBS_INF
+		WHERE BBS_CD = #bbsCd#
+		AND SEQ = #seq#
+	</update>
+	
+	
+	<update id="PortalBbsListDAO.insertLogBbsFileDown" parameterClass="egovframework.admin.bbs.service.BbsList" >
+
+	INSERT INTO TB_LOG_BBS_FILE
+	(BBS_CD,SEQ,FILE_SEQ,SYS_TAG,USER_CD,USER_IP,FILE_SIZE,REG_DTTM)
+	VALUES(
+	#bbsCd#
+	,#seq#
+	,#fileSeq#
+ 	,'K'
+	,null
+	,null
+	,#fileSize#
+	,SYSDATE)
+	
+	</update>
+	
+	
+	<update id="PortalBbsListDAO.upBbsFileViewCnt" parameterClass="egovframework.admin.bbs.service.BbsList" >
+
+	UPDATE TB_BBS_FILE SET VIEW_CNT = VIEW_CNT + 1
+	WHERE BBS_CD = #bbsCd# AND
+	SEQ = #seq# AND
+	FILE_SEQ = #fileSeq#
+	
+	</update>
+	
+	<select id = "PortalBbsListDAO.selectBbsDetail" parameterClass="egovframework.admin.bbs.service.BbsList" resultMap="bbsDetail">
+		SELECT SECRET_YN, USER_ID
+		FROM TB_BBS_LIST
+		WHERE BBS_CD = #bbsCd#
+		AND SEQ = #seq#
+	</select>
+	
+	<select id="PortalBbsListDAO.secretYnChk" parameterClass="egovframework.admin.bbs.service.BbsList" resultClass="java.lang.Integer">
+		SELECT COUNT(SEQ)
+		FROM TB_BBS_LIST
+		WHERE BBS_CD = #bbsCd#
+		AND SEQ = #seq#
+		AND USER_ID = #sUserId#
+	</select>
+		
+	<select id="PortalBbsListDAO.bbsPassChk" parameterClass="egovframework.admin.bbs.service.BbsList" resultClass="java.lang.Integer">
+		SELECT COUNT(SEQ)
+		FROM TB_BBS_LIST
+		WHERE BBS_CD = #bbsCd#
+		AND SEQ = #seq#
+		AND USER_PW = #userPw#
+	  	AND USER_PW = FN_SCP_EDC_STR('H',#userPw#)
+	</select>
+	
+	<update id="PortalBbsListDAO.deleteCPBbsFile" parameterClass="egovframework.admin.bbs.service.BbsList">
+		DELETE FROM TB_BBS_FILE
+		WHERE BBS_CD = #bbsCd#
+		AND SEQ = #mstSeq#
+	</update>
+	
+		파일 업로드시 전체 Directory 명 설정할때 bbsCd를 추가하기위해 seq를 가지고 bbsCd를 가지고 오는 Query임
+	<select id="PortalBbsListDAO.selectBbsCd" parameterClass="java.lang.Integer" resultClass="java.lang.String">
+		SELECT 
+		BBS_CD
+		FROM 
+		TB_BBS_LIST 
+		WHERE
+		SEQ = #seq#
+		
+	</select>
+	
+	<select id = "PortalBbsListDAO.selectMainEngList" parameterClass="egovframework.admin.bbs.service.BbsList" resultMap="bbsEngMain">
+	SELECT * 
+	FROM
+	( SELECT ROW_NUMBER() OVER ( ORDER BY USER_DTTM DESC ) RN , SEQ, BBS_TIT, TO_CHAR(USER_DTTM,'YYYY-MM-DD') USER_DTTM
+		FROM TB_BBS_LIST WHERE BBS_CD = 'FSL1008') TB
+	<![CDATA[
+	 WHERE TB.RN <= 4
+	 ]]>
+	</select>
+	
+	<select id = "PortalBbsListDAO.selectBbsSiteList" parameterClass="egovframework.admin.bbs.service.BbsList" resultMap="bbsSiteMap">
+		SELECT LIST_SUB_CD
+		     , SITE_NM
+		     , SITE_URL
+		     , BBS_CONT
+		     , DECODE(LIST_SUB_CD, 'FSL703', CONTINENT, '') AS CONTINENT
+		     , DECODE(LIST_SUB_CD, 'FSL703', NATION, '') AS NATION
+		     , BB.DITC_CD AS CT_CD
+		  FROM (SELECT B.SEQ
+		             , A.LIST_SUB_CD 
+				     , A.BBS_TIT SITE_NM
+				     , B.URL SITE_URL
+				     , DECODE(A.LIST_SUB_CD, 'FSL703', '', A.BBS_CONT) BBS_CONT
+				     , SUBSTR(B.LINK_NM, 1, INSTR(LINK_NM, ',')-1) AS CONTINENT
+				     , SUBSTR(B.LINK_NM, INSTR(LINK_NM, ',')+1, LENGTH(B.LINK_NM)) AS NATION
+				  FROM TB_BBS_LIST A
+				  	   INNER JOIN TB_BBS_LINK B
+				  	   ON  A.BBS_CD = B.BBS_CD
+				  	   AND A.SEQ = B.SEQ
+				  	   AND A.DEL_YN = 'N'
+				  	   AND B.DEL_YN = 'N'
+				  	   INNER JOIN TB_COMM_CODE C
+				  	   ON  GRP_CD = 'B1006'
+				  	   AND A.LIST_SUB_CD = C.DITC_CD 
+				  	   AND A.LIST_SUB_CD = #listSubCd#
+				 WHERE A.BBS_CD = 'FSL1007'
+				) AA
+				LEFT OUTER JOIN TB_COMM_CODE BB
+				ON  BB.GRP_CD = 'B1008'
+				AND AA.CONTINENT = BB.DITC_NM	
+				<isEqual property="listSubCd" compareValue="FSL703">
+				ORDER BY NATION, SITE_NM
+				</isEqual>
+				<isNotEqual property="listSubCd" compareValue="FSL703">
+				ORDER BY SITE_NM
+				</isNotEqual> 
+	</select>
+	
+	<select id = "PortalBbsListDAO.selectBbsPopUpList" parameterClass="egovframework.admin.bbs.service.BbsList" resultMap="bbsPopupMap">
+		SELECT
+			 	SEQ AS RN_SEQ
+		       ,WEIGHT_SIZE
+		       ,HEIGHT_SIZE
+		FROM(
+		SELECT SEQ
+		       ,WEIGHT_SIZE
+		       ,HEIGHT_SIZE
+		       ,POPUP_START_DATE||POPUP_START_HHMI AS POPUP_START
+		       ,POPUP_END_DATE||POPUP_END_HHMI AS POPUP_END
+		   FROM TB_BBS_LIST
+		  WHERE BBS_CD='NOTICE'
+		    AND DEL_YN ='N'
+		    AND POPUP_YN ='Y'
+		)
+		WHERE SYSDATE BETWEEN TO_DATE(POPUP_START,'YYYY-MM-DD HH24:MI') AND TO_DATE(POPUP_END,'YYYY-MM-DD HH24:MI')     
+		ORDER BY SEQ  
+	</select>
+	
+	<select id = "PortalBbsListDAO.selectBbsPopUpListDtl" parameterClass="String" resultMap="bbsPopupDtlMap">
+		SELECT BBS_TIT
+			 	 ,BBS_CONT
+			     ,WEIGHT_SIZE
+		         ,HEIGHT_SIZE
+		         ,SEQ AS RN_SEQ
+		   FROM TB_BBS_LIST
+		  WHERE BBS_CD='NOTICE'
+		    AND DEL_YN ='N'
+		    AND POPUP_YN ='Y'
+		    AND SEQ= #seq#
+	</select>
+	
+	<select id="PortalBbsListDAO.getPrevSeq" parameterClass="egovframework.admin.bbs.service.BbsList" resultClass="java.lang.Integer">
+	<![CDATA[
+			SELECT NVL(MIN(SEQ), 0) 
+					FROM TB_BBS_LIST T 
+					WHERE T.SEQ > #seq#
+					AND T.BBS_CD = #bbsCd#
+					AND T.DEL_YN = 'N'
+					]]>
+				 <isNotEmpty property="userId">
+	            	<isNotEmpty property="subCd">
+					AND T.USER_ID = #userId#
+					</isNotEmpty>
+					<isEmpty property = "subCd">
+						<isEqual property="ansTag" compareValue="A" >
+						AND T.ANS_STATE = 'AK'
+						</isEqual>
+					</isEmpty>
+				</isNotEmpty>
+				<isEmpty property = "userId">
+					<isEmpty property = "subCd">
+						<isEqual property="ansTag" compareValue="A" >
+						AND T.ANS_STATE = 'AK'
+						</isEqual>
+					</isEmpty>
+				</isEmpty>
+				<isNotEmpty property="searchWd">
+					<isEqual property="bbsCd" compareValue="FSL1004">
+					AND (T.BBS_TIT LIKE '%'||#searchWd#||'%'
+						        OR
+						        EXISTS (
+						             SELECT 1
+						             FROM	  TB_BBS_FILE X
+									 WHERE	  T.BBS_CD = X.BBS_CD
+									 AND	  T.SEQ = X.SEQ
+									 AND	  X.VIEW_FILE_NM LIKE '%'||#searchWd#||'%'
+									 AND X.DEL_YN ='N'
+									 )
+						     )
+					</isEqual> 
+					<isNotEqual property="bbsCd" compareValue="FSL1004">
+					AND (UPPER(T.BBS_TIT) LIKE UPPER('%'||#searchWd#||'%') OR UPPER(T.BBS_CONT) LIKE UPPER('%'||#searchWd#||'%'))
+					</isNotEqual>
+				</isNotEmpty>
+				<isNotEmpty property="ditcNm5">
+					AND T.LIST_SUB_CD =#ditcNm5#
+				</isNotEmpty>
+				<isNotEmpty property="listSubCd">
+					AND T.LIST_SUB_CD = #listSubCd#
+				</isNotEmpty>
+				ORDER BY T.NOTICE_YN DESC, T.USER_DTTM DESC, T.SEQ DESC
+	</select>
+	
+	<select id="PortalBbsListDAO.getNextSeq" parameterClass="egovframework.admin.bbs.service.BbsList" resultClass="java.lang.Integer">
+	<![CDATA[
+			SELECT NVL(MAX(SEQ), 0) 
+					FROM TB_BBS_LIST T
+					WHERE T.SEQ < #seq#
+					AND T.BBS_CD = #bbsCd#
+					AND T.DEL_YN = 'N'
+					]]>	
+				 <isNotEmpty property="userId">
+	            	<isNotEmpty property="subCd">
+					AND T.USER_ID = #userId#
+					</isNotEmpty>
+					<isEmpty property = "subCd">
+						<isEqual property="ansTag" compareValue="A" >
+						AND T.ANS_STATE = 'AK'
+						</isEqual>
+						</isEmpty>
+				</isNotEmpty>
+				<isEmpty property = "userId">
+					<isEmpty property = "subCd">
+						<isEqual property="ansTag" compareValue="A" >
+						AND T.ANS_STATE = 'AK'
+						</isEqual>
+					</isEmpty>
+				</isEmpty>				
+				<isNotEmpty property="searchWd">
+					<isEqual property="bbsCd" compareValue="FSL1004">
+					AND (T.BBS_TIT LIKE '%'||#searchWd#||'%'
+						        OR
+						        EXISTS (
+						             SELECT 1
+						             FROM	  TB_BBS_FILE X
+									 WHERE	  T.BBS_CD = X.BBS_CD
+									 AND	  T.SEQ = X.SEQ
+									 AND	  X.VIEW_FILE_NM LIKE '%'||#searchWd#||'%'
+									 AND X.DEL_YN ='N'
+									 )
+						     )
+					</isEqual>
+					<isNotEqual property="bbsCd" compareValue="FSL1004">
+					AND (UPPER(T.BBS_TIT) LIKE UPPER('%'||#searchWd#||'%') OR UPPER(T.BBS_CONT) LIKE UPPER('%'||#searchWd#||'%'))
+					</isNotEqual>
+				</isNotEmpty>
+				<isNotEmpty property="ditcNm5">
+					AND T.LIST_SUB_CD =#ditcNm5#
+				</isNotEmpty>
+				<isNotEmpty property="listSubCd">
+					AND T.LIST_SUB_CD = #listSubCd#
+				</isNotEmpty>
+				ORDER BY T.NOTICE_YN DESC, T.USER_DTTM DESC, T.SEQ DESC
+	</select>
+	
+	<resultMap id="PrevNextList" class="egovframework.admin.bbs.service.BbsList">
+		<result column="SEQ" property="seq" />
+		<result column="PREV_TIT" property="prevTit" />
+		<result column="PRE_SEQ" property="preSeq" />
+		<result column="NEXT_TIT" property="nextTit" />
+		<result column="NEX_SEQ" property="nexSeq" />
+	</resultMap>
+	
+	<select id="PortalBbsListDAO.selectPrevNextList" parameterClass="egovframework.admin.bbs.service.BbsList" resultMap="PrevNextList">
+		SELECT * FROM (
+				SELECT SEQ, LAG(T.BBS_TIT, 1) OVER(ORDER BY  T.NOTICE_YN DESC, T.USER_DTTM DESC, T.SEQ DESC ) AS PREV_TIT
+						, LAG(T.SEQ, 1) OVER(ORDER BY  T.NOTICE_YN DESC, T.USER_DTTM DESC, T.SEQ DESC ) AS PRE_SEQ
+						, LEAD(T.BBS_TIT, 1) OVER(ORDER BY  T.NOTICE_YN DESC, T.USER_DTTM DESC, T.SEQ DESC ) AS NEXT_TIT
+						, LEAD(T.SEQ, 1) OVER(ORDER BY  T.NOTICE_YN DESC, T.USER_DTTM DESC, T.SEQ DESC ) AS NEX_SEQ		
+				FROM TB_BBS_LIST T
+				WHERE T.BBS_CD = #bbsCd#
+				AND T.DEL_YN = 'N'
+				<isNotEmpty property="userId">
+		            	<isNotEmpty property="subCd">
+						AND T.USER_ID = #userId#
+						</isNotEmpty>
+						<isEmpty property = "subCd">
+							<isEqual property="ansTag" compareValue="A" >
+							AND T.ANS_STATE = 'AK'
+							</isEqual>
+							</isEmpty>
+					</isNotEmpty>
+					<isEmpty property = "userId">
+						<isEmpty property = "subCd">
+							<isEqual property="ansTag" compareValue="A" >
+							AND T.ANS_STATE = 'AK'
+							</isEqual>
+						</isEmpty>
+					</isEmpty>				
+					<isNotEmpty property="searchWd">
+						<isEqual property="bbsCd" compareValue="FSL1004">
+						AND (T.BBS_TIT LIKE '%'||#searchWd#||'%'
+							        OR
+							        EXISTS (
+							             SELECT 1
+							             FROM	  TB_BBS_FILE X
+										 WHERE	  T.BBS_CD = X.BBS_CD
+										 AND	  T.SEQ = X.SEQ
+										 AND	  X.VIEW_FILE_NM LIKE '%'||#searchWd#||'%'
+										 AND X.DEL_YN ='N'
+										 )
+							     )
+						</isEqual>
+						<isNotEqual property="bbsCd" compareValue="FSL1004">
+						AND (UPPER(T.BBS_TIT) LIKE UPPER('%'||#searchWd#||'%') OR UPPER(T.BBS_CONT) LIKE UPPER('%'||#searchWd#||'%'))
+						</isNotEqual>
+					</isNotEmpty>
+					<isNotEmpty property="ditcNm5">
+						AND T.LIST_SUB_CD =#ditcNm5#
+					</isNotEmpty>
+					<isNotEmpty property="listSubCd">
+						AND T.LIST_SUB_CD = #listSubCd#
+					</isNotEmpty>
+			) TB
+		WHERE TB.SEQ = #seq#
+	
+	
+	</select>
+	 -->
+</sqlMap>

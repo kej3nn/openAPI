@@ -1,0 +1,104 @@
+@charset "EUC-KR"; 
+
+/*우편번호검색 2010-12-02*/
+
+table{
+margin:0; padding:0; 
+width:100%; 
+border:0; border-collapse:collapse; border-spacing:0; 
+table-layout:fixed; 
+empty-cellls:show; 
+word-break:break-all; 
+word-wrap:break-word;
+}
+.text_ss{font-weight:normal; font-size:0.75em; color:#666; }
+
+
+#zip_top {
+	float:none;
+	width:500px; height:45px;
+	background:url(/common/image/popup/zip_top.gif) no-repeat left top;
+	}
+#zip_body{
+	width:500px;
+	background:url(/common/image/popup/zip_bg.gif) repeat-y ;
+	float:left;
+	}
+#zip_bottom {
+	clear:both;
+	width:500px; height:45px;
+	background:url(/common/image/popup/zip_bottom.gif) no-repeat left top;
+	}
+
+
+#zip_body .title{
+	float:left;
+	padding:0 0 0 42px;
+	width:458px; height:33px;
+	text-align:left;
+	font-weight:bold; font-size:1.2em; 
+	background:url(/common/image/popup/bullet_zip.gif) no-repeat 28px 1px;
+	}
+
+#zip_body #zip_board{
+	float:left; 
+	width:500px;
+	}
+#zip_body #zip_board table{
+	margin:0 0 0 28px; 
+	width:444px;
+	border:#CFCFCF; border-style:solid; border-width:1px 0 0 0; 
+	}
+
+#zip_body #zip_board table th,
+#zip_body #zip_board table td{padding:4px; font-size:12px; border:#CFCFCF; border-style:solid; border-width:0 0 1px 0;}
+#zip_body #zip_board table th{background-color:#E9E9E9; font-weight:bold;}
+
+/*예시글*/
+p.text_ex{
+	float:left; 
+	padding:5px 0 18px 38px; 
+	width:500px; height:20px;
+	width:400px; 
+	font-weight:normal; font-size:0.9em; 
+	}
+
+
+#zip_body #zip_list table{
+	width:442px;
+	font-size:12px; 
+	border:#CFCFCF; border-style:solid; border-width:1px 0 0 0;
+	} 
+#zip_body #zip_list table td {
+	padding:4px 6px 2px 6px; 
+	border:#CFCFCF; border-style:solid; border-width:0 0 1px 0;
+	}
+
+#zip_body #zip_list table td.zip	{font-weight:bold; text-align:center;}
+#zip_body #zip_list table td.address{color:#3366cc; line-height:1.3em; cursor:pointer;}
+
+
+#zip_body #zip_list{
+	float:left; 
+	display:inline; 
+	margin:0 0 0 28px; 
+	width:460px; height:245px; 
+	overflow:auto;
+	}
+#zip_body #zip_name{
+	float:left;		
+	display:inline; 
+	margin:-10px 0 0 28px; 
+	width:444px; 
+	border:#CFCFCF; border-style:solid; border-width:1px 0 0 0;
+	background-color:#E9E9E9;
+	}
+#zip_body #zip_name span.zip,
+#zip_body #zip_name span.address{
+	display:inline-block; 
+	padding:4px 0 2px 0; 
+	text-align:center; 
+	font-weight:bold; 
+		}
+#zip_body #zip_name span.zip{width:80px;}
+#zip_body #zip_name span.address{width:300px;}

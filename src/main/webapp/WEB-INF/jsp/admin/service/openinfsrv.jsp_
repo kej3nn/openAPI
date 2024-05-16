@@ -1,0 +1,779 @@
+<%@ page language="java" contentType="text/html; charset=utf-8" pageEncoding="utf-8"%>
+<%@ page import="egovframework.common.WiseOpenConfig"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="ui" uri="http://egovframework.gov/ctl/ui"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<%@ taglib prefix="spring" uri="http://www.springframework.org/tags"%>
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
+
+<%
+%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title><spring:message code='wiseopen.title'/></title>         
+<c:import  url="/WEB-INF/jsp/inc/headinclude.jsp"/>
+</head>                                                 
+<script language="javascript">              
+//<![CDATA[   
+var openApiSheetYn = false;
+//var multiMediaSheetYn = false; multimedia 제거
+function tabSet(){ //탭 객체 생성  
+	openTab = new OpenTab(tabId,tabContentClass,tabBody); //headinclude.jsp 변수 있음
+	openTab.TabObj = openTab;  
+	openTab.addTabClickEvent();            
+}	   
+$(document).ready(function()    {
+	init();
+ 	LoadPage();
+	doAction('search');
+	inputEnterKey();
+	tabSet();// tab 셋팅
+	
+});                
+function init(){
+	var formObj = $("form[name=adminOpenInfSrv]");
+// 	formObj.find("input[name=openDttmTo]").datepicker(setCalendar());          
+// 	formObj.find("input[name=openDttmFrom]").datepicker(setCalendar());          
+// 	datepickerTrigger();                
+	formObj.find("button[name=btn_inquiry]").click(function(e) { 
+		doAction("search");
+		 return false;                  
+	 }); 
+	formObj.find("button[name=btn_search]").eq(1).click(function(e) { 
+		doAction("poporgnm");
+		 return false;        
+	 }); 
+	formObj.find("button[name=btn_search]").eq(0).click(function(e) { 
+		doAction("popcatenm");
+		 return false;               
+	 }); 
+	formObj.find("button[name=btn_init2]").eq(0).click(function(e) { 
+		formObj.find("input[name=orgNm]").val("");
+		formObj.find("input[name=orgCd]").val("");
+		return false;               
+	}); 
+	formObj.find("button[name=btn_init]").eq(0).click(function(e) { 
+		formObj.find("input[name=cateNm]").val("");
+		formObj.find("input[name=cateId]").val("");
+		return false;               
+	}); 
+	
+	formObj.find("input[name=serVal]").focus();         
+	
+// 	formObj.find("button[name=btn_dttm]").click(function(e) { 
+// 		formObj.find("input[name=openDttmFrom]").val("");
+// 		formObj.find("input[name=openDttmTo]").val("");
+// 	 }); 
+}
+function LoadPage()                
+{      
+	//message-common_ko_KR.properties 선언 후 사용 or message-common_en_US.properties 선언 후 사용
+	var gridTitle = "NO"
+		gridTitle +="|"+"<spring:message code='labal.infId'/>";  
+		gridTitle +="|"+"<spring:message code='labal.dtNm'/>";        
+		gridTitle +="|"+"<spring:message code='labal.infNm'/>";        
+		gridTitle +="|"+"데이터셋 구분";        
+		gridTitle +="|"+"분류";        
+		gridTitle +="|"+"<spring:message code='labal.bbsOrgCd'/>";        
+		gridTitle +="|"+"<spring:message code='labal.cclCd'/>";        
+// 		gridTitle +="|"+"<spring:message code='labal.usrNm'/>";        
+		gridTitle +="|"+"서비스";        
+		gridTitle +="|"+"개방일";        
+		gridTitle +="|"+"<spring:message code='labal.infState'/>";        
+	
+    with(mySheet1){
+    	                     
+    	var cfg = {SearchMode:3,Page:<%=WiseOpenConfig.IBSHEETPAGENOW%>,VScrollMode:1};                                        
+        SetConfig(cfg);          
+        var headers = [                               
+                    {Text:gridTitle, Align:"Center"}                 
+                ];
+        var headerInfo = {Sort:0,ColMove:1,ColResize:1,HeaderCheck:0};
+        
+        InitHeaders(headers, headerInfo); 
+       
+        //문자는 왼쪽정렬
+        //숫자는 오른쪽정렬
+        //코드값은 가운데정렬
+        var cols = [          
+					 {Type:"Seq",			SaveName:"seq",					Width:30,	Align:"Center",		Edit:false}
+					,{Type:"Text",			SaveName:"infId",				Width:100,	Align:"Center",		Edit:false}
+					,{Type:"Text",			SaveName:"dtNm",				Width:200,	Align:"Left",			Edit:false, Hidden:true}
+					,{Type:"Text",			SaveName:"infNm",				Width:200,	Align:"Left",			Edit:false}
+					,{Type:"Text",			SaveName:"cateNm",			Width:0,		Align:"Left",			Edit:false, Hidden:true}
+					,{Type:"Text",			SaveName:"cateFullnm",		Width:120,	Align:"Left",			Edit:false}
+					,{Type:"Text",			SaveName:"orgNm",				Width:100,	Align:"Left",			Edit:false}
+					,{Type:"Text",			SaveName:"cclNm",				Width:90,	Align:"Left",		Edit:false}
+					,{Type:"Html",			SaveName:"openSrv",				Width:70,	Align:"Left",			Edit:false}
+					,{Type:"Text",			SaveName:"openDttm",			Width:70,	Align:"Center",		Edit:false, Format:"Ymd" }
+					,{Type:"Combo",			SaveName:"infState",			Width:70,	Align:"Center",		Edit:false}
+                                        
+                ];                          
+                                      
+        InitColumns(cols);                                                                           
+        FitColWidth();                                                         
+        SetExtendLastCol(1);   
+        SetColProperty("infState", 	${codeMap.infStateIbs});    //InitColumns 이후에 셋팅       
+    }               
+    default_sheet(mySheet1);                      
+}      
+
+/*Sheet 각종 처리*/                  
+function doAction(sAction)                                  
+{
+	var classObj = $("."+tabContentClass); //tab으로 인하여 form이 다건임
+	var actObj = setTabForm(classObj); // 0: form data, 1: form 객체
+	switch(sAction)                  
+	{                        
+		case "search":      //조회   
+			var formObj = $("form[name=adminOpenInfSrv]");        
+// 			fromObj = formObj.find("input[name=openDttmFrom]");                          
+// 			toObj = formObj.find("input[name=openDttmTo]");
+// 			dateValCheck(fromObj,toObj)// from , to 날짜 안맞을 경우 자동셋팅             
+			
+			ajaxBeforeSendAdmin("<c:url value='/admin/ajaxBeforeSendAdmin.do'/>"); //IbSheet 조회전 세션 체크
+			var param = {PageParam: "ibpage", Param: "onepagerow=50&"+actObj[0]};         
+			mySheet1.DoSearchPaging("<c:url value='/admin/service/openInfListAll.do'/>", param);
+			break;     
+		case "popclose":              
+			closeIframePop("iframePopUp");
+			break;
+		case "poporgnm":
+			var url="<c:url value="/admin/basicinf/popup/commOrg_pop.do"/>";
+			var popup = OpenWindow(url,"orgPop","500","550","yes");	             
+			break;
+		case "popcatenm":
+			var url = "<c:url value="/admin/opendt/openCateParListPopUp.do"/>" + "?cateGb=2";
+			var popup = OpenWindow(url,"openCateParListPopUp","500","550","yes");	               
+			break;
+		case "dataSetDtl" :
+			var objTab = getTabShowObj();//탭이 oepn된 객체가져옴
+ 			var dsId = objTab.find("input[name=dsId]").val();     
+			var target = "<c:url value="/admin/openinf/opends/popup/opends_samplePop.do"/>";   
+			var wName = "samplePop";       
+			var wWidth = "1024";
+			var wHeight = "400";                            
+			var wScroll ="no";
+			OpenWindow(target+"?dsId="+dsId, wName, wWidth, wHeight, wScroll);      
+			break;
+ 		case "metaDtl" :
+ 			var objTab = getTabShowObj();//탭이 oepn된 객체가져옴        
+ 			var infId = objTab.find("input[name=infId]").val();                  
+			var target = "<c:url value='/admin/openinf/popup/openInfViewPopUp.do'/>"+"?infId="+infId;
+			var wName = "metaview";        
+			var wWidth = "1024";
+			var wHeight = "580";                            
+			var wScroll ="no";
+			OpenWindow(target, wName, wWidth, wHeight, wScroll);                     
+			break;	
+	}           
+}         
+
+
+
+// 마우스 이벤트
+function mySheet1_OnSearchEnd(code, msg)
+{
+   if(msg != "")
+	{
+	    alert(msg);
+    }
+}
+
+function inputEnterKey(){
+	var formObj = $("form[name=adminOpenInfSrv]");
+	formObj.find("input").keypress(function(e) {
+		  if(e.which == 13) {
+			  doAction('search');   
+			  return false; 
+		  }
+	}); 
+}           
+                   
+function mySheet1_OnDblClick(row, col, value, cellx, celly) {
+    if(row == 0) return;     
+    tabEvent(row);                      
+                          
+}  
+var sheetTabCnt = 0;      
+function tabEvent(row){//탭 이벤트 실행     
+	var title = mySheet1.GetCellValue(row,"infNm");//탭 제목                                                    
+	var id = mySheet1.GetCellValue(row,"infId");//탭 id(유일한key))
+    openTab.SetTabData(mySheet1.GetRowJson(row));//db data 조회시 조건 data
+    var url = "<c:url value='/admin/service/openInfSrvtInfo.do'/>"; // Controller 호출 url        
+    
+    var sheetYn = openTab.tabExits(id); //탭존재 여부      
+    openTab.addTab(id,title,url,tabCallBackSvr); // 탭 추가 시작함(callback함수 overring)          
+    if(!sheetYn){//탭이 있을 경우 IBSheet 로드 방직                                        
+    	var cnt = sheetTabCnt++;
+    	//SheetCreate("Tcol",cnt, "300"); //시계열
+    	SheetCreate("Scol",cnt, "300"); //시트
+    	SheetCreate("Ccol",cnt); //CHART
+    	SheetCreate("Mcol",cnt, "300");//MAP                    
+        SheetCreate("Lcol",cnt, "300");//LINK                                       
+        SheetCreate("Fcol",cnt, "300");//FILE
+    	SheetCreate("Acol",cnt, "300");//API
+    	SheetCreate("Vcol",cnt, "300");//시각화
+    	if ( openApiSheetYn ) {
+	    	SheetCreate("AcolTwo",cnt, "150");//API2
+    	} else {
+    		setAcolTwoObjSet();		// 2번째 sheet 버튼 숨김.
+    	}
+    	/* 
+    	if ( multiMediaSheetYn ) {
+    		SheetCreate("VcolTwo",cnt, "150");//MultiMedia 2
+    	} else {
+    		setVcolTwoObjSet();		// 2번째 sheet 버튼 숨김.
+    	}
+    	*/
+    }else{
+    	buttonEventAdd();                      
+    }
+}    
+
+function buttonEventAdd(){ //버튼 이벤트 사라짐 overring하여 버튼 이벤트 추가사용
+	//setTcol();	// tcol 제거 
+	setScol();               
+	setCcol(); 
+	setMcol();                 
+	setLcol();                                           
+	setFcol(); 
+	setAcol();
+	setVcol();
+	if ( openApiSheetYn ) {
+		setAcolTwo(); 
+	} else {
+		setAcolTwoObjSet();		// 2번째 sheet 버튼 숨김.
+	}
+	/* multimedia 제거
+	if ( multiMediaSheetYn ) {
+		setVcolTwo(); 
+	} */
+}
+
+function SheetCreate(Type,SheetCnt, sheetHeight){   
+	var SheetNm = Type+SheetCnt; 
+	if ( sheetHeight == null || sheetHeight == undefined ) sheetHeight = "300";
+	$("div[name="+Type+"]").eq(1).attr("id","DIV_"+SheetNm);
+	createIBSheet2(document.getElementById("DIV_"+SheetNm),SheetNm, "100%", sheetHeight+"px");               
+	var sheetobj = window[SheetNm]; 
+	var initFunction = window["init"+Type]; // fucntion이름 가변적 생성 Type맞게 호출 (if else 하려다 코딩하기 귀찮았음...)
+	initFunction(sheetobj,SheetNm);
+	/* 	
+	if(Type == "VcolTwo") {
+		window[SheetNm + "_OnClick"] =  vColClickTwo;
+		window[SheetNm + "_OnSearchEnd"] = onSearchEnd_VcolTwo;
+	} else {
+		window[SheetNm + "_OnClick"] =  onClick;	
+	}
+	
+	if(Type == "Vcol") {
+		window[SheetNm + "_OnSearchEnd"] = onSearchEnd_V;
+	} */
+	window[SheetNm + "_OnClick"] =  onClick;				// 시트별 클릭이벤트 생성
+	window[SheetNm + "_OnValidation"] = onValidation;		// 시트 별 검증로직 이벤트 생성
+}
+
+function onValidation(Row, Col, Value) {
+	var objTabDiv = getTabShowObjForm("srvColDiv");//탭이 oepn된 div객체가져옴
+	var sshetNm =objTabDiv.find("input[name=SSheetNm]").val();
+	var gridObj = window[sshetNm];
+	if ( sshetNm.substring(0, 1) == "L" ) {
+		lColValidation(gridObj, Row, Col, Value);
+		return;
+	} else if ( sshetNm.substring(0, 1) == "A" ) {
+		var sshetNmTwo =objTabDiv.find("input[name=SSheetNmTwo]").val();
+		aColValidation(window[sshetNmTwo], Row, Col, Value);
+		return;
+	} else if ( sshetNm.substring(0, 1) == "F" ) {
+		fColValidation(gridObj, Row, Col, Value);
+		return;
+	} else if ( sshetNm.substring(0, 1) == "V" ) {
+		vColValidation(gridObj, Row, Col, Value);
+		return;
+	}
+}
+
+function onClick(Row, Col, Value, CellX, CellY, CellW, CellH) {
+	
+	//var objTab = getTabShowObj();//탭이 oepn된 객체가져옴
+	var objTabDiv = getTabShowObjForm("srvColDiv");//탭이 oepn된 div객체가져옴
+	var sshetNm =objTabDiv.find("input[name=SSheetNm]").val();
+	var gridObj = window[sshetNm];
+	var data;
+	var url ="";
+	var wWidth;
+	var wHeight;              
+	var iframeNm ="iframePopUp";
+	var data = "?infId="+gridObj.GetCellValue(Row,"infId");             
+	data += "&infSeq="+gridObj.GetCellValue(Row,"infSeq");                
+	data += "&colSeq="+gridObj.GetCellValue(Row,"colSeq");                             
+	data += "&srvCd="+objTabDiv.find("input[name=srvCd]").val();
+	data += "&prssAccCd="+objTabDiv.find("input[name=prssAccCd]").val();	//공공데이터 메타 권한
+	var status =gridObj.GetCellValue(Row,"status");  
+	if ( sshetNm.substring(0, 1) == "L" ) {
+		lColClick(gridObj, Row, Col);		//Link는 팝업설정이 없음.
+		return;
+	} else if ( sshetNm.substring(0, 1) == "F" ) {
+		fColClick(gridObj, Row, Col);
+		return;
+	} else if ( sshetNm.substring(0, 1) == "V" ) {
+		vColClick(gridObj, Row, Col);
+		return;
+	} else {
+		
+	
+	
+		switch(gridObj.ColSaveName(Col))                                  
+			{                     
+			case "toptSet":  
+				if(status =="I"){
+					alert("저장 버튼을 먼저 클릭해주세요.");           
+				}else{
+					wWidth ="660";                                                    
+					wHeight ="530";                         
+					url = "<c:url value='/admin/service/openInfColOptPopUp.do"+data+"'/>";
+					openIframePop(iframeNm,url,wWidth,wHeight);//ifrmNm, url,width,height
+				}
+				break;      
+			case "soptSet":
+				if(status =="I"){
+					alert("저장 버튼을 먼저 클릭해주세요.");           
+				}else{
+					wWidth ="660";                                                    
+					wHeight ="530";                         
+					url = "<c:url value='/admin/service/openInfColOptPopUp.do"+data+"'/>";
+					openIframePop(iframeNm,url,wWidth,wHeight);//ifrmNm, url,width,height
+				}
+				break;                                                      
+			case "coptSet":  
+				if(status =="I"){
+					alert("저장 버튼을 먼저 클릭해주세요.");           
+				}else{      
+					wWidth ="660";                                                     
+					url = "<c:url value='/admin/service/openInfColOptPopUp.do"+data+"'/>";
+					openIframePop(iframeNm,url,wWidth);//ifrmNm, url,width
+				}
+				break; 
+			case "moptSet": 
+				if(status =="I"){
+					alert("저장 버튼을 먼저 클릭해주세요.");           
+				}else{
+					wWidth ="660";                                                    
+					url = "<c:url value='/admin/service/openInfColOptPopUp.do"+data+"'/>";
+					openIframePop(iframeNm,url,wWidth);//ifrmNm, url,width
+				}
+				break; 
+			case "loptSet":
+				break; 
+			case "foptSet":      
+				break; 
+			case "aoptSet":      
+				if(status =="I"){
+					alert("저장 버튼을 먼저 클릭해주세요.");           
+				}else{
+					wWidth ="660";                                                    
+					wHeight ="530";                        
+					url = "<c:url value='/admin/service/openInfColOptPopUp.do"+data+"'/>";
+					openIframePop(iframeNm,url,wWidth,wHeight);//ifrmNm, url,width,height
+				}
+				break;
+		}
+	}
+}
+
+function tabCallBackSvr(tab,json){ //callBack 함수
+	var startSrvType = "";
+	var srvStartTypeCd = "";
+	if(json.DATA != null){//아따 겁다 짜증나...
+		$.each(json.DATA,function(key,state){ 
+			var srvCd = state.srvCd;
+			srvStartTypeCd += srvCd + "/";
+			if ( srvCd == "A" ) {
+				openApiSheetYn = true;	//API는 항상 sheet 2개유지
+			}
+			/* multimedia 제거
+			if ( srvCd == "V" ) {
+				multiMediaSheetYn = true;	//MultiMedia는 항상 sheet 2개유지
+			} */
+			var formName =typeFormName(srvCd) || "form";//서비스 유형에 따라서 form을 찾아서 값을 넣는다.  
+			var srvIndex = typeIndex(srvCd) || 1;
+			
+			setPrssAccCdBtn(formName, state.prssAccCd);	//공공데이터 메타 권한에 따른 저장 버튼 처리
+			
+			tab.ContentObj.find("input[name=infNm]").addClass("readonly");     
+			tab.ContentObj.find("input[name=ownerCd]").addClass("readonly");
+			tab.ContentObj.find("input[name=dsId]").addClass("readonly");
+			tab.ContentObj.find("input[name=dsNm]").addClass("readonly");
+             			
+			$.each(state,function(key2,state2){ 
+				/* 
+				if(key2 == "dsCd" && state2 =="TS"){ //시계열은 통계 open apin
+					startSrvType = "TS";
+					tab.ContentObj.find(".tab-inner li").eq(1).hide();        
+					tab.ContentObj.find(".tab-inner li").eq(2).hide();                
+					tab.ContentObj.find(".tab-inner li").eq(3).hide();         
+					tab.ContentObj.find(".tab-inner li").eq(4).hide();                           
+					tab.ContentObj.find(".tab-inner li").eq(5).hide();    
+					tab.ContentObj.find("div[name=srvColDiv]").eq(0).show();     	                  		    
+				}else if(key2 == "dsCd" && state2 =="RAW"){ // 통계제외   
+					startSrvType = "RAW";
+					tab.ContentObj.find(".tab-inner li").eq(0).hide();   
+					tab.ContentObj.find("div[name=srvColDiv]").eq(1).show();     	                     		
+				}else if(key2 == "dsCd" && (state2 =="" || state2 ==null || state2 =="null")){     
+					startSrvType = "ETC";
+					tab.ContentObj.find(".tab-inner li").eq(0).hide();
+					tab.ContentObj.find(".tab-inner li").eq(1).hide();
+					tab.ContentObj.find(".tab-inner li").eq(2).hide();
+					tab.ContentObj.find(".tab-inner li").eq(3).hide();
+					tab.ContentObj.find(".tab-inner li").eq(6).hide();
+				}    */ 
+				// dsCd 삭제로 인해 default ETC로
+				startSrvType = "RAW";
+				tab.ContentObj.find(".tab-inner li").eq(0).hide();	//tSheet 사용안함
+				/* tab.ContentObj.find(".tab-inner li").eq(7).hide();  //multimedia 사용안함  */
+				tab.ContentObj.find("div[name=srvColDiv]").eq(1).show();
+				
+				if(key2 == "rytitNm"){
+					tab.ContentObj.find("form[name="+formName+"]").find("[name=rytitNm2]").val(state2);
+				}else if(key2 == "lytitNm"){
+					tab.ContentObj.find("form[name="+formName+"]").find("[name=lytitNm2]").val(state2);
+				}
+				if(key2 == "apiExp") {
+					tab.ContentObj.find("form[name="+formName+"]").find("[name=apiExp2]").val(state2);
+				}
+				
+				//아래 값은 반드시 어떤 서비스든 반드시 존재한다.
+				if(key2 =="ownerCd" || key2 =="dsId" || key2 =="dsNm" || key2 =="infNm"|| key2 =="infId"){
+					tab.ContentObj.find("form").find("[name="+key2+"]").val(state2);                         
+					if(key2 =="dsId" && (state2 == null || state2 =="")){ // 데이터셋 없으면 버튼 삭제
+						/* $("a[name=a_reg]").remove();     
+						$("a[name=a_up]").remove();      
+						$("a[name=a_down]").remove();          
+						$("a[name=a_save]").remove();      
+						$("a[name=a_view]").remove();       */
+					}
+				}else{             
+					if(key2 =="srvYn" && srvIndex > -1){ //사용여부 판단     
+						if(state2 =="Y"){                                                 
+							tab.ContentObj.find(".tab-inner").find("a").eq(srvIndex).removeClass("no-service").addClass("service");
+						}else{
+							tab.ContentObj.find(".tab-inner").find("a").eq(srvIndex).removeClass("no-service");            
+						} 
+					}              
+					if(tab.ContentObj.find("form[name="+formName+"]").find("[name="+key2+"]").attr("type") == 'radio'){          
+						tab.ContentObj.find("form[name="+formName+"]").find("[name="+key2+"]"+":radio[value='"+state2+"']").prop("checked",true);                                                                          
+					}else if(tab.ContentObj.find("form[name="+formName+"]").find("[name="+key2+"]").attr("type") == 'checkbox'){          
+						tab.ContentObj.find("form[name="+formName+"]").find("[name="+key2+"]"+":checkbox[value='"+state2+"']").prop("checked",true); 
+					}else{          
+						tab.ContentObj.find("form[name="+formName+"]").find("[name="+key2+"]").val(state2);
+					}
+				}               
+			});
+		});                        
+	}
+	//dsCd가 없는경우(파일,링크 만 표시) 중 서비스 하고 있는 항목 보여주기	 
+	if ( startSrvType == "ETC" ) {	//dsCd가 없는경우  
+		if ( srvStartTypeCd.indexOf("F") > -1 ) {		//파일, 링크 2개인경우 파일부터.
+			tab.ContentObj.find("div[name=srvColDiv]").eq(5).show(); 	//파일서비스 보여준다.
+			tab.ContentObj.find(".tab-inner a").eq(5).addClass("on");   
+		} else if ( srvStartTypeCd.indexOf("L") > -1) {
+			tab.ContentObj.find("div[name=srvColDiv]").eq(4).show(); 	//링크서비스 보여준다.
+			tab.ContentObj.find(".tab-inner a").eq(4).addClass("on");
+		} else if ( srvStartTypeCd.indexOf("V") > -1) {
+			tab.ContentObj.find("div[name=srvColDiv]").eq(7).show(); 	//시각화 보여준다.
+			tab.ContentObj.find(".tab-inner a").eq(7).addClass("on");   
+		}
+	}
+}                    
+
+function colcallback(res){ 
+    var result = res.RESULT.CODE;
+    if(result == 0) {
+    	alert(res.RESULT.MESSAGE);                  
+    } else {                               
+    	var objTab = getTabShowObj();//탭이 oepn된 객체가져옴
+    	var objTabDiv = getTabShowObjForm("srvColDiv");//탭이 oepn된 div객체가져옴
+    	var val =objTabDiv.find(':radio[name="srvYn"]:checked').val();
+    	var srvCd = objTabDiv.find("input[name=srvCd]").val();
+    	var index = typeIndex(srvCd);
+    	if(val =="Y"){                                                     
+    		objTab.find(".tab-inner").find("a").eq(index).removeClass("no-service").addClass("service");
+		}else{                 
+			objTab.find(".tab-inner").find("a").eq(index).removeClass("no-service").removeClass("service");                       
+		}                                  
+    	alert(res.RESULT.MESSAGE);
+    }
+}                                                            
+
+function setLabal(formObj,type){// labal 동작하기 위해서 id변경(id는 반드시 한개여야함)                  
+	formObj.find("#"+type+"use").attr("id",type+"use0");   
+	formObj.find("#"+type+"use0").next().attr("for",type+"use0");                  
+	formObj.find("#"+type+"unuse").attr("id",type+"unuse0");
+	formObj.find("#"+type+"unuse0").next().attr("for",type+"unuse0"); 
+}
+
+function typeIndex(srvCd){          
+	var srvIndex = -1
+	switch(srvCd)                    
+	{          
+		/* 	
+		case "T":      
+			srvIndex = 0;
+			break; */      
+		case "S":      
+			srvIndex = 1;
+			break;
+		case "C":      
+			srvIndex = 2;
+			break; 
+		case "M":      
+			srvIndex = 3;
+			break; 
+		case "L":      
+			srvIndex = 4;
+			break; 
+		case "F":      
+			srvIndex = 5;
+			break; 
+		case "A":      
+			srvIndex = 6;
+			break;  
+		case "V":      
+			srvIndex = 7;
+			break; 
+	}
+	return srvIndex;
+}
+
+function typeFormName(srvCd){          
+	var formName = "";
+	switch(srvCd)                                  
+	{                     
+		/* tcol 제거
+		case "T":      
+			formName ="adminOpenInfTcol";
+			break; */      
+		case "S":      
+			formName ="adminOpenInfScol";
+			break;
+		case "C":      
+			formName ="adminOpenInfCcol";
+			break; 
+		case "M":      
+			formName ="adminOpenInfMcol";
+			break; 
+		case "L":      
+			formName ="adminOpenInfLcol";
+			break; 
+		case "F":      
+			formName ="adminOpenInfFcol";
+			break; 
+		case "A":      
+			formName ="adminOpenInfAcol";
+			break;
+		case "V":      
+			formName ="adminOpenInfVcol";
+			break;   
+	}
+	return formName;
+}
+
+/**
+ * 공공데이터 메타 권한에 따른 저장 버튼 처리
+ */
+function setPrssAccCdBtn(formName, prssAccCd) {
+	var accCd = Number(prssAccCd);
+	var objTab = getTabShowObj();//탭이 oepn된 객체가져옴
+	var formObj = objTab.find("form[name="+formName+"]");
+	if ( accCd > 20 ) {
+		//수정 권한 이상일 경우
+		formObj.find("a[name=a_save]").show();
+		if ( formName == "adminOpenInfAcol" ) {
+			//API는 폼이 2개있음
+			objTab.find("form[name=adminOpenInfAcolTwo]").find("a[name=a_save]").show();
+		}
+	} else {
+		formObj.find("a[name=a_save]").hide();
+		if ( formName == "adminOpenInfAcol" ) {
+			objTab.find("form[name=adminOpenInfAcolTwo]").find("a[name=a_save]").hide();
+		}
+	}
+}
+
+//현재 오픈된 탭의 번호를 확인한다.(탭의 특성에 맞게 약간 수정.)
+//특성 = 첫번째 열린탭 번호는 0, 두번째 열린탭 번호는 1로 역순증가.
+function getTabShowObjNum() {
+	var cnt = 0;
+	var rtnVal = 0;
+	$(".tab li").each(function(index,item) {
+		if( $(this).hasClass("on") ) {
+			rtnVal = cnt;
+		}
+		cnt++;
+	});
+	rtnVal = (cnt-1) - rtnVal;		//탭의 특성에 맞게 수정.(전체갯수-반환값)
+	if ( rtnVal == cnt-1 )			//전체목록은 -1을 반환.
+		rtnVal = -1;
+	
+	return rtnVal;
+}
+
+//]]> 
+</script>              
+</head>
+<body onload="">
+<div class="wrap">            
+		<c:import  url="/admin/admintop.do"/>   
+		<!-- 내용 -->
+		<div class="container">
+			<!-- 상단 타이틀 -->   
+			<div class="title">             
+				<h2>${MENU_NM}</h2>                                      
+				<p>${MENU_URL}</p>             
+			</div>
+			
+			<!-- 탭 -->
+			<ul class="tab">
+				<li class="all_list"><a href="#">전체목록</a></li>                       
+			</ul>
+			<div class="more_list" style="display:none">
+				<a href="#" class="more">0</a>                
+				<ul class="other_list" style="display:none;">
+					<li><a href="#">보유데이터목록</a><a href="#" class="line_close">x</a></li>
+					<li><a href="#">공공데이터목록asdfsdfsfsdfsdfsdf</a><a href="#" class="line_close">x</a></li>
+				</ul>
+			</div>
+			              
+			<!-- 탭 내용 -->
+			<div class="content" style="display:none">
+				<ul class="tab-inner">   
+					<li class="none"><a href="#" class="no-service on">tsSheet</a></li>
+					<li><a href="#" class="no-service on">Sheet</a></li>
+					<li><a href="#" class="no-service">Chart</a></li>              
+					<li><a href="#" class="no-service">Map</a></li>
+					<li><a href="#" class="no-service">Link</a></li>
+					<li><a href="#" class="no-service">File</a></li>
+					<li><a href="#" class="no-service">Open API</a></li>
+					<li><a href="#" class="no-service">시각화</a></li>
+				</ul>              
+				<c:import  url="openinftcol.jsp"/>                       
+				<c:import  url="openinfscol.jsp"/>   
+				<c:import  url="openinfccol.jsp"/>                          
+                <c:import  url="openinfmcol.jsp"/>
+                <c:import  url="openinflcol.jsp"/>       
+                <c:import  url="openinffcol.jsp"/>      
+                <c:import  url="openinfacol.jsp"/>
+                <c:import  url="openinfvcol.jsp"/>                                         				        		
+			</div>                      
+			
+			<div class="content"  >           
+				<form name="adminOpenInfSrv"  method="post" action="#">
+					
+					<table class="list01">
+						<caption>보유데이터 목록 관리</caption>
+						<colgroup>
+							<col width="150" />
+							<col width="" />
+							<col width="150" />
+							<col width="" />
+						</colgroup>
+						<tr>
+							<th><label class="">분류</label></th>
+							<td><input type="hidden" name="cateId" value="" /> 
+								<input type="text" name="cateNm" readonly="readonly" />
+								<button type="button" class="btn01" name="btn_search">
+									<spring:message code="btn.search" />
+								</button>
+								<button type="button" class="btn01" name="btn_init">초기화</button>
+							</td>
+							<th><label class=""><spring:message code="labal.bbsOrgCd" /></label></th>
+							<td><input type="hidden" name="orgCd" /> <input type="text"
+								name="orgNm" readonly="readonly" />
+								<button type="button" class="btn01" name="btn_search">
+									<spring:message code="btn.search" />
+								</button>
+								<!-- 2017.01.04 초기화 버튼 추가 -->
+								<button type="button" class="btn01" name="btn_init2">초기화</button>
+							</td>
+						</tr>
+						
+						<!-- 2017.01.04 이용허락조건, 서비스 검색 -->
+						<tr>
+							<th><label class=""><spring:message
+										code="labal.cclCd" /></label></th>
+							<td><select name="cclCd">
+									<option value=""><spring:message code="labal.whole" /></option>
+									<c:forEach var="code" items="${codeMap.cclCd}" varStatus="status">
+										<option value="${code.ditcCd}">${code.ditcNm}</option>
+									</c:forEach>
+							</select></td>
+							
+							<th>서비스</th>
+							<td>
+							<select id="infSrv" name="infSrv">
+									<option value="">전체</option>
+									<c:forEach var="code" items="${codeMap.infSrv}" varStatus="status">
+										<option value="${code.ditcCd}">${code.ditcNm}</option>
+									</c:forEach>
+							</select>
+							</td>
+							
+						</tr>
+	
+						<!-- 2017.01.03 검색어, 추천순위 체크박스 추가 -->
+						<tr>
+							<th><spring:message code="labal.search" /></th>
+							<td colspan="3"><select name="serSel">	
+									<option value="ALL">선택</option>
+									<option value="DT" ><spring:message code='labal.dtNm'/></option>
+									<option value="INF" selected="selected"><spring:message code='labal.infNm'/></option>
+									<option value="TAG" ><spring:message code='labal.infTag'/></option>
+									<input type="text" name="serVal" value="" style="width: 300px"/>
+								</select>     
+							<input type="checkbox" name="fvtDataYn" id="fvtDataYn">
+							<label for="fvtDataYn">추천(홈페이지 노출)</label></input> 
+							${sessionScope.button.btn_inquiry}
+								<%-- <button type="button" class="btn01B" name="btn_search">
+									<spring:message code="btn.inquiry" />
+								</button> --%></td>
+						</tr>
+						
+						<!-- 2017.01.03 개방상태 라디오버튼으로 변경, 코드맵으로 데이터를 못가져왔음ㅜㅜ -->
+						<tr>
+							<th><label class=""><spring:message code="labal.infState" /></label></th>
+							<td colspan="3">
+							<input type="radio" id="infStateAll" name="infState" value=""  checked="checked"><label for="infStateAll"><spring:message code="labal.infStateA" /></label></input>&nbsp;&nbsp;
+							<input type="radio" id="infStateN" name="infState" value="N" ><label for="infStateN"><spring:message code="labal.infStateN" /></label></input>&nbsp;&nbsp;
+							<input type="radio" id="infStateY" name="infState" value="Y" ><label for="infStateY"><spring:message code="labal.infStateY" /></label></input>&nbsp;&nbsp;
+							<input type="radio" id="infStateX" name="infState" value="X" ><label for="infStateX"><spring:message code="labal.infStateX" /></label></input>&nbsp;&nbsp;
+							<input type="radio" id="infStateC" name="infState" value="C" ><label for="infStateC"><spring:message code="labal.infStateC" /></label></input>&nbsp;&nbsp;
+							
+							<%-- 
+							<input type="radio" id="infStateAll" name="infState" value=""  checked="checked"><label for="infStateAll">전체</label></input>&nbsp;&nbsp;
+							<c:forEach var="code" items="${codeMap.infState }" varStatus="status">
+								<input type="radio" id="infState_${code.ditcCd }" name="infState" value="${code.ditcCd }" ><label for="infState_${code.ditcCd }">${code.ditcNm }</label></input>&nbsp;&nbsp;
+							</c:forEach> --%>
+							
+							</td>
+						</tr>
+					</table>
+				</form> 
+				<!-- ibsheet 영역 -->
+				<div style="clear: both;"></div>
+				<div class="ibsheet_area_both">
+					<script type="text/javascript">createIBSheet("mySheet1", "100%", "300px"); </script>             
+				</div>            
+				<div class="buttons">                          
+				</div>
+			</div>                  
+		</div>		                      
+	</div>               
+	<c:import  url="/WEB-INF/jsp/inc/iframepopup.jsp"/>
+	<!--##  푸터  ##-->                                       
+	<c:import  url="/WEB-INF/jsp/admin/adminfooter.jsp"/>                                   
+	<!--##  /푸터  ##-->            
+</body>
+</html>

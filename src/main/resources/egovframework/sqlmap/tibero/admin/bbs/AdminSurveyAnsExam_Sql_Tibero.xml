@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="SurveyAnsExam">
+	<typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+	
+	<insert id="SurveyAnsExamDao.insertSurveyAnsExam" parameterClass="egovframework.admin.bbs.service.SurveyAnsExam" >
+			
+		
+		INSERT INTO TB_SURVEY_ANS_EXAM
+			(  SURVEY_ID
+			,  ANS_SEQ
+			,  QUEST_SEQ
+			,  EXAM_SEQ
+			<isNotEmpty property="examVal">
+			,  EXAM_VAL
+			</isNotEmpty>
+			<isNotEmpty property="examAns">
+			,  EXAM_ANS
+			</isNotEmpty>
+			) 
+		VALUES
+			(
+				  #surveyId#
+				, #ansSeq#
+				, #questSeq#
+				, #examSeq#
+				<isNotEmpty property="examVal">
+				, #examVal#
+				</isNotEmpty>
+				<isNotEmpty property="examAns">
+				, #examAns#
+				</isNotEmpty>
+			)
+	</insert>
+	
+	
+	
+</sqlMap>

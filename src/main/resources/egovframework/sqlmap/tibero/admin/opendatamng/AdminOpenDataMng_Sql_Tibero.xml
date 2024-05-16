@@ -1,0 +1,438 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- @(#)AdminStatStddMeta_Sql_Tibero.xml 1.0 2017/06/28                       -->
+<!--                                                                         -->
+<!-- COPYRIGHT (C) 2013 WISEITECH CO., LTD. ALL RIGHTS RESERVED.             -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- 관리자 공공데이터관리  SQL 파일이다.	                                  -->
+<!--                                                                         -->
+<!-- @version 1.0 2019/04/23                                                -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<sqlMap namespace="OpenDataMng">
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Type Alias                                                          -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+    
+    	
+	<!-- API 연계설정 리스트 조회 -->
+    <select id="OpenDataMngDao.openApiLinkageMngList" parameterClass="params" resultClass="java.util.HashMap">
+    	/* sql id : OpenDataMngDao.openApiLinkageMngList */ 
+    	SELECT API_SEQ  AS "apiSeq"
+			 , API_NM   AS "apiNm"
+			 , DS_ID    AS "dsId"
+			 , API_URL  AS "apiUrl"
+			 , CASE OBJ_TAG_CD WHEN 'S' THEN '통계'
+			   	               WHEN 'O' THEN '공공데이터' END AS "objTagCdNm"
+			 , OBJ_TAG_CD AS "objTagCd"
+			 , CASE RUN_MODE WHEN 'Y' THEN '실행'
+	                         WHEN 'P' THEN '일시중지'
+				             WHEN 'N' THEN '사용안함' END AS "runModeNm"
+			 , RUN_MODE       AS "runMode"
+			 , LAST_DATA_DTTM AS "lastDataDttm"
+		FROM TB_OPEN_API
+		WHERE
+			1=1
+		<isNotEmpty property="runMode">
+			AND RUN_MODE = #runMode#	
+		</isNotEmpty>
+		<isNotEmpty property="searchVal">
+			AND $searchGubun$ LIKE '%' || #searchVal# || '%'
+		</isNotEmpty>
+		ORDER BY API_SEQ	
+    </select>
+    
+    <select id="OpenDataMngDao.openApiLinkageMngListCount" parameterClass="params" resultClass="java.util.HashMap">
+    	/* sql id : OpenDataMngDao.openApiLinkageMngListCount */ 
+    	SELECT 
+    		COUNT(*)
+		FROM TB_OPEN_API
+		WHERE
+			1=1
+		<isNotEmpty property="useYn">
+			AND RUN_MODE = #runMode#	
+		</isNotEmpty>
+		<isNotEmpty property="searchVal">
+			AND $searchGubun$ LIKE '%' || #searchVal# || '%'
+		</isNotEmpty>
+    </select>
+    
+    <!-- API 연계설정 상세조회 -->
+	<select id="OpenDataMngDao.selectOpenApiLinkageMngDtl" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		/* sql id : OpenDataMngDao.selectOpenApiLinkageMngDtl */ 
+		SELECT 
+		      A.API_SEQ                               AS "apiSeq"
+		      , A.API_NM                              AS "apiNm"
+		      , A.DS_ID                               AS "dsId"
+		      , A.API_URL                             AS "apiUrl"
+		      , A.OBJ_TAG_CD                          AS "objTagCd"
+		      , A.RUN_MODE                            AS "runMode"
+		      , A.LAST_DATA_DTTM                      AS "lastDataDttm"
+		      , A.AUTH_KEY                            AS "authKey"
+		      , A.AUTH_KEY_NM                         AS "authKeyNm"
+		      , A.CALLBACK_SP                         AS "callbackSp"
+		      , A.CHAR_SET                            AS "charSet"
+		      , A.COORD_YN                            AS "coordYn"
+		      , A.DATAID                              AS "dataid"
+		      , A.DMPOINT_CNT                         AS "dmpointCnt"
+		      , A.DS_MODE                             AS "dsMode"
+		      , A.DS_PK                               AS "dsPk"
+		      , A.DS_TYPE                             AS "dsType"
+		      , A.ETC_VAR_NM                          AS "etcVarNm"
+		      , A.OBJ_ID                              AS "objId"
+		      , DECODE( A.OBJ_TAG_CD, 'S', A.OBJ_ID)  AS "objIdS"
+		      , DECODE( A.OBJ_TAG_CD, 'O', A.OBJ_ID)  AS "objIdO"
+		      , A.OWNER_CD                            AS "ownerCd"
+		      , A.O_ROW_NM                            AS "oRowNm"
+		      , A.O_SERVICE_NM                        AS "oServiceNm"
+		      , A.O_TOT_MSG                           AS "oTotMsg"
+		      , A.O_TOT_NM                            AS "oTotNm"
+		      , A.PAGEIDX2_NM                         AS "pageidx2Nm"
+		      , A.PAGEIDX_NM                          AS "pageidxNm"
+		      , A.PAGEIDX_TAG                         AS "pageidxTag"
+		      , A.PAGESIZE                            AS "pagesize"
+		      , A.PAGESIZE_NM                         AS "pagesizeNm"
+		      , A.PARAM_MODE                          AS "paramMode"
+		      , A.PROC_DESC                           AS "procDesc"
+		      , A.REG_DTTM                            AS "regDttm"
+		      , A.REG_ID                              AS "regId"
+		      , A.TRANS_MODE                          AS "transMode"
+		      , A.UPD_DTTM                            AS "updDttm"
+		      , A.UPD_ID                              AS "updId"
+		      , A.VAR1_NM                             AS "var1Nm"
+		      , A.VAR1_VAL                            AS "var1Val"
+		      , A.VAR2_NM                             AS "var2Nm"
+		      , A.VAR2_VAL                            AS "var2Val"
+		      , A.VAR3_NM                             AS "var3Nm"
+		      , A.VAR3_VAL                            AS "var3Val"
+		      , A.WRTTIME_COL_ID                      AS "wrttimeColId"
+		      , A.WRTTIME_DEF_VAL                     AS "wrttimeDefVal"
+		      , A.WRTTIME_ID                          AS "wrttimeId"     
+		FROM TB_OPEN_API A
+		WHERE A.API_SEQ = #apiSeq#
+		ORDER BY A.API_SEQ
+	</select>
+	
+	 <!-- API 연계설정  저장 데이터셋 데이터 리스트 조회 -->
+	<select id="OpenDataMngDao.selectOpenApiLinkDsPopList" parameterClass="params" resultClass="java.util.HashMap">
+		/* sql id : OpenDataMngDao.selectOpenApiLinkDsPopList */
+		SELECT 
+		       A.OWNER        AS "owner"
+			   , A.TABLE_NAME AS "tableName"
+			   , A.COMMENTS   AS "comments"
+		 FROM TV_TABLE_LIST A
+		WHERE 1=1 
+		<isNotEmpty property="ownerCd">
+			AND A.OWNER = #ownerCd# 
+		</isNotEmpty>
+		<isNotEmpty property="searchVal">
+			AND   UPPER(A.TABLE_NAME) LIKE '%' || UPPER(#searchVal#) || '%'	   	 
+	   	</isNotEmpty>
+	</select>
+	
+	<!-- API 연계설정  저장 데이터셋 데이터 리스트 갯수 -->
+	<select id="OpenDataMngDao.selectOpenApiLinkDsPopListCount" parameterClass="params" resultClass="int">
+		/* sql id : OpenDataMngDao.selectOpenApiLinkDsPopListCount */
+		SELECT 
+		      COUNT(*)
+		 FROM TV_TABLE_LIST A
+		WHERE 1=1 
+		<isNotEmpty property="ownerCd">
+			AND A.OWNER = #ownerCd# 
+		</isNotEmpty>
+		<isNotEmpty property="searchVal">
+			AND   UPPER(A.TABLE_NAME) LIKE '%' || UPPER(#searchVal#) || '%'	   	 
+	   	</isNotEmpty>
+	</select>	
+	
+	<!-- API 연계설정  대상객체(통계데이터) 데이터 리스트 조회 -->
+	<select id="OpenDataMngDao.selectOpenApiLinkObjSPopList" parameterClass="params" resultClass="java.util.HashMap">
+		/* sql id : OpenDataMngDao.selectOpenApiLinkObjSPopList */
+		 SELECT A.STATBL_ID AS "statblId",
+		        A.STATBL_NM AS "statblNm"
+		   FROM TB_STTS_TBL A
+		  WHERE A.STATBL_ID IS NOT NULL
+		  <isNotEmpty property="searchVal">
+			AND UPPER(A.$searchGubun$) LIKE '%' || UPPER(#searchVal#) || '%'
+		</isNotEmpty>
+	</select>
+	
+	<!-- API 연계설정  대상객체(통계데이터) 데이터 리스트 갯수 -->
+	<select id="OpenDataMngDao.selectOpenApiLinkObjSPopListCount" parameterClass="params" resultClass="int">
+		/* sql id : OpenDataMngDao.selectOpenApiLinkObjSPopListCount */
+		SELECT  
+			  COUNT(*)
+		 FROM TB_STTS_TBL A
+		WHERE A.STATBL_ID IS NOT NULL
+		  <isNotEmpty property="searchVal">
+			AND UPPER(A.$searchGubun$) LIKE '%' || UPPER(#searchVal#) || '%'
+		</isNotEmpty>
+	</select>
+	
+	<!-- API 연계설정 등록 -->
+	<insert id="OpenDataMngDao.insertStatStddMeta" parameterClass="params">
+		<selectKey keyProperty="apiSeq" resultClass="integer">
+			SELECT NVL(MAX(API_SEQ), 0) + 1 FROM TB_OPEN_API
+		</selectKey>
+		INSERT INTO TB_OPEN_API (
+			API_SEQ            
+			, API_NM             
+			, DS_ID              
+			, API_URL            
+			, OBJ_TAG_CD         
+			, RUN_MODE
+			<isNotEmpty property="authKey">           
+			, AUTH_KEY
+			</isNotEmpty>
+			<isNotEmpty property="authKeyNm">           
+			, AUTH_KEY_NM
+			</isNotEmpty>        
+			, CALLBACK_SP        
+			, CHAR_SET           
+			, DATAID  
+			<isNotEmpty property="dmpointCnt">           
+			, DMPOINT_CNT
+			</isNotEmpty>        
+			, DS_MODE
+			<isNotEmpty property="dsPk">             
+			, DS_PK
+			</isNotEmpty>              
+			, DS_TYPE            
+			, ETC_VAR_NM 
+			<isNotEmpty property="callbackSp">         
+			, OBJ_ID
+			</isNotEmpty>             
+			, OWNER_CD           
+			, O_ROW_NM           
+			, O_SERVICE_NM       
+			, O_TOT_MSG          
+			, O_TOT_NM           
+			, PAGEIDX2_NM 
+			<isNotEmpty property="pageidxNm">       
+			, PAGEIDX_NM
+			</isNotEmpty>         
+			, PAGEIDX_TAG
+			<isNotEmpty property="pagesize">        
+			, PAGESIZE
+			</isNotEmpty> 
+			<isNotEmpty property="pagesizeNm">          
+			, PAGESIZE_NM
+			</isNotEmpty>        
+			, PARAM_MODE 
+			<isNotEmpty property="procDesc">        
+			, PROC_DESC
+			</isNotEmpty>          
+			, REG_DTTM           
+			, REG_ID             
+			, TRANS_MODE         
+			, VAR1_NM            
+			, VAR1_VAL           
+			, VAR2_NM            
+			, VAR2_VAL           
+			, VAR3_NM            
+			, VAR3_VAL           
+			, WRTTIME_COL_ID     
+			, WRTTIME_DEF_VAL    
+			, WRTTIME_ID
+		) 
+		VALUES 
+		(
+			#apiSeq#       
+			, #apiNm#        
+			, #dsId#         
+			, #apiUrl#       
+			, #objTagCd#     
+			, #runMode#
+			<isNotEmpty property="authKey">      
+			, #authKey#
+			</isNotEmpty>
+			<isNotEmpty property="authKeyNm">      
+			, #authKeyNm#
+			</isNotEmpty>
+			, #callbackSp:VARCHAR#   
+			, #charSet#      
+			, #dataid# 
+			<isNotEmpty property="dmpointCnt">      
+			, #dmpointCnt#
+			</isNotEmpty>   
+			, #dsMode# 
+			<isNotEmpty property="dsPk">      
+			, #dsPk#
+			</isNotEmpty>         
+			, #dsType#       
+			, #etcVarNm:VARCHAR#
+		<isNotEmpty property="callbackSp">     
+			<isEqual property="objTagCd" compareValue="O">
+			, #objIdO#
+			</isEqual>
+			<isEqual property="objTagCd" compareValue="S">
+			, #objIdS#
+			 </isEqual>
+		</isNotEmpty>  
+			, #ownerCd#      
+			, #oRowNm:VARCHAR#       
+			, #oServiceNm:VARCHAR#   
+			, #oTotMsg:VARCHAR#      
+			, #oTotNm:VARCHAR#       
+			, #pageidx2Nm:VARCHAR#  
+			<isNotEmpty property="pageidxNm"> 
+			, #pageidxNm#
+			</isNotEmpty>    
+			, #pageidxTag#
+			<isNotEmpty property="pagesize">   
+			, #pagesize#
+			</isNotEmpty>
+			<isNotEmpty property="pagesizeNm">     
+			, #pagesizeNm#
+			</isNotEmpty>   
+			, #paramMode#
+			<isNotEmpty property="procDesc">    
+			, #procDesc#
+			</isNotEmpty>     
+			, SYSDATE     
+			, #updId:VARCHAR#      
+			, #transMode#    
+			, #var1Nm:VARCHAR#       
+			, #var1Val:VARCHAR#      
+			, #var2Nm:VARCHAR#       
+			, #var2Val:VARCHAR#      
+			, #var3Nm:VARCHAR#       
+			, #var3Val:VARCHAR#      
+			, #wrttimeColId:VARCHAR# 
+			, #wrttimeDefVal:VARCHAR#
+			, #wrttimeId:VARCHAR# 
+			
+		)	
+		
+	</insert>
+	
+	<!-- API 연계설정 수정 -->
+	<update id="OpenDataMngDao.updateStatStddMeta" parameterClass="params" >
+		UPDATE TB_OPEN_API
+			SET
+				API_NM             = #apiNm#
+				, DS_ID            = #dsId#
+				, API_URL          = #apiUrl#
+				, OBJ_TAG_CD       = #objTagCd#
+				, RUN_MODE         = #runMode#
+				, AUTH_KEY         = #authKey#
+				, AUTH_KEY_NM      = #authKeyNm#
+				, CALLBACK_SP      = #callbackSp:VARCHAR#
+				, CHAR_SET         = #charSet#
+				, DATAID           = #dataid#
+				<isNotEmpty property="dmpointCnt"> 
+				, DMPOINT_CNT      = #dmpointCnt#
+				</isNotEmpty>
+				, DS_MODE          = #dsMode:VARCHAR#
+				, DS_PK            = #dsPk:VARCHAR#
+				, DS_TYPE          = #dsType:VARCHAR#
+				, ETC_VAR_NM       = #etcVarNm:VARCHAR#
+			<isNotEmpty property="callbackSp">
+				<isEqual property="objTagCd" compareValue="O">
+				, OBJ_ID           = #objIdO#
+				</isEqual>
+				<isEqual property="objTagCd" compareValue="S">
+				, OBJ_ID           = #objIdS#
+				</isEqual>
+			</isNotEmpty>
+				, OWNER_CD         = #ownerCd:VARCHAR#
+				, O_ROW_NM         = #oRowNm:VARCHAR#
+				, O_SERVICE_NM     = #oServiceNm:VARCHAR#
+				, O_TOT_MSG        = #oTotMsg:VARCHAR#
+				, O_TOT_NM         = #oTotNm:VARCHAR#
+				, PAGEIDX2_NM      = #pageidx2Nm:VARCHAR#
+				, PAGEIDX_NM       = #pageidxNm:VARCHAR#
+				, PAGEIDX_TAG      = #pageidxTag:VARCHAR#
+				, PAGESIZE         = #pagesize:VARCHAR#
+				, PAGESIZE_NM      = #pagesizeNm:VARCHAR#
+				, PARAM_MODE       = #paramMode:VARCHAR#
+				, PROC_DESC        = #procDesc:VARCHAR#
+				, TRANS_MODE       = #transMode:VARCHAR#
+				, UPD_DTTM         = SYSDATE
+				, UPD_ID           = #updId:VARCHAR#
+				, VAR1_NM          = #var1Nm:VARCHAR#
+				, VAR1_VAL         = #var1Val:VARCHAR#
+				, VAR2_NM          = #var2Nm:VARCHAR#
+				, VAR2_VAL         = #var2Val:VARCHAR#
+				, VAR3_NM          = #var3Nm:VARCHAR#
+				, VAR3_VAL         = #var3Val:VARCHAR#
+				, WRTTIME_COL_ID   = #wrttimeColId:VARCHAR#
+				, WRTTIME_DEF_VAL  = #wrttimeDefVal:VARCHAR#
+				, WRTTIME_ID       = #wrttimeId:VARCHAR#  
+			WHERE API_SEQ = #apiSeq#	
+	</update>
+	
+	<!-- API 연계설정 삭제 -->
+	<delete id="OpenDataMngDao.deleteOpenApiLinkageMng" parameterClass="params" >
+		DELETE FROM TB_OPEN_API
+		 WHERE API_SEQ = #apiSeq#
+	</delete>
+	
+	<!-- 코드정보 조회 -->
+    <select id="OpenDataMngDao.selectOption" parameterClass="params" resultClass="record">
+    	/* sql id : StatsMgmtDao.selectOption */
+        SELECT 
+        	DITC_CD AS "code",
+        	DITC_NM AS "name"
+        FROM TB_COMM_CODE
+        WHERE GRP_CD = #grpCd#
+        	AND USE_YN = 'Y'
+        	<isNotEmpty property="valueCd" prepend="AND">
+        		VALUE_CD LIKE '%' || #valueCd# || '%'
+        	</isNotEmpty>
+        ORDER BY V_ORDER
+    </select>
+    
+    <!-- API연계모니터링 리스트 조회 -->
+    <select id="OpenDataMngDao.openApiLinkageMonList" parameterClass="params" resultClass="java.util.HashMap">
+    	/* sql id : OpenDataMngDao.openApiLinkageMonList */
+    	
+    	SELECT A.SEQCE_NO                AS "seqceNo" 
+			 , A.API_SEQ                 AS "apiSeq"
+		 	 , A.API_NM                  AS "apiNm"
+			 , A.JOB_TAG_CD              AS "jobTagCd"
+			 ,(SELECT DITC_NM FROM TB_COMM_CODE WHERE GRP_CD = 'D1109' AND DITC_CD = A.JOB_TAG_CD ) AS "jobTagCdNm"
+			 , A.DTACYCLE_CD             AS "dtacycleCd"
+			 , A.LAST_WRTTIME_IDTFR_ID   AS "lastWrttimeIdtfrId"
+			 , A.START_WRTTIME_IDTFR_ID  AS "startWrttimeIdtfrId"
+			 , A.END_WRTTIME_IDTFR_ID    AS "endWrttimeIdtfrId"
+			 , A.PRSS_CNT                AS "prssCnt"
+			 , A.SRC_OBJ_NM              AS "srcObjNm"
+			 , A.TARGET_OBJ_NM           AS "targetObjNm"
+			 , A.PRSS_MSG_CONT           AS "prssMsgCont"
+			 , TO_CHAR(A.REG_DTTS, 'YYYY-MM-DD HH24:MI:SS') AS "regDtts"
+		FROM TB_LOG_OPEN_API A
+		WHERE A.REG_DTTS BETWEEN TO_DATE(#regStartDtts#,'YYYY-MM-DD')
+		  AND TO_DATE(#regEndDtts#,'YYYY-MM-DD')+1
+		 <isNotEmpty property="jobTagCd"> 
+		  AND A.JOB_TAG_CD = #jobTagCd#
+		 </isNotEmpty>
+		 <isNotEmpty property="searchVal">
+			AND $searchGubun$ LIKE '%' || #searchVal# || '%'
+		</isNotEmpty>
+		ORDER BY REG_DTTS DESC  
+    </select>
+	
+	 <select id="OpenDataMngDao.openApiLinkageMonListCount" parameterClass="params" resultClass="java.util.HashMap">
+	 	/* sql id : OpenDataMngDao.openApiLinkageMonListCount */ 
+	 	
+	 	SELECT
+	 		COUNT(*)
+		FROM TB_LOG_OPEN_API A
+		WHERE A.REG_DTTS BETWEEN TO_DATE(#regStartDtts#,'YYYY-MM-DD')
+		  AND TO_DATE(#regEndDtts#,'YYYY-MM-DD')+1
+		 <isNotEmpty property="jobTagCd"> 
+		  AND A.JOB_TAG_CD = #jobTagCd#
+		 </isNotEmpty>
+		 <isNotEmpty property="searchVal">
+			AND $searchGubun$ LIKE '%' || #searchVal# || '%'
+		</isNotEmpty>
+		
+	 </select>
+</sqlMap>

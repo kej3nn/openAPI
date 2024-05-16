@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- @(#)AdminLinkMonitor_Sql_Tibero.xml 1.0 2019/10/15                     -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- 연계 모니터링을 관리하는 SQL 파일이다.	                                     -->
+<!--                                                                         -->
+<!-- @author JSSON                                                    	-->
+<!-- @version 1.0 2019/10/05                                                -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<sqlMap namespace="mailMonitor">
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Type Alias                                                          -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+    
+    <!-- 메인리스트 쿼리 -->
+    <sql id="mailSendMonitorDao.main">
+		SELECT
+			I.SEQIDX	AS		"seqidx"
+			, I.SUBJECT	AS "subject"
+			, I.MAILTO		AS "mailto"
+			, I.MAILFROM AS "mailfrom"
+			, SUBSTR(I.MAILTO,INSTR(I.MAILTO,'"')+1,INSTR(I.MAILTO,'"',2)-(INSTR(I.MAILTO,'"')+1)) AS "personNm"
+			, <![CDATA[SUBSTR(I.MAILTO,INSTR(I.MAILTO,'<')+1,INSTR(I.MAILTO,'>')-(INSTR(I.MAILTO,'<')+1)) AS "email"]]>
+			, TO_CHAR(TO_DATE(I.SDATE,'YYYYMMDDHH24MISS'),'YYYY-MM-DD HH24:MI:SS') AS "sdate"
+			, TO_CHAR(TO_DATE(R.STIME,'YYYYMMDDHH24MISS'),'YYYY-MM-DD HH24:MI:SS') AS "stime"
+			, R.EMAIL AS "remail"
+			, R.ERRCODE as "errcode"
+			, CASE WHEN R.ERRCODE = 100 THEN '성공'
+				WHEN R.ERRCODE <![CDATA[<>]]> 100 THEN '실패'
+				ELSE ''
+				END AS "errname"
+			, R.MESSAGE as "message"
+			, CASE WHEN R.ERRCODE IS NULL OR R.ERRCODE = 100 THEN ''
+            	ELSE  '재발송' 
+                END AS "reSendButton"
+		FROM IM_DMAIL_INFO_48 I
+		LEFT OUTER JOIN IM_DMAIL_RESULT_48 R
+		ON I.SEQIDX = R.DMIDX
+	</sql>
+		    	
+    <sql id="mailSendMonitorDao.main.where">
+    	WHERE 1=1
+			<isNotEmpty property="errCode" prepend="AND">
+				<isEqual property="errCode" compareValue="100">
+					R.ERRCODE = #errCode:VARCHAR#	   	 
+				</isEqual>
+				<isEqual property="errCode" compareValue="-1">
+					R.ERRCODE <![CDATA[<>]]> 100	   	 
+				</isEqual>
+				<isEqual property="errCode" compareValue="0">
+					I.SEQIDX NOT IN (SELECT DMIDX FROM IM_DMAIL_RESULT_48)
+				</isEqual>
+	   		</isNotEmpty>
+			<isNotEmpty property="searchVal" prepend="AND">
+				<isEqual property="searchGubun" compareValue="SUBJECT" >
+					I.SUBJECT LIKE '%' || #searchVal# || '%'
+				</isEqual>
+				<isEqual property="searchGubun" compareValue="MAILTO" >
+					I.MAILTO LIKE '%' || #searchVal# || '%'
+				</isEqual>
+		   	</isNotEmpty>
+   		<isNotEmpty property="regStartDtts" prepend="AND">
+		   TO_DATE(I.SDATE,'YYYYMMDDHH24MISS') <![CDATA[ >= ]]> TO_DATE(#regStartDtts:VARCHAR#, 'YYYY-MM-DD') + 0	   	 
+	   	</isNotEmpty>
+	   	<isNotEmpty property="regEndDtts" prepend="AND">
+		   TO_DATE(I.SDATE,'YYYYMMDDHH24MISS') <![CDATA[ < ]]> TO_DATE(#regEndDtts:VARCHAR#, 'YYYY-MM-DD') + 1
+	   	</isNotEmpty>
+    </sql>
+  
+  	<!-- 메인 리스트 조회 -->
+  	<select id="mailSendMonitorDao.selectMailMonitorList" parameterClass="params" resultClass="record">
+  		/* sql id : mailSendMonitorDao.selectMailMonitorList */
+  		<isEqual property="paging" compareValue="0">
+		SELECT AA.* 
+		FROM   (SELECT ROWNUM AS ROW_NUM, AA.*
+				FROM   (  
+		</isEqual>
+			<include refid="mailSendMonitorDao.main"></include>
+			<include refid="mailSendMonitorDao.main.where"></include>
+			ORDER BY
+			    I.SDATE DESC
+		<isEqual property="paging" compareValue="0">
+		<![CDATA[
+				) AA
+			WHERE ROWNUM <= #end:NUMERIC#
+			) AA
+		WHERE AA.ROW_NUM >= #start:NUMERIC#
+		]]>
+		</isEqual>
+  	</select>
+  	<select id="mailSendMonitorDao.selectMailMonitorListCount" parameterClass="params" resultClass="int">
+  		/* sql id : mailSendMonitorDao.selectMailMonitorListCount */
+		SELECT COUNT(*)
+		FROM IM_DMAIL_INFO_48 I
+		LEFT OUTER JOIN IM_DMAIL_RESULT_48 R
+		ON I.SEQIDX = R.DMIDX
+		<include refid="mailSendMonitorDao.main.where"></include>
+  	</select>
+  	
+  	<insert id="mailSendMonitorDao.insertMailReSend" parameterClass="params">
+  		/* sql id : mailSendMonitorDao.insertMailReSend*/
+  		INSERT INTO IM_DMAIL_INFO_48 ( 
+			  SEQIDX
+			, SUBJECT
+			, QRY
+			, REJECT_SLIST_IDX
+			, BLOCK_GROUP_IDX
+			, MAILFROM
+			, MAILTO
+			, REPLYTO
+			, ERRORSTO
+			, HTML
+			, ENCODING
+			, CHARSET
+			, SDATE
+			, TDATE
+			, DURATION_SET
+			, CLICK_SET
+			, SITE_SET
+			, ATC_SET
+			, MTYPE
+			, U_IDX
+			, G_IDX
+			, MSGFLAG
+			, CONTENT
+			) 
+			SELECT 
+				IM_SEQ_DMAIL_INFO_48.NEXTVAL
+		        , SUBJECT
+		        <![CDATA[
+		        , (CASE WHEN  INSTR(PKG_CRYPTO2.decrypt(SUBSTR(QRY,INSTR(QRY,':')+1,instr(QRY,',')-INSTR(QRY,':')-1)) || SUBSTR(QRY,INSTR(QRY,',')), 'ORA-28817') >  0 THEN
+                            QRY
+                	ELSE 
+                            SUBSTR(QRY,1,INSTR(QRY,':')) || PKG_CRYPTO2.decrypt(SUBSTR(QRY,INSTR(QRY,':')+1,instr(QRY,',')-INSTR(QRY,':')-1)) || SUBSTR(QRY,INSTR(QRY,','))
+                    END ) AS  QRY 
+                ]]>
+		        , REJECT_SLIST_IDX
+		        , BLOCK_GROUP_IDX
+		        , MAILFROM
+		        <![CDATA[
+		        , (CASE WHEN INSTR(PKG_CRYPTO2.decrypt(SUBSTR(MAILTO,INSTR(MAILTO,'<')+1,instr(MAILTO,'>')-INSTR(MAILTO,'<')-1)), 'ORA-28817') > 0 THEN
+                		MAILTO
+                	ELSE 
+                    	SUBSTR(MAILTO,1,INSTR(MAILTO,'<')) || PKG_CRYPTO2.decrypt(SUBSTR(MAILTO,INSTR(MAILTO,'<')+1,instr(MAILTO,'>')-INSTR(MAILTO,'<')-1)) || SUBSTR(MAILTO,INSTR(MAILTO,'>'))
+                    END) AS MAILTO
+                ]]>
+		        , REPLYTO
+		        , ERRORSTO
+		        , HTML
+		        , ENCODING
+		        , (SELECT VALUE_CD FROM TB_COMM_CODE WHERE GRP_CD = 'A8000' AND DITC_CD = 'OPNZM' AND  USE_YN = 'Y')
+		        , TO_CHAR(SYSDATE, 'yyyymmddHH24MISS')
+		        , TO_CHAR(SYSDATE+10, 'yyyymmddHH24MISS')
+		        , DURATION_SET
+		        , CLICK_SET
+		        , SITE_SET
+		        , ATC_SET
+		        , MTYPE
+		        , U_IDX
+		        , G_IDX
+		        , 0
+		        , #mailBody#
+			FROM IM_DMAIL_INFO_48
+			WHERE SEQIDX = #seqidx#
+  	</insert>
+  	
+  	<select id="mailSendMonitorDao.selectMailContent" parameterClass="params" resultClass="record">
+  	/* sql id : mailSendMonitorDao.selectMailContent */
+  		SELECT 
+  				CONTENT as "content"
+  		FROM IM_DMAIL_INFO_48
+  		WHERE SEQIDX = #seqidx#
+  	</select>
+</sqlMap>

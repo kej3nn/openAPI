@@ -1,0 +1,96 @@
+#chart {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+div.node {
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+div.node.depth1 {
+    width: 170px;
+    height: 68px;
+    cursor: pointer;
+    color: #ffffff;
+    font-size: 1.4em;
+    font-weight: bold;
+    text-align: center;
+    line-height: 60px;
+    border: 5px solid #ffffff;
+    border-radius: 10px;
+}
+
+div.node.depth2 {
+    width: 170px;
+    height: 50px;
+    cursor: pointer;
+    color: #003366;
+    font-size: 1.2em;
+    text-align: center;
+    line-height: 50px;
+    background-color: #9cceff;
+    border-radius: 5px;
+}
+
+div.node.depth3 {
+    width: 170px;
+    height: 50px;
+    cursor: pointer;
+    color: #336699;
+    font-size: 14px;
+    text-align: center;
+    line-height: 50px;
+    padding: 0;
+    background-color: #ffffff;
+    border-radius: 5px;
+}
+
+div.node.depth4 {
+    width: 170px;
+    height: 50px;
+    cursor: pointer;
+    color: #336699;
+    font-size: 14px;
+    text-align: center;
+    line-height: 50px;
+    padding: 0;
+    background-color: #ffffff;
+    border-radius: 5px;
+}
+
+div.node.link {
+	padding-left: 0;
+	padding-right: 24px;
+	background-image: url('/img/Jit/icon_bullet.png');
+	background-repeat: no-repeat;
+	background-position: 146px center;
+}
+
+div.node.depth1:hover,
+div.node.depth1.active {
+    border-color: #fff32e;
+}
+
+div.node.depth2:hover,
+div.node.depth2.active,
+div.node.depth3:hover,
+div.node.depth3.active,
+div.node.depth4:hover,
+div.node.depth4.active {
+    color: #ffffff;
+    background-color: #ffa200;
+    border: 2px solid #fff32e;
+}
+
+#global-mindmap-obj {
+	/* position: relative;
+	top: 10%;
+	left: 10%;
+	zoom: 0.8; */
+	overflow: hidden;
+}

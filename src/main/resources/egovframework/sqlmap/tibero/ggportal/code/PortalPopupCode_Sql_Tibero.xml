@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- @(#)PortalPopupCode_Sql_Tibero.xml 1.0 2015/06/15                       -->
+<!--                                                                         -->
+<!-- COPYRIGHT (C) 2013 WISEITECH CO., LTD. ALL RIGHTS RESERVED.             -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- 팝업 코드를 관리하는 SQL 파일이다.                                      -->
+<!--                                                                         -->
+<!-- @author 김은삼                                                          -->
+<!-- @version 1.0 2015/06/15                                                 -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<sqlMap namespace="PortalPopupCodeDao">
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Type Alias                                                          -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 팝업 코드를 조회한다.                                               -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="PortalPopupCodeDao.selectPopupCode" parameterClass="params" resultClass="record">
+         SELECT A.TBL_ID           AS "tblId",
+                A.COL_ID           AS "colId",
+                A.COL_NM           AS "colNm",
+                TRIM(A.COND_WHERE) AS "condWhere"
+           FROM TV_POPUP_CODE A
+          WHERE A.TBL_ID      = #tblId#
+    </select>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 팝업 코드를 검색한다.                                               -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 검색 데이터 -->
+    <select id="PortalPopupCodeDao.searchPopupCode" parameterClass="params" resultClass="record">
+        <isEqual property="paging" compareValue="0">
+         SELECT A.ROW_NUM AS "rowNum",
+                A.CODE    AS "code",
+                A.NAME    AS "name"
+           FROM (
+                     SELECT ROWNUM AS ROW_NUM,
+                            A.CODE AS CODE,
+                            A.NAME AS NAME
+                       FROM (
+        </isEqual>
+                                 SELECT $colId$ AS CODE,
+                                        $colNm$ AS NAME
+                                   FROM $tblId$
+                                        <dynamic prepend="WHERE">
+                                            <isNotEmpty property="condWhere" prepend="AND">
+                                                $condWhere$
+                                            </isNotEmpty>
+                                            <isNotEmpty property="searchWord" prepend="AND">
+                                                (
+                                                    UPPER($colId$) LIKE '%'||UPPER(#searchWord#)||'%' OR
+                                                    UPPER($colNm$) LIKE '%'||UPPER(#searchWord#)||'%'
+                                                )
+                                            </isNotEmpty>
+                                        </dynamic>
+                                  ORDER BY
+                                        $colId$ ASC
+        <isEqual property="paging" compareValue="0">
+        <![CDATA[
+                            )       A
+                      WHERE ROWNUM <= #end:NUMERIC#
+                )          A
+          WHERE A.ROW_NUM >= #start:NUMERIC#
+        ]]>
+        </isEqual>
+    </select>
+    <!-- 검색 카운트 -->
+    <select id="PortalPopupCodeDao.searchPopupCodeCount" parameterClass="params" resultClass="int">
+         SELECT COUNT(*)
+           FROM $tblId$
+                <dynamic prepend="WHERE">
+                    <isNotEmpty property="condWhere" prepend="AND">
+                        $condWhere$
+                    </isNotEmpty>
+                    <isNotEmpty property="searchWord" prepend="AND">
+                        (
+                            UPPER($colId$) LIKE '%'||UPPER(#searchWord#)||'%' OR
+                            UPPER($colNm$) LIKE '%'||UPPER(#searchWord#)||'%'
+                        )
+                    </isNotEmpty>
+                </dynamic>
+    </select>
+    
+</sqlMap>

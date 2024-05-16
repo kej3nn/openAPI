@@ -1,0 +1,88 @@
+package egovframework.admin.nadata.service.impl;
+
+import java.util.List;
+
+
+import org.springframework.stereotype.Repository;
+
+import egovframework.admin.nadata.service.impl.NaDataCommitteeThmlDao;
+import egovframework.common.base.dao.BaseDao;
+import egovframework.common.base.model.Paging;
+import egovframework.common.base.model.Params;
+import egovframework.common.base.model.Record;
+
+
+/**
+ * 국회 정보 사이트맵을 관리하는 DAO 클래스
+ *
+ * @version 1.0
+ * @author 김재한
+ * @since 2019/09/09
+ */
+
+
+@Repository(value = "naDataCommitteeThmlDao")
+public class NaDataCommitteeThmlDao extends BaseDao {
+
+
+    /**
+     * 메인 리스트 조회(페이징 처리)
+     */
+    public Paging selectMainList(Params params, int page, int rows) {
+        return search("naDataCommitteeThmlDao.selectMainList", params, page, rows, PAGING_SCROLL);
+    }
+
+    /**
+     * 기관정보 리스트
+     *
+     * @param params
+     * @return
+     */
+    public List<Record> selectOrgList(Params params) {
+        return (List<Record>) list("naDataCommitteeThmlDao.selectOrgList", params);
+    }
+
+    /**
+     * 사이트맵 ID 중복 체크
+     *
+     * @param params
+     * @return
+     */
+    public Object selectNaDataCommitteeThmlDupChk(Params params) {
+        return select("naDataCommitteeThmlDao.selectNaDataCommitteeThmlDupChk", params);
+    }
+
+    /**
+     * 사이트맵 정보 저장
+     *
+     * @param params
+     * @return
+     */
+    public Object saveNaDataCommitteeThml(Params params) {
+        return merge("naDataCommitteeThmlDao.mergeNaDataCommitteeThml", params);
+    }
+
+    /**
+     * 사이트맵 정보 저장
+     *
+     * @param params
+     * @return
+     */
+    public Object selectNaDataCommitteeThmlDtl(Params params) {
+        return select("naDataCommitteeThmlDao.selectNaDataCommitteeThmlDtl", params);
+    }
+
+    public Object deleteNaDataCommitteeThml(Params params) {
+        return delete("naDataCommitteeThmlDao.deleteNaDataCommitteeThml", params);
+    }
+
+    /**
+     * 사이트맵 순서 저장
+     *
+     * @param record
+     * @return
+     */
+    public Object saveNaDataCommitteeThmlOrder(Record record) {
+        return update("naDataCommitteeThmlDao.saveNaDataCommitteeThmlOrder", record);
+    }
+}

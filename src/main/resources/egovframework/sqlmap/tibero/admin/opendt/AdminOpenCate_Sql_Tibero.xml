@@ -1,0 +1,550 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="OpenCate">
+	<typeAlias alias="egovMap"
+		type="egovframework.rte.psl.dataaccess.util.EgovMap" />
+	<resultMap id="OpenCateListAllMainTree" class="egovframework.admin.opendt.service.OpenCate">
+		<result column="CATE_ID" property="cateId" />
+		<result column="CATE_NM" property="cateNm" />
+		<result column="ENG_CATE_NM" property="cateNmEng" />
+		<result column="CATE_FULLNM" property="cateFullnm" />
+		<result column="ENG_CATE_FULLNM" property="cateFullnmEng" />
+		<result column="PAR_CATE_ID" property="cateIdPar" />
+		<result column="TOP_CATE_ID" property="cateIdTop" />
+		<result column="CATE_LVL" property="cateLvl" />
+		<result column="CATE_LVL" property="Level" />
+		<result column="USE_YN" property="useYn" />
+		<result column="V_ORDER" property="vOrder" />
+		<result column="REG_ID" property="regId" />
+		<result column="REG_DTTM" property="regDttm" />
+		<result column="UPD_ID" property="updId" />
+		<result column="UPD_DTTM" property="updDttm" />
+		<result column="CATE_ID_CHECK" property="cateIdCheck" />
+		<result column="CATE_CIB" property="cateCib" />
+	</resultMap>
+	
+	<resultMap id="OpenCateListAllSubTree" class="egovframework.admin.opendt.service.OpenCate">
+		<result column="CATE_ID" property="cateId" />
+		<result column="CATE_NM" property="cateNm" />
+		<result column="ENG_CATE_NM" property="cateNmEng" />
+		<result column="PAR_CATE_ID" property="cateIdPar" />
+		<result column="TOP_CATE_ID" property="cateIdTop" />
+		<result column="CATE_LVL" property="Level" />
+		<result column="CATE_LVL" property="cateLvl" />
+		<result column="USE_YN" property="useYn" />
+		<result column="V_ORDER" property="vOrder" />
+	</resultMap>
+
+	<resultMap id="OpenCateINFO" class="egovframework.admin.opendt.service.OpenCate">
+		<result column="CATE_ID" property="cateId" />
+		<result column="CATE_NM" property="cateNm" />
+		<result column="ENG_CATE_NM" property="cateNmEng" />
+		<result column="CATE_FULLNM" property="cateFullnm" />
+		<result column="ENG_CATE_FULLNM" property="cateFullnmEng" />
+		<result column="PAR_CATE_ID" property="cateIdPar" />
+		<result column="PAR_CATE_NM" property="cateNmPar" />
+		<result column="TOP_CATE_ID" property="cateIdTop" />
+		<result column="CATE_LVL" property="cateLvl" />
+		<result column="DITC_CD" property="ditcCd" />
+		<result column="DITC_NM" property="ditcNm" />
+		<result column="USE_YN" property="useYn" />
+		<result column="V_ORDER" property="vOrder" />
+		<result column="UPD_ID" property="updId" />
+		<result column="UPD_DTTM" property="updDttm" />
+		<result column="PAR_CATE_NM" property="cateNmPar" />
+		<result column="CATE_CIB" property="cateCib" />
+	</resultMap>
+
+	<resultMap id="OpenCateParList" class="egovframework.admin.opendt.service.OpenCate">
+		<result column="CATE_ID" property="cateId" />
+		<result column="CATE_NM" property="cateNm" />
+		<result column="ENG_CATE_NM" property="cateNmEng" />
+		<result column="PAR_CATE_ID" property="cateIdPar" />
+		<result column="TOP_CATE_ID" property="cateIdTop" />
+		<result column="CATE_LVL" property="Level" />
+		<result column="USE_YN" property="useYn" />
+		<result column="V_ORDER" property="vOrder" />
+	</resultMap>
+	
+	<resultMap id="OpenCateParInfo" class="egovframework.admin.opendt.service.OpenCate">
+		<result column="CATE_ID" property="cateId" />
+		<result column="CATE_NM" property="cateNm" />
+		<result column="ENG_CATE_NM" property="cateNmEng" />
+		<result column="PAR_CATE_ID" property="cateIdPar" />
+	</resultMap>
+	
+	<resultMap id="OpenCateFullNm" class="egovframework.admin.opendt.service.OpenCate">
+		<result column="CATE_ID" property="cateId" />
+		<result column="CATE_FULLNM" property="cateFullnm" />
+		<result column="ENG_CATE_FULLNM" property="cateFullnmEng" />
+	</resultMap>
+	
+	<resultMap id="openCateTop" class="egovframework.admin.opendt.service.OpenCate">
+		<result column="CATE_ID" property="cateId" />
+		<result column="CATE_NM" property="cateNm" />
+	</resultMap>
+	
+	<resultMap id="CateFileListAll" class="egovframework.admin.opendt.service.OpenCate">
+		
+		<result column="SRC_FILE_NM" property="srcFileNm" />
+		<result column="SAVE_FILE_NM" property="saveFileNm" />
+		
+	</resultMap>
+	
+
+	<select id="OpenCateDAO.selectOpenCateListAllMainTree"	parameterClass="egovframework.admin.opendt.service.OpenCate" resultMap="OpenCateListAllMainTree">
+		SELECT
+		
+		CATE_ID
+		,CATE_NM
+		,ENG_CATE_NM
+		,CATE_FULLNM
+		,ENG_CATE_FULLNM
+		,PAR_CATE_ID
+		,TOP_CATE_ID
+		,CATE_LVL
+		,USE_YN
+		,V_ORDER
+		,REG_ID
+		,REG_DTTM
+		,UPD_ID
+		,UPD_DTTM
+		,CATE_ID AS CATE_ID_CHECK
+		,(SELECT NVL((SELECT 'Y' FROM TB_OPEN_CATE WHERE PAR_CATE_ID = CATE_ID AND ROWNUM = 1),'N') 
+		FROM TB_OPEN_CATE WHERE ROWNUM = 1) AS CATE_CIB
+		
+		FROM TB_OPEN_CATE A
+		
+		WHERE 1 = 1
+
+		<isNotEmpty property="useYn">
+			AND USE_YN = #useYn#
+		</isNotEmpty>
+		
+		<isNotEmpty property="serVal">
+			<isEqual property="serSel" compareValue="ID">
+				AND CATE_ID LIKE '%'||UPPER(#serVal#)||'%'
+			</isEqual>
+			<isEqual property="serSel" compareValue="NM">
+				AND CATE_NM LIKE '%'||#serVal#||'%'
+			</isEqual>
+			<isEqual property="serSel" compareValue="ENG">
+				AND UPPER(ENG_CATE_NM) LIKE '%'||UPPER(#serVal#)||'%'
+			</isEqual>
+			<isEqual property="serSel" compareValue="ALL">
+				AND
+				(
+				CATE_ID LIKE '%'|| UPPER(#serVal#)||'%'
+				OR CATE_NM LIKE '%'||#serVal#||'%'
+				OR UPPER(ENG_CATE_NM) LIKE '%'||UPPER(#serVal#)||'%'
+				)
+			</isEqual>
+		</isNotEmpty>
+		
+		<isNotEmpty property="sysLang">
+			START WITH PAR_CATE_ID = 'T'
+		</isNotEmpty>
+		<isEmpty property="sysLang">
+			START WITH PAR_CATE_ID = 'T'
+		</isEmpty>
+		CONNECT BY PRIOR CATE_ID = PAR_CATE_ID
+		ORDER SIBLINGS BY V_ORDER
+	</select>
+
+	<select id="OpenCateDAO.selectOpenCateListAllCnt" parameterClass="egovframework.admin.opendt.service.OpenCate" resultClass="java.lang.Integer">
+		SELECT COUNT(1) AS CNT
+		
+		FROM TB_OPEN_CATE
+	</select>
+
+	<select id="OpenCateDAO.selectOpenCateListSubTree" parameterClass="egovframework.admin.opendt.service.OpenCate" resultMap="OpenCateListAllSubTree">
+		SELECT
+		
+		CATE_ID
+		,CATE_NM
+		,ENG_CATE_NM
+		,PAR_CATE_ID
+		,TOP_CATE_ID
+		,CATE_LVL
+		,USE_YN
+		,V_ORDER
+		
+		FROM TB_OPEN_CATE 
+		
+		WHERE 1 = 1
+		AND CATE_ID = CATE_ID
+
+		START WITH A.CATE_ID = #cateId:VARCHAR#
+		CONNECT BY PRIOR CATE_ID = PAR_CATE_ID
+		ORDER SIBLINGS BY V_ORDER
+	</select>
+
+	<select id="OpenCateDAO.selectOpenCateListSubTreeAllCnt" parameterClass="egovframework.admin.opendt.service.OpenCate" resultClass="java.lang.Integer">
+		SELECT COUNT(1) AS CNT
+		
+		FROM TB_OPEN_CATE
+		
+		WHERE 1=1
+		AND CATE_ID = CATE_ID
+		
+		START WITH CATE_ID = #cateId:VARCHAR#
+		CONNECT BY PRIOR CATE_ID = PAR_CATE_ID
+	</select>
+
+	<select id="OpenCateDAO.selectOpenCateOne" parameterClass="egovframework.admin.opendt.service.OpenCate"	resultMap="OpenCateINFO">
+	SELECT
+		
+		A.CATE_ID
+		,A.CATE_NM
+		,A.ENG_CATE_NM
+		,A.CATE_FULLNM
+		,A.ENG_CATE_FULLNM
+		,A.PAR_CATE_ID
+		,A.TOP_CATE_ID
+		,A.CATE_LVL
+		,C.CATE_NM AS PAR_CATE_NM
+		,A.USE_YN
+		,A.V_ORDER
+		,A.UPD_ID
+		,A.UPD_DTTM
+		,(SELECT NVL((SELECT 'Y' FROM TB_OPEN_CATE WHERE PAR_CATE_ID = #cateId:VARCHAR# AND ROWNUM = 1),'N') 
+		FROM TB_OPEN_CATE WHERE ROWNUM = 1) AS CATE_CIB
+		
+		FROM TB_OPEN_CATE A
+		LEFT OUTER JOIN TB_OPEN_CATE C
+		ON A.PAR_CATE_ID = C.CATE_ID
+
+		WHERE A.CATE_ID=#cateId:VARCHAR#
+	</select>
+
+	<update id="OpenCateDAO.updateOrderby" parameterClass="egovframework.admin.opendt.service.OpenCate">
+		UPDATE TB_OPEN_CATE A SET A.V_ORDER=#vOrder:NUMERIC#
+		WHERE CATE_ID = #cateId:VARCHAR#
+	</update>
+
+	<select id="OpenCateDAO.selectOpenCateCheckDup" parameterClass="egovframework.admin.opendt.service.OpenCate" resultClass="java.lang.Integer">
+		SELECT COUNT(1) AS CNT
+		FROM TB_OPEN_CATE
+		WHERE CATE_ID = #cateId:VARCHAR#
+	</select>
+
+	<update id="OpenCateDAO.delete" parameterClass="egovframework.admin.opendt.service.OpenCate">
+		DELETE FROM TB_OPEN_CATE A
+		WHERE EXISTS
+		(
+		SELECT 1
+		FROM TB_OPEN_CATE B
+		WHERE 1=1
+		AND A.CATE_ID = B.CATE_ID
+		START WITH CATE_ID = #cateId:VARCHAR#
+		CONNECT BY PRIOR CATE_ID = PAR_CATE_ID
+		)
+	</update>
+
+	<update id="OpenCateDAO.updateUseYn" parameterClass="egovframework.admin.opendt.service.OpenCate">
+		UPDATE TB_OPEN_CATE A SET A.USE_YN=#useYn:CHAR#
+		WHERE EXISTS
+		(
+		SELECT 1
+		FROM TB_OPEN_CATE B
+		WHERE 1=1
+		AND A.CATE_ID = B.CATE_ID
+		START WITH CATE_ID = #cateId:VARCHAR#
+		CONNECT BY PRIOR CATE_ID = PAR_CATE_ID
+		)
+	</update>
+
+	<update id="OpenCateDAO.updOpenCateLvl" parameterClass="egovframework.admin.opendt.service.OpenCate">
+		UPDATE TB_OPEN_CATE A SET A.CATE_LVL =
+		A.CATE_LVL + #updlvl:NUMERIC#
+		WHERE EXISTS
+		(
+		SELECT 1
+		FROM TB_OPEN_CATE B
+		WHERE 1=1
+		AND A.CATE_ID = B.CATE_ID
+		AND A.TOP_CATE_ID = #topPrev:VARCHAR#
+		START WITH CATE_ID = #cateId:VARCHAR#
+		CONNECT BY PRIOR CATE_ID = PAR_CATE_ID
+		)
+	</update>
+
+	<update id="OpenCateDAO.mergeInto" parameterClass="egovframework.admin.opendt.service.OpenCate">
+		MERGE INTO TB_OPEN_CATE A
+		USING(
+		SELECT #cateId:VARCHAR# AS CATE_ID
+		,#cateNm:VARCHAR# AS CATE_NM
+		,#cateNmEng:VARCHAR# AS ENG_CATE_NM
+		
+		<isEmpty property="cateIdPar">
+		, 'T' AS PAR_CATE_ID 
+		</isEmpty>
+		<!-- 최상위 레벨이 아닌 경우 -->
+		<isNotEmpty property="cateIdPar">
+		,#cateIdPar:VARCHAR# AS PAR_CATE_ID
+		,(SELECT TOP_CATE_ID FROM TB_OPEN_CATE WHERE CATE_ID = #cateIdPar:VARCHAR#) AS
+		TOP_CATE_ID
+		,#vOrder:NUMERIC# AS V_ORDER
+		,(SELECT NVL(MAX(CATE_LVL),0)+1 FROM TB_OPEN_CATE WHERE CATE_ID =
+		#cateIdPar:VARCHAR#) AS CATE_LVL
+		<isNotEmpty property="cateIdParKEM">
+			<!-- cateIdPar의 값이 KOR,ENG,MOB 셋중 하나일 경우 - 국문,영문,모바일 바로 아래 최상위 레벨일 경우 -->	
+			<!-- cateFullNm을 구하는 query -->
+			,#cateNm:VARCHAR# AS CATE_FULLNM
+			
+			<!-- cateFullNmEng를 구하는 query -->
+			,#cateNmEng:VARCHAR# AS ENG_CATE_FULLNM
+		</isNotEmpty>
+		<isEmpty property="cateIdParKEM">
+			<!-- cateIdPar의 값이 KOR,ENG,MOB 셋중 하나가 아닐 경우 - 국문,영문,모바일 바로 아래 최상위 레벨이 아닐 경우 -->
+				<!-- cateFullNm을 구하는 query -->
+			,(SELECT  
+          LTRIM(sys_connect_by_path(C.CATE_NM,'>'),'>') ||'>'||#cateNm:VARCHAR#
+			FROM   TB_OPEN_CATE C 
+			WHERE  1=1      AND    C.USE_YN = 'Y' 
+			AND CATE_ID = #cateIdPar:VARCHAR#
+			START WITH ( C.PAR_CATE_ID = 'T')
+			CONNECT BY PRIOR C.CATE_ID = C.PAR_CATE_ID) AS CATE_FULLNM
+			
+			<!-- cateFullNmEng를 구하는 query -->
+			,(SELECT  
+          LTRIM(sys_connect_by_path(C.CATE_NM,'>'),'>') ||'>'||#cateNmEng:VARCHAR#
+			FROM   TB_OPEN_CATE C 
+			WHERE  1=1      AND    C.USE_YN = 'Y' 
+			AND CATE_ID = #cateIdPar:VARCHAR#
+			START WITH ( C.PAR_CATE_ID = #cateIdTop:VARCHAR#)
+			CONNECT BY PRIOR C.CATE_ID = C.PAR_CATE_ID) AS ENG_CATE_FULLNM
+		</isEmpty>
+		</isNotEmpty>
+		
+		<!-- 최상위 레벨인 경우 -->
+		<isEmpty property="cateIdPar">
+		,#cateId:VARCHAR# AS TOP_CATE_ID
+		,#vOrder:NUMERIC# AS V_ORDER
+		,(SELECT NVL(MAX(CATE_LVL),0)+1 FROM TB_OPEN_CATE WHERE CATE_ID =
+		#cateIdPar:VARCHAR#) AS CATE_LVL
+		,#cateNm:VARCHAR# AS CATE_FULLNM
+		,#cateNmEng:VARCHAR# AS ENG_CATE_FULLNM
+		</isEmpty>
+		
+		,#useYn:CHAR# AS USE_YN
+		,#sessionUsrId:VARCHAR# AS REG_ID
+		,SYSDATE AS REG_DTTM
+		,#sessionUsrId:VARCHAR# AS UPD_ID
+		,SYSDATE AS UPD_DTTM
+		FROM DUAL
+		)B
+		
+		ON ( A.CATE_ID = B.CATE_ID)
+		WHEN MATCHED THEN
+		
+		UPDATE SET
+		A.CATE_NM = B.CATE_NM
+		,A.ENG_CATE_NM = B.ENG_CATE_NM
+		,A.PAR_CATE_ID = B.PAR_CATE_ID
+		,A.TOP_CATE_ID = B.TOP_CATE_ID
+		,A.V_ORDER = B.V_ORDER
+		,A.CATE_LVL = B.CATE_LVL
+		,A.USE_YN = B.USE_YN
+		,A.UPD_ID = B.UPD_ID
+		,A.UPD_DTTM = B.UPD_DTTM
+		,A.CATE_FULLNM = B.CATE_FULLNM
+		,A.ENG_CATE_FULLNM = B.ENG_CATE_FULLNM
+		WHEN NOT MATCHED THEN
+		
+		INSERT
+		(
+		A.CATE_ID
+		,A.CATE_NM
+		,A.ENG_CATE_NM
+		,A.PAR_CATE_ID
+		,A.TOP_CATE_ID
+		,A.CATE_LVL
+		,A.USE_YN
+		
+		<isNotEmpty property="vOrder">
+			,A.V_ORDER
+		</isNotEmpty>
+		
+		,A.REG_ID
+		,A.REG_DTTM
+		,A.UPD_ID
+		,A.UPD_DTTM
+		,A.CATE_FULLNM
+		,A.ENG_CATE_FULLNM
+		)VALUES
+		(
+		B.CATE_ID
+		,B.CATE_NM
+		,B.ENG_CATE_NM
+		,B.PAR_CATE_ID
+		,B.TOP_CATE_ID
+		,B.CATE_LVL
+		,B.USE_YN
+		
+		<isNotEmpty property="vOrder">
+			,B.V_ORDER
+		</isNotEmpty>
+		
+		,B.REG_ID
+		,B.REG_DTTM
+		,B.UPD_ID
+		,B.UPD_DTTM
+		,B.CATE_FULLNM
+		,B.ENG_CATE_FULLNM
+		)
+	</update>
+
+	<select id="OpenCateDAO.selectOpenCateParListTree" parameterClass="egovframework.admin.opendt.service.OpenCate" resultMap="OpenCateParList">
+		SELECT
+		
+		CATE_ID,
+		CATE_NM,
+		ENG_CATE_NM,
+		PAR_CATE_ID,
+		TOP_CATE_ID,
+		CATE_LVL+1 AS CATE_LVL,
+		USE_YN,
+		V_ORDER
+		
+		FROM TB_OPEN_CATE
+
+		WHERE 1 = 1
+		AND CATE_LVL > 0
+		AND USE_YN = 'Y' 
+
+		<isNotEmpty property="serVal">
+			<isEqual property="serSel" compareValue="ID">
+				AND CATE_ID LIKE  '%'|| UPPER(#serVal#)||'%'
+			</isEqual>
+			<isEqual property="serSel" compareValue="NM">
+				AND CATE_NM LIKE '%'||#serVal#||'%'
+			</isEqual>
+			<isEqual property="serSel" compareValue="ENG">
+				AND UPPER(ENG_CATE_NM) LIKE '%'|| UPPER(#serVal#)||'%'
+			</isEqual>
+			<isEqual property="serSel" compareValue="ALL">
+				AND
+				(
+				CATE_ID LIKE '%'|| UPPER(#serVal#)||'%'
+				OR CATE_NM LIKE '%'||#serVal#||'%'
+				OR UPPER(ENG_CATE_NM) LIKE '%'||UPPER(#serVal#)||'%'
+				)
+			</isEqual>
+		</isNotEmpty>
+		
+		<isNotEmpty property="cateIdTop">
+		START WITH PAR_CATE_ID = #cateIdTop:VARCHAR#
+		</isNotEmpty>
+		<isEmpty property="cateIdTop">
+		START WITH PAR_CATE_ID = 'T'
+		</isEmpty>
+		CONNECT BY PRIOR CATE_ID = PAR_CATE_ID
+		ORDER SIBLINGS BY V_ORDER
+	</select>
+	
+	
+	<select id="OpenCateDAO.selectOpenCateParNm" parameterClass="egovframework.admin.opendt.service.OpenCate" resultMap="OpenCateParInfo">
+		SELECT
+		
+		CATE_ID,
+		NVL(CATE_NM,'') AS CATE_NM,
+		NVL(ENG_CATE_NM,'') AS ENG_CATE_NM,
+		PAR_CATE_ID
+				
+		FROM TB_OPEN_CATE
+
+		WHERE 1 = 1
+
+		AND CATE_ID = #cateIdPar:VARCHAR#
+	</select>
+	
+	
+	<select id="OpenCateDAO.checkUnderLvlCate" parameterClass="egovframework.admin.opendt.service.OpenCate" resultMap="OpenCateParList">
+		SELECT
+		
+		CATE_ID,
+		CATE_NM,
+		ENG_CATE_NM,
+		PAR_CATE_ID,
+		TOP_CATE_ID,
+		CATE_LVL+1 AS CATE_LVL,
+		USE_YN,
+		V_ORDER
+		
+		FROM TB_OPEN_CATE
+
+		WHERE 1 = 1
+
+		AND USE_YN = 'Y' 
+		
+		START WITH CATE_ID = #cateId:VARCHAR#
+		CONNECT BY PRIOR CATE_ID = PAR_CATE_ID
+		ORDER SIBLINGS BY V_ORDER
+	</select>
+	
+	<select id="OpenCateDAO.getCateFullNmQuery" parameterClass="egovframework.admin.opendt.service.OpenCate" resultMap="OpenCateFullNm">
+			SELECT
+			LTRIM(sys_connect_by_path(C.CATE_NM,'>'),'>') AS CATE_FULLNM,
+			LTRIM(sys_connect_by_path(C.ENG_CATE_NM,'>'),'>') AS ENG_CATE_FULLNM,
+			C.CATE_ID
+		FROM TB_OPEN_CATE C
+		WHERE 1=1 AND C.USE_YN = 'Y'
+			START WITH ( C.CATE_ID = #cateId:VARCHAR#)
+		
+			CONNECT BY PRIOR C.CATE_ID = C.PAR_CATE_ID
+			ORDER SIBLINGS BY C.V_ORDER, C.CATE_NM
+	</select>
+	
+	
+	<update id="OpenCateDAO.actCateFullNmUpd" parameterClass="egovframework.admin.opendt.service.OpenCate">
+		UPDATE TB_OPEN_CATE A SET 
+		CATE_FULLNM = #cateFullnm:VARCHAR#,
+		ENG_CATE_FULLNM = #cateFullnmEng:VARCHAR#
+		WHERE CATE_ID = #cateId:VARCHAR#
+	</update>
+	
+	<select id="OpenCateDAO.selectOpenCateIdTop" parameterClass="egovframework.admin.opendt.service.OpenCate" resultClass="java.lang.String">
+			SELECT 
+			TOP_CATE_ID
+			FROM TB_OPEN_CATE
+			WHERE CATE_ID = #cateIdPar:VARCHAR# 
+			AND ROWNUM = 1
+	</select>
+	
+	<select id="OpenCateDAO.selectOpenCateTop"  resultMap="openCateTop">
+	SELECT 
+	CATE_ID
+	,CATE_NM
+	FROM 
+	TB_OPEN_CATE 
+	WHERE 
+	PAR_CATE_ID = 'T' 
+	AND USE_YN = 'Y'
+	</select>
+	
+	<update id="OpenCateDAO.updateImgFile" parameterClass="egovframework.admin.opendt.service.OpenCate">
+		UPDATE TB_OPEN_CATE
+		SET SAVE_FILE_NM =#saveFileNm:VARCHAR#,
+			SRC_FILE_NM =#srcFileNm:VARCHAR#
+		WHERE CATE_ID = #cateId:VARCHAR#
+	</update>
+	
+	<select id="OpenCateDAO.cateImgDetailView" parameterClass="egovframework.admin.opendt.service.OpenCate" resultMap="CateFileListAll">
+		SELECT 
+			SRC_FILE_NM
+			, SAVE_FILE_NM
+			
+		FROM TB_OPEN_CATE
+		WHERE CATE_ID = #cateId:VARCHAR#
+	</select>
+	
+	<update id="OpenCateDAO.deleteImg" parameterClass="egovframework.admin.opendt.service.OpenCate">
+		UPDATE TB_OPEN_CATE
+		SET SAVE_FILE_NM = NULL
+			,SRC_FILE_NM = NULL
+		WHERE CATE_ID = #cateId:VARCHAR#
+	</update>
+	
+</sqlMap>

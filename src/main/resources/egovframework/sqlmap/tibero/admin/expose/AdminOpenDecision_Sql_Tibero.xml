@@ -1,0 +1,564 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- @(#)AdminOpenDecision_Sql_Tibero.xml 1.0 2019/07/29                       -->
+<!--                                                                         -->
+<!-- COPYRIGHT (C) 2013 WISEITECH CO., LTD. ALL RIGHTS RESERVED.             -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- 정보공개관리 > 공개결정내역 SQL 파일이다.	                                    														-->
+<!--                                                                         																						-->
+<!-- @author softon                                                        																					-->
+<!-- @version 1.0 2019/08/12                                                 																			-->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<sqlMap namespace="AdminOpenDecision">
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Type Alias                                                          -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+   	
+   	<!-- 공개결정내역 리스트 검색조건 -->
+    <sql id="AdminOpenDecisionDao.searchOpnDcsPagingWhere">
+   		<isNotEmpty property="aplDealInstCd">
+    	   AND APL_DEAL_INST_CD = #aplDealInstCd# 
+		</isNotEmpty> 
+		<isNotEmpty property="prgStatCd">   	   
+	       AND PRG_STAT_CD = #prgStatCd# 
+	    </isNotEmpty>
+	    <isNotEmpty property="imdDealDiv">   
+	       AND IMD_DEAL_DIV = #imdDealDiv#   
+	    </isNotEmpty>
+	    <isNotEmpty property="startAplDt">   
+	       AND APL_DT BETWEEN #startAplDt# AND #endAplDt#
+	    </isNotEmpty>
+	    <isNotEmpty property="aplPn">    
+	       AND APL_PN LIKE '%'||#aplPn#||'%' 
+	    </isNotEmpty>
+	    <isNotEmpty property="aplSj">   
+	       AND APL_SJ LIKE '%'||#aplSj#||'%' 
+	    </isNotEmpty>
+	    <isNotEmpty property="aplDtsCn">   
+	       AND APL_DTS_CN LIKE '%'||#aplDtsCn#||'%'
+	    </isNotEmpty>
+	    <isNotEmpty property="opbYn">    
+	       AND OPB_YN = #opbYn# 
+	    </isNotEmpty>	
+	    <isNotEmpty property="aplNo">
+	    	AND APL_NO = #aplNo:VARCHAR#   
+	    </isNotEmpty>
+   		<isNotEmpty property="rcpDtsNo">
+			AND RCP_DTS_NO LIKE '%'||#rcpDtsNo#||'%'
+		</isNotEmpty>
+    </sql>
+    <!-- 공개결정내역 리스트 조회 -->
+    <select id="AdminOpenDecisionDao.searchOpnDcsPaging" parameterClass="params" resultClass="java.util.HashMap">
+    	<isEqual property="paging" compareValue="0">
+		SELECT AA.*
+		FROM   (SELECT ROWNUM AS ROW_NUM, AA.*
+				FROM   (
+		</isEqual>
+		            SELECT APL_NO					AS "aplNo"
+		            		 , RCP_DT					AS "rcpDt"
+		            		 , APL_PN					AS "aplPn"
+		            		 , RCP_NO					AS "rcpNo"
+		            		 , APL_SJ 					AS "aplSj"
+		            		 , APL_INST_CD			AS "aplInstCd"
+		            		 , APL_DEAL_INST_CD	AS "aplDealInstCd"
+		            		 , APL_RNO1				AS "aplRno1"
+		            		 , APL_PNO					AS "aplPno"
+		            		 , APL_MBL_PNO			AS "aplMblPno"
+		            		 , PRG_STAT_CD			AS "prgStatCd"
+		            		 , FC_COMCODE(APL_INST_CD, '') AS "aplInstNm"
+		            		 , APL_DT					AS "aplDt"
+		            		 , ROWNUM 				AS "rowNum"
+		            		 , OPB_YN					AS "opbYn"
+		            		 , DECODE(OPB_YN, '', ' ', '0', '공개', '1', '부분공개', '2', '비공개', '3', '부존재 등') AS "opbYnNm"
+		            		 , FC_COMCODE(APL_DEAL_INST_CD, '') 	AS "aplDealInstNm"
+		            		 , FC_COMCODE(PRG_STAT_CD, 'D') 		AS "prgStatNm"
+		            		 , INST_TRSF_YN									AS "instTrsfYn"
+		            		 , RCP_DTS_NO									AS "rcpDtsNo"
+		            		 , IMD_DEAL_DIV									AS "imdDealDiv"
+		            		 , CASE WHEN  IMD_DEAL_DIV = '1' THEN '즉시처리'
+            						ELSE FC_COMCODE(PRG_STAT_CD, 'D')
+            						END AS "imdDealDivNm"
+            				 , CASE WHEN PRG_STAT_CD = '08' THEN '종결' 
+            				 		WHEN  IMD_DEAL_DIV = '1' THEN '종결'	
+           				 			ELSE '' END AS "endNm"
+            				 , DCS_NTC_DT AS "dcsNtcDt"
+            				 , SRC_APL_NO  AS "srcAplNo"
+		            FROM (SELECT A.APL_NO, A.RCP_DT, A.APL_PN, A.RCP_NO, A.APL_SJ, A.APL_DTS_CN, A.APL_INST_CD, A.APL_DEAL_INST_CD, A.APL_RNO1, A.APL_PNO, 
+		            						 A.APL_MBL_PNO, A.PRG_STAT_CD, FC_COMCODE(A.APL_INST_CD, '') AS APL_INST_NM, B.APL_DT ,
+		            						 FC_COMCODE(A.APL_DEAL_INST_CD, '') AS APL_DEAL_INST_NM, FC_COMCODE(A.PRG_STAT_CD, 'D') AS PRG_STAT_NM, INST_TRSF_YN, C.OPB_YN,
+		            						 A.RCP_DTS_NO AS RCP_DTS_NO, C.IMD_DEAL_DIV AS IMD_DEAL_DIV
+		            						 ,ascii(substr(ltrim(A.APL_SJ),1,1)) st
+		            						 , A.END_CN, C.DCS_NTC_DT, B.SRC_APL_NO
+		            			FROM TB_OPNZ_RCP A, TB_OPNZ_APL B, TB_OPNZ_DCS C
+					            WHERE A.APL_NO = B.APL_NO
+					            AND   A.APL_NO = C.APL_NO(+)
+					            AND   A.PRG_STAT_CD IN ('03', '04', '05', '08')
+					            ORDER BY A.RCP_DT DESC, A.APL_NO DESC 
+		            			)
+				        WHERE INST_TRSF_YN='1'
+				          AND END_CN IS NULL
+					  <include refid="AdminOpenDecisionDao.searchOpnDcsPagingWhere" />
+		<isEqual property="paging" compareValue="0">
+		<![CDATA[
+				) AA
+			WHERE ROWNUM <= #end:NUMERIC#
+			) AA
+		WHERE AA.ROW_NUM >= #start:NUMERIC#
+		]]>
+		</isEqual>			
+    </select>
+    
+    <select id="AdminOpenDecisionDao.searchOpnDcsPagingCount" parameterClass="params" resultClass="int">
+		SELECT COUNT(*)
+          FROM (SELECT A.APL_DEAL_INST_CD, A.PRG_STAT_CD, C.IMD_DEAL_DIV, B.APL_DT, A.APL_PN
+          					 , A.APL_SJ, A.APL_DTS_CN, C.OPB_YN, INST_TRSF_YN, A.END_CN, A.APL_NO, A.RCP_DTS_NO
+          			FROM TB_OPNZ_RCP A, TB_OPNZ_APL B, TB_OPNZ_DCS C
+	            WHERE A.APL_NO = B.APL_NO
+	            AND   A.APL_NO = C.APL_NO(+)
+	            AND   A.PRG_STAT_CD IN ('03', '04', '05', '08')
+          			)
+        WHERE INST_TRSF_YN='1'
+          AND END_CN IS NULL
+	  <include refid="AdminOpenDecisionDao.searchOpnDcsPagingWhere" />
+    </select>
+
+	<!-- 정보공개접수조회 -->
+	<select id="AdminOpenDecisionDao.getOpnDcsSearch" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		/* sql id : AdminOpenDecisionDao.getOpnDcsSearch */
+		SELECT A.APL_NO 											AS "aplNo"
+				 , A.RCP_DT 											AS "rcpDt"
+				 , A.RCP_NO 											AS "rcpNo"
+				 , RCP_DTS_NO										AS "rcpDtsNo"
+				 , A.PRG_STAT_CD									AS "prgStatCd"
+				 , A.APL_NTFR_DIV									AS "aplNtfrDiv"
+				 , A.APL_RNO1											AS "aplRno1"
+				 , A.APL_RNO2											AS "aplRno2"
+				 , A.APL_CORP_NM									AS "aplCorpNm"
+				 , A.APL_BNO											AS "aplBno"
+				 , A.APL_ZPNO											AS "aplZpno"
+				 , A.APL_1_ADDR										AS "apl1Addr"
+				 , A.APL_2_ADDR										AS "apl2Addr"
+				 , A.APL_PNO											AS "aplPno"
+				 , A.APL_MBL_PNO									AS "aplMblPno"
+				 , A.APL_FAX_NO										AS "aplFaxNo"
+				 , A.APL_EMAIL_ADDR								AS "aplEmailAddr"
+				 , A.APL_INST_CD										AS "aplInstCd"
+				 , A.APL_DEAL_INST_CD							AS "aplDealInstCd"
+				 , A.APL_SJ												AS "aplSj"
+				 , A.APL_MOD_SJ										AS "aplModSj"
+				 , A.APL_DTS_CN										AS "aplDtsCn"
+				 , A.APL_MOD_DTS_CN								AS "aplModDtsCn"
+				 , A.ATTCH_FL_NM									AS "attchFlNm"
+				 , A.ATTCH_FL_PH_NM								AS "attchFlPhNm"
+				 , A.OPB_FOM_VAL									AS "opbFomVal"
+				 , OPB_FOM_ETC										AS "opbFomEtc"
+				 , A.APL_TAK_MTH									AS "aplTakMth"
+				 , APL_TAK_MTH_ETC								AS "aplTakMthEtc"
+				 , A.FEE_RDTN_CD									AS "feeRdtnCd"
+				 , A.FEE_RDTN_RSON								AS "feeRdtnRson"
+				 , A.FEE_ATTCH_FL_NM								AS "feeAttchFlNm"
+				 , A.FEE_ATTCH_FL_PH								AS "feeAttchFlPh"
+				 , A.DCS_NTC_RCV_MTH_CD						AS "dcsNtcRcvMthCd"
+				 , A.DCS_NTC_RCV_MTH_SMS						AS "dcsNtcRcvMthSms"
+				 , A.DCS_NTC_RCV_MTH_MAIL					AS "dcsNtcRcvMthMail"
+				 , A.DCS_NTC_RCV_MTH_TALK					AS "dcsNtcRcvMthTalk"
+				 , A.RG_DIV												AS "rgDiv"
+				 , A.OPB_DCS_FL_NM								AS "opbDcsFlNm"
+				 , A.OPB_DCS_FL_PH									AS "opbDcsFlPh"
+				 , DEAL_DLN_DT										AS "dealDlnDt"
+				 , INST_TRSF_YN										AS "instTrsfYn"
+				 , TRSF_INST_NM										AS "trsfInstNm"
+				 , USR_ID												AS "usrId"
+				 , A.APL_PN												AS "aplPn"
+				 , FC_COMCODE(A.OPB_FOM_VAL, 'A') 			AS "opbFomNm"
+				 , FC_COMCODE(A.APL_TAK_MTH, 'B') 			AS "aplTakMthNm"
+				 , INST_BANK_NM										AS "instBankNm"
+				 , INST_ACC_NO										AS "instAccNo"
+				 , b.inst_chrg_dept_nm								AS "instChrgDeptNm"
+				 , b.inst_chrg_cent_cgp_1_nm					AS "instChrgCentCgp1Nm"
+				 , b.inst_chrg_cent_cgp_2_nm					AS "instChrgCentCgp2Nm"
+				 , b.inst_chrg_cent_cgp_3_nm					AS "instChrgCentCgp3Nm"
+				 , b.inst_pno											AS "instPno"
+				 , b.inst_fax_no										AS "instFaxNo"
+				 , b.INST_ACC_NM									AS "instAccNm"
+				 , ''	AS "opbFomNm1"
+                 , ''	AS "opbFomNm2"
+                 , ''	AS "opbFomNm3"
+                 , ''	AS "opbFomNm4"
+                 , ''	AS "opbFomNm5"
+                 , ''	AS "giveMthNm1"
+                 , ''	AS "giveMthNm2"
+                 , ''	AS "giveMthNm3"
+                 , ''	AS "giveMthNm4"
+                 , ''	AS "giveMthNm5"
+		FROM TB_OPNZ_RCP a, TV_OPNZ_INSTCD b, TB_OPNZ_APL C
+		WHERE a.APL_DEAL_INST_CD = b.INST_CD
+		AND A.APL_NO = C.APL_NO
+    	AND A.APL_NO = #apl_no#
+	</select>
+	
+	<!-- 공개결정내역 상세조회 -->
+	<select id="AdminOpenDecisionDao.detailOpnDcs" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		/* sql id : AdminOpenDecisionDao.detailOpnDcs */
+		SELECT A.APL_NO 											AS "aplNo"
+				 , A.RCP_DT 											AS "rcpDt"
+				 , A.RCP_NO 											AS "rcpNo"
+				 , OPB_YN 												AS "opbYn"
+				 , APL_MOD_DTS_CN 								AS "aplModDtsCn"
+				 , OPB_CN 												AS "opbCn"
+				 , CLSD_RSON_CD 									AS "clsdRsonCd"
+				 , CLSD_RMK 											AS "clsdRmk"
+				 , A.OPB_FOM_VAL 									AS "opbFomVal"
+				 , A.OPB_FOM_ETC 									AS "opbFomEtc"
+				 , A.GIVE_MTH 										AS "giveMth"
+				 , A.GIVE_MTH_ETC 									AS "giveMthEtc"
+				 , A.OPB_DTM 											AS "opbDtm"
+				 , A.OPB_PLC_NM 									AS "opbPlcNm"
+				 , A.FEE_PAY_YN 										AS "feePayYn"
+				 , A.FEE 													AS "fee"
+				 , A.ZIP_FAR 											AS "zipFar"
+				 , A.FEE_RDTN_AMT 									AS "feeRdtnAmt"
+				 , A.FEE_EST_CN 										AS "feeEstCn"
+				 , A.DCS_PROD_ET_YN 								AS "dcsProdEtYn"
+				 , A.DCS_PROD_ET_RSON 							AS "dcsProdEtRson"
+				 , A.DCS_PROD_ET_DT 								AS "dcsProdEtDt"
+				 , A.DCS_PROD_ETC 									AS "dcsProdEtc"
+				 , DCS_PROD_ET_ANC_YN 							AS "dcsProdEtAncYn"
+				 , A.FIRST_DCS_DT 									AS "firstDcsDt"
+				 , OPB_FL_NM 											AS "opbFlNm"
+				 , OPB_FL_PH 											AS "opbFlPh"
+				 , A.DCS_NTC_DT 									AS "dcsNtcDt"
+				 , CLSD_RSON_NM 									AS "clsdRsonNm"
+				 , GIVE_MTH_NM 										AS "giveMthNm"
+				 , OPB_FOM_NM 										AS "opbFomNm"
+				 , FEE_SUM 											AS "feeSum"
+				 , TRD_OPN_FL_NM 									AS "trdOpnFlNm"
+				 , TRD_OPN_FL_PH 									AS "trdOpnFlPh"
+				 , DBRT_INST_FL_NM 								AS "dbrtInstFlNm"
+				 , DBRT_INST_FL_PH 								AS "dbrtInstFlPh"
+				 , APL_DEAL_INST_CD 								AS "aplDealInstCd"
+				 , B.INST_BANK_NM ||'/'|| B.INST_ACC_NO 	AS "feePaidAccNo"
+				 <!-- , C.OBJTN_DT 										AS "objtnDt"
+				 , C.OBJTN_SNO 										AS "objtnSno" -->
+				 , A.OPB_PSBJ 											AS "opbPsbj"
+				 , A.DCS_NTCS_DOC_NO 							AS "dcsNtcsDocNo"
+				 , CLSD_ATTCH_FL_NM 								AS "clsdAttchFlNm"
+				 , CLSD_ATTCH_FL_PH_NM 						AS "clsdAttchFlPhNm"
+				 , IMD_DEAL_DIV 										AS "imdDealDiv"
+				 , B.INST_ACC_NM 									AS "instAccNm"
+				 , A.INST_CHRG_CENT_CGP_1_NM 				AS "instChrgCentCgp1Nm"
+				 , A.INST_CHRG_CENT_CGP_2_NM 				AS "instChrgCentCgp2Nm"
+				 , A.INST_CHRG_CENT_CGP_3_NM 				AS "instChrgCentCgp3Nm"
+				 , A.INST_CHRG_DEPT_NM 							AS "instChrgDeptNm"
+				 , A.INST_PNO 										AS "instPno"
+				 , A.INST_FAX_NO 									AS "instFaxNo"
+				 , A.OPB_FL_NM2 										AS "opbFlNm2"
+				 , A.OPB_FL_PH2 										AS "opbFlPh2"
+				 , A.OPB_FL_NM3 										AS "opbFlNm3"
+				 , A.OPB_FL_PH3 										AS "opbFlPh3"
+				 , NON_EXT 											AS "nonExt"
+				 , A.IMD_FL_NM 										AS "imdFlNm"
+				 , A.IMD_FL_PH 										AS "imdFlPh"
+				 , A.NON_FL_NM 										AS "nonFlNm"
+				 , A.NON_FL_PH 										AS "nonFlPh"
+				 , DECODE(A.OPB_FOM_01_YN, 'Y', '열람,시청', '')		AS "opbFomNm1"
+                 , DECODE(A.OPB_FOM_02_YN, 'Y', '사본,출력물', '')	AS "opbFomNm2"
+                 , DECODE(A.OPB_FOM_03_YN, 'Y', '전자파일', '')		AS "opbFomNm3"
+                 , DECODE(A.OPB_FOM_04_YN, 'Y', '복제,인화물', '')	AS "opbFomNm4"
+                 , DECODE(A.OPB_FOM_05_YN, 'Y', '기타', '')			AS "opbFomNm5"
+                 , DECODE(A.GIVE_MTH_01_YN, 'Y', '직접방문', '')		AS "giveMthNm1"
+                 , DECODE(A.GIVE_MTH_02_YN, 'Y', '우편', '')			AS "giveMthNm2"
+                 , DECODE(A.GIVE_MTH_03_YN, 'Y', '모사전송', '')		AS "giveMthNm3"
+                 , DECODE(A.GIVE_MTH_04_YN, 'Y', '정보통신망', '')	AS "giveMthNm4"
+                 , DECODE(A.GIVE_MTH_05_YN, 'Y', '기타', '')			AS "giveMthNm5"
+				 , FN_GET_OPNZ_CLSD(#aplNo#)				AS "newClsdRmk"
+				 , NVL2(A.DCS_NTC_DT, FN_GET_OPNZ_CALLVERSION(TO_CHAR(TO_DATE(A.DCS_NTC_DT, 'YYYYMMDD'), 'YYYYMMDD'))
+               							       , FN_GET_OPNZ_CALLVERSION(TO_CHAR(TO_DATE(A.RCP_DT, 'YYYYMMDD'), 'YYYYMMDD'))) AS "callVersion"
+		 FROM (
+            SELECT A.APL_NO AS APL_NO,
+                   A.RCP_DT,
+                   A.RCP_NO,
+                   OPB_YN,
+                   A.APL_DTS_CN AS APL_MOD_DTS_CN,
+                   OPB_CN,
+                   CLSD_RSON_CD,
+                   CLSD_RMK,
+                   A.OPB_FOM_VAL AS OPB_FOM_VAL,
+                   A.GIVE_MTH,
+                   A.OPB_DTM,
+                   A.OPB_PLC_NM,
+                   A.FEE_PAY_YN,
+                   NVL(A.FEE, 0) AS FEE,
+                   NVL(A.ZIP_FAR, 0) AS ZIP_FAR,
+                   NVL(A.FEE_RDTN_AMT, 0) AS FEE_RDTN_AMT,
+                   A.FEE_EST_CN,
+                   A.FEE_PAID_ACC_NO,
+                   A.DCS_PROD_ET_YN,
+                   A.DCS_PROD_ET_RSON,
+                   A.DCS_PROD_ET_DT,
+                   A.DCS_PROD_ETC,
+                   DCS_PROD_ET_ANC_YN,
+                   FIRST_DCS_DT,
+                   OPB_FL_NM,
+                   OPB_FL_PH,
+                   A.DCS_NTC_DT AS DCS_NTC_DT,
+                   FC_COMCODE(CLSD_RSON_CD, 'F') AS CLSD_RSON_NM,
+                   FC_COMCODE(GIVE_MTH, 'B') AS GIVE_MTH_NM,
+                   give_mth_etc as give_mth_etc,
+                   FC_COMCODE(A.OPB_FOM_VAL, 'A') AS OPB_FOM_NM,
+                   a.opb_fom_etc as opb_fom_etc, 
+                   NVL(A.FEE, 0)+NVL(A.ZIP_FAR, 0)+NVL(A.FEE_RDTN_AMT, 0) AS FEE_SUM,
+                   TRD_OPN_FL_NM,
+                   TRD_OPN_FL_PH,
+                   DBRT_INST_FL_NM,
+                   DBRT_INST_FL_PH,
+                   B.APL_DEAL_INST_CD AS APL_DEAL_INST_CD,
+                   A.OPB_PSBJ AS OPB_PSBJ,
+                   A.DCS_NTCS_DOC_NO,
+                   CLSD_ATTCH_FL_NM,
+                   CLSD_ATTCH_FL_PH_NM,
+                   A.IMD_DEAL_DIV,
+                   a.INST_CHRG_CENT_CGP_1_NM,
+                   A.INST_CHRG_CENT_CGP_2_NM,
+                   A.INST_CHRG_CENT_CGP_3_NM,
+                   A.INST_CHRG_DEPT_NM,
+                   A.INST_FAX_NO,
+                   A.INST_PNO, 
+                   A.OPB_FL_NM2, 
+                   A.OPB_FL_PH2, 
+                   A.OPB_FL_NM3, 
+                   A.OPB_FL_PH3,
+                   NON_EXT,
+                   A.IMD_FL_NM, 
+                   A.IMD_FL_PH,
+                   A.NON_FL_NM, 
+                   A.NON_FL_PH,
+                   A.OPB_FOM_01_YN,
+                   A.OPB_FOM_02_YN,
+                   A.OPB_FOM_03_YN,
+                   A.OPB_FOM_04_YN,
+                   A.OPB_FOM_05_YN,
+                   A.GIVE_MTH_01_YN,
+                   A.GIVE_MTH_02_YN,
+                   A.GIVE_MTH_03_YN,
+                   A.GIVE_MTH_04_YN,
+                   A.GIVE_MTH_05_YN
+            FROM TB_OPNZ_DCS A, TB_OPNZ_APL B
+            WHERE A.APL_NO = B.APL_NO
+            AND A.APL_NO = #apl_no#
+        ) A, TV_OPNZ_INSTCD B<!-- , TB_OPNZ_OBJTN C -->
+    WHERE A.APL_DEAL_INST_CD = B.INST_CD
+    <!-- AND A.APL_NO = C.APL_NO(+) -->
+	</select>
+
+	<!-- 테이블 카운트 -->
+	<select id="AdminOpenDecisionDao.getInfoOpenDcsSeqCount" parameterClass="params" resultClass="String">
+		SELECT COUNT(*)
+		FROM TB_OPNZ_DCS
+		WHERE APL_NO = #apl_no#
+	</select>
+	
+	<!-- 정보공개 결정관리 등록 -->
+	<insert id="AdminOpenDecisionDao.insertOpnDcs" parameterClass="params">
+		INSERT INTO TB_OPNZ_DCS
+        (apl_no, rcp_dt, rcp_no, opb_yn, apl_dts_cn, 
+         opb_cn, opb_fom_val, opb_fom_etc, give_mth, give_mth_etc, 
+         opb_dtm, opb_plc_nm, fee, zip_far, fee_rdtn_amt, 
+         fee_est_cn, fee_paid_acc_no, dcs_ntc_dt, trd_opn_fl_nm, trd_opn_fl_ph,
+         dbrt_inst_fl_nm, dbrt_inst_fl_ph, dcs_ntcs_doc_no,
+         clsd_attch_fl_nm, clsd_attch_fl_ph_nm, imd_deal_div,
+         inst_chrg_dept_nm, inst_chrg_cent_cgp_1_nm, inst_chrg_cent_cgp_2_nm, inst_chrg_cent_cgp_3_nm,
+         inst_pno, inst_fax_no, non_ext, imd_fl_nm, imd_fl_ph, non_fl_nm, non_fl_ph,
+         opb_fom_01_yn, opb_fom_02_yn, opb_fom_03_yn, opb_fom_04_yn, opb_fom_05_yn, 
+         give_mth_01_yn, give_mth_02_yn, give_mth_03_yn, give_mth_04_yn, give_mth_05_yn        
+         )
+        VALUES
+        (#apl_no#, #rcp_dt:VARCHAR:NO_ENTRY#, #rcp_no:VARCHAR:NO_ENTRY#, #opb_yn:VARCHAR:NO_ENTRY#, #apl_dts_cn:VARCHAR:NO_ENTRY#, 
+         #opb_cn:VARCHAR:NO_ENTRY#, #opb_fom:VARCHAR:NO_ENTRY#, #opb_fom_etc:VARCHAR:NO_ENTRY#, #give_mth:VARCHAR:NO_ENTRY#, #give_mth_etc:VARCHAR:NO_ENTRY#, 
+         #opb_dtm:VARCHAR:NO_ENTRY#, #opb_plc:VARCHAR:NO_ENTRY#, #fee:VARCHAR:NO_ENTRY#, #zip_far:VARCHAR:NO_ENTRY#, #fee_rdtn_amt:VARCHAR:NO_ENTRY#, 
+         #fee_est_cn:VARCHAR:NO_ENTRY#, #fee_paid_acc:VARCHAR:NO_ENTRY#, to_char(sysdate, 'YYYYMMDD'),#third_opn_flnm:VARCHAR:NO_ENTRY#, #third_opn_flph:VARCHAR:NO_ENTRY#, 
+         #dbrt_inst_flnm:VARCHAR:NO_ENTRY#, #dbrt_inst_flph:VARCHAR:NO_ENTRY#, #dcs_ntcs_doc_no:VARCHAR:NO_ENTRY#,#clsd_attch_fl_nm:VARCHAR:NO_ENTRY#,#clsd_attch_fl_ph_nm:VARCHAR:NO_ENTRY#,
+         #imd_deal_div:VARCHAR:NO_ENTRY#, #inst_chrg_dept_nm:VARCHAR:NO_ENTRY#, #inst_chrg_cent_cgp_1_nm:VARCHAR:NO_ENTRY#, #inst_chrg_cent_cgp_2_nm:VARCHAR:NO_ENTRY#, #inst_chrg_cent_cgp_3_nm:VARCHAR:NO_ENTRY#,
+         #inst_pno:VARCHAR:NO_ENTRY#, #inst_fax_no:VARCHAR:NO_ENTRY#, #non_ext:VARCHAR:NO_ENTRY#, #imd_fl_nm:VARCHAR:NO_ENTRY#, #imd_fl_ph:VARCHAR:NO_ENTRY#, #non_fl_nm:VARCHAR:NO_ENTRY#, #non_fl_ph:VARCHAR:NO_ENTRY#,
+         #opb_fom_01_yn:VARCHAR:NO_ENTRY#, #opb_fom_02_yn:VARCHAR:NO_ENTRY#, #opb_fom_03_yn:VARCHAR:NO_ENTRY#, #opb_fom_04_yn:VARCHAR:NO_ENTRY#, #opb_fom_05_yn:VARCHAR:NO_ENTRY#,
+         #give_mth_01_yn:VARCHAR:NO_ENTRY#, #give_mth_02_yn:VARCHAR:NO_ENTRY#, #give_mth_03_yn:VARCHAR:NO_ENTRY#, #give_mth_04_yn:VARCHAR:NO_ENTRY#, #give_mth_05_yn:VARCHAR:NO_ENTRY#
+         )
+	</insert>
+
+	<!-- 정보공개 결정관리 수정 -->
+	<update id="AdminOpenDecisionDao.updateInfoOpnDcsWrite" parameterClass="params">
+		UPDATE TB_OPNZ_DCS
+		SET opb_yn 					= #opb_yn:VARCHAR:NO_ENTRY#,
+			opb_cn 						= #opb_cn:VARCHAR:NO_ENTRY#,
+			opb_fom_val 				= #opb_fom:VARCHAR:NO_ENTRY#,
+			opb_fom_etc 				= #opb_fom_etc:VARCHAR:NO_ENTRY#,
+			give_mth 					= #give_mth:VARCHAR:NO_ENTRY#,
+			give_mth_etc 				= #give_mth_etc:VARCHAR:NO_ENTRY#,
+			opb_dtm 					= #opb_dtm:VARCHAR:NO_ENTRY#,
+			opb_plc_nm 					= #opb_plc:VARCHAR:NO_ENTRY#,
+			fee 						= #fee:VARCHAR:NO_ENTRY#,
+			zip_far 					= #zip_far:VARCHAR:NO_ENTRY#,
+			fee_rdtn_amt 				= #fee_rdtn_amt:VARCHAR:NO_ENTRY#,
+			fee_est_cn 	 				= #fee_est_cn:VARCHAR:NO_ENTRY#,
+			fee_paid_acc_no 			= #fee_paid_acc:VARCHAR:NO_ENTRY#,
+			dcs_ntc_dt 					= to_char(sysdate, 'YYYYMMDD'),
+			dcs_ntcs_doc_no 			= #dcs_ntcs_doc_no:VARCHAR:NO_ENTRY#,
+			inst_chrg_dept_nm 			= #inst_chrg_dept_nm:VARCHAR:NO_ENTRY#,
+			inst_chrg_cent_cgp_1_nm 	= #inst_chrg_cent_cgp_1_nm:VARCHAR:NO_ENTRY#,
+			inst_chrg_cent_cgp_2_nm 	= #inst_chrg_cent_cgp_2_nm:VARCHAR:NO_ENTRY#,
+			inst_chrg_cent_cgp_3_nm 	= #inst_chrg_cent_cgp_3_nm:VARCHAR:NO_ENTRY#,
+			inst_pno 					= #inst_pno:VARCHAR:NO_ENTRY#,
+			inst_fax_no 				= #inst_fax_no:VARCHAR:NO_ENTRY#,
+			non_ext    				    = #non_ext:VARCHAR:NO_ENTRY#,
+			opb_fom_01_yn   		    = #opb_fom_01_yn:VARCHAR:NO_ENTRY#,
+			opb_fom_02_yn   		    = #opb_fom_02_yn:VARCHAR:NO_ENTRY#,
+			opb_fom_03_yn   		    = #opb_fom_03_yn:VARCHAR:NO_ENTRY#,
+			opb_fom_04_yn   		    = #opb_fom_04_yn:VARCHAR:NO_ENTRY#,
+			opb_fom_05_yn   		    = #opb_fom_05_yn:VARCHAR:NO_ENTRY#,
+			give_mth_01_yn   		= #give_mth_01_yn:VARCHAR:NO_ENTRY#,
+			give_mth_02_yn   		= #give_mth_02_yn:VARCHAR:NO_ENTRY#,
+			give_mth_03_yn   		= #give_mth_03_yn:VARCHAR:NO_ENTRY#,
+			give_mth_04_yn   		= #give_mth_04_yn:VARCHAR:NO_ENTRY#,
+			give_mth_05_yn   		= #give_mth_05_yn:VARCHAR:NO_ENTRY#
+			<isNotEmpty prepend="," property="imd_deal_div">
+				imd_deal_div = #imd_deal_div:VARCHAR:NO_ENTRY#
+			</isNotEmpty>
+			<isNotEmpty prepend="," property="third_opn_flnm">
+				trd_opn_fl_nm = 	#third_opn_flnm:VARCHAR:NO_ENTRY#,
+				trd_opn_fl_ph = 	#third_opn_flph:VARCHAR:NO_ENTRY#
+			</isNotEmpty>
+			<isNotEmpty prepend="," property="dbrt_inst_flnm">
+				dbrt_inst_fl_nm = 	#dbrt_inst_flnm:VARCHAR:NO_ENTRY#,
+				dbrt_inst_fl_ph = 	#dbrt_inst_flph:VARCHAR:NO_ENTRY#
+			</isNotEmpty>
+			<isNotEmpty prepend="," property="clsd_attch_fl_nm">
+				clsd_attch_fl_nm =  #clsd_attch_fl_nm:VARCHAR:NO_ENTRY#,
+				clsd_attch_fl_ph_nm =  #clsd_attch_fl_ph_nm:VARCHAR:NO_ENTRY#
+			</isNotEmpty>
+			<isNotEmpty prepend="," property="imd_fl_nm">
+				imd_fl_nm =  #imd_fl_nm:VARCHAR:NO_ENTRY#,
+				imd_fl_ph =  #imd_fl_ph:VARCHAR:NO_ENTRY#
+			</isNotEmpty>
+			<isNotEmpty prepend="," property="non_fl_nm">
+				non_fl_nm =  #non_fl_nm:VARCHAR:NO_ENTRY#,
+				non_fl_ph =  #non_fl_ph:VARCHAR:NO_ENTRY#
+			</isNotEmpty>
+		WHERE APL_NO = #apl_no#
+	</update>
+	
+	<!-- 정보공개청구 처리구분변경 -->
+	<update id="AdminOpenDecisionDao.updateOpnApplyPrgStat" parameterClass="params">
+		UPDATE TB_OPNZ_APL
+		SET prg_stat_cd = #prg_stat_cd#
+		<isNotEmpty property="opb_flnm">
+				,opb_dcs_fl_nm = #opb_flnm:VARCHAR:NO_ENTRY#
+				,opb_dcs_fl_ph = #opb_flph:VARCHAR:NO_ENTRY#
+		</isNotEmpty>
+		WHERE apl_no = #apl_no#
+	</update>
+
+	<!-- 정보공개접수 처리구분변경-->
+	<update id="AdminOpenDecisionDao.updateOpnRcpPrgStat" parameterClass="params">
+		UPDATE TB_OPNZ_RCP
+		SET prg_stat_cd = #prg_stat_cd#
+		<isNotEmpty property="deal_dln_dt">
+				,deal_dln_dt = #deal_dln_dt#
+		</isNotEmpty>
+		<isNotEmpty property="opb_flnm">
+				,opb_dcs_fl_nm = #opb_flnm:VARCHAR:NO_ENTRY#
+				,opb_dcs_fl_ph = #opb_flph:VARCHAR:NO_ENTRY#
+		</isNotEmpty>
+		WHERE apl_no = #apl_no#
+	</update>
+
+	<!-- 정보공개 이력등록 -->
+	<insert id="AdminOpenDecisionDao.insertOpnHist" parameterClass="params">
+	<![CDATA[
+		INSERT INTO TB_OPNZ_HIST
+		(hist_sno, apl_no, hist_div, usr_id, hist_dt, hist_cn)
+		VALUES ((select nvl(max(abs(hist_sno))+1, 1) from TB_OPNZ_HIST where apl_no = #apl_no#), 
+						#apl_no#, #prg_stat_cd#, #usrId:VARCHAR:NO_ENTRY#, to_char(sysdate, 'YYYYMMDDHH24MI'), #hist_cn:VARCHAR:NO_ENTRY#)
+	]]>
+	</insert>
+
+	<!-- 결정통보 공개실시  -->
+	<update id="AdminOpenDecisionDao.openStartOpnDcs" parameterClass="params">
+		UPDATE TB_OPNZ_DCS
+		SET OPB_PSBJ = #opb_psbj#
+			<isNotEmpty property="opb_flnm">
+			, OPB_FL_NM = #opb_flnm#
+			</isNotEmpty>
+			<isNotEmpty property="opb_flph">
+			, OPB_FL_PH = #opb_flph#
+			</isNotEmpty>
+			<isNotEmpty property="opb_flnm2">
+			, OPB_FL_NM2 = #opb_flnm2#
+			</isNotEmpty>
+			<isNotEmpty property="opb_flph2">
+			, OPB_FL_PH2 = #opb_flph2#
+			</isNotEmpty>
+			<isNotEmpty property="opb_flnm3">
+			, OPB_FL_NM3 = #opb_flnm3#
+			</isNotEmpty>
+			<isNotEmpty property="opb_flph3">
+			, OPB_FL_PH3 = #opb_flph3#
+			</isNotEmpty>
+		WHERE APL_NO = #apl_no#
+	</update>
+
+	<!-- 정보공개접수 처리구분변경-->
+	<update id="AdminOpenDecisionDao.deleteOpnDcs" parameterClass="params">
+		DELETE TB_OPNZ_DCS
+		WHERE apl_no = #apl_no#
+	</update>
+
+	<!-- 결정통보 비공개내용 및 사유 삭제-->
+	<delete id="AdminOpenDecisionDao.deleteOpnDcsClsd" parameterClass="params">
+		<![CDATA[	
+			DELETE TB_OPNZ_DCS_CLSD
+			WHERE APL_NO = #apl_no:VARCHAR#
+		]]>
+	</delete>
+
+	<!-- 결정통보 비공개내용 및 사유 등록-->
+	<insert id="AdminOpenDecisionDao.insertOpnDcsClsd" parameterClass="params">
+		INSERT INTO TB_OPNZ_DCS_CLSD(apl_no, clsd_no, clsd_rson_cd, clsd_rson, clsd_rmk, clsd_reg_dttm)
+        VALUES(#apl_no:VARCHAR:NO_ENTRY#, #clsdNo:NUMERIC#, #clsdRsonCd:VARCHAR#, #clsdRson:VARCHAR#, #clsdRmk:VARCHAR#, sysdate)
+	</insert>
+
+    <!-- 결정통보 비공개내용 조회 -->
+    <select id="AdminOpenDecisionDao.selectOpnDcsClsd" parameterClass="params" resultClass="record">
+    	/* sql id : AdminOpenDecisionDao.selectOpnDcsClsd */
+         <![CDATA[
+			SELECT A.CLSD_NO 		AS "clsdNo"
+			     , A.CLSD_RMK			AS "clsdRmk"
+			     , A.CLSD_RSON_CD	AS "clsdRsonCd"
+			     , A.CLSD_RSON		AS "clsdRson"
+			     , A.OBJTN_YN 		AS "objtnYn"
+			     , A.OBJTN_SNO		AS "objtnSno"
+			     , A.OBJTN_RSON		AS "objtnRson"
+			     , A.OBJTN_REG_DTTM	AS "objtnRegDttm"
+			  FROM TB_OPNZ_DCS_CLSD A
+			 WHERE A.APL_NO = #apl_no:VARCHAR#
+			 ORDER BY CLSD_NO
+        ]]>
+    </select>
+
+	<!-- 결정통보 비공개내용 및 사유 > 이의신청사유 등록-->
+	<insert id="AdminOpenDecisionDao.updateOpnDcsClsd" parameterClass="params">
+		UPDATE TB_OPNZ_DCS_CLSD
+		SET OBJTN_YN = 'Y'
+			, OBJTN_SNO = #objtnSno#
+			, OBJTN_RSON = #objtnRson#
+			, OBJTN_REG_DTTM = sysdate
+		WHERE APL_NO = #aplNo#
+		    AND CLSD_NO = #clsdNo#
+	</insert>
+	
+</sqlMap>

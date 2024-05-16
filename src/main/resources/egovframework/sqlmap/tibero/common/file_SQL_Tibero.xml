@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="File">
+	<typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+	
+	<resultMap id="fileNameMap" class="java.util.HashMap">
+		<result column="SAVE_FILE_NM" property="saveFileNm" />		
+		<result column="VIEW_FILE_NM" property="srcFileNm" />		
+		<result column="FILE_EXT" property="fileExt" />		
+	</resultMap>
+
+	<select id="FileDAO.fileSeq" resultClass="java.lang.Integer" >
+		SELECT SQ_OPEN_INF_FILE.NEXTVAL FROM DUAL
+	</select>
+	
+	<select id="FileDAO.fileMultiSeq" resultClass="java.lang.Integer" >
+		SELECT SQ_OPEN_INF_MEDIA_DETAIL.NEXTVAL FROM DUAL
+	</select>  
+	
+	<select id="FileDAO.fileBbsSeq" resultClass="java.lang.Integer" >
+		SELECT NVL(MAX(FILE_SEQ), 0) + 1 AS FILE_SEQ FROM TB_BBS_FILE
+	</select> 
+	
+	<select id="FileDAO.filePublishSeq" resultClass="java.lang.Integer" >
+		SELECT NVL(MAX(FILE_SEQ), 0) + 1 AS FILE_SEQ FROM TB_OPEN_PUBLISH_FILE
+	</select> 
+	
+	<select id="FileDAO.getFileNameByOpenInfFileSeq"  parameterClass="java.lang.Integer" resultClass="java.util.HashMap" >
+		SELECT A.SAVE_FILE_NM "saveFileNm"
+		     , A.VIEW_FILE_NM "viewFileNm"
+		     , A.FILE_EXT	 	"fileExt"
+		  FROM TB_OPEN_INF_FILE A
+		 INNER JOIN TB_OPEN_INF_SRV B
+		   ON A.INF_ID = B.INF_ID
+		  AND A.INF_SEQ= B.INF_SEQ
+ 		 WHERE FILE_SEQ = #fileSeq:NUMERIC#
+ 		  AND A.USE_YN = 'Y'
+ 		  
+	</select>
+	
+	<select id="FileDAO.getFileNameByBbsFileSeq"  parameterClass="java.lang.Integer" resultClass="java.util.HashMap" >
+		SELECT SAVE_FILE_NM "saveFileNm"
+		     , VIEW_FILE_NM "viewFileNm"
+		     , FILE_EXT	 	"fileExt"
+		  FROM TB_BBS_FILE
+ 		 WHERE FILE_SEQ = #fileSeq:NUMERIC#
+	</select>
+	<select id="FileDAO.getFileNameByPublishFileSeq"  parameterClass="java.lang.Integer" resultClass="java.util.HashMap" >
+		SELECT SAVE_FILE_NM "saveFileNm"
+		     , VIEW_FILE_NM "viewFileNm"
+		     , FILE_EXT	 	"fileExt"
+		  FROM TB_OPEN_PUBLISH_FILE
+ 		 WHERE FILE_SEQ = #fileSeq:NUMERIC#
+	</select>
+	
+	<select id="FileDAO.getFileNameByCateId"  parameterClass="java.lang.String" resultClass="java.util.HashMap" >
+		SELECT 
+			SAVE_FILE_NM "saveFileNm"
+			,SUBSTR(SAVE_FILE_NM,1,INSTR(SAVE_FILE_NM,'.',-1)-1) "viewFileNm"
+			,SUBSTR(SAVE_FILE_NM,INSTR(SAVE_FILE_NM,'.',-1)+1,LENGTH(SAVE_FILE_NM)) "fileExt"
+ 			FROM TB_OPEN_CATE
+		WHERE CATE_ID=#cateId:VARCHAR#
+	</select>
+	
+	<select id="FileDAO.getFileNameByLinkSeq"  parameterClass="egovframework.admin.service.service.OpenInfLcol" resultClass="java.util.HashMap" >
+		SELECT 
+			TMNL_IMG_FILE "saveFileNm"
+			,SUBSTR(TMNL_IMG_FILE,1,INSTR(TMNL_IMG_FILE,'.',-1)-1) "viewFileNm"
+			,SUBSTR(TMNL_IMG_FILE,INSTR(TMNL_IMG_FILE,'.',-1)+1,LENGTH(TMNL_IMG_FILE)) "fileExt"
+ 			FROM TB_OPEN_INF_LINK
+		WHERE INF_ID = #infId:VARCHAR#
+			AND LINK_SEQ = #linkSeq:NUMERIC# 
+	</select>
+	
+	<!-- TB_OPEN_INF_MEDIA 테이블 없음 -->
+	<select id="FileDAO.getFileNameByMediaNo"  parameterClass="egovframework.admin.service.service.OpenInfVcol" resultClass="java.util.HashMap" >
+		SELECT 
+			TMNL_IMG_FILE "saveFileNm"
+			,SUBSTR(TMNL_IMG_FILE,1,INSTR(TMNL_IMG_FILE,'.',-1)-1) "viewFileNm"
+			,SUBSTR(TMNL_IMG_FILE,INSTR(TMNL_IMG_FILE,'.',-1)+1,LENGTH(TMNL_IMG_FILE)) "fileExt"
+ 			FROM TB_OPEN_INF_MEDIA
+		WHERE INF_ID = #infId#
+			AND MEDIA_NO = #mediaNo# 
+	</select>
+	<select id="FileDAO.getFileNameByVistnSeq"  parameterClass="egovframework.admin.service.service.OpenInfVcol" resultClass="java.util.HashMap" >
+		SELECT 
+			TMNL_IMG_FILE "saveFileNm"
+			,SUBSTR(TMNL_IMG_FILE,1,INSTR(TMNL_IMG_FILE,'.',-1)-1) "viewFileNm"
+			,SUBSTR(TMNL_IMG_FILE,INSTR(TMNL_IMG_FILE,'.',-1)+1,LENGTH(TMNL_IMG_FILE)) "fileExt"
+ 			FROM TB_OPEN_INF_VISL
+		WHERE INF_ID = #infId:VARCHAR#
+			AND VISTN_SEQ = #vistnSeq:NUMERIC# 
+	</select>
+	<select id="FileDAO.getFileNameByOpenFileSeq"  parameterClass="egovframework.admin.service.service.OpenInfScol" resultClass="java.util.HashMap" >
+		SELECT 
+			TMNL_IMG_FILE "saveFileNm"
+			,SUBSTR(TMNL_IMG_FILE,1,INSTR(TMNL_IMG_FILE,'.',-1)-1) "viewFileNm"
+			,SUBSTR(TMNL_IMG_FILE,INSTR(TMNL_IMG_FILE,'.',-1)+1,LENGTH(TMNL_IMG_FILE)) "fileExt"
+ 			FROM TB_OPEN_INF_SRV
+		WHERE INF_ID = #infId:VARCHAR#
+		  AND SRV_CD = 'F'
+		  
+	</select>
+	<select id="FileDAO.getFileNameByOpenSheetSeq"  parameterClass="egovframework.admin.service.service.OpenInfScol" resultClass="java.util.HashMap" >
+		SELECT 
+			TMNL_IMG_FILE "saveFileNm"
+			,SUBSTR(TMNL_IMG_FILE,1,INSTR(TMNL_IMG_FILE,'.',-1)-1) "viewFileNm"
+			,SUBSTR(TMNL_IMG_FILE,INSTR(TMNL_IMG_FILE,'.',-1)+1,LENGTH(TMNL_IMG_FILE)) "fileExt"
+ 			FROM TB_OPEN_INF_SRV
+		WHERE INF_ID = #infId:VARCHAR#
+		  AND SRV_CD = 'S'
+		  
+	</select>
+	<select id="FileDAO.getFileNameByOpenLinkSeq"  parameterClass="egovframework.admin.service.service.OpenInfScol" resultClass="java.util.HashMap" >
+		SELECT 
+			TMNL_IMG_FILE "saveFileNm"
+			,SUBSTR(TMNL_IMG_FILE,1,INSTR(TMNL_IMG_FILE,'.',-1)-1) "viewFileNm"
+			,SUBSTR(TMNL_IMG_FILE,INSTR(TMNL_IMG_FILE,'.',-1)+1,LENGTH(TMNL_IMG_FILE)) "fileExt"
+ 			FROM TB_OPEN_INF_SRV
+		WHERE INF_ID = #infId:VARCHAR#
+		  AND SRV_CD = 'L'
+		  
+	</select>
+</sqlMap>

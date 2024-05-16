@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- @(#)PortalLogUser_Sql_Tibero.xml 1.0 2015/06/15                         -->
+<!--                                                                         -->
+<!-- COPYRIGHT (C) 2013 WISEITECH CO., LTD. ALL RIGHTS RESERVED.             -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- 사용자 로그인 이력을 관리하는 SQL 파일이다.                             -->
+<!--                                                                         -->
+<!-- @author 김은삼                                                          -->
+<!-- @version 1.0 2015/06/15                                                 -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<sqlMap namespace="PortalLogUserDao">
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Type Alias                                                          -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 사용자 로그인 이력을 등록한다.                                      -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <insert id="PortalLogUserDao.insertLogUser" parameterClass="params">
+         INSERT INTO TB_LOG_USER
+                (
+                	SEQCE_NO,
+                    USER_CD,
+                    USER_ID,
+                    USER_IP,
+                    SYS_TAG,
+                    USER_AGENT,
+                    REG_DTTM
+                )
+         SELECT SQ_LOG_USER_SEQ.NEXTVAL,
+         		A.USER_CD     AS "userCd",
+                A.USER_ID     AS "userId",
+                #userIp:VARCHAR#      AS "userIp",
+                #sysTag:CHAR#      AS "sysTag",
+                #userAgent:VARCHAR#   AS "userAgent",
+                SYSDATE       AS "regDttm"
+           FROM TB_USER        A
+        <isEmpty property="userCd">
+          WHERE A.CONT_SITE_CD = #contSiteCd:VARCHAR#
+            AND A.USER_ID      = #userId:VARCHAR#
+        </isEmpty>
+        <isNotEmpty property="userCd">
+          WHERE A.USER_CD      = #userCd:NUMERIC#
+        </isNotEmpty>
+    </insert>
+    
+</sqlMap>

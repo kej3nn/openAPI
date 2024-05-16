@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="portalAssmNoti" >
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+	
+	<sql id="schd.table">
+		SELECT S.GUBUN, S.GUBUN_NM, S.MEETINGSESSION, S.UNIT_CD,
+		       S.CHA, S.TITLE, S.MEETTING_DATE , S.MEETTING_TIME, S.COMMITTEE_NAME, SORT_NO, LINK_URL, FILE_URL, RESULT_DOWN_URL, S.UNIT_NM
+		FROM   TV_BULLETIN_SCHEDULE S
+		
+		<isEmpty property="gubun">
+			WHERE  (S.GUBUN = 'ASSEM'
+			OR	   (S.GUBUN = 'CMMTT'
+	        AND    HR_DEPT_CD IN
+			           	(
+			           	<!-- 현재 유효한 위원회 -->
+			           	  SELECT DEPT_CD
+			              FROM   TV_THXPSN13 
+			              WHERE  EMP_NO    = #empNo:VARCHAR#
+			              AND    S.UNIT_CD = UNIT_CD
+			              AND S.MEETINGDAY BETWEEN CMIT_FR_DATE AND NVL(CMIT_TO_DATE, TO_CHAR(SYSDATE, 'YYYYMMDD'))
+						))
+			)
+		</isEmpty>
+		<isNotEmpty property="gubun">
+			<isEqual property="gubun" compareValue="ASSEM">
+				WHERE  S.GUBUN = 'ASSEM' 	
+			</isEqual>
+			<isEqual property="gubun" compareValue="CMMTT">
+				WHERE  S.GUBUN = 'CMMTT'
+		        AND    HR_DEPT_CD IN
+				           	(
+				           	<!-- 현재 유효한 위원회 -->
+				           	  SELECT DEPT_CD
+				              FROM   TV_THXPSN13 
+				              WHERE  EMP_NO    = #empNo:VARCHAR#
+				              AND    S.UNIT_CD = UNIT_CD
+				              AND S.MEETINGDAY BETWEEN CMIT_FR_DATE AND NVL(CMIT_TO_DATE, TO_CHAR(SYSDATE, 'YYYYMMDD'))
+							) 	
+			</isEqual>
+		</isNotEmpty>
+		ORDER BY S.GUBUN, MEETINGDAY DESC, MEETTING_TIME DESC
+	</sql>
+	
+	<!-- 의원 일정 -->
+	<sql id="schd.col">
+		GUBUN				AS "gubun"
+		, GUBUN_NM			AS "gubunNm" <!-- 위사일정 구분명(본회의/위원회) -->
+		, MEETINGSESSION	AS "meetingsession" <!-- 회기 -->
+		, COMMITTEE_NAME    AS "committeeName" <!-- 위원회명 -->
+		, CHA				AS "cha" <!-- 차수 -->
+		, TITLE				AS "title" <!-- 제목 -->
+		, MEETTING_DATE		AS "meetingDate" <!-- 일자 -->
+		, MEETTING_TIME		AS "meetingTime" <!-- 시간 -->
+		, MEETTING_DATE || ' ' || MEETTING_TIME AS "meetingDateTime"
+		, LINK_URL          AS "linkUrl"
+		, FILE_URL          AS "fileUrl"
+		, RESULT_DOWN_URL   AS "resultDownUrl"
+		, UNIT_NM           AS "unitNm"
+	</sql>
+	<sql id="schd.where">
+		WHERE 1=1
+		<isNotEmpty property="unitCd" prepend=" AND ">
+			UNIT_CD = #unitCd:VARCHAR#
+		</isNotEmpty>
+		<isNotEmpty property="title" prepend=" AND ">
+			TITLE LIKE '%' || #title:VARCHAR# || '%'
+		</isNotEmpty>
+		<isNotEmpty property="meetingDate" prepend=" AND ">
+			MEETTING_DATE = #meetingDate:VARCHAR#
+		</isNotEmpty>
+		<isNotEmpty property="meetingYM" prepend=" AND ">
+			MEETTING_DATE LIKE #meetingYM:VARCHAR# || '%'
+		</isNotEmpty>
+	</sql>
+	
+	<!-- 의원일정 조회 -->
+	<select id="assmSchdDao.searchAssmSchd" remapResults="true" parameterClass="params" resultClass="record">
+		/* sql id : assmSchdDao.searchAssmSchd */
+		<isEqual property="paging" compareValue="0">
+		SELECT AA.* 
+		FROM   (SELECT ROWNUM AS ROW_NUM, AA.*
+				FROM   (
+		</isEqual>
+		
+			SELECT
+			    <include refid="schd.col"/>
+			FROM
+				(<include refid="schd.table"/>) A
+			<include refid="schd.where"/>
+		<isEqual property="paging" compareValue="0">
+		<![CDATA[
+				) AA
+			WHERE ROWNUM <= #end:NUMERIC#
+			) AA
+		WHERE AA.ROW_NUM >= #start:NUMERIC#
+		]]>
+		</isEqual>
+	</select>
+	<select id="assmSchdDao.searchAssmSchdCount" parameterClass="params" resultClass="int">
+		/* sql id : assmSchdDao.searchAssmSchdCount */
+		SELECT
+		    COUNT(*)
+		FROM
+		    (<include refid="schd.table"/>) A
+		<include refid="schd.where"/>
+	</select>
+	
+</sqlMap>

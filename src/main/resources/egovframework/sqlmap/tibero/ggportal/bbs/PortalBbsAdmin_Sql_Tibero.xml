@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- @(#)PortalBbsAdmin_Sql_Tibero.xml 1.0 2015/06/15                        -->
+<!--                                                                         -->
+<!-- COPYRIGHT (C) 2013 WISEITECH CO., LTD. ALL RIGHTS RESERVED.             -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- 게시판 설정을 관리하는 SQL 파일이다.                                    -->
+<!--                                                                         -->
+<!-- @author 김은삼                                                          -->
+<!-- @version 1.0 2015/06/15                                                 -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<sqlMap namespace="PortalBbsAdminDao">
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Type Alias                                                          -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 게시판 설정을 조회한다.                                             -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="PortalBbsAdminDao.selectBbsAdmin" parameterClass="params" resultClass="record">
+         SELECT A.BBS_CD                                AS "bbsCd",
+                A.BBS_NM                                AS "bbsNm",
+                A.LANG_CD                               AS "langCd",
+                A.BBS_TYPE_CD                           AS "bbsTypeCd",
+                TO_CHAR(A.BBS_OPEN_DTTM,  'YYYY-MM-DD') AS "bbsOpenDttm",
+                TO_CHAR(A.BBS_CLOSE_DTTM, 'YYYY-MM-DD') AS "bbsCloseDttm",
+                CASE
+                WHEN TRUNC(SYSDATE) BETWEEN TRUNC(A.BBS_OPEN_DTTM) AND TRUNC(A.BBS_CLOSE_DTTM)
+                THEN 'Y'
+                ELSE 'N'
+                END                                     AS "bbsOpenYn",
+                A.BBS_EXP                               AS "bbsExp",
+                A.LOGIN_WT_YN                           AS "loginWtYn",
+                A.LIST_CNT                              AS "listCnt",
+                A.HL_CNT                                AS "hlCnt",
+                A.LIST_CD                               AS "listCd",
+                A.LIST1_CD                               AS "list1Cd",
+                A.NOTICE_YN                             AS "noticeYn",
+                A.SECRET_YN                             AS "secretYn",
+                A.ATFILE_YN                             AS "atfileYn",
+                A.EXT_LIMIT                             AS "extLimit",
+                A.SIZE_LIMIT                            AS "sizeLimit",
+                A.LINK_YN                               AS "linkYn",
+                A.INF_YN                                AS "infYn",
+                A.DEPT_YN                               AS "deptYn",
+                A.EMAIL_REG_YN                          AS "emailRegYn",
+                A.EMAIL_NEED_YN                         AS "emailNeedYn",
+                A.TEL_YN                                AS "telYn",
+                A.TEL_NEED_YN                           AS "telNeedYn",
+                A.ANS_YN                                AS "ansYn",
+                A.ANS_TAG                               AS "ansTag",
+                A.HTML_YN                               AS "htmlYn",
+                A.USE_YN                                AS "useYn"
+           FROM TB_BBS_ADMIN A
+          WHERE A.BBS_CD     = #bbsCd:VARCHAR#
+            AND A.USE_YN     = 'Y'
+    </select>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 로그인 후 글쓰기 여부를 조회한다.                                   -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="PortalBbsAdminDao.selectLoginWtYn" parameterClass="string" resultClass="string">
+         SELECT A.LOGIN_WT_YN AS "loginWtYn"
+           FROM TB_BBS_ADMIN   A
+          WHERE A.BBS_CD       = UPPER(#bbsCd:VARCHAR#)
+            AND A.USE_YN       = 'Y'
+    </select>
+    
+</sqlMap>

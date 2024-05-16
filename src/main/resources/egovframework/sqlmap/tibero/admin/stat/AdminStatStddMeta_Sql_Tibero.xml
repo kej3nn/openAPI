@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- @(#)AdminStatStddMeta_Sql_Tibero.xml 1.0 2017/06/28                       -->
+<!--                                                                         -->
+<!-- COPYRIGHT (C) 2013 WISEITECH CO., LTD. ALL RIGHTS RESERVED.             -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- 표준메타정보 관리 SQL 파일이다.	                                  -->
+<!--                                                                         -->
+<!-- @author 김정호                                                        	-->
+<!-- @version 1.0 2017/07/03                                                -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<sqlMap namespace="StatStddMeta">
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Type Alias                                                          -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+    
+    <!-- 표준메타정보 메인 리스트 조회 -->
+    <select id="StatStddMetaDao.selectStatStddMetaList" parameterClass="params" resultClass="java.util.HashMap">
+		SELECT
+			A.META_ID			AS "metaId"
+			, A.META_NM			AS "metaNm"
+			, A.ENG_META_NM		AS "engMetaNm"
+			, A.STTS_CD			AS "sttsCd"
+			, B.DITC_NM			AS "sttsCdNm"
+			, A.META_CD			AS "metaCd"
+			, C.DITC_NM			AS "metaCdNm"
+			, A.METATY_CD		AS "metatyCd"
+			, D.DITC_NM			AS "metatyCdNm"
+			, A.INPUT_NEED_YN	AS "inputNeedYn"
+			, A.OPEN_YN			AS "openYn"
+			, A.USE_YN			AS "useYn"
+			, A.V_ORDER			AS "vOrder"
+		FROM
+			TB_STTS_STDDMETA A
+			INNER JOIN TB_COMM_CODE B
+				ON  A.STTS_CD = B.DITC_CD
+				AND B.GRP_CD = 'S1008'
+				AND B.USE_YN = 'Y'
+			INNER JOIN TB_COMM_CODE C
+				ON  A.META_CD = C.DITC_CD
+				AND C.GRP_CD = 'S1001'
+				AND C.USE_YN = 'Y'
+			INNER JOIN TB_COMM_CODE D
+				ON  A.METATY_CD = D.DITC_CD
+				AND D.GRP_CD = 'S1002'
+				AND D.USE_YN = 'Y'		
+		WHERE
+			1=1
+		<isNotEmpty property="useYn">
+			AND A.USE_YN = #useYn#	
+		</isNotEmpty>
+		<isNotEmpty property="searchSttsCd">
+			AND A.STTS_CD = #searchSttsCd#
+		</isNotEmpty>
+		<isNotEmpty property="searchVal">
+			<isEqual property="searchGubun" compareValue="META_NM" >
+				AND A.META_NM LIKE '%' || #searchVal# || '%'
+			</isEqual>
+			<isEqual property="searchGubun" compareValue="ENG_META_NM" >
+				AND A.ENG_META_NM LIKE '%' || #searchVal# || '%'
+			</isEqual>
+			<isEqual property="searchGubun" compareValue="META_ID" >
+				AND A.META_ID LIKE '%' || #searchVal# || '%'
+			</isEqual>
+		</isNotEmpty>
+		ORDER BY 
+			A.V_ORDER, A.META_NM	
+	</select>
+	<select id="StatStddMetaDao.selectStatStddMetaListCount" parameterClass="params" resultClass="java.util.HashMap">
+		SELECT
+			COUNT(*)
+		FROM
+			TB_STTS_STDDMETA A
+			INNER JOIN TB_COMM_CODE B
+				ON  A.STTS_CD = B.DITC_CD
+				AND B.GRP_CD = 'S1008'
+				AND B.USE_YN = 'Y'
+			INNER JOIN TB_COMM_CODE C
+				ON  A.META_CD = C.DITC_CD
+				AND C.GRP_CD = 'S1001'
+				AND C.USE_YN = 'Y'
+			INNER JOIN TB_COMM_CODE D
+				ON  A.METATY_CD = D.DITC_CD
+				AND D.GRP_CD = 'S1002'
+				AND D.USE_YN = 'Y'			
+		WHERE
+			1=1	
+		<isNotEmpty property="useYn">
+			AND A.USE_YN = #useYn#	
+		</isNotEmpty>
+		<isNotEmpty property="searchSttsCd">
+			AND A.STTS_CD = #searchSttsCd#
+		</isNotEmpty>
+		<isNotEmpty property="searchVal">
+			<isEqual property="searchGubun" compareValue="META_NM" >
+				AND A.META_NM LIKE '%' || #searchVal# || '%'
+			</isEqual>
+			<isEqual property="searchGubun" compareValue="ENG_META_NM" >
+				AND A.ENG_META_NM LIKE '%' || #searchVal# || '%'
+			</isEqual>
+			<isEqual property="searchGubun" compareValue="META_ID" >
+				AND A.META_ID LIKE '%' || #searchVal# || '%'
+			</isEqual>
+		</isNotEmpty>			
+	</select>
+	
+	<!-- 표준메타정보 상세조회 -->
+	<select id="StatStddMetaDao.selectStatStddMetaDtl" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		SELECT
+			A.META_ID			AS "metaId"
+			, A.META_NM			AS "metaNm"
+			, A.ENG_META_NM		AS "engMetaNm"
+			, A.STTS_CD			AS "sttsCd"
+			, B.DITC_NM			AS "sttsCdNm"
+			, A.META_CD			AS "metaCd"
+			, C.DITC_NM			AS "metaCdNm"
+			, A.METATY_CD		AS "metatyCd"
+			, D.DITC_NM			AS "metatyCdNm"
+			, A.META_EXP		AS "metaExp"
+			, A.GRP_CD			AS "grpCd"
+			, A.V_ORDER			AS "vOrder"
+			, A.INPUT_MAX_CD	AS "inputMaxCd"
+			, A.INPUT_NEED_YN	AS "inputNeedYn"
+			, A.OPEN_YN			AS "openYn"
+			, A.USE_YN			AS "useYn"
+		FROM
+			TB_STTS_STDDMETA A
+			INNER JOIN TB_COMM_CODE B
+				ON  A.STTS_CD = B.DITC_CD
+				AND B.GRP_CD = 'S1008'
+				AND B.USE_YN = 'Y'
+			INNER JOIN TB_COMM_CODE C
+				ON  A.META_CD = C.DITC_CD
+				AND C.GRP_CD = 'S1001'
+				AND C.USE_YN = 'Y'
+			INNER JOIN TB_COMM_CODE D
+				ON  A.METATY_CD = D.DITC_CD
+				AND D.GRP_CD = 'S1002'
+				AND D.USE_YN = 'Y'		
+		WHERE
+			META_ID = #metaId:NUMERIC#
+		ORDER BY 
+			A.META_NM, A.META_ID DESC	
+	</select>
+	
+	<!-- 표준메타정보 등록 -->
+	<insert id="StatStddMetaDao.insertStatStddMeta" parameterClass="params">
+		<selectKey keyProperty="metaId" resultClass="integer">
+			SELECT NVL(MAX(META_ID), 0) + 1 FROM TB_STTS_STDDMETA
+		</selectKey>
+		INSERT INTO TB_STTS_STDDMETA (
+			META_ID
+			, META_NM
+			, ENG_META_NM
+			, STTS_CD
+			, META_CD
+			, META_EXP
+			, METATY_CD
+			, INPUT_MAX_CD
+			, GRP_CD
+			<isNotEmpty property="inputNeedYn">
+			, INPUT_NEED_YN
+			</isNotEmpty>
+			, OPEN_YN
+			, USE_YN
+			, V_ORDER
+			, REG_ID
+			, REG_DTTM
+			, UPD_ID
+			, UPD_DTTM
+		) 
+		VALUES 
+		(
+			#metaId:NUMERIC#
+			, #metaNm:VARCHAR#
+			, #engMetaNm:VARCHAR#
+			, #sttsCd:VARCHAR#
+			, #metaCd:VARCHAR#
+			, #metaExp:VARCHAR#
+			, #metatyCd:VARCHAR#
+			, #inputMaxCd#
+			, #grpCd:VARCHAR#
+			<isNotEmpty property="inputNeedYn">
+			, #inputNeedYn#
+			</isNotEmpty>
+			, #openYn:CHAR#
+			, #useYn:CHAR#
+			, (SELECT NVL(MAX(V_ORDER), 0) + 1 FROM TB_STTS_STDDMETA )
+			, #regId:VARCHAR#
+			, SYSDATE
+			, #updId:VARCHAR#
+			, SYSDATE
+		)	
+	</insert>
+	
+	<!-- 표준메타정보 저장 -->
+	<update id="StatStddMetaDao.updateStatStddMeta" parameterClass="params" >
+		UPDATE TB_STTS_STDDMETA
+		SET
+			META_NM 		= #metaNm:VARCHAR#
+			, ENG_META_NM   = #engMetaNm:VARCHAR#
+			, STTS_CD 		= #sttsCd:VARCHAR#
+			, META_CD 		= #metaCd:VARCHAR#
+			, METATY_CD 	= #metatyCd:VARCHAR#
+			, INPUT_MAX_CD 	= #inputMaxCd:VARCHAR#
+			, GRP_CD 		= #grpCd:VARCHAR#
+			<isNotEmpty property="inputNeedYn">
+			, INPUT_NEED_YN	= #inputNeedYn#
+			</isNotEmpty>
+			<isEmpty property="inputNeedYn">
+			, INPUT_NEED_YN	= 'N'
+			</isEmpty>
+			, OPEN_YN 		= #openYn:CHAR#
+			, META_EXP 		= #metaExp:VARCHAR#
+			, USE_YN 		= #useYn:CHAR#
+			, UPD_ID 		= #updId:VARCHAR#
+			, UPD_DTTM 		= SYSDATE
+		WHERE
+			META_ID = #metaId:NUMERIC#
+	</update>
+	
+	<!-- 표준메타정보 삭제 -->
+	<delete id="StatStddMetaDao.deleteStatStddMeta" parameterClass="params" >
+		DELETE FROM TB_STTS_STDDMETA
+		WHERE  META_ID = #metaId:NUMERIC#
+	</delete>
+	
+	<!-- 표준메타정보 순서저장 -->
+	<update id="StatStddMetaDao.saveStatStddMetaOrder" parameterClass="params">
+		UPDATE TB_STTS_STDDMETA
+		SET    V_ORDER = #vOrder:NUMERIC#
+		WHERE  META_ID = #metaId:NUMERIC#
+	</update>	
+	
+</sqlMap>

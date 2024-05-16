@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+    
+<sqlMap namespace="commTerm">
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Type Alias                                                          -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+    
+    <sql id="commTerm.col">
+	    TERM_SEQ			AS "termSeq"
+	    , TERM_NM			AS "termNm"
+	    , ENG_TERM_NM		AS "engTermNm"
+	    , REL_TERM_NM		AS "relTermNm"
+	    , ENG_REL_TERM_NM	AS "engRelTermNm"
+	    , TERM_TAG_CD		AS "termTagCd"
+	    , ENG_TERM_CONT		AS "engTermCont"
+	    , VIEW_CNT			AS "viewCnt"
+	    , USE_YN			AS "useYn"
+	    , REG_ID			AS "regId"
+	    , REG_DTTM			AS "regDttm"
+	    , UPD_ID			AS "updId"
+	    , UPD_DTTM			AS "updDttm"
+	</sql>
+		    	
+    <sql id="commTerm.where">
+    	<dynamic prepend="WHERE">
+    	<isNotEmpty property="useYn" prepend=" AND ">
+    		A.USE_YN = #useYn:VARCHAR#
+    	</isNotEmpty>
+    	<isNotEmpty property="termNm" prepend=" AND ">
+    		<isEqual property="termNmGubun" compareValue="A">
+	    		A.TERM_NM LIKE '%' || #termNm:VARCHAR# || '%'
+    		</isEqual>
+    		<isEqual property="termNmGubun" compareValue="B">
+	    		A.REL_TERM_NM LIKE '%' || #termNm:VARCHAR# || '%'
+    		</isEqual>
+    	</isNotEmpty>
+    	<isNotEmpty property="termTagCd" prepend=" AND ">
+    		A.TERM_TAG_CD = #termTagCd:VARCHAR#
+    	</isNotEmpty>
+    	</dynamic>
+    </sql>
+  
+  	<!-- 동의어 페이징 리스트 조회 -->
+  	<select id="commTermDao.searchCommTerm" parameterClass="params" resultClass="record">
+  		/* sql id : commTermDao.searchCommTerm */
+  		<isEqual property="paging" compareValue="0">
+		SELECT AA.* 
+		FROM   (SELECT ROWNUM AS ROW_NUM, AA.*
+				FROM   (  
+		</isEqual>
+			SELECT
+				<include refid="commTerm.col"></include>
+			FROM
+				TB_COMM_TERM A
+			<include refid="commTerm.where"></include>
+			ORDER BY
+			    A.V_ORDER
+		<isEqual property="paging" compareValue="0">
+		<![CDATA[
+				) AA
+			WHERE ROWNUM <= #end:NUMERIC#
+			) AA
+		WHERE AA.ROW_NUM >= #start:NUMERIC#
+		]]>
+		</isEqual>
+  	</select>
+  	<select id="commTermDao.searchCommTermCount" parameterClass="params" resultClass="int">
+  		/* sql id : commTermDao.searchCommTermCount */
+		SELECT COUNT(*)
+		FROM   TB_COMM_TERM A
+		<include refid="commTerm.where"></include>
+  	</select>
+  	
+  	<select id="commTermDao.selectCommTermDup" parameterClass="params" resultClass="int">
+  		/* sql id : commTermDao.selectCommTermDup */
+  		SELECT COUNT(*)
+  		FROM   TB_COMM_TERM A
+  		WHERE  TERM_NM		= #termNm:NUMERIC#
+  		AND    REL_TERM_NM 	= #relTermNm:NUMERIC#
+  	</select>	
+  	
+  	<insert id="commTermDao.insertCommTerm" parameterClass="params">
+  		<selectKey keyProperty="sqTermSeq" resultClass="int">
+  			SELECT SQ_TERM_SEQ.NEXTVAL FROM DUAL
+  		</selectKey>
+  		INSERT INTO TB_COMM_TERM (
+  			TERM_SEQ			
+			, TERM_NM			
+			, ENG_TERM_NM		
+			, REL_TERM_NM		
+			, ENG_REL_TERM_NM	
+			, TERM_TAG_CD		
+			, TERM_CONT
+			, ENG_TERM_CONT		
+			, VIEW_CNT			
+			, USE_YN			
+			, REG_ID			
+			, REG_DTTM			
+			, UPD_ID			
+			, UPD_DTTM			
+  		)
+  		VALUES (
+			#sqTermSeq:NUMERIC#			
+			, #termNm:VARCHAR#			
+			, #engTermNm:VARCHAR#		
+			, #relTermNm:VARCHAR#		
+			, #engRelTermNm:VARCHAR#	
+			, #termTagCd:VARCHAR#
+			, #termCont:VARCHAR#		
+			, #engTermCont:VARCHAR#		
+			, 0			
+			, #useYn:VARCHAR#			
+			, #regId:VARCHAR#			
+			, SYSDATE
+			, #updId:VARCHAR#			
+			, SYSDATE
+  		)
+  	</insert>
+  	
+  	
+	<update id="commTermDao.updateCommTerm" parameterClass="params">
+		/* sql id : commTermDao.updateCommTerm */
+		UPDATE TB_COMM_TERM
+		SET    TERM_NM 		= #termNm:VARCHAR#
+			,  REL_TERM_NM 	= #relTermNm:VARCHAR#
+			,  USE_YN 		= #useYn:VARCHAR#
+			,  TERM_TAG_CD 	= #termTagCd:VARCHAR#
+		<isNotEmpty property="engTermNm">
+			,  ENG_TERM_NM = #engTermNm:VARCHAR#
+		</isNotEmpty>
+		<isNotEmpty property="engRelTermNm">
+			,  ENG_REL_TERM_NM = #engRelTermNm:VARCHAR#
+		</isNotEmpty>
+		<isNotEmpty property="termCont">
+			,  TERM_CONT = #termCont:VARCHAR#
+		</isNotEmpty>
+		<isNotEmpty property="engTermCont">
+			,  ENG_TERM_CONT = #engTermCont:VARCHAR#
+		</isNotEmpty>
+		WHERE TERM_SEQ = #termSeq:NUMERIC#
+	</update>	
+	
+	
+	<delete id="commTermDao.deleteCommTerm" parameterClass="params">
+		/* sql id : commTermDao.deleteCommTerm */
+		DELETE FROM TB_COMM_TERM
+		WHERE  TERM_SEQ = #termSeq:NUMERIC#
+	</delete>
+</sqlMap>

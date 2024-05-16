@@ -1,0 +1,51 @@
+@charset "utf-8";
+
+/************************************************************************
+ - FILE NAME : member.css
+ - SUMMARY   : member layout (마이페이지 관련 layout)
+ - DATE      : 2015.06.26
+************************************************************************/
+
+/* 로그인 */
+.section_socialLog {margin:0 auto;}
+ul.socialLog {width:100%;}
+ul.socialLog li {padding:10px 0 0px 0;}
+ul.socialLog a {display:block;  box-sizing:border-box;  border-radius:2px; background-repeat:no-repeat;  text-align:right; vertical-align:middle; color:#fff;}
+
+ul.socialLog .naver {background-color:#2db400; background-image:url('../../img/ggportal/desktop/member/icon_socialLog_naver.png');}
+ul.socialLog .daum {background-color:#6285c3; background-image:url('../../img/ggportal/desktop/member/icon_socialLog_daum.png');}
+ul.socialLog .google {background-color:#e5665c; background-image:url('../../img/ggportal/desktop/member/icon_socialLog_google.png');}
+ul.socialLog .kakaotalk {background-color:#ee9b02; background-image:url('../../img/ggportal/desktop/member/icon_socialLog_kakaotalk.png');}
+ul.socialLog .facebook {background-color:#3554a4; background-image:url('../../img/ggportal/desktop/member/icon_socialLog_facebook.png');}
+ul.socialLog .twitter {background-color:#1a9bf7; background-image:url('../../img/ggportal/desktop/member/icon_socialLog_twitter.png');}
+@media all and (max-width:767px) {
+.section_socialLog {width:80%;}
+ul.socialLog {margin:1px 0 6px 0;}
+ul.socialLog li {padding:8px 0 0px 0;}
+ul.socialLog a {height:38px; padding:0 17px 0 0; background-position:0px 50%; background-size:117px 50px; line-height:38px;}
+}
+@media all and (min-width:768px) {
+.section_socialLog {width:380px; padding:50px 0 0 0;}
+ul.socialLog {margin:12px 0 19px 0;}
+ul.socialLog a {height:50px; padding:0 30px 0 0; background-position:10px 50%; background-size:150px 60px; line-height:50px;}
+}
+/* 로그인 E */
+
+/* 개인정보 */
+.area_agreement  {padding-bottom:20%;}
+@media all and (max-width:767px) {
+.area_agreement {padding-bottom:67%;}
+}
+/* 개인정보 E */
+
+/* 인증키 발급 */
+.notice_authenticationKey {padding:16px 0 14px 20px;}
+@media all and (max-width:767px) {
+.notice_authenticationKey {padding:6px 5px 5px 10px;}
+.notice_authenticationKey li {font-size:11px; line-height:18px;}
+}
+.area_OpenAPI_guide  {padding-bottom:40.5%;}
+@media all and (max-width:767px) {
+.area_OpenAPI_guide {padding-bottom:67%;}
+}
+/* 인증키 발급 E */

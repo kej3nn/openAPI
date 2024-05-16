@@ -1,0 +1,674 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="Monitor">
+<typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+	<resultMap id="StatServiceListAll" class="egovframework.admin.monitor.service.StatService">
+		
+		<result property="infId" column="INF_ID"/>
+		<result property="dtNm" column="DT_NM"/>
+		<result property="infNm" column="INF_NM"/>
+		<result property="cclNm" column="CCL_NM"/>
+		<result property="cateNm" column="CATE_NM"/>
+		<result property="cateFullNm" column="CATE_FULLNM"/>
+		<result property="useDeptNm" column="USE_DEPT_NM"/>  
+		<result property="infState" column="INF_STATE"/>
+		<result property="openDttm" column="OPEN_DTTM"/>
+		<result property="openSrv" column="OPEN_SRV"/>
+		
+	</resultMap>
+	
+	<resultMap id="StatServiceList" class="egovframework.admin.monitor.service.StatService">
+		
+		<result property="infId" column="INF_ID"/>
+		<result property="infCnt" column="INF_CNT"/>
+		<result property="apprCnt" column="APPR_CNT"/>
+		<result property="apprGrade" column="APPR_GRADE"/>
+		<result property="infSeq" column="INF_SEQ"/>
+		<result property="scolInfSeq" column="SCOL_INF_SEQ"/>
+		<result property="ccolInfSeq" column="CCOL_INF_SEQ"/>
+		<result property="mcolInfSeq" column="MCOL_INF_SEQ"/>
+		<result property="fileInfSeq" column="FILE_INF_SEQ"/>
+		<result property="acolInfSeq" column="ACOL_INF_SEQ"/>
+		<result property="linkInfSeq" column="LINK_INF_SEQ"/>
+		<result property="srvCd" column="SRV_CD"/>
+		<result property="metaImagFileNm" column="SAVE_FILE_NM"/>
+		<result property="cateSaveFileNm" column="SAVE_FILE_NM"/>
+		<result property="infNm" column="INF_NM"/>
+		<result property="infExp" column="INF_EXP"/>
+		<result property="apprVal" column="APPR_VAL"/>
+		<result property="topCateId" column="CATE_ID"/>
+		<!-- <result property="topCateNm" column="CATE_NM"/> -->
+		<result property="cateNm" column="CATE_NM"/>
+		<result property="openDttm" column="OPEN_DTTM"/>
+		<result property="infTag" column="SCHW_TAG_CONT"/>
+		<result property="loadDttm" column="LOAD_DTTM"/>
+		<result property="orgNm" column="ORG_NM"/>
+		<result property="loadNm" column="DITC_NM"/>
+		<result property="usrNm" column="USR_NM"/>
+		<result property="usrTel" column="USR_TEL"/>
+		<result property="useUsrCnt" column="USE_USR_CNT"/>
+		<result property="srcExp" column="SRC_EXP"/>
+		<result property="cclCd" column="CCL_CD"/>
+		<!-- <result property="cclNm" column="DITC_NM"/> -->
+		<result property="cclExp" column="CD_EXP"/>
+		<result property="useDeptNm" column="USE_DEPT_NM"/>
+		<result property="dataCondDttm" column="DATA_COND_DTTM"/>
+		<result property="topCateId2" column="TOP_CATE_ID"/>
+		<!-- <result property="topCateNm2" column="CATE_NM"/> -->
+		<!-- <result property="CateNm2" column="CATE_NM"/> -->
+		
+	</resultMap>
+	
+	
+	<resultMap id="MonitorInList" class="egovframework.admin.monitor.service.Monitor">
+		
+		<result property="dsIdName" column="DS_ID"/>
+		<result property="dsTitle" column="DS_TITLE"/>
+		<result property="systemCode" column="SYSTEM_CODE"/>
+		<result property="sDbCode" column="S_DB_CODE"/>
+		<result property="tDbCode" column="T_DB_CODE"/>
+		<result property="cateNmm" column="CATE_NM"/>
+		<result property="cApiDay" column="C_API_DAY"/>  
+		<result property="batchSchedule" column="BATCH_SCHEDULE"/>
+		<result property="batchDay" column="BATCH_DAY"/>
+		<result property="batchTm" column="BATCH_TM"/>
+		
+	</resultMap>
+	
+	 <resultMap id="MonitorOutList" class="egovframework.admin.monitor.service.Monitor">
+		
+		<result property="srcTableNm" column="SRC_TABLE_NM"/>
+		<result property="tgtTableNm" column="TGT_TABLE_NM"/>
+		<result property="srcTableDivNm" column="SRC_TABLE_DIV_NM"/>
+		<result property="startTm" column="START_TM"/>
+		<result property="endTm" column="END_TM"/>
+		<result property="jobTm" column="JOB_TM"/>  
+		<result property="totalCnt" column="TOTAL_CNT"/>  
+		<result property="processCnt" column="PROCESS_CNT"/>  
+		<result property="insertCnt" column="INSERT_CNT"/>   
+		<result property="updateCnt" column="UPDATE_CNT"/>
+		<result property="deleteCnt" column="DELETE_CNT"/>
+		<result property="errorCnt" column="ERROR_CNT"/>
+		<result property="status" column="STATUS"/> 
+		<result property="errorMsq" column="ERROR_MSG"/> 
+	</resultMap>
+	
+	<resultMap id="menuLogList" class="egovframework.portal.service.service.OpenInfLog">
+		<result property="totCnt" column="TOT_CNT"/>
+		<result property="sysTag" column="SYS_TAG"/>
+		<result property="menuNm" column="MENU_NM"/>
+		<result property="menuUrl" column="MENU_URL"/>
+		<result property="userIp" column="USER_IP"/>
+		<result property="regDttm" column="REG_DTTM"/>
+	</resultMap>
+	
+	<resultMap id="menuLogList2" class="egovframework.portal.service.service.OpenInfLog">
+		<result property="totCnt" column="TOT_CNT"/>
+		<result property="sysTag" column="SYS_TAG"/>
+		<result property="menuNm" column="MENU_NM"/>
+		<result property="logCnt" column="LOG_CNT"/>
+		<result property="regDttm" column="REG_DTTM"/>
+	</resultMap> 
+	
+	<select id="MonitorDAO.selectMenuLogList" parameterClass="egovframework.admin.monitor.service.Monitor" resultMap="menuLogList">
+		   SELECT *
+			FROM(
+				SELECT ROWNUM AS RN, TB.*,
+					(SELECT MENU_NM FROM TB_SITE_MENU WHERE MENU_ID = TB.MENU_ID) AS MENU_NM,
+					(SELECT MENU_URL FROM TB_SITE_MENU WHERE MENU_ID = TB.MENU_ID) AS MENU_URL
+				 FROM 
+				 (
+				 SELECT 
+				 		   COUNT(*) OVER() AS TOT_CNT
+			    		   ,DECODE(SYS_TAG,'K','PC','E','영문','M','모바일','') AS SYS_TAG
+						  ,CASE WHEN USER_IP ='0:0:0:0:0:0:0:1' THEN '127.0.0.1'
+						   ELSE USER_IP END USER_IP
+						  ,MENU_ID
+						  ,TO_CHAR(REG_DTTM,'YYYY-MM-DD HH24:MI:SS') AS REG_DTTM
+					FROM TB_LOG_SITE_MENU
+				WHERE REG_DTTM BETWEEN TO_CHAR(TO_DATE(#fnlLoadDtm:VARCHAR#,'YYYY-MM-DD'), 'YYYYMMDD')
+					AND  TO_CHAR(TO_DATE(#fnlLoadEndDtm:VARCHAR#,'YYYY-MM-DD')+1, 'YYYYMMDD')
+					AND		USER_IP NOT LIKE '0:%' 
+					AND		USER_IP NOT IN ('192.168.24.120', '127.0.0.1') 
+					<isNotEmpty property="searchWord">
+				 			AND MENU_NM LIKE '%' || #searchWord#  || '%' 
+				 	</isNotEmpty>
+				 	<isNotEmpty property="searchWd">
+				 			AND SYS_TAG =#searchWd#
+				 	</isNotEmpty>
+						ORDER BY REG_DTTM DESC
+				)TB
+			)
+			WHERE RN BETWEEN #startPage:NUMERIC# AND #endPage:NUMERIC#
+	</select>
+	
+	<select id="MonitorDAO.selectMenuLogList2" parameterClass="egovframework.admin.monitor.service.Monitor" resultMap="menuLogList2">
+		   SELECT *
+			FROM(
+				SELECT ROWNUM AS RN, TB.*
+				FROM(
+				SELECT REG_DTTM
+				  		 ,SYS_TAG
+				  		 ,(SELECT MENU_NM FROM TB_SITE_MENU WHERE MENU_ID = A.MENU_ID) AS MENU_NM
+				  		 ,COUNT(0) AS LOG_CNT
+				  		 ,COUNT(*) OVER() AS TOT_CNT
+				 FROM 
+				 (
+					 SELECT 
+					 		   DECODE(SYS_TAG,'K','PC','E','영문','M','모바일','') AS SYS_TAG
+							  ,CASE WHEN USER_IP ='0:0:0:0:0:0:0:1' THEN '127.0.0.1'
+							   ELSE USER_IP END USER_IP
+							  ,TO_CHAR(REG_DTTM,'YYYY-MM-DD') AS REG_DTTM
+							  , MENU_ID
+						FROM TB_LOG_SITE_MENU 
+					WHERE REG_DTTM BETWEEN TO_CHAR(TO_DATE(#fnlLoadDtm:VARCHAR#,'YYYY-MM-DD'), 'YYYYMMDD')
+						AND  TO_CHAR(TO_DATE(#fnlLoadEndDtm:VARCHAR#,'YYYY-MM-DD')+1, 'YYYYMMDD')
+						AND		USER_IP NOT LIKE '0:%' 
+						AND		USER_IP NOT IN ('127.0.0.1') 
+						<isNotEmpty property="searchWord">
+					 			AND MENU_NM LIKE '%' || #searchWord#  || '%' 
+					 	</isNotEmpty>
+					 	<isNotEmpty property="searchWd">
+					 			AND SYS_TAG =#searchWd#
+					 	</isNotEmpty>
+					 ) A
+					 GROUP BY REG_DTTM, SYS_TAG, MENU_ID
+						ORDER BY REG_DTTM DESC , DECODE(SYS_TAG, 'PC', 1, '영문', 2, '모바일', 3, 4), LOG_CNT DESC
+				)TB
+			)
+			WHERE RN BETWEEN #startPage:NUMERIC# AND #endPage:NUMERIC#
+	</select>
+	
+	<select id="MonitorDAO.selectNetConnMonitorList" parameterClass="egovframework.admin.monitor.service.Monitor2" resultClass="egovframework.admin.monitor.service.Monitor2">
+		SELECT
+		    "fromDB"
+		    , "toDB"
+		    , "workPlan"
+		    , "startDttm"
+		    , "endDttm"
+		    , "workTime"
+		    , "total"
+		    , "prcCnt"
+		    , "ins"
+		    , "mod"
+		    , "del"
+		    , "errCnt"
+		    , "successYN"
+		    , "errorMsg"
+		    , "progenitorId"
+		    , "totalCnt"
+		FROM (    
+		  SELECT
+		    A.*
+		    , ROWNUM RN
+		  FROM (  
+		      SELECT  
+		        (CASE WHEN SUBSTR(A.DISP_NAME,5,1) = 'T' THEN '외부망'
+		              ELSE  '내부망' END ) "fromDB"
+		           , (CASE WHEN SUBSTR(A.DISP_NAME,6,1) = 'T' THEN '외부망'
+		              ELSE  '내부망' END ) "toDB"
+		           , RTRIM(A.DISP_NAME,'_1') "workPlan"
+		           , TO_DATE(EXEC_START,'YYYYMMDDHH24MISS') "startDttm"
+		           , TO_DATE(EXEC_END,'YYYYMMDDHH24MISS') "endDttm"
+		           , A.ELAPSED "workTime"      
+		           , C.TOTAL "total"
+		           , C.PROCESSED "prcCnt"
+		           , C.INSERTED "ins"
+		           , C.UPDATED "mod"  
+		           , C.DELETED "del" 
+		           , A.ERRORS "errCnt"
+		           , CASE WHEN A.STATUS  = 'S' THEN '성공'
+		                  WHEN A.STATUS  = 'W' THEN '경고'
+		                  ELSE '실패' END "successYN"
+		           , A.ERROR_MSG "errorMsg"
+		           , A.PROGENITOR_ID "progenitorId"
+		           , COUNT(*) OVER() "totalCnt"
+		        FROM  BTLDI.DI_EXEC_LOG A  
+		            , ( SELECT ID ID
+		                     ,  PROGENITOR_ID
+		                     ,  DISP_NAME
+		                  FROM  BTLDI.DI_EXEC_LOG 
+		                 GROUP BY ID, PROGENITOR_ID,DISP_NAME,TOTAL
+		              )B
+		              , (SELECT PROGENITOR_ID
+		                     , SUM(TOTAL) TOTAL
+		                     , SUM(PROCESSED) PROCESSED
+		                     , SUM(INSERTED) INSERTED
+		                     , SUM(UPDATED) UPDATED
+		                     , SUM(DELETED) DELETED
+		                  FROM  BTLDI.DI_EXEC_LOG 
+		                  WHERE  DISP_NAME NOT LIKE '%추출%'
+		                 GROUP BY PROGENITOR_ID 
+		               ORDER BY 1) C
+		       WHERE 1=1
+		         AND A.ID = B.PROGENITOR_ID
+		         AND A.DISP_NAME = B.DISP_NAME
+		         AND B.PROGENITOR_ID=C.PROGENITOR_ID 
+		         AND A.DISP_NAME NOT IN ('시작','예외처리기','추출','변환','SQL실행','커맨드라인')
+		         AND A.DISP_NAME NOT LIKE '%잡%'  
+		         AND A.DISP_NAME NOT LIKE '%추출%'
+		         AND A.DISP_NAME NOT LIKE '%커맨드라인%'
+		         AND A.DISP_NAME NOT LIKE '%FTP%%'
+		         AND A.DISP_NAME NOT LIKE '%SQL실행%'
+		         AND A.DISP_NAME NOT LIKE '%벌크로더%'
+         		 AND A.STATUS IS NOT NULL
+		         AND (TO_CHAR(TO_DATE(EXEC_START,'YYYYMMDDHH24MISS'), 'YYYYMMDD') BETWEEN #startDttm# AND #endDttm#)
+		         <isNotEmpty property="searchWord">
+		         AND RTRIM(A.DISP_NAME,'_1') LIKE '%'||#searchWord#||'%'
+		         </isNotEmpty>
+		         <isNotEmpty property="successYN">
+		         AND TRIM(A.STATUS) = #successYN#
+		         </isNotEmpty>
+		       ORDER BY A.ID DESC	
+		  ) A
+		  WHERE
+			ROWNUM <![CDATA[ <= ]]> #endPage#
+		)
+		WHERE
+			RN <![CDATA[ >= ]]> #startPage#
+	</select>
+	
+	<select id="MonitorDAO.selectNetConnMonitorDetail" parameterClass="egovframework.admin.monitor.service.Monitor2" resultClass="egovframework.admin.monitor.service.Monitor2">
+		SELECT
+			"tbNm"
+			, "startDttm"
+			, "endDttm"
+			, "workTime"
+			, "total"
+			, "prcCnt"
+			, "ins"
+			, "mod"
+			, "del"
+			, "errCnt"
+			, "successYN"
+			, "errorMsg"
+			, "totalCnt"
+		FROM (	
+			  SELECT
+			    A.*
+			    , ROWNUM RN
+			  FROM (  
+				SELECT 
+					RTRIM(A.DISP_NAME,'_1')                "tbNm"    
+				     , TO_DATE(EXEC_START,'YYYYMMDDHH24MISS') "startDttm"
+				     , TO_DATE(EXEC_END,'YYYYMMDDHH24MISS')   "endDttm"
+				     , A.ELAPSED             "workTime"      
+				     , A.TOTAL               "total"
+				     , A.PROCESSED           "prcCnt"
+				     , A.INSERTED            "ins"
+				     , A.UPDATED             "mod"  
+				     , A.DELETED             "del" 
+				     , A.ERRORS              "errCnt"
+				     , CASE WHEN A.STATUS  = 'S' THEN '성공'
+				            WHEN A.STATUS  = 'W' THEN '경고'
+				            ELSE '실패' END  "successYN"
+				     , A.ERROR_MSG "errorMsg"
+				     , COUNT(*) OVER() "totalCnt"
+				  FROM BTLDI.DI_EXEC_LOG A 
+				 WHERE 1=1
+				   AND A.DISP_NAME NOT IN ('시작','예외처리기','추출','변환','SQL실행','커맨드라인')
+				   AND A.DISP_NAME NOT LIKE '%잡%'  
+				   AND A.DISP_NAME NOT LIKE '%워크플랜%' 
+				   AND A.DISP_NAME NOT LIKE '%추출%'
+				   AND A.DISP_NAME NOT LIKE '%커맨드라인%'
+				   AND A.DISP_NAME NOT LIKE '%FTP%%'
+				   AND A.DISP_NAME NOT LIKE '%SQL실행%'
+				   AND A.DISP_NAME NOT LIKE '%벌크로더%'
+				   AND A.DISP_NAME NOT LIKE 'SP_%' 
+				   AND A.DISP_NAME LIKE 'TB_%'
+				   AND A.PROGENITOR_ID = #progenitorId#
+				 ORDER BY A.EXEC_START	
+		  ) A
+		  WHERE
+			ROWNUM <![CDATA[ <= ]]> #endPage#
+		)
+		WHERE
+			RN <![CDATA[ >= ]]> #startPage#
+	</select>
+	
+	<select id="MonitorDAO.selectQuailtyMonitorList" parameterClass="egovframework.admin.monitor.service.Monitor2" resultClass="egovframework.admin.monitor.service.Monitor2">
+		SELECT
+		  "num"
+		  ,"jobNm"
+		  ,"prfCnt"
+		  ,"anaCnt"
+		  ,"esnErCnt"
+		  ,"brCnt"
+		  ,"brAnaCnt"
+		  ,"brErCnt"
+		  ,"startDttm"
+		  ,"endDttm"
+		  ,"totalCnt"
+		FROM (  
+		  SELECT
+		    A.*
+		    , ROWNUM RN
+		  FROM (  
+		    SELECT NUM               "num"
+		         , JOB_NAME          "jobNm"
+		         , COUNT(PRF_ID)     "prfCnt"
+		         , SUM(ANA_CNT)      "anaCnt"
+		         , SUM(ESN_ER_CNT)   "esnErCnt"
+		         , COUNT(BR_ID)      "brCnt"
+		         , SUM(BR_ANA_CNT)   "brAnaCnt"
+		         , SUM(BR_ER_CNT)    "brErCnt"
+		         , MIN(ANA_STR_DTM)  "startDttm"
+		         , MAX(ANA_END_DTM)  "endDttm"
+		         , COUNT(*) OVER()   "totalCnt"
+		      FROM TV_DQ_RESULT_TEST
+		      WHERE
+				TO_CHAR(ANA_STR_DTM, 'YYYYMMDD') BETWEEN #startDttm# AND #endDttm#
+		     GROUP BY JOB_NAME, NUM
+		     ORDER BY MIN(ANA_STR_DTM) DESC
+		  ) A
+		  WHERE 
+			ROWNUM <![CDATA[ <= ]]> #endPage#
+		)
+		WHERE
+			RN <![CDATA[ >= ]]> #startPage#
+	</select>
+	
+	<select id="MonitorDAO.selectQuailtyMonitorDetail" parameterClass="egovframework.admin.monitor.service.Monitor2" resultClass="egovframework.admin.monitor.service.Monitor2">
+		SELECT
+		  "jobNm"
+		  ,"kindCd"
+		  ,"commDtlCdNm"
+		  ,"dbcTblKorNm"
+		  ,"tbNm"
+		  ,"colNm"
+		  ,"anaCnt"
+		  ,"esnErCnt"
+		  ,"brAnaCnt"
+		  ,"brErCnt"
+		  ,"startDttm"
+		  ,"endDttm"
+		  ,"totalCnt"
+		FROM (  
+		  SELECT
+		    A.*
+		    , ROWNUM RN
+		  FROM (  
+		    SELECT JOB_NAME   "jobNm" 
+		     , KIND_CD        "kindCd"
+		     , COMM_DTL_CD_NM  "commDtlCdNm"
+		     , DBC_TBL_KOR_NM  "dbcTblKorNm"
+		     , DBC_TBL_NM      "tbNm"  
+		     , DBC_COL_KOR_NM	"colNm"
+		     , NVL(ANA_CNT, 0)         "anaCnt"
+		     , NVL(ESN_ER_CNT, 0)      "esnErCnt"
+		     , NVL(BR_ANA_CNT, 0)      "brAnaCnt"
+		     , NVL(BR_ER_CNT, 0)       "brErCnt"
+		     , ANA_STR_DTM     "startDttm"
+		     , ANA_END_DTM     "endDttm"
+		     , COUNT(*) OVER()   "totalCnt"
+		    FROM TV_DQ_RESULT_TEST<![CDATA[ 
+		    WHERE (ESN_ER_CNT > 0 OR BR_ER_CNT > 0) ]]>
+		      AND NUM = #num#
+			ORDER By
+				ANA_STR_DTM DESC
+		  ) A
+		  WHERE 
+			ROWNUM <![CDATA[ <= ]]> #endPage#
+		)
+		WHERE
+			RN <![CDATA[ >= ]]> #startPage#
+	</select>
+	
+	<select id="MonitorDAO.selectOutMonitorList" parameterClass="egovframework.admin.monitor.service.Monitor2" resultClass="egovframework.admin.monitor.service.Monitor2">
+		SELECT
+		  "orgNm"
+		  , "jobNm"
+		  , "tbNm"
+		  , "dsType"
+		  , "procCnt"
+		  , "endDttm"
+		  , "jobMsg"
+		  , "totalCnt"
+		FROM (  
+		  SELECT
+		    A.*
+		    , ROWNUM RN
+		  FROM (  
+		    SELECT 
+		      B.DATAID     "orgNm"    
+		      , A.JOB_NAME    "jobNm"
+		      , A.TARGET     "tbNm"
+		      , B.DS_TYPE     "dsType"
+		      , A.PROC_CNT   "procCnt"
+		      , TO_CHAR(A.JOB_PROC_DTTM, 'YYYY-MM-DD HH24:MI:SS.FF1') "endDttm"
+		      , A.JOB_MSG       "jobMsg"
+		      , COUNT(*) OVER() "totalCnt"
+		    FROM TB_DATA_LOG A , TB_DATA_CONFIG  B 
+		    WHERE A.TARGET = B.DS_ID 
+		    	AND TO_CHAR(A.JOB_PROC_DTTM, 'YYYYMMDD') BETWEEN #startDttm# AND #endDttm#
+		    	<isNotEmpty property="searchWord">
+		    	AND A.JOB_NAME LIKE '%' || #searchWord# || '%'
+		    	</isNotEmpty> 
+		    ORDER BY JOB_PROC_DTTM DESC 
+		  ) A
+		  WHERE 
+			ROWNUM <![CDATA[ <= ]]> #endPage#
+		)
+		WHERE
+			RN <![CDATA[ >= ]]> #startPage#
+	</select>
+	
+	<select id="MonitorDAO.selectStatServiceListAll" parameterClass="egovframework.admin.monitor.service.StatService" resultMap="StatServiceListAll" >
+	SELECT *
+	  FROM(
+		SELECT ROWNUM AS RN, TB.*
+		  FROM
+		  (
+			SELECT A.INF_ID, A.DT_NM, A.INF_NM, A.CCL_NM, A.CATE_NM,
+			(case when A.CATE2_ID IS NOT NULL THEN A.CATE_FULLNM || ', ' || A.CATE2_FULLNM ELSE A.CATE_FULLNM END) as CATE_FULLNM, 
+			A.USE_DEPT_NM
+			,A.INF_STATE
+			,TO_CHAR(A.OPEN_DTTM,'YYYY-MM-DD') AS OPEN_DTTM
+			,FN_GET_OPEN_SRV_HTML(A.OPEN_SRV) AS OPEN_SRV
+			FROM TV_MNG_INF A
+		 	WHERE 1=1 
+	    <isNotEmpty property="searchWord" >
+	    	<isEmpty property="searchWd" >
+	    	AND (A.INF_NM LIKE '%'||#searchWord#||'%' OR A.DT_NM LIKE '%'||#searchWord#||'%' OR A.SCHW_TAG_CONT  LIKE '%'||#searchWord#||'%')
+	    	</isEmpty>
+			<isEqual property="searchWd" compareValue="0" >
+			AND A.INF_NM LIKE '%'||#searchWord#||'%'
+			</isEqual>
+			<isEqual property="searchWd" compareValue="1">
+			AND A.DT_NM LIKE '%'||#searchWord#||'%'
+			</isEqual>
+			<isEqual property="searchWd" compareValue="2">
+			AND A.SCHW_TAG_CONT LIKE '%'||#searchWord#||'%'
+			</isEqual>
+		</isNotEmpty>
+		<isNotEmpty property="cateId">
+			AND (A.CATE_ID IN	 (SELECT 
+									CATE_ID
+									FROM TB_OPEN_CATE A
+									WHERE 1 = 1
+									START WITH CATE_ID = #cateId#
+									CONNECT BY PRIOR CATE_ID = PAR_CATE_ID)	OR CATE2_ID = #cateId# )
+		</isNotEmpty>
+		AND A.INF_STATE = 'Y'
+			ORDER  BY A.SEQ DESC
+		)TB
+	)
+	<isNotEqual prepend="startPage" compareValue="0">
+		WHERE RN BETWEEN #startPage# AND #endPage#
+	</isNotEqual>
+	</select>
+	
+	<select id="MonitorDAO.selectStatServiceListAllCnt" parameterClass="egovframework.admin.monitor.service.StatService" resultClass="java.lang.Integer">
+			SELECT   COUNT(A.INF_ID)
+		    FROM TV_MNG_INF A
+		   WHERE 1=1 
+ 	    <isNotEmpty property="searchWord" >
+	    	<isEmpty property="searchWd" >
+	    	AND (A.INF_NM LIKE '%'||#searchWord#||'%' OR A.DT_NM LIKE '%'||#searchWord#||'%' OR A.SCHW_TAG_CONT  LIKE '%'||#searchWord#||'%')
+	    	</isEmpty>
+			<isEqual property="searchWd" compareValue="0" >
+			AND A.INF_NM LIKE '%'||#searchWord#||'%'
+			</isEqual>
+			<isEqual property="searchWd" compareValue="1">
+			AND A.DT_NM LIKE '%'||#searchWord#||'%'
+			</isEqual>
+			<isEqual property="searchWd" compareValue="2">
+			AND A.SCHW_TAG_CONT LIKE '%'||#searchWord#||'%'
+			</isEqual>
+		</isNotEmpty>
+		<isNotEmpty property="cateId">
+				AND A.CATE_ID IN	 (SELECT 
+									CATE_ID
+									FROM TB_OPEN_CATE A
+									WHERE 1 = 1
+									START WITH CATE_ID = #cateId#
+									CONNECT BY PRIOR CATE_ID = PAR_CATE_ID)
+		</isNotEmpty>
+		AND A.INF_STATE = 'Y'
+	</select>
+	
+	<select id="MonitorDAO.selectStatServiceList" parameterClass="egovframework.admin.monitor.service.StatService" resultClass="egovframework.admin.monitor.service.StatService" >
+	<![CDATA[
+		SELECT 
+	   		    NVL(H.INF_CNT,0)								AS "infCnt",
+				NVL(H.APPR_CNT,0)								AS "apprCnt",
+				NVL(H.APPR_GRADE,0)							AS "apprGrade",
+				C.SEQ                                   AS "seq",
+                B.INF_ID                                AS "infId",
+                B.INF_SEQ                               AS "infSeq",
+                A.SCOL_INF_SEQ                          AS "scolInfSeq",
+                A.CCOL_INF_SEQ                          AS "ccolInfSeq",
+                A.MCOL_INF_SEQ                          AS "mcolInfSeq",
+                A.FILE_INF_SEQ                          AS "fileInfSeq",
+                A.ACOL_INF_SEQ                          AS "acolInfSeq",
+                A.LINK_INF_SEQ                          AS "linkInfSeq",
+                B.SRV_CD                                AS "srvCd",
+                C.SAVE_FILE_NM                     		AS "metaImagFileNm",
+                D.SAVE_FILE_NM                          AS "cateSaveFileNm",
+                C.INF_NM                                AS "infNm",
+                C.INF_EXP                               AS "infExp",
+                (
+                     SELECT AVG(H.APPR_VAL)
+                       FROM TB_OPEN_INF_APPR H
+                      WHERE H.INF_ID         = C.INF_ID
+                )                                       AS "apprVal",
+                E.CATE_ID                               AS "topCateId",
+                E.CATE_NM                               AS "topCateNm",
+                D.CATE_NM                               AS "cateNm",
+                TO_CHAR(C.OPEN_DTTM, 'YYYY-MM-DD')      AS "openDttm",
+                C.SCHW_TAG_CONT                               AS "infTag",
+                CASE TO_CHAR(C.LOAD_DTTM,  'YYYY-MM-DD') 
+                WHEN NULL THEN '수시'
+                ELSE TO_CHAR(C.LOAD_DTTM,  'YYYY-MM-DD') END AS "loadDttm",
+                (
+                     SELECT H.ORG_NM
+                       FROM TB_COMM_ORG      H
+                      WHERE H.ORG_CD         = C.ORG_CD
+                )                                       AS "orgNm",
+                C.USE_ORG_CNT                           AS "useOrgCnt",
+                (
+                     SELECT H.DITC_NM
+                       FROM TB_COMM_CODE     H
+                      WHERE H.GRP_CD         = 'D1009'
+                        AND H.DITC_CD        = C.LOAD_CD
+                )                                       AS "loadNm",
+                F.USR_NM                                AS "usrNm",
+                F.USR_TEL                               AS "usrTel",
+                C.USE_USR_CNT                           AS "useUsrCnt",
+                (
+                     SELECT H.SRC_EXP
+                       FROM TB_OPEN_DT       H
+                      WHERE H.DT_ID          = C.DT_ID
+                )                                       AS "srcExp",
+                C.CCL_CD                                AS "cclCd",
+                G.DITC_NM                               AS "cclNm",
+                G.CD_EXP                                AS "cclExp",
+                C.USE_DEPT_NM                           AS "useDeptNm",
+                TO_CHAR(C.DATA_COND_DTTM, 'YYYY-MM-DD') AS "dataCondDttm",
+                (SELECT A.TOP_CATE_ID FROM TB_OPEN_CATE A WHERE A.CATE_ID = C.CATE2_ID) AS "topCateId2",                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
+        		(SELECT A.CATE_NM FROM TB_OPEN_CATE A WHERE A.CATE_ID = (SELECT A.TOP_CATE_ID FROM TB_OPEN_CATE A WHERE A.CATE_ID = C.CATE2_ID)) AS "topCateNm2",
+        		(SELECT A.CATE_NM FROM TB_OPEN_CATE A WHERE A.CATE_ID = C.CATE2_ID) AS "CateNm2"
+				
+           FROM (
+                     SELECT A.INF_ID       AS INF_ID,
+                            MIN(CASE A.SRV_CD
+                                WHEN 'S'
+                                THEN A.INF_SEQ
+                                END)       AS SCOL_INF_SEQ,
+                            MIN(CASE A.SRV_CD
+                                WHEN 'C'
+                                THEN A.INF_SEQ
+                                END)       AS CCOL_INF_SEQ,
+                            MIN(CASE A.SRV_CD
+                                WHEN 'M'
+                                THEN A.INF_SEQ
+                                END)       AS MCOL_INF_SEQ,
+                            MIN(CASE A.SRV_CD
+                                WHEN 'F'
+                                THEN A.INF_SEQ
+                                END)       AS FILE_INF_SEQ,
+                            MIN(CASE A.SRV_CD
+                                WHEN 'A'
+                                THEN A.INF_SEQ
+                                END)       AS ACOL_INF_SEQ,
+                            MIN(CASE A.SRV_CD
+                                WHEN 'L'
+                                THEN A.INF_SEQ
+                                END)       AS LINK_INF_SEQ
+                       FROM TB_OPEN_INF_SRV A
+                       JOIN TB_OPEN_INF     B
+                         ON B.INF_ID        = A.INF_ID
+                  LEFT JOIN TB_OPEN_DS      C
+                         ON C.DS_ID         = B.DS_ID
+                      WHERE A.INF_ID        = #infId#
+                        AND A.SRV_YN        = 'Y'
+                        AND A.SRV_CD       IN ('S', 'C', 'M', 'F', 'A', 'L')
+                        AND B.INF_STATE     = 'Y'
+                        AND B.OPEN_DTTM    <= SYSDATE
+                        AND CASE A.SRV_CD
+                            WHEN 'F'
+                            THEN 'Y'
+                            WHEN 'L'
+                            THEN 'Y'
+                            ELSE C.USE_YN
+                            END             = 'Y'
+                      GROUP BY
+                            A.INF_ID
+                )               A
+           JOIN TB_OPEN_INF_SRV B
+             ON B.INF_ID        = A.INF_ID
+            AND B.INF_SEQ       = CASE '1'
+                                  WHEN A.SCOL_INF_SEQ
+                                  THEN A.SCOL_INF_SEQ
+                                  WHEN A.CCOL_INF_SEQ
+                                  THEN A.CCOL_INF_SEQ
+                                  WHEN A.MCOL_INF_SEQ
+                                  THEN A.MCOL_INF_SEQ
+                                  WHEN A.FILE_INF_SEQ
+                                  THEN A.FILE_INF_SEQ
+                                  WHEN A.ACOL_INF_SEQ
+                                  THEN A.ACOL_INF_SEQ
+                                  WHEN A.LINK_INF_SEQ
+                                  THEN A.LINK_INF_SEQ
+                                  END
+           JOIN TB_OPEN_INF     C
+             ON C.INF_ID        = B.INF_ID
+      LEFT JOIN TB_OPEN_CATE    D
+             ON D.CATE_ID       = C.CATE_ID
+      LEFT JOIN TB_OPEN_CATE    E
+             ON E.CATE_ID       = D.TOP_CATE_ID
+      LEFT JOIN TB_COMM_USR     F
+             ON F.ORG_CD        = C.ORG_CD
+            AND F.USR_CD        = C.USR_CD
+      LEFT JOIN TB_COMM_CODE    G
+             ON G.GRP_CD        = 'D1008'
+       		AND G.DITC_CD       = C.CCL_CD
+      LEFT JOIN      TB_STAT_OPEN H
+             ON C.INF_ID = H.INF_ID
+             AND  H.YYYYMMDD = (SELECT MAX(YYYYMMDD) FROM TB_STAT_OPEN)
+      ]]>
+	</select> 
+	
+	
+</sqlMap>
+

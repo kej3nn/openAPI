@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- @(#)PortalOpenInfAcol_Sql_Tibero.xml 1.0 2015/06/15                     -->
+<!--                                                                         -->
+<!-- COPYRIGHT (C) 2013 WISEITECH CO., LTD. ALL RIGHTS RESERVED.             -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- 공공데이터 오픈API 서비스를 관리하는 SQL 파일이다.                      -->
+<!--                                                                         -->
+<!-- @author 김은삼                                                          -->
+<!-- @version 1.0 2015/06/15                                                 -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<sqlMap namespace="PortalOpenInfAcolDao">
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Type Alias                                                          -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 공공데이터 오픈API 서비스 메타정보를 조회한다.                      -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="PortalOpenInfAcolDao.selectOpenInfAcolMeta" parameterClass="params" resultClass="record">
+        <![CDATA[
+         SELECT B.INF_NM       AS "infNm",
+                A.SRV_CD       AS "srvCd",
+                A.API_EP       AS "apiEp",
+                A.API_RES      AS "apiRes",
+                A.API_TRF      AS "apiTrf"
+           FROM TB_OPEN_INF_SRV A
+           JOIN TB_OPEN_INF     B
+             ON B.INF_ID        = A.INF_ID
+           JOIN TB_OPEN_DS      C
+             ON C.DS_ID         = B.DS_ID
+          WHERE A.INF_ID        = #infId:VARCHAR#
+            AND A.INF_SEQ       = #infSeq:NUMERIC#
+            AND A.SRV_YN        = 'Y'
+            AND A.SRV_CD        = 'A'
+            AND B.INF_STATE     = 'Y'
+            AND B.OPEN_DTTM    <= SYSDATE
+            AND C.USE_YN        = 'Y'
+        ]]>
+    </select>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 공공데이터 오픈API 서비스 요청변수를 검색한다.                      -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="PortalOpenInfAcolDao.searchOpenInfAcolVars" parameterClass="params" resultClass="record">
+        <![CDATA[
+         SELECT E.COL_ID        AS "colId",
+                A.REQ_TYPE      AS "reqType",
+                A.REQ_NEED      AS "reqNeed",
+                E.COL_NM        AS "colNm",
+                E.COL_EXP       AS "colExp",
+                (CASE WHEN A.REQ_OP = 'LIKE' AND E.SMP_COL_EXP IS NOT NULL THEN E.COL_ID || '=''' || E.COL_NM || ' 검색어'' '
+                ||' (예시) ' || ( CASE  WHEN INSTR(E.SMP_COL_EXP, ' ') > 0 THEN REPLACE(SUBSTR(E.SMP_COL_EXP, 1, INSTR(E.SMP_COL_EXP, ' ') ), '''', '')
+                   WHEN INSTR(E.SMP_COL_EXP, ' ') >  INSTR(E.SMP_COL_EXP, '=') + 5 THEN REPLACE(SUBSTR(E.SMP_COL_EXP, 1, INSTR(E.SMP_COL_EXP, '=') + 5 ), '''', '')
+                                       WHEN INSTR(E.SMP_COL_EXP, ' ') = 0 AND LENGTH(E.SMP_COL_EXP  ) > 5  THEN REPLACE(SUBSTR(E.SMP_COL_EXP, 1,  INSTR(E.SMP_COL_EXP, '=') + 5 ), '''', '')
+                                       ELSE REPLACE(E.SMP_COL_EXP, '''', '') END )
+                   WHEN E.SMP_COL_EXP IS NULL THEN '' ELSE E.SMP_COL_EXP END) AS "smpColExp"
+           FROM TB_OPEN_INF_ACOL A
+           JOIN TB_OPEN_INF_SRV  B
+             ON B.INF_ID         = A.INF_ID
+            AND B.INF_SEQ        = A.INF_SEQ
+           JOIN TB_OPEN_INF      C
+             ON C.INF_ID         = B.INF_ID
+           JOIN TB_OPEN_DS       D
+             ON D.DS_ID          = C.DS_ID
+           JOIN TB_OPEN_DSCOL    E
+             ON E.DS_ID          = D.DS_ID
+            AND E.COL_SEQ        = A.COL_SEQ
+          WHERE A.INF_ID         = #infId:VARCHAR#
+            AND A.INF_SEQ        = #infSeq:NUMERIC#
+            AND A.USE_YN         = 'Y'
+            AND A.REQ_YN         = 'Y'
+            AND B.SRV_YN         = 'Y'
+            AND B.SRV_CD         = 'A'
+            AND C.INF_STATE      = 'Y'
+            AND C.OPEN_DTTM     <= SYSDATE
+            AND D.USE_YN         = 'Y'
+            AND E.USE_YN         = 'Y'
+          ORDER BY
+                A.V_ORDER ASC
+        ]]>
+    </select>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 공공데이터 오픈API 서비스 응답컬럼을 검색한다.                      -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="PortalOpenInfAcolDao.searchOpenInfAcolCols" parameterClass="params" resultClass="record">
+        <![CDATA[
+         SELECT E.COL_ID        AS "colId",
+                E.COL_NM        AS "colNm",
+                (
+                    SELECT F.DITC_NM
+                      FROM TB_COMM_CODE F
+                     WHERE F.GRP_CD     = 'D1013'
+                       AND F.DITC_CD    = E.UNIT_CD
+                       AND F.USE_YN     = 'Y' 
+                )               AS "unitNm",
+                E.COL_EXP       AS "colExp"
+           FROM TB_OPEN_INF_ACOL A
+           JOIN TB_OPEN_INF_SRV  B
+             ON B.INF_ID         = A.INF_ID
+            AND B.INF_SEQ        = A.INF_SEQ
+           JOIN TB_OPEN_INF      C
+             ON C.INF_ID         = B.INF_ID
+           JOIN TB_OPEN_DS       D
+             ON D.DS_ID          = C.DS_ID
+           JOIN TB_OPEN_DSCOL    E
+             ON E.DS_ID          = D.DS_ID
+            AND E.COL_SEQ        = A.COL_SEQ
+          WHERE A.INF_ID         = #infId:VARCHAR#
+            AND A.INF_SEQ        = #infSeq:NUMERIC#
+            AND A.USE_YN         = 'Y'
+            AND A.VIEW_YN        = 'Y'
+            AND B.SRV_YN         = 'Y'
+            AND B.SRV_CD         = 'A'
+            AND C.INF_STATE      = 'Y'
+            AND C.OPEN_DTTM     <= SYSDATE
+            AND D.USE_YN         = 'Y'
+            AND E.USE_YN         = 'Y'
+          ORDER BY
+                A.V_ORDER ASC
+        ]]>
+    </select>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 공공데이터 오픈API 서비스 예제주소를 검색한다.                      -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="PortalOpenInfAcolDao.searchOpenInfAcolUrls" parameterClass="params" resultClass="record">
+        <![CDATA[
+         SELECT A.URI_NM        AS "uriNm",
+                B.API_EP        AS "apiEp",
+                B.API_RES       AS "apiRes",
+                A.URI           AS "uri"
+           FROM TB_OPEN_INF_AURI A
+           JOIN TB_OPEN_INF_SRV  B
+             ON B.INF_ID         = A.INF_ID
+            AND B.INF_SEQ        = A.INF_SEQ
+           JOIN TB_OPEN_INF      C
+             ON C.INF_ID         = B.INF_ID
+           JOIN TB_OPEN_DS       D
+             ON D.DS_ID          = C.DS_ID
+          WHERE A.INF_ID         = #infId:VARCHAR#
+            AND A.INF_SEQ        = #infSeq:NUMERIC#
+            AND A.USE_YN         = 'Y'
+            AND B.SRV_YN         = 'Y'
+            AND B.SRV_CD         = 'A'
+            AND C.INF_STATE      = 'Y'
+            AND C.OPEN_DTTM     <= SYSDATE
+            AND D.USE_YN         = 'Y'
+          ORDER BY
+                A.V_ORDER ASC
+        ]]>
+    </select>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 공공데이터 오픈API 서비스 조회필터를 검색한다.                      -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="PortalOpenInfAcolDao.searchOpenInfAcolFilt" parameterClass="params" resultClass="record">
+        <![CDATA[
+         SELECT E.COL_ID        AS "colId",
+         		E.COL_NM        AS "colNm",
+                A.REQ_NEED      AS "reqNeed",
+                A.FILT_CODE     AS "filtCode"
+           FROM TB_OPEN_INF_ACOL A
+           JOIN TB_OPEN_INF_SRV  B
+             ON B.INF_ID         = A.INF_ID
+            AND B.INF_SEQ        = A.INF_SEQ
+           JOIN TB_OPEN_INF      C
+             ON C.INF_ID         = B.INF_ID
+           JOIN TB_OPEN_DS       D
+             ON D.DS_ID          = C.DS_ID
+           JOIN TB_OPEN_DSCOL    E
+             ON E.DS_ID          = D.DS_ID
+            AND E.COL_SEQ        = A.COL_SEQ
+          WHERE A.INF_ID         = #infId:VARCHAR#
+            AND A.INF_SEQ        = #infSeq:NUMERIC#
+            AND A.USE_YN         = 'Y'
+            AND A.REQ_YN         = 'Y'
+            AND B.SRV_YN         = 'Y'
+            AND B.SRV_CD         = 'A'
+            AND C.INF_STATE      = 'Y'
+            AND C.OPEN_DTTM     <= SYSDATE
+            AND D.USE_YN         = 'Y'
+            AND E.USE_YN         = 'Y'
+          ORDER BY
+                A.V_ORDER ASC
+        ]]>
+    </select>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 공공데이터 오픈API 서비스 응답문자를 검색한다.                      -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="PortalOpenInfAcolDao.searchOpenInfAcolMsgs" parameterClass="params" resultClass="record">
+         SELECT A.MSG_TAG       AS "msgTag",
+                A.MSG_CD        AS "msgCd",
+                A.MSG_EXP       AS "msgExp"
+           FROM TB_OPEN_INF_AMSG A
+          WHERE A.USE_YN         = 'Y'
+          ORDER BY
+                A.MSG_TAG ASC,
+                A.V_ORDER ASC
+    </select>
+    
+</sqlMap>

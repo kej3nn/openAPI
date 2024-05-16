@@ -1,0 +1,470 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- OPEN API을 관리하는 SQL 파일이다.                            -->
+<!--                                                                         -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<sqlMap namespace="PortalOpenApiDao">
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Type Alias                                                          -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+    
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- OPEN API 전체목록을 검색한다.                            -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 검색 조건절 -->
+    <sql id="PortalOpenApiDao.searchOpenApiListWhere">
+          WHERE A.SRV_YN        = 'Y'
+            AND A.SRV_CD       IN ('S', 'C', 'M', 'F', 'A', 'L')
+            AND B.INF_STATE     = 'Y'
+            <![CDATA[
+            AND B.OPEN_DTTM    <= SYSDATE
+            ]]>
+            <isNotEmpty property="orgCd">
+            AND EXISTS
+                (
+                     SELECT G.ORG_CD
+                       FROM TB_OPEN_INF F
+                       JOIN TB_COMM_ORG         G
+                         ON G.ORG_CD            = F.ORG_CD
+                       JOIN TB_COMM_ORG         H
+                         ON H.ORG_CD            = G.ORG_CD_TOP
+                      WHERE F.INF_ID            = B.INF_ID
+                        AND G.USE_YN            = 'Y'
+                        AND H.USE_YN            = 'Y'
+                        AND H.ORG_CD           IN (
+                                <iterate property="orgCd" conjunction=",">#orgCd[]#</iterate>
+                            )
+                )
+            </isNotEmpty>
+              AND EXISTS
+                (
+                     SELECT F.INF_SEQ
+                       FROM TB_OPEN_INF_SRV F
+                      WHERE F.INF_ID        = B.INF_ID
+                        AND F.SRV_YN        = 'Y'
+                        AND F.SRV_CD        = 'A'
+                        
+                )
+            <isNotEmpty property="schwTagCont">
+            AND EXISTS
+                (
+                     SELECT F.TAG_NM
+                       FROM TB_OPEN_INF_TAG F
+                      WHERE F.INF_ID    = B.INF_ID
+                        AND F.USE_YN    = 'Y'
+                        AND F.TAG_NM   IN (
+                                <iterate property="schwTagCont" conjunction=",">#schwTagCont[]#</iterate>
+                            )
+                )
+            </isNotEmpty>
+            <isNotEmpty property="searchWord">
+            AND ((UPPER(B.INF_NM)  LIKE '%'||UPPER(#searchWord#)||'%') OR (UPPER(B.INF_EXP) LIKE '%'||UPPER(#searchWord#)||'%') OR (UPPER(B.SCHW_TAG_CONT) LIKE '%'||UPPER(#searchWord#)||'%'))
+            </isNotEmpty>
+            AND C.USE_YN        = 'Y'
+            AND D.USE_YN        = 'Y'
+            <isNotEmpty property="cateId">
+            AND D.CATE_ID      IN (
+                    <iterate property="cateId" conjunction=",">#cateId[]#</iterate>
+                )
+            </isNotEmpty>
+            <isNotEmpty property="sigunFlag">
+            AND EXISTS 
+                (
+                    SELECT 
+                        F.INF_ID 
+                    FROM 
+                        TB_META_ORG_DS_REL F 
+                    WHERE 
+                        F.INF_ID = B.INF_ID 
+                        <!-- AND F.ORG_CD = #sigunFlag# 2016.07.29 -->
+                        AND F.ORG_CD IN (SELECT  ORG_CD from TB_COMM_ORG where TYPE_CD = #sigunFlag# )
+                )
+            </isNotEmpty>
+            AND CASE A.SRV_CD
+                WHEN 'F'
+                THEN 'Y'
+                WHEN 'L'
+                THEN 'Y'
+                ELSE E.USE_YN
+                END             = 'Y'
+    </sql>
+    <!-- TV_INFA_LIST 검색조건 - Open API -->	
+	<sql id="infaList.openapi.where">
+		WHERE A.INFA_ID = B.INFA_ID
+		AND REGEXP_LIKE(A.OPEN_SRV, 'A')
+		AND   A.OPENTY_TAG = 'O'
+		<isNotEmpty property="schInputVal" prepend=" AND ">
+			<isEmpty property="schInputGubun">
+				A.TAG_INFA_NM LIKE '%' || UPPER(REPLACE(#schInputVal:VARCHAR#, ' ', '')) || '%'
+			</isEmpty>
+			<isNotEmpty property="schInputGubun">
+				<isEqual property="schInputGubun" compareValue="schTagInfaNm" >
+					A.TAG_INFA_NM LIKE '%' || UPPER(REPLACE(#schInputVal:VARCHAR#, ' ', '')) || '%'
+				</isEqual>
+				<isEqual property="schInputGubun" compareValue="schSchwTagCont">
+					A.SCHW_TAG_CONT LIKE '%' || UPPER(REPLACE(#schInputVal:VARCHAR#, ' ', '')) || '%'
+				</isEqual>
+				<isEqual property="schInputGubun" compareValue="schInfaExp">
+					A.INFA_EXP LIKE '%' || UPPER(REPLACE(#schInputVal:VARCHAR#, ' ', '')) || '%'
+				</isEqual>
+			</isNotEmpty>		
+		</isNotEmpty>
+		<isNotEmpty property="schOrgCd" prepend=" AND ">
+			A.ORG_CD = #schOrgCd:VARCHAR#
+		</isNotEmpty>
+		<isNotEmpty property="schArrCateId" prepend=" AND ">
+			A.INFA_ID IN (SELECT INFA_ID 
+						  FROM   TV_INFA_LIST_CATE 
+						  WHERE   CATE_ID IN (SELECT CATE_ID FROM TB_INFO_CATE C
+						  					  START WITH 
+												<iterate property="schArrCateId" prepend=" CATE_ID IN " open="(" close=")" conjunction=", ">
+													#schArrCateId[]#
+												</iterate>
+											   AND USE_YN = 'Y'
+											   CONNECT BY PRIOR C.CATE_ID = C.PAR_CATE_ID
+											   AND USE_YN = USE_YN
+						  					  ) 
+						  )
+		</isNotEmpty>
+	</sql>
+    <!-- 검색 데이터 -->
+    <select id="PortalOpenApiDao.searchOpenApiList" parameterClass="params" resultClass="record">
+        <isEqual property="paging" compareValue="0">
+         SELECT A.ROW_NUM                         AS "rowNum",
+         		A.SEQ                             AS "seq",
+                A.INF_ID                          AS "infId",
+                CASE
+                WHEN A.SCOL_INF_SEQ IS NOT NULL
+                THEN A.SCOL_INF_SEQ
+                WHEN A.CCOL_INF_SEQ IS NOT NULL
+                THEN A.CCOL_INF_SEQ
+                WHEN A.MCOL_INF_SEQ IS NOT NULL
+                THEN A.MCOL_INF_SEQ
+                WHEN A.FILE_INF_SEQ IS NOT NULL
+                THEN A.FILE_INF_SEQ
+                WHEN A.ACOL_INF_SEQ IS NOT NULL
+                THEN A.ACOL_INF_SEQ
+                WHEN A.LINK_INF_SEQ IS NOT NULL
+                THEN A.LINK_INF_SEQ
+                END                               AS "infSeq",
+                A.SCOL_INF_SEQ                    AS "scolInfSeq",
+                A.CCOL_INF_SEQ                    AS "ccolInfSeq",
+                A.MCOL_INF_SEQ                    AS "mcolInfSeq",
+                A.FILE_INF_SEQ                    AS "fileInfSeq",
+                A.ACOL_INF_SEQ                    AS "acolInfSeq",
+                A.LINK_INF_SEQ                    AS "linkInfSeq",
+                A.SAVE_FILE_NM               	  AS "metaImagFileNm",
+                A.CATE_SAVE_FILE_NM               AS "cateSaveFileNm",
+                A.INF_NM                          AS "infNm",
+                A.INF_EXP                         AS "infExp",
+                A.VIEW_CNT                        AS "viewCnt",
+                TO_CHAR(A.OPEN_DTTM, 'YYYY-MM-DD') AS "regDttm",
+                NVL(TO_CHAR(A.LOAD_DTTM,  'YYYY-MM-DD'), A.LOAD_NM) AS "updDttm",
+                A.TOP_CATE_ID                     AS "topCateId",
+                A.TOP_CATE_NM                     AS "topCateNm",
+                A.TOP_CATE_ID2 AS "topCateId2",
+       		    A.TOP_CATE_NM2 AS "topCateNm2"
+           FROM (
+                     SELECT ROWNUM              AS ROW_NUM,
+                            A.SEQ               AS SEQ,
+                            A.INF_ID            AS INF_ID,
+                            A.SCOL_INF_SEQ      AS SCOL_INF_SEQ,
+                            A.CCOL_INF_SEQ      AS CCOL_INF_SEQ,
+                            A.MCOL_INF_SEQ      AS MCOL_INF_SEQ,
+                            A.FILE_INF_SEQ      AS FILE_INF_SEQ,
+                            A.ACOL_INF_SEQ      AS ACOL_INF_SEQ,
+                            A.LINK_INF_SEQ      AS LINK_INF_SEQ,
+                            A.SAVE_FILE_NM 	    AS SAVE_FILE_NM,
+                            A.CATE_SAVE_FILE_NM AS CATE_SAVE_FILE_NM,
+                            A.INF_NM            AS INF_NM,
+                            A.INF_EXP           AS INF_EXP,
+                            A.VIEW_CNT          AS VIEW_CNT,
+                            A.LOAD_DTTM          AS LOAD_DTTM,
+                            A.OPEN_DTTM          AS OPEN_DTTM,
+                            A.LOAD_NM            AS LOAD_NM,
+                            A.TOP_CATE_ID       AS TOP_CATE_ID,
+                            A.TOP_CATE_NM       AS TOP_CATE_NM,
+                            A.TOP_CATE_ID2 AS TOP_CATE_ID2,
+                		    A.TOP_CATE_NM2 AS TOP_CATE_NM2
+                       FROM (
+        </isEqual>
+                                 SELECT B.SEQ               AS SEQ,
+                                        A.INF_ID            AS INF_ID,
+                                        A.SCOL_INF_SEQ      AS SCOL_INF_SEQ,
+                                        A.CCOL_INF_SEQ      AS CCOL_INF_SEQ,
+                                        A.MCOL_INF_SEQ      AS MCOL_INF_SEQ,
+                                        A.FILE_INF_SEQ      AS FILE_INF_SEQ,
+                                        A.ACOL_INF_SEQ      AS ACOL_INF_SEQ,
+                                        A.LINK_INF_SEQ      AS LINK_INF_SEQ,
+                                        B.SAVE_FILE_NM      AS SAVE_FILE_NM,
+                                        C.SAVE_FILE_NM      AS CATE_SAVE_FILE_NM,
+                                        B.INF_NM            AS INF_NM,
+                                        B.INF_EXP           AS INF_EXP,
+                                        A.VIEW_CNT          AS VIEW_CNT,
+                                        B.LOAD_DTTM          AS LOAD_DTTM,
+                                        B.OPEN_DTTM 			AS OPEN_DTTM,
+                                        FN_GET_COMM_CODE_NM('D1009', B.LOAD_CD) AS LOAD_NM,
+                                        D.CATE_ID           AS TOP_CATE_ID,
+                                        D.CATE_NM           AS TOP_CATE_NM,
+                                        (SELECT A.TOP_CATE_ID FROM TB_OPEN_CATE A WHERE A.CATE_ID = B.CATE2_ID) AS TOP_CATE_ID2,                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
+                         				(SELECT A.CATE_NM FROM TB_OPEN_CATE A WHERE A.CATE_ID = (SELECT A.TOP_CATE_ID FROM TB_OPEN_CATE A WHERE A.CATE_ID = B.CATE2_ID)) AS TOP_CATE_NM2
+                                   FROM (
+                                             SELECT A.INF_ID        AS INF_ID,
+                                                    MIN(CASE A.SRV_CD
+                                                        WHEN 'S'
+                                                        THEN A.INF_SEQ
+                                                        END)        AS SCOL_INF_SEQ,
+                                                    MIN(CASE A.SRV_CD
+                                                        WHEN 'C'
+                                                        THEN A.INF_SEQ
+                                                        END)        AS CCOL_INF_SEQ,
+                                                    MIN(CASE A.SRV_CD
+                                                        WHEN 'M'
+                                                        THEN A.INF_SEQ
+                                                        END)        AS MCOL_INF_SEQ,
+                                                    MIN(CASE A.SRV_CD
+                                                        WHEN 'F'
+                                                        THEN A.INF_SEQ
+                                                        END)        AS FILE_INF_SEQ,
+                                                    MIN(CASE A.SRV_CD
+                                                        WHEN 'A'
+                                                        THEN A.INF_SEQ
+                                                        END)        AS ACOL_INF_SEQ,
+                                                    MIN(CASE A.SRV_CD
+                                                        WHEN 'L'
+                                                        THEN A.INF_SEQ
+                                                        END)        AS LINK_INF_SEQ,
+                                                    SUM(A.VIEW_CNT) AS VIEW_CNT
+                                               FROM TB_OPEN_INF_SRV A
+                                               JOIN TB_OPEN_INF     B
+                                                 ON B.INF_ID        = A.INF_ID
+                                               JOIN TB_OPEN_CATE    C
+                                                 ON C.CATE_ID       = B.CATE_ID
+                                               JOIN TB_OPEN_CATE    D
+                                                 ON D.CATE_ID       = C.TOP_CATE_ID
+                                          LEFT JOIN TB_OPEN_DS      E
+                                                 ON E.DS_ID         = B.DS_ID
+                                         
+                                                    <include refid="PortalOpenApiDao.searchOpenApiListWhere" />
+                                              GROUP BY
+                                                    A.INF_ID
+                                        )            A
+                                   JOIN TB_OPEN_INF  B
+                                     ON B.INF_ID     = A.INF_ID
+                                   JOIN TB_OPEN_CATE C
+                                     ON C.CATE_ID    = B.CATE_ID
+                                   JOIN TB_OPEN_CATE D
+                                     ON D.CATE_ID    = C.TOP_CATE_ID
+                                  ORDER BY	B.V_ORDER ASC
+        <isEqual property="paging" compareValue="0">
+        <![CDATA[
+                            )       A
+                      WHERE ROWNUM <= #end#
+                )          A
+          WHERE A.ROW_NUM >= #start#
+        ]]>
+        </isEqual>
+    </select>
+    
+    <!-- 검색 카운트 -->
+    <select id="PortalOpenApiDao.searchOpenApiListCount" parameterClass="params" resultClass="int">
+         SELECT COUNT(DISTINCT A.INF_ID)
+           FROM TB_OPEN_INF_SRV A
+           JOIN TB_OPEN_INF     B
+             ON B.INF_ID        = A.INF_ID
+           JOIN TB_OPEN_CATE    C
+             ON C.CATE_ID       = B.CATE_ID
+           JOIN TB_OPEN_CATE    D
+             ON D.CATE_ID       = C.TOP_CATE_ID
+      LEFT JOIN TB_OPEN_DS      E
+             ON E.DS_ID         = B.DS_ID
+      LEFT JOIN TV_OPEN_INF     F 
+             ON A.INF_ID        = F.INF_ID 
+                <include refid="PortalOpenApiDao.searchOpenApiListWhere" />
+    </select>
+    
+    
+    <!-- 통계표 항목분류 리스트 조회 -->
+	<select id="PortalOpenApiDao.selectOpenApiItmCd" parameterClass="params" resultClass="record">
+		SELECT A.STATBL_ID             AS "statblId"
+		       , B.STATBL_NM           AS "statblNm"
+		       , A.ITM_TAG             AS "itmTag"
+		       , A.ITM_ID              AS "itmId"
+		       , A.ITM_NM              AS "itmNm"
+		 FROM TV_STTS_API_TBL_ITM A 
+		 JOIN TV_STTS_API_TBL B
+		   ON A.STATBL_ID = B.STATBL_ID 
+		WHERE A.STATBL_ID = #statblId#
+		ORDER BY A.ITM_TAG, A.ITM_ID
+	</select>
+	
+	<select id="PortalOpenApiDao.selectOpenApiSrvMeta" parameterClass="params" resultClass="record">
+		 SELECT A.INF_ID AS "infId"
+		       , B.INF_SEQ AS "infSeq"
+		       , A.INF_NM AS "infNm"
+		       , A.INF_NM AS "infNm"
+		       , A.INF_EXP AS "infExp"
+		       , B.API_EP AS "apiEp"
+		       , B.API_RES AS "apiRES"
+    	  FROM TB_OPEN_INF A INNER JOIN TB_OPEN_INF_SRV B
+             ON A.INF_ID = B.INF_ID AND A.INF_STATE = 'Y' 
+             <![CDATA[
+            AND A.OPEN_DTTM <= SYSDATE 
+            AND B.SRV_CD = 'A' 
+            AND B.SRV_YN = 'Y'
+            ]]>
+	      WHERE A.INF_ID =  #infId#
+	</select>
+	
+	<!-- Open API 목록검색 - 사무처 -->
+	<select id="PortalOpenApiDao.selectInfsOpenApiListPaging" remapResults="true" parameterClass="params" resultClass="record">
+		/* sql id : portalInfsListDao.selectInfsOpenApiListPaging */
+		<isEqual property="paging" compareValue="0">
+		SELECT AA.* 
+		FROM   (SELECT ROWNUM AS ROW_NUM, AA.*
+				FROM   (  
+		</isEqual> 
+
+		SELECT
+			<!-- <include refid="infaList.col"/> -->
+			*
+		FROM TV_INFA_LIST A,
+        (
+          SELECT INFA_ID
+          FROM (
+                 SELECT INFA_NM
+                      , INFA_ID
+                      , OPEN_YMD
+                      , ROW_NUMBER() OVER(PARTITION BY INFA_NM ORDER BY OPEN_YMD DESC) AS RNO
+                   FROM TV_INFA_LIST
+               )
+          WHERE RNO = 1 
+        ) B	
+		<include refid="infaList.openapi.where"/>
+		<!-- 데이터 정렬 -->
+		<isNotEmpty property="schVOrder" prepend=" ORDER BY ">
+			<isEqual property="schVOrder" compareValue="N">
+				INFA_NM
+			</isEqual>
+			<isEqual property="schVOrder" compareValue="D">
+				OPEN_YMD DESC
+			</isEqual>
+			<isEqual property="schVOrder" compareValue="V">
+				VIEW_CNT DESC
+			</isEqual>
+		</isNotEmpty>
+		<isEqual property="paging" compareValue="0">
+		<![CDATA[
+				) AA
+			WHERE ROWNUM <= #end:NUMERIC#
+			) AA
+		WHERE AA.ROW_NUM >= #start:NUMERIC#
+		]]>
+		</isEqual>
+				<isEqual property="paging" compareValue="1">
+		<![CDATA[
+				) AA
+			WHERE ROWNUM <= #end:NUMERIC#
+			) AA
+		WHERE AA.ROW_NUM >= #start:NUMERIC#
+		]]>
+		</isEqual>
+	</select>
+	<select id="PortalOpenApiDao.selectInfsOpenApiListPagingCount" parameterClass="params" resultClass="int">
+		/* sql id : "PortalOpenApiDao.selectInfsOpenApiListPagingCount" */
+		SELECT COUNT(*) AS CNT
+		FROM   TV_INFA_LIST A,
+        (
+          SELECT INFA_ID
+          FROM (
+                 SELECT INFA_NM
+                      , INFA_ID
+                      , OPEN_YMD
+                      , ROW_NUMBER() OVER(PARTITION BY INFA_NM ORDER BY OPEN_YMD DESC) AS RNO
+                   FROM TV_INFA_LIST
+               )
+          WHERE RNO = 1 
+        ) B	
+		<include refid="infaList.openapi.where"/> 
+	</select>
+	
+	<!-- 타기관 제공 Open API 목록검색-->
+	<select id="PortalOpenApiDao.selectOpenApiSupplyListPaging" remapResults="true" parameterClass="params" resultClass="record">
+		/* sql id : portalOpenApiDao.selectOpenApiSupplyListPaging */
+		<isEqual property="paging" compareValue="0">
+		SELECT AA.* 
+		FROM   (SELECT ROWNUM AS ROW_NUM, AA.*
+				FROM   (  
+		</isEqual> 
+
+		SELECT A.API_SEQ 			 AS "apiSeq"
+			 , A.ORG_CD             AS "orgCd"
+			 , A.API_TAG_CD         AS "apiTagCd"
+			 , A.API_NM             AS "apiNm"
+			 , A.API_URL            AS "apiUrl"
+			 , A.API_SMRY_EXP       AS "apiSmryExp"
+			 , A.V_ORDER            AS "vOrder"
+			 , A.USE_YN             AS "useYn"
+			 , A.REG_ID             AS "regId"
+			 , A.REG_DTTM           AS "regDttm"
+			 , A.UPD_ID             AS "updId"
+			 , A.UPD_DTTM           AS "updDttm"
+			 , (SELECT ORG_NM FROM TB_COMM_ORG B WHERE B.ORG_CD = A.ORG_CD)   AS "orgNm"
+			  , (SELECT DITC_NM FROM TB_COMM_CODE WHERE GRP_CD = 'A8016' AND DITC_CD = API_TAG_CD) AS "apiTagNm"
+		FROM TB_NA_API_LIST A	
+		WHERE 1 =  1
+		<isNotEmpty property="schInputVal" prepend=" AND ">
+				A.API_NM LIKE '%' || UPPER(REPLACE(#schInputVal:VARCHAR#, ' ', '')) || '%'
+		</isNotEmpty>
+		<isNotEmpty property="schArrOrgCd" prepend=" AND ">
+			<iterate property="schArrOrgCd" prepend=" A.ORG_CD IN " open="(" close=")" conjunction=", ">
+				#schArrOrgCd[]#
+			</iterate>
+		</isNotEmpty>
+		<isNotEmpty property="schApiTagCd" prepend=" AND ">
+			A.API_TAG_CD = #schApiTagCd:VARCHAR#
+		</isNotEmpty>
+		<isEqual property="paging" compareValue="0">
+		<![CDATA[
+				) AA
+			WHERE ROWNUM <= #end:NUMERIC#
+			) AA
+		WHERE AA.ROW_NUM >= #start:NUMERIC#
+		]]>
+		</isEqual>
+	</select>
+	<select id="PortalOpenApiDao.selectOpenApiSupplyListPagingCount" parameterClass="params" resultClass="int">
+		/* sql id : portalOpenApiDao.selectOpenApiSupplyListPagingCount */
+		SELECT COUNT(*) AS CNT
+		FROM   TB_NA_API_LIST A
+		WHERE 1 =  1
+		<isNotEmpty property="schInputVal" prepend=" AND ">
+				A.API_NM LIKE '%' || UPPER(REPLACE(#schInputVal:VARCHAR#, ' ', '')) || '%'
+		</isNotEmpty>
+		<isNotEmpty property="schArrOrgCd" prepend=" AND ">
+			<iterate property="schArrOrgCd" prepend=" A.ORG_CD IN " open="(" close=")" conjunction=", ">
+				#schArrOrgCd[]#
+			</iterate>
+		</isNotEmpty>
+		<isNotEmpty property="schApiTagCd" prepend=" AND ">
+			A.API_TAG_CD = #schApiTagCd:VARCHAR#
+		</isNotEmpty>
+	</select>
+	
+    <!-- 활용가이드 리스트 조회 -->
+	<select id="PortalOpenApiDao.selectGuideList" parameterClass="params" resultClass="record">
+		/* sql id : PortalOpenApiDao.selectGuideList */
+         SELECT seq, bbs_tit, ans_cont
+           FROM tb_bbs_list
+         WHERE bbs_cd = 'GUIDE'
+             AND p_seq = '0'
+             AND notice_yn = 'N'
+             AND del_yn = 'N'
+	</select>	
+</sqlMap>

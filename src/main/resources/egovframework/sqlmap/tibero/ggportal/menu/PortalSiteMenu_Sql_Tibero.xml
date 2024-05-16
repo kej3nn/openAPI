@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- @(#)PortalSiteMenu_Sql_Tibero.xml 1.0 2015/06/15                        -->
+<!--                                                                         -->
+<!-- COPYRIGHT (C) 2013 WISEITECH CO., LTD. ALL RIGHTS RESERVED.             -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- 사이트 메뉴를 관리하는 SQL 파일이다.                                    -->
+<!--                                                                         -->
+<!-- @author 김은삼                                                          -->
+<!-- @version 1.0 2015/06/15                                                 -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<sqlMap namespace="PortalSiteMenuDao">
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Type Alias                                                          -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 사이트 메뉴를 조회한다.                                             -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="PortalSiteMenuDao.selectSiteMenu" parameterClass="params" resultClass="record">
+         SELECT TRIM(REGEXP_SUBSTR(A.MENU_FULLNM, '[^>]+', 1, 1)) AS "lvl1MenuPath",
+                TRIM(REGEXP_SUBSTR(A.MENU_FULLNM, '[^>]+', 1, 2)) AS "lvl2MenuPath",
+                TRIM(REGEXP_SUBSTR(A.MENU_FULLNM, '[^>]+', 1, 3)) AS "lvl3MenuPath",
+                <!--
+                CASE A.SEQ
+                WHEN (
+                          SELECT MIN(B.SEQ)
+                            FROM TB_SITE_MENU B
+                           WHERE B.MENU_NM    = A.MENU_NM
+                             AND B.USE_YN     = 'Y'
+                     )
+                THEN 'Y'
+                ELSE 'N'
+                END                                             AS "menuYn"
+                -->
+                'Y'                                             AS "menuYn"
+           FROM TB_COMM_MENU A
+          WHERE A.MENU_URL   = #menuUrl:VARCHAR#
+            AND A.MENU_SITE_CD = 'PN201'
+            AND A.USE_YN     = 'Y'
+    </select>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 사이트 메뉴를 검색한다.                                             -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="PortalSiteMenuDao.searchSiteMenu" parameterClass="params" resultClass="record">
+         SELECT B.MENU_NM   AS "menuNm",
+                B.MENU_URL  AS "menuUrl"
+           FROM (
+                     SELECT MIN(A.MENU_ID)  AS SEQ
+                       FROM TB_COMM_MENU A
+                      WHERE A.TOP_MENU_NM   = #lvl1MenuPath:VARCHAR#
+                        AND A.MENU_SITE_CD  = 'PN201'
+                        AND A.USE_YN        = 'Y'
+                      GROUP BY
+                            A.MENU_NM
+                )            A
+           JOIN TB_COMM_MENU B
+             ON B.MENU_ID        = A.SEQ
+          ORDER BY
+                B.V_ORDER ASC
+    </select>
+
+</sqlMap>

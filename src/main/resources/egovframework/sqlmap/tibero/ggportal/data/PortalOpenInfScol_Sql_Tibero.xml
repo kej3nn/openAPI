@@ -1,0 +1,660 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- @(#)PortalOpenInfScol_Sql_Tibero.xml 1.0 2015/06/15                     -->
+<!--                                                                         -->
+<!-- COPYRIGHT (C) 2013 WISEITECH CO., LTD. ALL RIGHTS RESERVED.             -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- 공공데이터 시트 서비스를 관리하는 SQL 파일이다.                         -->
+<!--                                                                         -->
+<!-- @author 김은삼                                                          -->
+<!-- @version 1.0 2015/06/15                                                 -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<sqlMap namespace="PortalOpenInfScolDao">
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Type Alias                                                          -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 공공데이터 시트 서비스 메타정보를 조회한다.                         -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="PortalOpenInfScolDao.selectOpenInfScolMeta" parameterClass="params" resultClass="record">
+    	/* SQL ID : PortalOpenInfScolDao.selectOpenInfScolMeta  */
+        <![CDATA[
+         SELECT B.INF_NM       AS "infNm",
+                A.SRV_CD       AS "srvCd"
+           FROM TB_OPEN_INF_SRV A
+           JOIN TB_OPEN_INF     B
+             ON B.INF_ID        = A.INF_ID
+           JOIN TB_OPEN_DS      C
+             ON C.DS_ID         = B.DS_ID
+          WHERE A.INF_ID        = #infId:VARCHAR#
+            AND A.INF_SEQ       = #infSeq:NUMERIC#
+            AND A.SRV_YN        = 'Y'
+            AND A.SRV_CD        = 'S'
+            AND B.INF_STATE     = 'Y'
+            AND B.OPEN_DTTM    <= SYSDATE
+            AND C.USE_YN        = 'Y'
+        ]]>
+    </select>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 공공데이터 시트 서비스 컬럼속성을 검색한다.                         -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="PortalOpenInfScolDao.searchOpenInfScolProp" parameterClass="params" resultClass="record">
+    /* SQL ID :  PortalOpenInfScolDao.searchOpenInfScolProp */
+        <![CDATA[
+         SELECT A.COL_NM     AS "Header",
+                A.SRC_COL_ID AS "SaveName",
+                CASE WHEN A.COL_TAG_CD IS NOT NULL THEN 'Html'
+                	ELSE A.VIEW_CD 
+                END   AS "Type",
+                A.VIEW_SIZE  AS "Width",
+                CASE A.ALIGN_TAG
+                WHEN 'C'
+                THEN 'Center'
+                WHEN 'R'
+                THEN 'Right'
+                WHEN 'L'
+                THEN 'Left'
+                END          AS "Align",
+                CASE A.VIEW_CD
+                WHEN 'Float'
+                THEN '##,####0.####'
+                WHEN 'Date'
+           		THEN 'yyyy-MM-dd'
+                END          AS "Format",
+                CASE A.VIEW_CD
+                WHEN 'Text'
+                THEN 1
+                ELSE 0
+                END          AS "Ellipsis",
+                A.SORT       AS "Sort",
+                0            AS "Edit",
+                NVL(DECODE(VIEW_YN, 'N', 1, 0, 0), 0) AS "Hidden"
+           FROM (
+                     SELECT '번호'          AS COL_NM,
+                            'number'        AS SRC_COL_ID,
+                            'Seq'           AS VIEW_CD,
+                            40              AS VIEW_SIZE,
+                            'C'             AS ALIGN_TAG,
+                            0               AS SORT,
+                            0               AS V_ORDER,
+                            ''				AS COL_TAG_CD,
+                            '' 				AS VIEW_YN
+                       FROM DUAL
+                      UNION ALL
+                     SELECT E.COL_NM        ||
+                            (
+                                 SELECT F.DITC_NM
+                                   FROM TB_COMM_CODE F
+                                  WHERE F.GRP_CD     = 'D1013'
+                                    AND F.DITC_CD    = E.UNIT_CD
+                            )               AS COL_NM,
+                            E.SRC_COL_ID    AS SRC_COL_ID,
+                            A.VIEW_CD       AS VIEW_CD,
+                            A.VIEW_SIZE     AS VIEW_SIZE,
+                            A.ALIGN_TAG     AS ALIGN_TAG,
+                            1               AS SORT,
+                            A.V_ORDER       AS V_ORDER,
+                            E.COL_TAG_CD    AS COL_TAG_CD,
+                            A.VIEW_YN		AS VIEW_YN
+                       FROM TB_OPEN_INF_SCOL A
+                       JOIN TB_OPEN_INF_SRV  B
+                         ON B.INF_ID         = A.INF_ID
+                        AND B.INF_SEQ        = A.INF_SEQ
+                       JOIN TB_OPEN_INF      C
+                         ON C.INF_ID         = B.INF_ID
+                       JOIN TB_OPEN_DS       D
+                         ON D.DS_ID          = C.DS_ID
+                       JOIN TB_OPEN_DSCOL    E
+                         ON E.DS_ID          = D.DS_ID
+                        AND E.COL_SEQ        = A.COL_SEQ
+                      WHERE A.INF_ID         = #infId:VARCHAR#
+                        AND A.INF_SEQ        = #infSeq:NUMERIC#
+                        AND A.USE_YN         = 'Y'
+                        AND B.SRV_YN         = 'Y'
+                        AND B.SRV_CD         = 'S'
+                        AND C.INF_STATE      = 'Y'
+                        AND C.OPEN_DTTM     <= SYSDATE
+                        AND D.USE_YN         = 'Y'
+                        AND E.USE_YN         = 'Y'
+                ) A
+          ORDER BY
+                A.SORT    ASC,
+                A.V_ORDER ASC
+        ]]>
+    </select>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 공공데이터 시트 서비스 조회필터를 검색한다.                         -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="PortalOpenInfScolDao.searchOpenInfScolFilt" parameterClass="params" resultClass="record">
+    /* SQL ID :  PortalOpenInfScolDao.searchOpenInfScolFilt  */
+        <![CDATA[
+         SELECT E.COL_NM          AS "colNm",
+                E.SRC_COL_ID      AS "srcColId",
+                A.FILT_CD         AS "filtCd",
+                A.FILT_NEED       AS "filtNeed",
+                A.FILT_CODE       AS "filtCode",
+                A.FILT_DEFAULT    AS "filtDefault",
+                A.FILT_DEFAULT_NM AS "filtDefaultNm",
+                A.FILT_MAX_DAY    AS "filtMaxDay",
+                A.FILT_TBL_CD     AS "filtTblCd"
+           FROM TB_OPEN_INF_SCOL A
+           JOIN TB_OPEN_INF_SRV  B
+             ON B.INF_ID         = A.INF_ID
+            AND B.INF_SEQ        = A.INF_SEQ
+           JOIN TB_OPEN_INF      C
+             ON C.INF_ID         = B.INF_ID
+           JOIN TB_OPEN_DS       D
+             ON D.DS_ID          = C.DS_ID
+           JOIN TB_OPEN_DSCOL    E
+             ON E.DS_ID          = D.DS_ID
+            AND E.COL_SEQ        = A.COL_SEQ
+          WHERE A.INF_ID         = #infId:VARCHAR#
+            AND A.INF_SEQ        = #infSeq:NUMERIC#
+            AND A.USE_YN         = 'Y'
+            AND A.FILT_YN        = 'Y'
+            AND A.FILT_CD       IN ('CHECK', 'RADIO', 'COMBO', 'WORDS', 'FDATE', 'LDATE', 'PDATE', 'SDATE', 'CDATE')
+            AND B.SRV_YN         = 'Y'
+            AND B.SRV_CD         = 'S'
+            AND C.INF_STATE      = 'Y'
+            AND C.OPEN_DTTM     <= SYSDATE
+            AND D.USE_YN         = 'Y'
+            AND E.USE_YN         = 'Y'
+          ORDER BY
+                A.V_ORDER ASC
+        ]]>
+    </select>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 공공데이터 시트 서비스 테이블명을 조회한다.                         -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="PortalOpenInfScolDao.selectOpenInfScolTbNm" parameterClass="params" resultClass="record">
+    /* SQL ID :  PortalOpenInfScolDao.selectOpenInfScolTbNm */
+        <![CDATA[
+         SELECT C.DS_ID   		AS "dsId",
+                C.OWNER_CD     	AS "ownerCd"
+           FROM TB_OPEN_INF_SRV A
+           JOIN TB_OPEN_INF     B
+             ON B.INF_ID        = A.INF_ID
+           JOIN TB_OPEN_DS      C
+             ON C.DS_ID         = B.DS_ID
+          WHERE A.INF_ID        = #infId:VARCHAR#
+            AND A.INF_SEQ       = #infSeq:NUMERIC#
+            AND A.SRV_YN        = 'Y'
+            AND A.SRV_CD        = 'S'
+            AND B.INF_STATE     = 'Y'
+            AND B.OPEN_DTTM    <= SYSDATE
+            AND C.USE_YN        = 'Y'
+        ]]>
+    </select>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 유저 파일 다운로드시 서비스 테이블명을 조회한다.                    -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="PortalOpenInfScolDao.selectOpenInfScolDownTbNm" parameterClass="params" resultClass="record">
+    /* SQL ID :  PortalOpenInfScolDao.selectOpenInfScolDownTbNm */
+        <![CDATA[
+         SELECT NVL(D.VALUE2_CD, C.DS_ID)   AS "dsId",
+                C.OWNER_CD     				AS "ownerCd"
+           FROM TB_OPEN_INF_SRV A
+           JOIN TB_OPEN_INF     B
+             ON B.INF_ID        = A.INF_ID
+           JOIN TB_OPEN_DS      C
+             ON C.DS_ID         = B.DS_ID
+           LEFT OUTER JOIN TB_COMM_CODE D
+             ON D.GRP_CD = 'A8013'
+            AND B.DS_ID = D.VALUE_CD
+            AND D.USE_YN = 'Y' 
+          WHERE A.INF_ID        = #infId:VARCHAR#
+            AND A.INF_SEQ       = #infSeq:NUMERIC#
+            AND A.SRV_YN        = 'Y'
+            AND A.SRV_CD        = 'S'
+            AND B.INF_STATE     = 'Y'
+            AND B.OPEN_DTTM    <= SYSDATE
+            AND C.USE_YN        = 'Y'
+        ]]>
+    </select>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 공공데이터 시트 서비스 조회컬럼을 검색한다.                         -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="PortalOpenInfScolDao.searchOpenInfScolCols" parameterClass="params" resultClass="string">
+    /* SQL ID :  PortalOpenInfScolDao.searchOpenInfScolCols */
+        <![CDATA[
+         SELECT E.SRC_COL_ID    ||' AS '||
+                E.SRC_COL_ID    AS "columnName"
+           FROM TB_OPEN_INF_SCOL A
+           JOIN TB_OPEN_INF_SRV  B
+             ON B.INF_ID         = A.INF_ID
+            AND B.INF_SEQ        = A.INF_SEQ
+           JOIN TB_OPEN_INF      C
+             ON C.INF_ID         = B.INF_ID
+           JOIN TB_OPEN_DS       D
+             ON D.DS_ID          = C.DS_ID
+           JOIN TB_OPEN_DSCOL    E
+             ON E.DS_ID          = D.DS_ID
+            AND E.COL_SEQ        = A.COL_SEQ
+          WHERE A.INF_ID         = #infId:VARCHAR#
+            AND A.INF_SEQ        = #infSeq:NUMERIC#
+            AND A.USE_YN         = 'Y'
+            AND B.SRV_YN         = 'Y'
+            AND B.SRV_CD         = 'S'
+            AND C.INF_STATE      = 'Y'
+            AND C.OPEN_DTTM     <= SYSDATE
+            AND D.USE_YN         = 'Y'
+            AND E.USE_YN         = 'Y'
+          ORDER BY
+                A.V_ORDER ASC
+        ]]>
+    </select>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 공공데이터 시트 서비스 조회조건을 검색한다.                         -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="PortalOpenInfScolDao.searchOpenInfScolCond" parameterClass="params" resultClass="string">
+    /* SQL ID :  PortalOpenInfScolDao.searchOpenInfScolCond */
+        <![CDATA[
+         SELECT E.SRC_COL_ID    ||' '||
+                A.COND_OP       ||' '||
+                CASE A.COND_OP
+                WHEN 'IN'
+                THEN '('
+                END             ||' '||
+                A.COND_VAR      ||' '||
+                CASE A.COND_OP
+                WHEN 'IN'
+                THEN ')'
+                END             AS "searchCondition"
+           FROM TB_OPEN_INF_SCOL A
+           JOIN TB_OPEN_INF_SRV  B
+             ON B.INF_ID         = A.INF_ID
+            AND B.INF_SEQ        = A.INF_SEQ
+           JOIN TB_OPEN_INF      C
+             ON C.INF_ID         = B.INF_ID
+           JOIN TB_OPEN_DS       D
+             ON D.DS_ID          = C.DS_ID
+           JOIN TB_OPEN_DSCOL    E
+             ON E.DS_ID          = D.DS_ID
+            AND E.COL_SEQ        = A.COL_SEQ
+          WHERE A.INF_ID         = #infId:VARCHAR#
+            AND A.INF_SEQ        = #infSeq:NUMERIC#
+            AND A.USE_YN         = 'Y'
+            AND A.COND_YN        = 'Y'
+            AND B.SRV_YN         = 'Y'
+            AND B.SRV_CD         = 'S'
+            AND C.INF_STATE      = 'Y'
+            AND C.OPEN_DTTM     <= SYSDATE
+            AND D.USE_YN         = 'Y'
+            AND E.USE_YN         = 'Y'
+          ORDER BY
+                A.V_ORDER ASC
+        ]]>
+    </select>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 공공데이터 시트 서비스 정렬조건을 검색한다.                         -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="PortalOpenInfScolDao.searchOpenInfScolSort" parameterClass="params" resultClass="string">
+    /* SQL ID : PortalOpenInfScolDao.searchOpenInfScolSort */
+        <![CDATA[
+         SELECT E.SRC_COL_ID    ||' '||
+                CASE A.SORT_TAG
+                WHEN 'A'
+                THEN 'ASC'
+                WHEN 'D'
+                THEN 'DESC'
+                END             AS "sortCondition"
+           FROM TB_OPEN_INF_SCOL A
+           JOIN TB_OPEN_INF_SRV  B
+             ON B.INF_ID         = A.INF_ID
+            AND B.INF_SEQ        = A.INF_SEQ
+           JOIN TB_OPEN_INF      C
+             ON C.INF_ID         = B.INF_ID
+           JOIN TB_OPEN_DS       D
+             ON D.DS_ID          = C.DS_ID
+           JOIN TB_OPEN_DSCOL    E
+             ON E.DS_ID          = D.DS_ID
+            AND E.COL_SEQ        = A.COL_SEQ
+          WHERE A.INF_ID         = #infId:VARCHAR#
+            AND A.INF_SEQ        = #infSeq:NUMERIC#
+            AND A.USE_YN         = 'Y'
+            AND A.SORT_TAG      IS NOT NULL
+            AND B.SRV_YN         = 'Y'
+            AND B.SRV_CD         = 'S'
+            AND C.INF_STATE      = 'Y'
+            AND C.OPEN_DTTM     <= SYSDATE
+            AND D.USE_YN         = 'Y'
+            AND E.USE_YN         = 'Y'
+          ORDER BY
+                A.V_ORDER ASC
+        ]]>
+    </select>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 공공데이터 시트 서비스 다운컬럼을 검색한다.                         -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="PortalOpenInfScolDao.searchOpenInfScolDown" parameterClass="params" resultClass="record">
+    /* SQL ID :  PortalOpenInfScolDao.searchOpenInfScolDown */
+        <![CDATA[
+         SELECT E.SRC_COL_ID    AS "srcColId",
+                E.COL_NM        ||
+                (
+                     SELECT F.DITC_NM
+                       FROM TB_COMM_CODE F
+                      WHERE F.GRP_CD     = 'D1013'
+                        AND F.DITC_CD    = E.UNIT_CD
+                )               AS "colNm",
+                A.VIEW_CD       AS "viewCd",
+                A.VIEW_SIZE     AS "viewSize",
+                A.ALIGN_TAG     AS "alignTag"
+           FROM TB_OPEN_INF_SCOL A
+           JOIN TB_OPEN_INF_SRV  B
+             ON B.INF_ID         = A.INF_ID
+            AND B.INF_SEQ        = A.INF_SEQ
+           JOIN TB_OPEN_INF      C
+             ON C.INF_ID         = B.INF_ID
+           JOIN TB_OPEN_DS       D
+             ON D.DS_ID          = C.DS_ID
+           JOIN TB_OPEN_DSCOL    E
+             ON E.DS_ID          = D.DS_ID
+            AND E.COL_SEQ        = A.COL_SEQ
+          WHERE A.INF_ID         = #infId:VARCHAR#
+            AND A.INF_SEQ        = #infSeq:NUMERIC#
+            AND A.USE_YN         = 'Y'
+            AND B.SRV_YN         = 'Y'
+            AND B.SRV_CD         = 'S'
+            AND C.INF_STATE      = 'Y'
+            AND C.OPEN_DTTM     <= SYSDATE
+            AND D.USE_YN         = 'Y'
+            AND E.USE_YN         = 'Y'
+          ORDER BY
+                A.V_ORDER ASC
+        ]]>
+    </select>
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 공공데이터 시트 서비스 데이터를 검색한다.                           -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 검색 데이터 -->
+    <select id="PortalOpenInfScolDao.searchOpenInfScolData" parameterClass="params" resultClass="record" remapResults="true">
+    /* SQL ID : PortalOpenInfScolDao.searchOpenInfScolData */
+        <isEqual property="paging" compareValue="0">
+         SELECT <iterate property="columnNames" conjunction=",">A.$columnNames[]$</iterate>
+           FROM (
+                     SELECT ROWNUM AS ROW_NUM,
+                            <iterate property="columnNames" conjunction=",">A.$columnNames[]$</iterate>
+                       FROM (
+        </isEqual>
+                                 SELECT <iterate property="columnNames" conjunction=",">$columnNames[]$</iterate>
+                                   FROM $ownerName$.$tableName$
+                                        <dynamic prepend="WHERE">
+						                    <isEqual property="aprvProcYn" compareValue="Y" prepend="AND">
+						                        APRV_YN = 'Y'
+						                    </isEqual>
+                                            <isNotEmpty property="searchConditions" prepend="AND">
+                                                <iterate property="searchConditions" conjunction=" AND ">$searchConditions[]$</iterate>
+                                            </isNotEmpty>
+                                            <isNotEmpty property="searchFilters" prepend="AND">
+                                                <iterate property="searchFilters" conjunction=" AND ">$searchFilters[]$</iterate>
+                                            </isNotEmpty>
+                                             <isNotEmpty property="parSigunNm" prepend="AND" >
+			                   				     SIGUN_NM = #parSigunNm#
+			                  			    </isNotEmpty>
+                                            <isNotEmpty property="sigunNm" prepend="AND">
+			                   				     EMD_NM = #sigunNm#
+			                  			    </isNotEmpty>
+                                            <isNotEmpty property="sigunFlag" prepend="AND">
+                                            	<isEqual property="sigunCdYn" compareValue="Y">
+                                            		<!-- 2016.07.29 -->
+                                            		<!-- SIGUN_CD = (SELECT TYPE_CD FROM TB_COMM_ORG WHERE ORG_CD = #sigunFlag#) -->
+                                            		SIGUN_CD = #sigunFlag#
+                                            	</isEqual>
+                                            	<isNotEqual property="sigunCdYn" compareValue="Y">
+                                            		<!-- 2016.07.29 이 조건은 필요없어 보인는데???-->
+                                            		<!--  EXISTS (SELECT ORG_CD FROM TB_META_ORG_DS_REL WHERE INF_ID = #infId# AND  ORG_CD = #sigunFlag#) -->
+                                            		EXISTS ( SELECT ORG_CD 
+                                            				 FROM TB_META_ORG_DS_REL 
+                                            				 WHERE INF_ID = #infId:VARCHAR#   
+                                            				 		AND ORG_CD  in (SELECT ORG_CD FROM TB_COMM_ORG WHERE TYPE_CD = #sigunFlag# )
+                                            				)
+                                            	</isNotEqual>
+                                            </isNotEmpty>
+                                        </dynamic>
+                                        <dynamic prepend="ORDER BY">
+                                            <isEmpty property="orderby">
+                                                <iterate property="sortOrders" conjunction=",">$sortOrders[]$</iterate>
+                                            </isEmpty>
+                                            <isNotEmpty property="orderby">
+                                                $orderby$
+                                            </isNotEmpty>
+                                        </dynamic>
+        <isEqual property="paging" compareValue="0">
+        <![CDATA[
+                            )       A
+                      WHERE ROWNUM <= #end:NUMERIC#
+                )          A
+          WHERE A.ROW_NUM >= #start:NUMERIC#
+        ]]>
+        </isEqual>
+    </select>
+    <!-- 검색 카운트 -->
+    <select id="PortalOpenInfScolDao.searchOpenInfScolDataCount" parameterClass="params" resultClass="int">
+    /* SQL ID : PortalOpenInfScolDao.searchOpenInfScolDataCount */
+         SELECT COUNT(*)
+           FROM $ownerName$.$tableName$
+                <dynamic prepend="WHERE">
+                    <isEqual property="aprvProcYn" compareValue="Y" prepend="AND">
+                        APRV_YN = 'Y'
+                    </isEqual>
+                    <isNotEmpty property="searchConditions" prepend="AND">
+                        <iterate property="searchConditions" conjunction=" AND ">$searchConditions[]$</iterate>
+                    </isNotEmpty>
+                    <isNotEmpty property="searchFilters" prepend="AND">
+                        <iterate property="searchFilters" conjunction=" AND ">$searchFilters[]$</iterate>
+                    </isNotEmpty>
+                    <isNotEmpty property="sigunNm" prepend="AND">
+			                   				     EMD_NM = #sigunNm#
+			              </isNotEmpty>
+					<isNotEmpty property="sigunFlag" prepend="AND">
+	                    <isEqual property="sigunCdYn" compareValue="Y">
+                       		<!-- 2016.07.29 -->
+                       		<!-- SIGUN_CD = (SELECT TYPE_CD FROM TB_COMM_ORG WHERE ORG_CD = #sigunFlag#) -->
+                       		SIGUN_CD = #sigunFlag#
+	                    </isEqual>
+	                    <isNotEqual property="sigunCdYn" compareValue="Y">
+                       		<!-- 2016.07.29 이 조건은 필요없어 보인는데???-->
+                       		<!--  EXISTS (SELECT ORG_CD FROM TB_META_ORG_DS_REL WHERE INF_ID = #infId# AND  ORG_CD = #sigunFlag#) -->
+                       		EXISTS ( SELECT ORG_CD 
+                       				 FROM TB_META_ORG_DS_REL 
+                       				 WHERE INF_ID = #infId#   
+                       				 		AND ORG_CD  in (SELECT ORG_CD FROM TB_COMM_ORG WHERE TYPE_CD = #sigunFlag# )
+                      				)
+	                    </isNotEqual>
+					</isNotEmpty>
+                </dynamic>
+    </select>
+    
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 추천데이터셋을 조회한다.                         -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="PortalOpenInfScolDao.selectRecommandDataSet" parameterClass="params" resultClass="record">
+     /* SQL ID : PortalOpenInfScolDao.selectRecommandDataSet */
+        <![CDATA[
+		SELECT ROWNUM, AA.*
+		FROM (	SELECT
+				    V.INFS_TAG 		AS "opentyTag",
+				    V.OBJ_ID 		AS "objId",
+				    L.INFA_NM		AS "objNm",
+				    D.CATE_NM		AS "topCateNm",
+				    D.SAVE_FILE_NM	AS "saveFileNm",
+				    DECODE(V.INFS_TAG, 'D', '규정(지침)', 'O', '데이터', 'S', '통계') AS "opentyTagNm"
+				FROM
+				    TB_INFO_SET S
+				    INNER JOIN TB_INFO_CATE C ON S.CATE_ID = C.CATE_ID
+				    AND C.USE_YN = 'Y'
+				    INNER JOIN TB_INFO_CATE D ON D.CATE_ID = C.TOP_CATE_ID
+				    AND D.USE_YN = 'Y'
+				    INNER JOIN TB_INFO_SET_REL R ON R.INFS_ID = S.INFS_ID
+				    AND R.USE_YN = 'Y'
+				    INNER JOIN TB_INFO_SET_REL V ON V.INFS_ID = S.INFS_ID
+				    AND V.USE_YN = 'Y'
+				    INNER JOIN TV_INFA_LIST L ON V.INFS_TAG = L.OPENTY_TAG
+				    AND V.OBJ_ID = L.INFA_ID
+				WHERE
+				    R.OBJ_ID = #objId:VARCHAR#
+				    AND V.OBJ_ID <> #objId:VARCHAR#
+				    AND S.USE_YN = 'Y'
+				    AND S.OPEN_STATE = 'Y'
+				    AND S.OPEN_DTTM < TRUNC(SYSDATE +1)
+				UNION
+				SELECT DISTINCT
+				    OPENTY_TAG		AS "opentyTag",
+				    INFA_ID			AS "objId",
+				    INFA_NM			AS "objNm",
+				    TOP_CATE_NM		AS "topCateNm",
+				    SAVE_FILE_NM	AS "saveFileNm",
+				    DECODE(OPENTY_TAG, 'D', '규정(지침)', 'O', '데이터', 'S', '통계') AS "opentyTagNm"
+				FROM
+				    TV_INFA_LIST_TAG
+				WHERE
+				    TAG_NM IN (
+				        SELECT
+				            TAG_NM
+				        FROM
+				            TV_INFA_LIST_TAG
+				        WHERE
+				            INFA_ID = #objId:VARCHAR#
+				    )
+				    AND INFA_ID <> #objId:VARCHAR#
+				) AA
+		WHERE ROWNUM BETWEEN 1 AND 8	
+        ]]>
+    </select>
+    
+     <select id="PortalOpenInfScolDao.selectInfNm" parameterClass="params" resultClass="record">
+     /* SQL ID : PortalOpenInfScolDao.selectInfNm */
+        <![CDATA[
+		SELECT INF_NM AS infNm FROM TB_OPEN_INF
+		WHERE INF_ID = #infId#
+        ]]>
+    </select>
+    
+    <!-- 공공데이터 태그 정보를 조회한다. -->
+    <select id="PortalOpenInfScolDao.searchOpenInfScolColTag" parameterClass="params" resultClass="record">
+    	/* sql id : PortalOpenInfScolDao.searchOpenInfScolColTag */
+        <![CDATA[
+		SELECT 
+			AA.COL_TAG_CD		AS "colTagCd"
+			, AA.COL_ID			AS "colId"
+			, AA.COL_TAG_CONT	AS "colTagCont"
+			, BB.VALUE_CD		AS "valueCd"
+			, BB.REF_CD			AS "refCd"
+			, BB.SAVE_FILE_NM	AS "saveFileNm"
+		FROM (
+				SELECT 
+					E.COL_TAG_CD
+				    , E.COL_ID
+				 	, (CASE WHEN E.COL_TAG_CD IS NOT NULL AND SUBSTR(E.COL_TAG_CD, 2, 1) = 'C' THEN
+						(SELECT COL_ID FROM TB_OPEN_DSCOL 
+						 WHERE  DS_ID = D.DS_ID AND COL_TAG_CD = SUBSTR(E.COL_TAG_CD, 1, 1) || 'U' || SUBSTR(E.COL_TAG_CD, -2) )
+				       ELSE NULL END) AS COL_TAG_CONT
+				   FROM TB_OPEN_INF_SCOL A
+				   JOIN TB_OPEN_INF_SRV  B
+				     ON B.INF_ID         = A.INF_ID
+				    AND B.INF_SEQ        = A.INF_SEQ
+				   JOIN TB_OPEN_INF      C
+				     ON C.INF_ID         = B.INF_ID
+				   JOIN TB_OPEN_DS       D
+				     ON D.DS_ID          = C.DS_ID
+				   JOIN TB_OPEN_DSCOL    E
+				     ON E.DS_ID          = D.DS_ID
+				    AND E.COL_SEQ        = A.COL_SEQ
+				  WHERE A.INF_ID         = #infId:VARCHAR#
+					AND A.INF_SEQ        = #infSeq:NUMERIC#
+					AND A.USE_YN         = 'Y'
+					AND B.SRV_YN         = 'Y'
+					AND B.SRV_CD         = 'S'
+					AND C.INF_STATE      = 'Y'
+					AND C.OPEN_DTTM     <= SYSDATE
+					AND D.USE_YN         = 'Y'
+					AND E.USE_YN         = 'Y'
+					AND E.COL_TAG_CD IS NOT NULL
+					AND SUBSTR(E.COL_TAG_CD, 2, 1) = 'C'
+			) AA
+			INNER JOIN TB_COMM_CODE BB 
+			ON  AA.COL_TAG_CD = BB.DITC_CD 
+			AND GRP_CD = 'D1103' 
+			AND BB.USE_YN = 'Y'
+        ]]>   
+	</select>
+	
+	<!-- 그룹코드 조회 -->
+	<select id="PortalOpenInfScolDao.selectCommCodeGrpCd" parameterClass="params" resultClass="record">
+    	/* sql id : PortalOpenInfScolDao.selectCommCodeGrpCd */
+		SELECT
+		    DITC_CD			AS "ditcCd",
+		    DITC_NM			AS "ditcNm",
+		    SAVE_FILE_NM	AS "saveFileNm"
+		FROM
+		    TB_COMM_CODE
+		WHERE
+		    GRP_CD = #grpCd:VARCHAR#
+		    AND USE_YN = 'Y'	
+    </select>	
+    
+    <!-- 유저 파일다운로드 데이터 조회 -->
+	<select id="PortalOpenInfScolDao.searchUsrDefFileData" parameterClass="params" resultClass="record" remapResults="true">
+		/* sql id :PortalOpenInfScolDao.searchUsrDefFileData */
+		SELECT 
+		    F.DATA_SEQCE_NO AS "dataSeqceNo",
+		    F.FILE_SEQ		AS "fileSeq",
+		    F.SRC_FILE_NM		AS "srcFileNm",
+		    F.SAVE_FILE_NM	AS "saveFileNm",
+		    F.VIEW_FILE_NM	AS "viewFileNm",
+		    F.FILE_EXT		AS "fileExt",
+		    U.USR_NM		AS "usrNm",
+		    TO_CHAR(F.FT_CR_DTTM, 'YYYY-MM-DD') 								AS "ftCrDttm",				
+		    FN_GET_DMPOINT(FN_GET_BYTE2UC(F.FILE_SIZE,  'KB' ), '0') || ' KB' 	AS "fileSize"
+		FROM   $ownerName$.TB_OPEN_USR_FILE F
+			   LEFT OUTER JOIN TB_COMM_USR U ON F.DATA_COLT_REG_USR_CD = U.USR_CD AND U.USE_YN = 'Y'
+		WHERE  F.DATA_SEQCE_NO = #dataSeqceNo:NUMERIC#                             
+    </select>    
+    
+    <!-- 유저 파일다운로드 데이터 조회 -->
+	<select id="PortalOpenInfScolDao.searchUsrDefFileOneData" parameterClass="params" resultClass="record">
+	/* sql id : PortalOpenInfScolDao.searchUsrDefFileOneData */
+		SELECT 
+		    F.DATA_SEQCE_NO AS "dataSeqceNo",
+		    F.FILE_SEQ		AS "fileSeq",
+		    F.SRC_FILE_NM		AS "srcFileNm",
+		    F.SAVE_FILE_NM	AS "saveFileNm",
+		    F.VIEW_FILE_NM	AS "viewFileNm",
+		    F.FILE_EXT		AS "fileExt",
+		    U.USR_NM		AS "usrNm",
+		    TO_CHAR(F.FT_CR_DTTM, 'YYYY-MM-DD') 								AS "ftCrDttm",				
+		    F.FILE_SIZE 		AS  "fileSize"
+		FROM   $ownerName$.TB_OPEN_USR_FILE F
+			   LEFT OUTER JOIN TB_COMM_USR U ON F.DATA_COLT_REG_USR_CD = U.USR_CD AND U.USE_YN = 'Y'
+		WHERE  F.DATA_SEQCE_NO = #dataSeqceNo:NUMERIC#
+		  AND  F.FILE_SEQ = #fileSeq:NUMERIC#   
+    </select>   
+    
+    <update id="PortalOpenInfScolDao.updateUsrDefFileFileHits" parameterClass="params">
+    /* sql id : PortalOpenInfScolDao.updateUsrDefFileFileHits */
+         UPDATE $ownerName$.TB_OPEN_USR_FILE A
+            SET A.VIEW_CNT       = NVL(A.VIEW_CNT, 0) + 1
+          WHERE  A.DATA_SEQCE_NO = #dataSeqceNo:NUMERIC#
+		    AND  A.FILE_SEQ = #fileSeq:NUMERIC#   
+    </update>
+    
+</sqlMap>

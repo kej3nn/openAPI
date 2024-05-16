@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE form-validation PUBLIC 
+    "-//Apache Software Foundation//DTD Commons Validator Rules Configuration 1.1//EN" 
+    "http://jakarta.apache.org/commons/dtds/validator_1_1.dtd">
+
+<form-validation>
+    <formset>
+		<form name="adminCommOrg">
+			<field property="orgCd" depends="required">
+        		<arg0 key="labal.orgCd" />
+			</field>
+			<field property="orgNm" depends="required">
+        		<arg0 key="labal.orgNm" />
+			</field>
+		<!-- 	<field property="orgNmEng" depends="required">
+        		<arg0 key="labal.orgNm" />
+			</field> -->
+			<field property="orgFullNm" depends="required">
+        		<arg0 key="labal.orgFullnm" />
+			</field>
+<!-- 			<field property="orgFullNmEng" depends="required">
+        		<arg0 key="labal.orgFullnm" />
+			</field> -->
+		</form>
+    </formset>
+</form-validation>

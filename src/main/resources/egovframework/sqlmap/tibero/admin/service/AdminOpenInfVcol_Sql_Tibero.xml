@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="OpenInfVcol" >
+
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+    
+  <typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+	<resultMap id="OpenInfCol" class="egovframework.admin.service.service.OpenInfVcol" >
+		<result column="STATUS"        		property="status"                />
+		<result column="INF_ID"        		property="infId"                />
+		<result column="INF_SEQ"       		property="infSeq"               />
+		<result column="VISTN_SEQ"       	property="vistnSeq"               />
+		<result column="V_ORDER"        	property="vOrder"                />
+		<result column="VISTN_URL"        	property="vistnUrl"                />
+		<result column="VISTN_EXP"        	property="vistnExp"                />
+		<result column="PRD_NM"        		property="prdNm"                />
+		<result column="VISTN_TY_NM"        property="vistnTyNm"                />
+		<result column="VIEW_CNT"        	property="viewCnt"                />
+		<result column="USE_YN"        		property="useYn"                />               
+		<result column="REG_DTTM"        	property="regDttm"                />               
+		<result column="VIEW_LANG"        	property="viewLang"                />           
+		<result column="TMNL_IMG_FILE"      property="tmnlImgFile"           />    
+	</resultMap>
+	
+	<resultMap id="OpenInfColDtl" class="egovframework.admin.service.service.OpenInfVcol" >
+		<result column="INF_ID"        		property="infId"                />
+		<result column="SEQ"        		property="mstSeq"               />
+		<result column="INF_SEQ"       		property="infSeq"               />
+		<result column="SRC_FILE_NM"     	property="srcFileNm"            />
+		<result column="SAVE_FILE_NM"  		property="saveFileNm"           />
+		<result column="VIEW_FILE_NM"		property="viewFileNm"           />               
+		<result column="STREAM_URL"     	property="streamUrl"            />               
+		<result column="TMNL_IMG_FILE"   	property="tmnlImgFile"          />               
+		<result column="USE_YN"        		property="useYn"             	/>      
+		<result column="VIEW_LANG"        	property="viewLang"             />  
+		<result column="TMNL_IMG_FILE"		property="tmnlImgFile"			/>
+		<result column="MEDIA_DETAIL_NO"	property="mediaDetailNo"			/>
+	</resultMap>
+	
+	<resultMap id="OpenInfColView" class="egovframework.admin.service.service.OpenInfVcol" >
+		<result column="INF_ID"        		property="infId"                />
+		<result column="MST_SEQ"       		property="mstSeq"               />
+		<result column="TMNL_IMG_FILE"		property="tmnlImgFile"			/>   
+		<result column="VISTN_SEQ"		property="vistnSeq"			/>   
+	</resultMap>
+  <!-- 
+
+	<resultMap id="OpenInfColOptPop" class="egovframework.admin.service.service.OpenInfLcol" >
+		<result column="INF_NM"          property="infNm"        />            
+		<result column="INF_ID"        property="infId"                />
+		<result column="INF_SEQ"       property="infSeq"               />
+		<result column="SRV_CD"       property="srvCd"               />
+		<result column="OWNER_CD"        property="ownerCd"      />
+		<result column="DS_ID"           property="dsId"         />
+		<result column="DS_NM"           property="dsNm"         />
+		<result column="COL_ID"        property="colId"               />
+		<result column="COL_NM"        property="colNm"            />
+		<result column="COL_SEQ"       property="colSeq"               />
+		<result column="COND_YN"         property="condYn"       />           
+		<result column="COND_OP"         property="condOp"       />
+		<result column="COND_VAR"        property="condVar"      />
+		<result column="FILT_CODE"       property="filtCode"     />
+		<result column="REQ_YN"       property="reqYn"     />
+		<result column="REQ_OP"       property="reqOp"     />
+		<result column="REQ_VAR"       property="reqVar"     />
+		<result column="REQ_NEED"       property="reqNeed"     />
+		<result column="REQ_TYPE"       property="reqType"     />
+	</resultMap>
+	-->
+	<select id="OpenInfVcolDAO.selectOpenInfColList" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultMap="OpenInfCol" >
+		SELECT   CASE WHEN LI.VISTN_SEQ IS NOT NULL THEN '' ELSE 'I' END AS STATUS
+	    	   , LI.INF_ID
+	           , LI.INF_SEQ
+	       	   , LI.VISTN_SEQ
+	           , LI.V_ORDER
+	           , LI.VISTN_URL
+	       	   , LI.VISTN_EXP
+	       	   , LI.PRD_NM
+	       	   , LI.VISTN_TY_NM
+	           , LI.VIEW_CNT
+	       	   , NVL(LI.USE_YN, 'Y') AS USE_YN
+	       	   , NVL(#viewLang:VARCHAR#, '') VIEW_LANG
+	       	   , TO_CHAR(REG_DTTM, 'YYYY.MM.DD') REG_DTTM
+	       	   , LI.TMNL_IMG_FILE
+	   	  FROM   TB_OPEN_INF_VISL LI
+	     WHERE   LI.INF_ID= #infId:VARCHAR#
+	    ORDER BY V_ORDER  
+	</select>
+	
+	<update id="OpenInfVcolDAO.mergeIntoCol" parameterClass="egovframework.admin.service.service.OpenInfVcol" >
+		<![CDATA[
+		MERGE INTO TB_OPEN_INF_VISL A
+		USING(
+				SELECT #infId:VARCHAR#         	AS INF_ID
+					  ,#infSeq:NUMERIC#	       	AS INF_SEQ
+					  ,#vistnSeq:NUMERIC#       AS VISTN_SEQ
+					  ,#vistnUrl:VARCHAR#	    AS VISTN_URL
+					  ,#vistnExp:VARCHAR#		AS VISTN_EXP
+					  ,#prdNm:VARCHAR#		AS PRD_NM
+					  ,#vistnTyNm:VARCHAR#		AS VISTN_TY_NM
+					  ,#vOrder:NUMERIC#			AS V_ORDER
+					  ,#useYn:CHAR#			AS USE_YN
+					  ,#sessionUsrId:VARCHAR#  	AS REG_ID 
+					  ,SYSDATE         	AS REG_DTTM
+					  ,#sessionUsrId:VARCHAR#  	AS UPD_ID
+					  ,SYSDATE         	AS UPD_DTTM 
+					  ,#tmnlImgFile:VARCHAR#        AS TMNL_IMG_FILE   
+				  FROM DUAL
+			)B
+		ON ( A.INF_ID = B.INF_ID AND A.INF_SEQ = B.INF_SEQ AND A.VISTN_SEQ =B.VISTN_SEQ)
+		WHEN MATCHED THEN
+		UPDATE SET
+				 A.V_ORDER = B.V_ORDER
+				,A.USE_YN = B.USE_YN
+				,A.VISTN_URL = B.VISTN_URL
+				,A.VISTN_EXP = B.VISTN_EXP
+				,A.PRD_NM = B.PRD_NM
+				,A.VISTN_TY_NM = B.VISTN_TY_NM
+				,A.UPD_ID = B.UPD_ID
+				,A.UPD_DTTM = B.UPD_DTTM
+				]]>
+				<isNotEmpty property="tmnlImgFile">
+				,A.TMNL_IMG_FILE = B.TMNL_IMG_FILE
+				 </isNotEmpty>
+				 	<![CDATA[
+		WHEN NOT MATCHED THEN
+		INSERT 
+		(
+			 A.INF_ID
+			,A.INF_SEQ
+			,A.VISTN_SEQ
+			,A.V_ORDER
+			,A.USE_YN
+			,A.VISTN_URL
+			,A.VISTN_EXP
+			,A.PRD_NM
+			,A.VISTN_TY_NM
+			,A.REG_ID 
+			,A.REG_DTTM
+			,A.UPD_ID
+			,A.UPD_DTTM
+			,A.TMNL_IMG_FILE
+		)VALUES
+		(
+			 B.INF_ID
+			,B.INF_SEQ
+			,B.VISTN_SEQ
+			,B.V_ORDER
+			,B.USE_YN
+			,B.VISTN_URL
+			,B.VISTN_EXP
+			,B.PRD_NM
+			,B.VISTN_TY_NM
+			,B.REG_ID 
+			,B.REG_DTTM
+			,B.UPD_ID
+			,B.UPD_DTTM
+			,B.TMNL_IMG_FILE	
+		)
+		]]>
+	</update>
+	
+	<update id="OpenInfVcolDAO.deleteVcol" parameterClass="egovframework.admin.service.service.OpenInfVcol" >
+		DELETE FROM TB_OPEN_INF_MEDIA
+		 WHERE MEDIA_NO = #mediaNo# 
+	</update>
+<!-- 
+	<update id="OpenInfAcolDAO.mergeIntoApi" parameterClass="egovframework.admin.service.service.OpenInfAcol" >
+		<![CDATA[
+		MERGE INTO TB_OPEN_INF_AURI A
+		USING(
+				SELECT #infId#         					AS INF_ID
+					  ,#infSeq#	       					AS INF_SEQ
+					  ,#uriSeq#        					AS URI_SEQ
+					  ,#uriNm# 							AS URI_NM
+					  ,#uriNm#							AS ENG_URI_NM
+					  ,CONCAT(#uri#||'?', #uriParam#)	AS URI
+					  ,#uriUseYn#						AS USE_YN
+					  ,#uriVOrder#						AS V_ORDER
+					  ,#sessionUsrId#  					AS REG_ID 
+					  ,SYSDATE         					AS REG_DTTM
+					  ,#sessionUsrId#  					AS UPD_ID
+					  ,SYSDATE         					AS UPD_DTTM  
+				  FROM DUAL
+			)B
+		ON ( A.INF_ID = B.INF_ID AND A.INF_SEQ = B.INF_SEQ AND A.URI_SEQ =B.URI_SEQ)
+		WHEN MATCHED THEN
+		UPDATE SET
+				 A.V_ORDER = B.V_ORDER
+				,A.URI = B.URI  
+				,A.URI_NM = B.URI_NM
+				,A.ENG_URI_NM = B.ENG_URI_NM
+				,A.USE_YN = B.USE_YN
+				,A.UPD_ID = B.UPD_ID
+				,A.UPD_DTTM = B.UPD_DTTM
+		WHEN NOT MATCHED THEN
+		INSERT 
+		(
+			 A.INF_ID
+			,A.INF_SEQ
+			,A.URI_SEQ
+			,A.URI_NM
+			,A.ENG_URI_NM
+			,A.URI
+			,A.V_ORDER
+			,A.USE_YN
+			,A.REG_ID 
+			,A.REG_DTTM
+			,A.UPD_ID
+			,A.UPD_DTTM  
+		)VALUES
+		(
+			 B.INF_ID
+			,B.INF_SEQ
+			,B.URI_SEQ
+			,B.URI_NM
+			,B.ENG_URI_NM
+			,B.URI
+			,B.V_ORDER
+			,B.USE_YN
+			,B.REG_ID 
+			,B.REG_DTTM
+			,B.UPD_ID
+			,B.UPD_DTTM  	
+		)
+		]]>
+	</update>
+	
+	<select id="OpenInfAcolDAO.apiDup" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultClass="java.lang.Integer">
+		SELECT   NVL(COUNT(*), 0) AS CNT
+		  FROM   TB_OPEN_INF_SRV
+		 WHERE   API_RES = #apiRes#
+	</select>
+	
+	
+	<select id="OpenInfAcolDAO.selectApiUri" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultMap="sampleUriMap">
+		SELECT   INF_ID
+		       , INF_SEQ
+		       , URI_SEQ
+		       , URI_NM
+		       , ENG_URI_NM
+		       , SUBSTR(URI, 1, INSTR(URI, '?')-1) URI
+		       , SUBSTR(URI, INSTR(URI, '?')+1, LENGTH(URI)) AS URI_PARAM
+		       , USE_YN
+		       , URI_SEQ
+		       , V_ORDER
+		  FROM   TB_OPEN_INF_AURI
+		 WHERE   INF_ID = #infId#
+		ORDER BY V_ORDER 
+	</select>
+
+	<select id="OpenInfAcolDAO.selectOpenInfColInfo" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultMap="OpenInfColOptPop" >
+			SELECT 
+					   A.INF_ID
+					  ,A.INF_SEQ 
+					  ,A.INF_NM
+					  ,A.SRV_CD
+		              ,A.OWNER_CD
+		              ,A.DS_ID
+		              ,A.DS_NM
+		              ,B.COL_ID
+		              ,B.COL_NM
+		              ,B.COL_SEQ
+		              ,COND_YN
+		              ,COND_OP
+		              ,COND_VAR
+		              ,FILT_CODE
+		              ,REQ_YN
+		              ,REQ_OP
+		              ,REQ_VAR
+		              ,REQ_NEED
+		              ,REQ_TYPE
+		         FROM TV_MNG_INF_SRV A
+		         INNER JOIN TB_OPEN_DSCOL B
+		            ON A.DS_ID = B.DS_ID
+		           AND B.USE_YN ='Y'   
+		         LEFT OUTER JOIN TB_OPEN_INF_ACOL C
+		           ON A.INF_ID = C.INF_ID
+		          AND A.INF_SEQ = C.INF_SEQ
+		          AND B.COL_SEQ = C.COL_SEQ
+		         WHERE C.INF_ID=#infId#
+		           AND C.INF_SEQ=#infSeq#
+		           AND C.COL_SEQ=#colSeq# 
+	</select>
+	
+	<update id="OpenInfAcolDAO.updateOpt" parameterClass="egovframework.admin.service.service.OpenInfAcol" >
+		<![CDATA[
+		UPDATE   TB_OPEN_INF_ACOL 
+		   SET   COND_YN = #condYn#
+			   , COND_OP = #condOp#
+			   , COND_VAR =  #condVar#
+			   , REQ_YN = #reqYn#
+		       , REQ_OP = #reqOp#
+		       , REQ_VAR = #reqVar#
+		       , REQ_NEED = #reqNeed#
+		       , REQ_TYPE = #reqType#
+			   , UPD_ID = #sessionUsrId#
+			   , UPD_DTTM = SYSDATE
+		 WHERE   INF_ID=#infId#
+		   AND   INF_SEQ=#infSeq#
+		   AND   COL_SEQ=#colSeq# 
+		]]>
+	</update>
+	
+	 -->
+	 
+	<select id="OpenInfVcolDAO.getMstSeq" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultClass="java.lang.Integer">
+		SELECT NVL(SEQ, 0) FROM TB_OPEN_INF WHERE INF_ID = #infId:VARCHAR#
+	</select>
+	
+	<select id="OpenInfVcolDAO.getInfSeq" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultClass="java.lang.Integer">
+		SELECT NVL(INF_SEQ, 0) FROM TB_OPEN_INF_SRV WHERE INF_ID = #infId:VARCHAR# AND SRV_CD='V'
+	</select>
+	<update id="OpenInfVcolDAO.updateTmnlImgFile" parameterClass="egovframework.admin.service.service.OpenInfVcol" >
+		<![CDATA[
+		UPDATE TB_OPEN_INF_VISL SET
+			TMNL_IMG_FILE = #tmnlImgFile:VARCHAR#
+			,UPD_DTTM = SYSDATE
+		WHERE 
+			INF_ID = #infId:VARCHAR#
+			AND INF_SEQ = #infSeq:NUMERIC#
+			AND VISTN_SEQ = #vistnSeq:NUMERIC#
+		]]>
+	</update>
+	
+	<select id="OpenInfVcolDAO.selectOpenInfColInfo" parameterClass="egovframework.admin.service.service.OpenInfVcol" resultMap="OpenInfColView" >
+		SELECT 
+			 M.INF_ID			AS INF_ID
+			,M.SEQ 				AS MST_SEQ
+			,L.VISTN_SEQ		AS VISTN_SEQ
+			,L.TMNL_IMG_FILE	AS TMNL_IMG_FILE
+		FROM TB_OPEN_INF_VISL L INNER JOIN TB_OPEN_INF M
+			ON L.INF_ID = M.INF_ID
+		WHERE
+			L.INF_ID = #infId:VARCHAR#
+			AND L.INF_SEQ = #infSeq:NUMERIC#
+			AND L.VISTN_SEQ = #vistnSeq:NUMERIC#	
+	</select>
+	
+	<select id="OpenInfVcolDAO.selectOpenInfColPopList" parameterClass="egovframework.admin.service.service.OpenInfSrv" resultMap="OpenInfCol" >
+		SELECT   CASE WHEN LI.VISTN_SEQ IS NOT NULL THEN '' ELSE 'I' END AS STATUS
+	    	   , LI.INF_ID
+	           , LI.INF_SEQ
+	       	   , LI.VISTN_SEQ
+	           , LI.V_ORDER
+	           , LI.VISTN_URL
+	       	   , LI.VISTN_EXP
+	       	   , LI.PRD_NM
+	       	   , LI.VISTN_TY_NM
+	           , LI.VIEW_CNT
+	       	   , NVL(LI.USE_YN, 'Y') AS USE_YN
+	       	   , NVL(#viewLang:VARCHAR#, '') VIEW_LANG
+	       	   , TO_CHAR(REG_DTTM, 'YYYY.MM.DD') REG_DTTM
+	       	   , LI.TMNL_IMG_FILE
+	   	  FROM   TB_OPEN_INF_VISL LI
+	     WHERE   LI.INF_ID= #infId:VARCHAR#
+	     		AND LI.USE_YN = 'Y'
+	    ORDER BY V_ORDER 
+	</select>
+	
+</sqlMap>

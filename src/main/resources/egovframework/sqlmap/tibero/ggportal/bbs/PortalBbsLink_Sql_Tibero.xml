@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- @(#)PortalBbsLink_Sql_Tibero.xml 1.0 2015/06/15                         -->
+<!--                                                                         -->
+<!-- COPYRIGHT (C) 2013 WISEITECH CO., LTD. ALL RIGHTS RESERVED.             -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<!-- 게시판 링크를 관리하는 SQL 파일이다.                                    -->
+<!--                                                                         -->
+<!-- @author 김은삼                                                          -->
+<!-- @version 1.0 2015/06/15                                                 -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+<sqlMap namespace="PortalBbsLinkDao">
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- Type Alias                                                          -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <typeAlias alias="params" type="egovframework.common.base.model.Params" />
+    <typeAlias alias="record" type="egovframework.common.base.model.Record" />
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- 게시판 링크를 검색한다.                                             -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <select id="PortalBbsLinkDao.searchBbsLink" parameterClass="params" resultClass="record">
+         SELECT A.BBS_CD   AS "bbsCd",
+                A.SEQ      AS "seq",
+                A.LINK_SEQ AS "linkSeq",
+                A.LINK_NM  AS "linkNm",
+                A.URL      AS "url"
+           FROM TB_BBS_LINK A
+          WHERE A.BBS_CD    = #bbsCd:VARCHAR#
+            AND A.SEQ       = #seq:NUMERIC#
+            AND A.DEL_YN    = 'N'
+          ORDER BY
+                A.LINK_SEQ ASC
+    </select>
+    
+    <insert id="PortalBbsLinkDao.insertBbsLink" parameterClass="params">
+        <selectKey keyProperty="linkSeq" resultClass="int">
+         SELECT NVL(MAX(A.LINK_SEQ), 0) + 1
+           FROM TB_BBS_LINK A
+        </selectKey>
+	    INSERT INTO TB_BBS_LINK (
+			BBS_CD
+			, SEQ
+			, LINK_SEQ
+			, LINK_NM
+			, URL
+			, DEL_YN
+			, REG_DTTM
+			, UPD_ID
+			, UPD_DTTM
+		) VALUES (
+			#bbsCd:VARCHAR#
+			, #seq:NUMERIC#
+			, #linkSeq:NUMERIC#
+			, #linkNm:VARCHAR#
+			, #url:VARCHAR#
+			, 'N'
+			, SYSDATE
+			, #updId:VARCHAR#
+			, SYSDATE
+		)
+    </insert>
+    
+    <delete id="PortalBbsLinkDao.deleteBbsLink" parameterClass="params">
+    	DELETE FROM TB_BBS_LINK
+    	WHERE
+    		BBS_CD = #bbsCd:VARCHAR#
+    		AND SEQ = #seq:NUMERIC#
+    </delete>
+    
+</sqlMap>

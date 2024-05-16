@@ -1,0 +1,495 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="CommUsr">
+	<typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+	<resultMap id="CommUsrList" class="egovframework.admin.basicinf.service.CommUsr">
+		<result property="usrCd"      column="USR_CD"       />
+		<result property="usrNm"      column="USR_NM"       />
+		<result property="orgCd"      column="ORG_CD"       />
+		<result property="accYn"      column="ACC_YN"       />
+		<result property="accCd"      column="ACC_CD"       />
+	</resultMap>
+	
+	<resultMap id="CommUsrListCheck" class="egovframework.admin.basicinf.service.CommUsr">
+		<result property="usrCd"      column="USR_CD"       />
+		<result property="usrNm"      column="USR_NM"       />
+		<result property="orgCd"      column="ORG_CD"       />
+		<result property="orgNm"      column="ORG_NM"       />
+		<result property="accYn"      column="ACC_YN"       />
+		<result property="accCd"      column="ACC_CD"       />
+		<result property="usrId"      column="USR_ID"       />
+		<result property="accokYn"      column="ACCOK_YN"       />
+	</resultMap>
+	
+	<resultMap id="CommUsrDtlList" class="egovframework.admin.basicinf.service.CommUsr" extends="CommUsrList">
+		<result property="usrCd"   			column="USR_CD"   />
+		<result property="usrNmEng"   		column="ENG_USR_NM"   />
+		<result property="usrEmail"   		column="USR_EMAIL"    />
+		<result property="usrTel"     		column="USR_TEL"      />
+		<result property="orgNm"      		column="ORG_NM"       />
+		<result property="useYn"      		column="USE_YN"       />
+		<result property="jobCd"      		column="JOB_CD"       />
+		<result property="jobNm"      		column="JOB_NM"       />
+		<result property="emailYn"    		column="EMAIL_YN"       />
+		<result property="emailId"   		column="EMAIL_ID"       />
+		<result property="emailDomain"      column="EMAIL_DOMAIN"       />
+		<result property="firUsrTel"   		column="FIR_USR_TEL"       />
+		<result property="midUsrTel"   		column="MID_USR_TEL"       />
+		<result property="lastUsrTel"  		column="LAST_USR_TEL"       />
+		<result property="firUsrHp"  		column="FIR_USR_HP"       />
+		<result property="midUsrHp"  		column="MID_USR_HP"       />
+		<result property="lastUsrHp"  		column="LAST_USR_HP"       />
+		<result property="regId"      		column="REG_ID"       />
+		<result property="regDttm"    		column="REG_DTTM"     />
+		<result property="updId"      		column="UPD_ID"       />
+		<result property="updDttm"    		column="UPD_DTTM"     />
+		<result property="hpYn"    			column="HP_YN"     />
+		<result property="deptNm"    		column="DEPT_NM"     />
+		<result property="deptFullnm"    	column="DEPT_FULLNM"     />
+		<result property="usrWork" 			column="USR_WORK"/>
+		<result property="notiHhCd"			column="NOTI_HH_CD"/>
+		<result property="notiStartHh" 		column="NOTI_START_HH"/>
+		<result property="notiEndHh" 		column="NOTI_END_HH"/>
+	</resultMap>
+	
+<!-- 	  AND USR_PW = FN_SCP_EDC_STR('H', #usrPw#)  -->
+	<select id="CommUsrDAO.selectCommUsrCheck" parameterClass="egovframework.admin.basicinf.service.CommUsr" resultMap="CommUsrListCheck" >
+		SELECT	A.USR_CD
+				,A.USR_NM
+			    ,A.ORG_CD 
+			    ,B.ORG_NM        
+			    ,A.ACC_YN
+			    ,A.ACC_CD
+			    ,A.USR_ID
+			    ,A.ACCOK_YN
+		FROM   TB_COMM_USR A
+        LEFT OUTER JOIN TB_COMM_ORG B
+          	ON A.ORG_CD = B.ORG_CD
+		WHERE  A.USR_ID = #usrId:VARCHAR#
+		AND    A.USR_PW = #usrPw:VARCHAR#
+		AND    A.USE_YN ='Y'
+		AND    A.ACC_YN ='Y'
+	</select> 
+	
+	<select id="CommUsrDAO.selectCommUsrCheckSSO" parameterClass="egovframework.admin.basicinf.service.CommUsr" resultMap="CommUsrListCheck" >
+		SELECT	A.USR_CD
+				,A.USR_NM
+			    ,A.ORG_CD 
+			    ,B.ORG_NM        
+			    ,A.ACC_YN
+			    ,A.ACC_CD
+			    ,A.USR_ID
+			    ,A.ACCOK_YN
+		FROM   TB_COMM_USR A
+        LEFT OUTER JOIN TB_COMM_ORG B
+          	ON A.ORG_CD = B.ORG_CD
+		WHERE  A.USR_ID = #usrId:VARCHAR#
+		AND    A.USE_YN ='Y'
+		AND    A.ACC_YN ='Y'
+	</select> 	
+	
+	<select id="CommUsrDAO.selectCommUsrListAll" parameterClass="egovframework.admin.basicinf.service.CommUsr" resultMap="CommUsrDtlList" >
+SELECT *
+	  FROM(
+		SELECT ROWNUM AS RN, TB.*
+		  FROM
+		  (
+			SELECT   A.USR_CD
+					,A.USR_NM
+			        ,A.ORG_CD
+			        ,B.ORG_NM
+			        ,A.ACC_YN
+			        ,A.ACC_CD
+			        ,A.ENG_USR_NM
+			        ,pkg_crypto2.decrypt(A.USR_EMAIL) as USR_EMAIL 
+			        ,pkg_crypto2.decrypt(A.USR_TEL) as USR_TEL
+			        ,A.HP_YN
+			        ,SUBSTR((pkg_crypto2.decrypt(A.USR_EMAIL)), 1, INSTR((pkg_crypto2.decrypt(A.USR_EMAIL)), '@')-1) EMAIL_ID
+			        ,SUBSTR((pkg_crypto2.decrypt(A.USR_EMAIL)), INSTR((pkg_crypto2.decrypt(A.USR_EMAIL)), '@')+1, LENGTH((pkg_crypto2.decrypt(A.USR_EMAIL)))) EMAIL_DOMAIN
+			        ,EMAIL_YN
+			        ,SUBSTR(pkg_crypto2.decrypt(A.USR_TEL), 1, INSTR(pkg_crypto2.decrypt(A.USR_TEL), '-')-1) FIR_USR_TEL
+			        ,SUBSTR(SUBSTR(pkg_crypto2.decrypt(A.USR_TEL), INSTR(pkg_crypto2.decrypt(A.USR_TEL), '-')+1, LENGTH(pkg_crypto2.decrypt(A.USR_TEL))), 
+			        		1, 
+			        		INSTR(SUBSTR(pkg_crypto2.decrypt(A.USR_TEL), INSTR(pkg_crypto2.decrypt(A.USR_TEL), '-')+1, LENGTH(pkg_crypto2.decrypt(A.USR_TEL))), '-')-1) MID_USR_TEL
+			        ,SUBSTR(SUBSTR(pkg_crypto2.decrypt(A.USR_TEL), INSTR(pkg_crypto2.decrypt(A.USR_TEL), '-')+1, LENGTH(pkg_crypto2.decrypt(A.USR_TEL))), 
+			        		INSTR(SUBSTR(pkg_crypto2.decrypt(A.USR_TEL), INSTR(pkg_crypto2.decrypt(A.USR_TEL), '-')+1, LENGTH(pkg_crypto2.decrypt(A.USR_TEL))), '-')+1, 
+			        		LENGTH(SUBSTR(pkg_crypto2.decrypt(A.USR_TEL), INSTR(pkg_crypto2.decrypt(A.USR_TEL), '-')+1, LENGTH(pkg_crypto2.decrypt(A.USR_TEL))))) LAST_USR_TEL
+			        ,DECODE(A.USE_YN, 'Y', 1, 'N', 0) USE_YN
+			        
+					,SUBSTR(( pkg_crypto2.decrypt(A.USR_HP)), 1, INSTR(( pkg_crypto2.decrypt(A.USR_HP)), '-')-1) FIR_USR_HP
+			        ,SUBSTR(SUBSTR(( pkg_crypto2.decrypt(A.USR_HP)), INSTR((pkg_crypto2.decrypt(A.USR_HP)), '-')+1, LENGTH((pkg_crypto2.decrypt(A.USR_HP)))), 
+			        		1, 
+			        		INSTR(SUBSTR((pkg_crypto2.decrypt(A.USR_HP)), INSTR(( pkg_crypto2.decrypt(A.USR_HP)), '-')+1, LENGTH(( pkg_crypto2.decrypt(A.USR_HP)))), '-')-1) MID_USR_HP
+			        ,SUBSTR(SUBSTR((pkg_crypto2.decrypt(A.USR_HP)), INSTR((pkg_crypto2.decrypt(A.USR_HP)), '-')+1, LENGTH(pkg_crypto2.decrypt(A.USR_TEL))), 
+			        		INSTR(SUBSTR((pkg_crypto2.decrypt(A.USR_HP)), INSTR((pkg_crypto2.decrypt(A.USR_HP)), '-')+1, LENGTH((pkg_crypto2.decrypt(A.USR_HP)))), '-')+1, 
+			        		LENGTH(SUBSTR((pkg_crypto2.decrypt(A.USR_HP)), INSTR((pkg_crypto2.decrypt(A.USR_HP)), '-')+1, LENGTH((pkg_crypto2.decrypt(A.USR_HP)))))) LAST_USR_HP
+			        ,A.JOB_CD
+			        ,CD.DITC_NM AS JOB_NM
+			        ,A.REG_ID
+			        ,A.REG_DTTM
+			        ,A.UPD_ID
+			        ,A.UPD_DTTM
+			        ,D.ORG_NM AS DEPT_NM
+			        ,D.ORG_FULLNM AS DEPT_FULLNM
+			        ,A.USR_WORK
+			        ,A.NOTI_HH_CD
+					,A.NOTI_START_HH
+					,A.NOTI_END_HH
+		  FROM TB_COMM_USR A
+		  LEFT OUTER JOIN TB_COMM_ORG D
+          	ON  A.ORG_CD = D.ORG_CD
+          LEFT OUTER JOIN TB_COMM_ORG B
+          	ON  D.TOP_ORG_CD = B.ORG_CD
+          LEFT OUTER JOIN TB_COMM_CODE CD 
+          	ON  CD.GRP_CD = 'C1003' 
+          	AND A.JOB_CD = CD.DITC_CD 
+		 WHERE 1=1
+		   AND A.ACC_CD NOT IN('DATA','NAID') 
+			<isNotEmpty property="searchWord" >
+				AND A.USR_NM LIKE '%'||#searchWord#||'%'
+			</isNotEmpty>
+			<isNotEmpty property="orgNm" > <!-- 조직부서명 검색  -->
+				AND A.ORG_CD in 
+						(
+							SELECT ORG_CD
+							FROM TB_COMM_ORG
+							START WITH ORG_NM LIKE '%' || #orgNm# || '%'   AND USE_YN = 'Y'
+							CONNECT BY PRIOR ORG_CD =  PAR_ORG_CD AND USE_YN = 'Y'
+						)
+			</isNotEmpty>
+			<isEqual property="useYn" compareValue="Y" >
+				AND A.USE_YN = 'Y'
+			</isEqual>	
+			<isEqual property="useYn" compareValue="N" >
+				AND A.USE_YN = 'N'
+			</isEqual>
+			 ORDER  BY A.ORG_CD
+		)TB
+	)
+	<isNotEqual prepend="startPage" compareValue="0">
+		WHERE RN BETWEEN #startPage:NUMERIC# AND #endPage:NUMERIC#
+	</isNotEqual>
+</select>
+	
+	<select id="CommUsrDAO.selectCommUsrListAllCnt" parameterClass="egovframework.admin.basicinf.service.CommUsr" resultClass="java.lang.Integer">
+		SELECT   COUNT(*)
+		FROM TB_COMM_USR A
+		LEFT OUTER JOIN TB_COMM_ORG D
+        	ON A.ORG_CD = D.ORG_CD
+        LEFT OUTER JOIN TB_COMM_ORG B
+          	ON D.TOP_ORG_CD = B.ORG_CD
+		WHERE 1=1
+		   AND A.ACC_CD NOT IN('DATA','NAID') 
+			<isNotEmpty property="searchWord" >
+				<isEqual property="searchWd" compareValue="1">
+				AND A.USR_NM LIKE '%'||#searchWord#||'%'
+				</isEqual>
+				<isEqual property="searchWd" compareValue="2">
+				AND A.ENG_USR_NM LIKE '%'||#searchWord#||'%'
+				</isEqual>
+			</isNotEmpty>
+			<isNotEmpty property="orgNm" > <!-- 조직부서명 검색  -->
+				AND A.ORG_CD in 
+						(
+							SELECT ORG_CD
+							FROM TB_COMM_ORG
+							START WITH ORG_NM LIKE '%' || #orgNm# || '%'   AND USE_YN = 'Y'
+							CONNECT BY PRIOR ORG_CD =  PAR_ORG_CD AND USE_YN = 'Y'
+						)
+			</isNotEmpty>
+			<isEqual property="useYn" compareValue="Y" >
+				AND A.USE_YN = 'Y'
+			</isEqual>	
+			<isEqual property="useYn" compareValue="N" >
+				AND A.USE_YN = 'N'
+			</isEqual>
+	</select>
+	
+	<select id="CommUsrDAO.selectCommUsrList" parameterClass="egovframework.admin.basicinf.service.CommUsr" resultMap="CommUsrDtlList" >
+			SELECT   A.USR_CD
+			        ,A.USR_NM
+			        ,A.ORG_CD
+			        ,B.ORG_NM
+			        ,A.HP_YN
+			        ,A.ACC_YN
+			        ,A.ACC_CD
+			        ,A.ENG_USR_NM
+			        ,pkg_crypto2.decrypt(A.USR_EMAIL) as USR_EMAIL 
+			        ,pkg_crypto2.decrypt(A.USR_TEL) as USR_TEL
+			        ,SUBSTR((pkg_crypto2.decrypt(A.USR_EMAIL)), 1, INSTR((pkg_crypto2.decrypt(A.USR_EMAIL)), '@')-1) EMAIL_ID
+			        ,SUBSTR((pkg_crypto2.decrypt(A.USR_EMAIL)), INSTR((pkg_crypto2.decrypt(A.USR_EMAIL)), '@')+1, LENGTH((pkg_crypto2.decrypt(A.USR_EMAIL)))) EMAIL_DOMAIN
+			        ,EMAIL_YN
+			        ,'' FIR_USR_TEL
+			        ,'' MID_USR_TEL
+			        ,'' LAST_USR_TEL
+	        		,pkg_crypto2.decrypt(A.USR_HP) FIR_USR_HP
+	        		,'' MID_USR_HP
+	        		,'' LAST_USR_HP
+			        ,A.USE_YN
+			        ,A.JOB_CD
+			        ,CD.DITC_NM AS JOB_NM
+			        ,A.REG_ID
+			        ,A.REG_DTTM
+			        ,A.UPD_ID
+			        ,A.UPD_DTTM
+			        ,A.USR_ID
+			        ,A.USR_PW
+			        ,D.ORG_NM AS DEPT_NM
+			        ,D.ORG_FULLNM AS DEPT_FULLNM
+			        ,A.USR_WORK
+			        ,A.NOTI_HH_CD
+					,A.NOTI_START_HH
+					,A.NOTI_END_HH
+		  FROM TB_COMM_USR A
+		  LEFT OUTER JOIN TB_COMM_ORG D
+          	ON A.ORG_CD = D.ORG_CD
+          LEFT OUTER JOIN TB_COMM_ORG B
+          	ON D.TOP_ORG_CD = B.ORG_CD
+          LEFT OUTER JOIN TB_COMM_CODE CD 
+          	ON  CD.GRP_CD = 'C1003' 
+          	AND A.JOB_CD = CD.DITC_CD 	
+		 WHERE 1=1 
+		   AND A.USR_CD = #usrCd:NUMERIC#
+	</select>
+	
+	<!-- 이메일,핸드폰 임시로 입력안하면 안들어가게했음.. 수정예정  -->
+	<insert id="CommUsrDAO.insert" parameterClass="egovframework.admin.basicinf.service.CommUsr" >
+			INSERT INTO TB_COMM_USR
+			(USR_CD, USR_NM, ENG_USR_NM
+			<isNotEmpty property="emailId" >
+			  	<isNotEmpty property="emailDomain">
+			, USR_EMAIL
+				</isNotEmpty>
+			 </isNotEmpty>
+			, USR_TEL
+			  <isNotEmpty property="firUsrHp">
+			, USR_HP
+			 </isNotEmpty>
+			 , ORG_CD, EMAIL_YN,HP_YN, EMAIL_DTTM, JOB_CD,
+			 USE_YN, REG_ID, REG_DTTM, UPD_ID, 
+			 UPD_DTTM,USR_ID, USR_PW, USR_WORK, NOTI_HH_CD, NOTI_START_HH, NOTI_END_HH)
+			VALUES
+			( 
+				(SELECT NVL(MAX(USR_CD)+1,'7000001') FROM TB_COMM_USR)
+			  , #usrNm:VARCHAR#
+			  , #usrNmEng:VARCHAR#
+			   <isNotEmpty property="emailId" >
+			  	<isNotEmpty property="emailDomain">
+			  , pkg_crypto2.encrypt(#emailId# || '@' || #emailDomain#)
+			  	</isNotEmpty>
+			  </isNotEmpty>
+			  , pkg_crypto2.encrypt(#usrTel:VARCHAR#)
+			  /* 휴대폰번호 암호화 */
+			    <isNotEmpty property="firUsrHp"  >
+			  , pkg_crypto2.encrypt(#firUsrHp#)
+			  </isNotEmpty>
+			  , #orgCd:VARCHAR#
+			  , DECODE(NVL(#emailYn:CHAR#, 'N'), 'N', 'N', 'Y')	/* 이메일 수신여부 설정 */
+			  , DECODE(NVL(#hpYn:CHAR#, 'N'), 'N', 'N', 'Y')	/* 핸드폰 수신여부 설정 */
+			  , sysdate
+			  , #jobCd:VARCHAR#
+			  , #useYn:CHAR#
+			  , #sessionUsrId:VARCHAR#, sysdate, #sessionUsrId:VARCHAR#, sysdate, #usrId:VARCHAR#, #usrPw:VARCHAR#
+			  , #usrWork:VARCHAR#
+			  , #notiHhCd:VARCHAR#
+			  , #notiStartHh:VARCHAR#
+			  , #notiEndHh:VARCHAR#
+			 )
+	</insert>
+	
+	
+	<!-- 이메일,핸드폰 임시로 입력안하면 안들어가게했음.. 수정예정  지저분..-->
+	<update id="CommUsrDAO.update" parameterClass="egovframework.admin.basicinf.service.CommUsr" >
+			UPDATE TB_COMM_USR 
+			   SET USR_NM = #usrNm:VARCHAR#
+			      ,ENG_USR_NM = #usrNmEng:VARCHAR#
+			      <isNotEmpty property="emailId" >
+			  		<isNotEmpty property="emailDomain">
+			      ,USR_EMAIL = pkg_crypto2.encrypt(#emailId# || '@' || #emailDomain#)
+			      	</isNotEmpty>
+				   </isNotEmpty>
+				   
+				   <isEmpty property="emailId" >
+			  		<isEmpty property="emailDomain">
+			  		,USR_EMAIL = NULL
+			  		</isEmpty>
+			  	   </isEmpty>
+			  	   
+			      ,USR_TEL = pkg_crypto2.encrypt(#usrTel:VARCHAR#)
+			      <isNotEmpty property="firUsrHp"  >
+			      ,USR_HP = pkg_crypto2.encrypt(#firUsrHp#)
+				   </isNotEmpty>
+				    <isEmpty property="firUsrHp"  >
+			      ,USR_HP = NULL
+				   </isEmpty>
+				   
+			      ,ORG_CD = #orgCd:VARCHAR#
+			      ,USE_YN = #useYn:CHAR#
+			      ,EMAIL_YN = DECODE(NVL(#emailYn:CHAR#, 'N'), 'N', 'N', 'Y')
+			      ,HP_YN = DECODE(NVL(#hpYn:CHAR#, 'N'), 'N', 'N', 'Y')
+			      ,EMAIL_DTTM = sysdate
+			      ,JOB_CD = #jobCd:VARCHAR#
+			      ,UPD_ID = #sessionUsrId:VARCHAR#
+			      ,UPD_DTTM = sysdate
+			      ,USR_WORK = #usrWork:VARCHAR#
+			      ,NOTI_HH_CD = #notiHhCd:VARCHAR#
+			      ,NOTI_START_HH = #notiStartHh:VARCHAR#
+			      ,NOTI_END_HH = #notiEndHh:VARCHAR#
+			 WHERE USR_CD = #usrCd:NUMERIC# 
+	</update>
+	
+	<delete id="CommUsrDAO.delete" parameterClass="egovframework.admin.basicinf.service.CommUsr" >
+		<![CDATA[
+			DELETE FROM TB_COMM_USR 
+			WHERE USR_CD = #usrCd:NUMERIC#
+		]]>
+	</delete>
+	
+	<update id="CommUsrDAO.saveCommUsrFailCnt" parameterClass="egovframework.admin.basicinf.service.CommUsr" >
+			UPDATE TB_COMM_USR 
+			   SET FAIL_CNT = DECODE(0, #failCnt:NUMERIC#, 0, (SELECT NVL(FAIL_CNT, 0) + 1 FROM TB_COMM_USR 
+			                                            WHERE USR_ID = #usrId:VARCHAR#))
+			 WHERE USR_ID = #usrId:VARCHAR#
+	</update>
+	
+	<select id="CommUsrDAO.selectCommUsrIdChk" parameterClass="egovframework.admin.basicinf.service.CommUsr" resultClass="java.lang.Integer">
+		SELECT   NVL(COUNT(*), 0)
+		  FROM   TB_COMM_USR
+		 WHERE   1=1 
+		   AND   USE_YN ='Y'
+		   AND   USR_ID = #usrId:VARCHAR#
+	</select>
+	
+	<select id="CommUsrDAO.selectCommUsrFailCnt" parameterClass="egovframework.admin.basicinf.service.CommUsr" resultClass="java.lang.Integer">
+		SELECT CASE WHEN CNT = 0 THEN 0
+		       ELSE (SELECT NVL(FAIL_CNT, 0) FROM TB_COMM_USR WHERE USE_YN ='Y' AND USR_ID = #usrId#) END FAIL_CNT
+		FROM (SELECT NVL(COUNT(*), 0) AS CNT
+		        FROM   TB_COMM_USR
+		       WHERE   1=1 
+		         AND   USE_YN ='Y' 
+		         AND   USR_ID = #usrId:VARCHAR#
+		      )
+	</select>
+			
+	<select id="CommUsrDAO.selectCommUsrChangePwDttm" parameterClass="egovframework.admin.basicinf.service.CommUsr" resultClass="java.util.HashMap">
+		SELECT   NVL(TRUNC(SYSDATE - PW_DTTM), 0) "pwDttm"
+		  	   , REQ_PW_YN "reqPwYn"
+		  FROM   TB_COMM_USR
+		 WHERE   USE_YN = 'Y'
+		   AND   USR_ID = #usrId:VARCHAR#
+	</select>	
+	
+	<update id="CommUsrDAO.saveCommUsrChangePw" parameterClass="egovframework.admin.basicinf.service.CommUsr" >
+		UPDATE   TB_COMM_USR
+		   SET   USR_PW = FN_SCP_EDC_STR('H', #pwdNew1:VARCHAR#)
+		       , REQ_PW_YN = 'N'
+		       , PW_DTTM = SYSDATE
+		 WHERE   USR_ID = #usrId:VARCHAR#    
+	</update>	
+	
+	<update id="CommUsrDAO.savePkiReg" parameterClass="egovframework.admin.basicinf.service.CommUsr" >
+		UPDATE TB_COMM_USR
+		   SET USR_PKI = FN_SCP_EDC_STR('H', #usrPki:VARCHAR#)
+		     , PKI_DTTM = SYSDATE
+         WHERE USR_ID = #usrId:VARCHAR#		     
+	</update>
+	
+	<select id="CommUsrDAO.selectCommUsrPkiCheck" parameterClass="egovframework.admin.basicinf.service.CommUsr" resultMap="CommUsrListCheck" >
+			SELECT   USR_CD
+					,USR_NM
+			        ,A.ORG_CD         
+			        ,ORG_NM
+			        ,ACC_YN
+			        ,ACC_CD
+			        ,USR_ID
+			        ,ACCOK_YN
+		  FROM TB_COMM_USR A
+		  INNER JOIN TB_COMM_ORG B
+		  ON    A.ORG_CD = B.ORG_CD
+		 WHERE USR_PKI = #usrPki:VARCHAR#
+		   AND A.USE_YN ='Y'
+		   AND A.ACC_YN ='Y'
+	</select> 
+	
+	<select id="CommUsrDAO.selectQNACnt"  resultClass="java.lang.Integer">
+		SELECT COUNT(*)
+		  FROM TB_BBS_LIST
+		 WHERE 1=1
+		   AND BBS_CD =  'QNA01'
+		   AND DEL_YN = 'N'
+		   AND NOTICE_YN ='N'
+		   AND ANS_STATE  IN('RW','AW')
+	</select>
+	
+	<select id="CommUsrDAO.selectGalleryCnt"  resultClass="java.lang.Integer">
+		SELECT COUNT(*)
+		  FROM TB_BBS_LIST
+		 WHERE 1=1
+		   AND BBS_CD =  'GALLERY'
+		   AND DEL_YN = 'N'
+		   AND NOTICE_YN ='N'
+		   AND ANS_STATE  IN('RW','AW')
+	</select>
+	
+	<!--관리자의 로그인 접속이력을 기록한다.  -->
+	<insert id="CommUsrDAO.insertLogCommUsr" parameterClass="egovframework.admin.basicinf.service.CommUsr">
+		INSERT INTO TB_LOG_COMM_USR
+			( 	SEQCE_NO
+			    ,  USR_ID
+				, ACC_CD
+				, USR_IP
+				, USR_AGENT
+				, REG_DTTM
+			)  
+		VALUES (
+				  SQ_LOG_MNG_SEQ.NEXTVAL
+				, #usrId:VARCHAR#
+				, #accCd:VARCHAR#
+				, #usrIp:VARCHAR#
+				, #usrAgent:VARCHAR#
+				, SYSDATE
+			)
+	</insert>
+	
+	<!-- 사용자 정보를 조회한다. 권한이 naid,data 가 아니며 인증을 안했을때 -->
+	<select id="CommUsrDAO.selectCommUsrInfo" parameterClass="egovframework.admin.basicinf.service.CommUsr" resultClass="java.lang.Integer">
+		SELECT   COUNT(*)
+		  FROM TB_COMM_USR
+		 WHERE USR_CD = #usrCd:NUMERIC#
+		   AND ACC_CD NOT IN('NAID','DATA')
+		   AND RAUTH_YN = 'N'
+	</select>
+	
+	<!-- AccCd 권한 체크하여 sys,admin 인 경우만 업무처리정보 볼수있다. -->
+	<select id="CommUsrDAO.selectAccCdCheck" parameterClass="egovframework.admin.basicinf.service.CommUsr" resultClass="java.lang.Integer">
+		SELECT COUNT(*)
+		  FROM TB_COMM_USR
+		 WHERE USR_ID = 'sys'
+		   AND ACC_CD IN('SYS','ADMIN')
+	</select>
+	
+	<select id="CommUsrDAO.selectDupPki" parameterClass="egovframework.admin.basicinf.service.CommUsr" resultClass="java.lang.Integer" >
+		SELECT NVL(COUNT(*), 0)
+		  FROM TB_COMM_USR
+		 WHERE USR_PKI = FN_SCP_EDC_STR('H', #usrPki:VARCHAR#)
+	</select>
+	
+	<!-- 비밀번호 변경시 기존의 비밀번호로 변경못하도록 체크한다.  -->
+	<select id="CommUsrDAO.selectUserPwCheck" parameterClass="egovframework.admin.basicinf.service.CommUsr" resultClass="java.lang.Integer" >
+		SELECT COUNT(*)
+		  FROM TB_COMM_USR
+		 WHERE 1=1
+		   AND USR_ID = #usrId:VARCHAR#
+		   AND USR_PW = FN_SCP_EDC_STR('H', #pwdNew1:VARCHAR#)
+	</select>
+	
+	<!-- GPIN 관리자 중복체크 -->
+	<select id="CommUsrDAO.gpinAdminDupCheck" parameterClass="egovframework.admin.basicinf.service.CommUsr" resultClass="java.lang.Integer" >
+		SELECT NVL(COUNT(*), 0)
+		  FROM TB_COMM_USR
+		 WHERE RAUTH_VID = FN_SCP_EDC_STR('E', #rauthVid:VARCHAR#)
+		   AND RAUTH_DI = FN_SCP_EDC_STR('E', #rauthDi:VARCHAR#)
+	</select>
+	
+</sqlMap>
